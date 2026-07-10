@@ -249,6 +249,54 @@ img { max-width: 100%; display: block; }
 #cf26 .cf-lead-spaced-top { margin-top: 30px; }
 #cf26 .cf-lead-spaced-bottom { margin-bottom: 26px; }
 
+/* ---------- CTA FINAL ---------- */
+#cf26 .cf-cta {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff4b0 0%, #ffe07a 100%);
+  border: 4px solid var(--ink);
+  border-radius: 30px;
+  padding: 52px 28px;
+  text-align: center;
+  box-shadow: 10px 10px 0 var(--ink);
+}
+#cf26 .cf-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255, 46, 139, 0.18) 0 10px, transparent 11px),
+    radial-gradient(circle at 88% 18%, rgba(0, 210, 198, 0.18) 0 11px, transparent 12px),
+    radial-gradient(circle at 78% 82%, rgba(139, 47, 240, 0.14) 0 14px, transparent 15px),
+    radial-gradient(circle at 16% 78%, rgba(255, 107, 0, 0.16) 0 12px, transparent 13px);
+  pointer-events: none;
+}
+#cf26 .cf-cta > * { position: relative; z-index: 1; }
+#cf26 .cf-cta .cf-cta-tag { background: var(--white); color: var(--ink); margin-bottom: 16px; }
+#cf26 .cf-cta h2 {
+  font-family: 'Fredoka', sans-serif;
+  font-size: clamp(30px, 5vw, 44px);
+  text-transform: uppercase;
+  line-height: 0.98;
+  text-shadow: 2px 2px 0 var(--white);
+}
+#cf26 .cf-cta p {
+  margin: 14px auto 0;
+  max-width: 520px;
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 0.88;
+}
+#cf26 .cf-cta .cf-actions { margin-top: 24px; }
+#cf26 .cf-cta .cf-btn {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 15px 30px;
+  font-size: 15px;
+  box-shadow: 7px 7px 0 var(--pink);
+}
+#cf26 .cf-cta .cf-btn:hover { box-shadow: 9px 9px 0 var(--pink); }
+
 /* ---------- CONTENT BLOCKS (checklist / info panels for subpages) ---------- */
 .cf-panel {
   background: var(--white); border: 3px solid var(--ink); border-radius: 20px;
