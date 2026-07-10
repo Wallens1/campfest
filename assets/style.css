@@ -71,7 +71,15 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
   border-bottom: 6px solid var(--ink);
 }
-.cf-hero-inner { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; }
+.cf-hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .cf-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
   font-family: 'Fredoka', sans-serif;
@@ -102,7 +110,8 @@ img { max-width: 100%; display: block; }
 .cf-badge-date {
   position: relative;
   display: inline-flex; align-items: center; gap: 16px;
-  margin-top: 38px;
+  margin-top: 32px;
+  margin-bottom: 10px;
   background: var(--white); color: var(--ink);
   border: 4px solid var(--ink); border-radius: 999px;
   padding: 10px 26px 10px 10px;
@@ -471,4 +480,102 @@ img { max-width: 100%; display: block; }
 
 @media (max-width: 640px) {
   .cf-info-strip { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  #cf26 .cf-nav {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 14px;
+    gap: 10px;
+    scrollbar-width: none;
+  }
+  #cf26 .cf-nav::-webkit-scrollbar { display: none; }
+  #cf26 .cf-nav a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  #cf26 .cf-hero {
+    padding: 70px 18px 92px;
+  }
+  #cf26 .cf-hero h1 {
+    font-size: clamp(34px, 12vw, 62px);
+  }
+  #cf26 .cf-squiggle { width: 130px; }
+  #cf26 .cf-hero-sub {
+    font-size: 15px;
+  }
+  #cf26 .cf-badge-date {
+    margin-top: 30px;
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+  #cf26 .cf-badge-date .cf-badge-circle {
+    width: 48px;
+    height: 48px;
+    font-size: 14px;
+  }
+  #cf26 .cf-badge-date .cf-badge-text strong {
+    font-size: 14px;
+    line-height: 1.1;
+  }
+  #cf26 .cf-badge-date .cf-badge-text small {
+    display: block;
+    line-height: 1.2;
+  }
+  #cf26 .cf-actions {
+    gap: 12px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #cf26 .cf-actions .cf-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  #cf26 .cf-info-strip {
+    grid-template-columns: 1fr;
+    padding: 34px 18px 4px;
+  }
+  #cf26 .cf-section {
+    padding: 56px 18px;
+  }
+  #cf26 .cf-section-head {
+    margin-bottom: 30px;
+  }
+  #cf26 .cf-section-head h2 {
+    font-size: clamp(24px, 7vw, 34px);
+  }
+  #cf26 .cf-cards {
+    grid-template-columns: 1fr;
+  }
+  #cf26 .cf-card {
+    border-radius: 20px;
+    padding: 24px 18px;
+  }
+  #cf26 .cf-days {
+    grid-template-columns: 1fr;
+  }
+  #cf26 .cf-day-patch {
+    max-width: 250px;
+    margin: 0 auto;
+  }
+  #cf26 .cf-sponsors-track {
+    animation-duration: 34s;
+  }
+  #cf26 .cf-sponsor-group {
+    gap: 14px;
+    padding: 14px;
+  }
+  #cf26 .cf-sponsor-card {
+    width: 152px;
+    flex-basis: 152px;
+  }
+  #cf26 .cf-cta {
+    padding: 42px 18px;
+  }
 }
