@@ -1,0 +1,534 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+  #cf26 * { box-sizing: border-box; margin: 0; padding: 0; }
+  #cf26 {
+    --pink: #FF2E8B;
+    --yellow: #FFD400;
+    --cyan: #00D2C6;
+    --purple: #8B2FF0;
+    --orange: #FF6B00;
+    --ink: #1A1A1E;
+    --cream: #FFF7EA;
+    --white: #FFFFFF;
+    font-family: 'Poppins', sans-serif;
+    color: var(--ink);
+    background: var(--cream);
+    line-height: 1.5;
+    overflow-x: hidden;
+    position: relative;
+  }
+  #cf26 .cf-display { font-family: 'Fredoka', sans-serif; text-transform: uppercase; }
+  #cf26 a { color: inherit; text-decoration: none; }
+  #cf26 img { max-width: 100%; display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #cf26 * { animation: none !important; transition: none !important; }
+  }
+
+  /* ---------- confetti bg layer ---------- */
+  #cf26 .cf-confetti { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  #cf26 .cf-confetti span { position: absolute; display: block; opacity: 0.85; }
+  #cf26 .cf-c-circle { width: 18px; height: 18px; border-radius: 50%; background: var(--yellow); }
+  #cf26 .cf-c-tri { width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 20px solid var(--cyan); }
+  #cf26 .cf-c-square { width: 16px; height: 16px; background: var(--pink); transform: rotate(20deg); }
+  #cf26 .cf-c-ring { width: 24px; height: 24px; border: 4px solid var(--purple); border-radius: 50%; }
+
+  @keyframes cf-float { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-14px) rotate(12deg); } }
+  #cf26 .cf-float1 { animation: cf-float 5s ease-in-out infinite; }
+  #cf26 .cf-float2 { animation: cf-float 6.5s ease-in-out infinite 0.6s; }
+  #cf26 .cf-float3 { animation: cf-float 4.5s ease-in-out infinite 1.2s; }
+
+  /* ---------- HERO ---------- */
+  #cf26 .cf-hero {
+    position: relative;
+    background: var(--purple);
+    color: var(--white);
+    padding: 84px 24px 110px;
+    text-align: center;
+    overflow: hidden;
+    border-bottom: 6px solid var(--ink);
+  }
+  #cf26 .cf-hero-inner { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; }
+  #cf26 .cf-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--yellow);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    padding: 8px 18px;
+    border-radius: 999px;
+    margin-bottom: 26px;
+    transform: rotate(-3deg);
+  }
+  #cf26 .cf-hero h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: clamp(46px, 10vw, 96px);
+    line-height: 0.92;
+    text-transform: uppercase;
+    color: var(--white);
+    text-shadow: 4px 4px 0 var(--ink);
+  }
+  #cf26 .cf-hero h1 .cf-word2 { color: var(--yellow); text-shadow: 4px 4px 0 var(--ink); display: inline-block; transform: rotate(-2deg); }
+  #cf26 .cf-squiggle { display: block; margin: 18px auto 0; width: 160px; }
+  #cf26 .cf-hero-sub {
+    margin-top: 18px;
+    font-size: clamp(15px, 2.4vw, 19px);
+    font-weight: 500;
+    color: var(--white);
+    opacity: 0.95;
+  }
+  #cf26 .cf-badge-date {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 38px;
+    background: var(--white);
+    color: var(--ink);
+    border: 4px solid var(--ink);
+    border-radius: 999px;
+    padding: 10px 26px 10px 10px;
+    box-shadow: 6px 6px 0 var(--ink);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    overflow: visible;
+  }
+  #cf26 .cf-badge-date:hover { transform: translate(-2px,-2px); box-shadow: 8px 8px 0 var(--ink); }
+  #cf26 .cf-badge-date .cf-badge-circle {
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: var(--white);
+    border: 3px solid var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  #cf26 .cf-badge-date .cf-badge-text { text-align: left; }
+  #cf26 .cf-badge-date .cf-badge-text strong { display: block; font-family: 'Fredoka', sans-serif; font-size: 16px; }
+  #cf26 .cf-badge-date .cf-badge-text small { font-size: 11px; opacity: 0.65; letter-spacing: 0.5px; font-weight: 600; }
+  #cf26 .cf-burst { position: absolute; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; z-index: 5; }
+
+  #cf26 .cf-hero-shape { position: absolute; z-index: 1; }
+
+  /* ---------- ALERT / MANDO UNIFICADO ---------- */
+  #cf26 .cf-alert {
+    background: repeating-linear-gradient(45deg, var(--yellow) 0 22px, var(--ink) 22px 26px);
+    padding: 6px;
+  }
+  #cf26 .cf-alert-inner {
+    background: var(--white);
+    color: var(--ink);
+    padding: 14px 20px;
+    text-align: center;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 14px;
+    display: flex; flex-wrap: wrap; gap: 8px 14px;
+    align-items: center; justify-content: center;
+  }
+  #cf26 .cf-alert-inner strong { text-transform: uppercase; letter-spacing: 0.5px; }
+  #cf26 .cf-alert-inner a {
+    background: var(--pink); color: var(--white);
+    padding: 3px 12px; border-radius: 999px; border: 2px solid var(--ink);
+    font-weight: 700;
+  }
+
+  /* ---------- INFO STRIP ---------- */
+  #cf26 .cf-info-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    padding: 48px 24px 12px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  #cf26 .cf-info-item {
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: 18px;
+    padding: 26px 18px;
+    text-align: center;
+    box-shadow: 5px 5px 0 var(--ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  #cf26 .cf-info-item:nth-child(1) { transform: rotate(-2deg); background: #FFF0D6; }
+  #cf26 .cf-info-item:nth-child(2) { transform: rotate(1.5deg); background: #E4FBF9; }
+  #cf26 .cf-info-item:nth-child(3) { transform: rotate(-1deg); background: #FFE6F1; }
+  #cf26 .cf-info-item:hover { transform: rotate(0deg) translateY(-4px); box-shadow: 7px 7px 0 var(--ink); }
+  #cf26 .cf-info-item .cf-icon { font-size: 30px; margin-bottom: 10px; }
+  #cf26 .cf-info-item h3 { font-family: 'Fredoka', sans-serif; font-size: 18px; text-transform: uppercase; }
+  #cf26 .cf-info-item p { font-size: 13px; opacity: 0.7; margin-top: 4px; font-weight: 500; }
+
+  /* ---------- SECTION SHARED ---------- */
+  #cf26 .cf-section { padding: 70px 24px; max-width: 1020px; margin: 0 auto; position: relative; z-index: 1; }
+  #cf26 .cf-section-head { text-align: center; margin-bottom: 42px; }
+  #cf26 .cf-section-head .cf-tag {
+    display: inline-block;
+    font-family: 'Fredoka', sans-serif; font-size: 12px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--white); background: var(--purple);
+    padding: 5px 14px; border-radius: 999px; border: 2px solid var(--ink);
+  }
+  #cf26 .cf-section-head h2 {
+    font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: clamp(28px, 5vw, 42px);
+    text-transform: uppercase; color: var(--ink); margin-top: 12px;
+  }
+  #cf26 .cf-lead { max-width: 620px; margin: 16px auto 0; text-align: center; opacity: 0.8; font-size: 15.5px; font-weight: 500; }
+
+  /* ---------- DAYS / BADGES ---------- */
+  #cf26 .cf-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 26px; margin-top: 10px; }
+  #cf26 .cf-day-patch {
+    position: relative;
+    background: var(--ink);
+    color: var(--white);
+    border-radius: 50%;
+    aspect-ratio: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    border: 4px solid var(--ink);
+    transition: transform 0.2s ease;
+  }
+  #cf26 .cf-day-patch:nth-child(1) { background: var(--pink); }
+  #cf26 .cf-day-patch:nth-child(2) { background: var(--cyan); color: var(--ink); }
+  #cf26 .cf-day-patch:nth-child(3) { background: var(--orange); }
+  #cf26 .cf-day-patch:hover { transform: rotate(-6deg) scale(1.04); }
+  #cf26 .cf-day-patch .cf-day-num { font-family: 'Fredoka', sans-serif; font-size: 40px; font-weight: 700; }
+  #cf26 .cf-day-patch .cf-day-label { font-family: 'Fredoka', sans-serif; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+  #cf26 .cf-day-patch .cf-day-status { margin-top: 10px; font-size: 11.5px; opacity: 0.85; font-weight: 600; padding: 0 20px; }
+
+  /* ---------- CARD GRID ---------- */
+  #cf26 .cf-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-top: 10px; }
+  #cf26 .cf-card {
+    position: relative;
+    display: block;
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: 18px;
+    padding: 28px 22px;
+    box-shadow: 6px 6px 0 var(--ink);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    overflow: hidden;
+  }
+  #cf26 .cf-card:nth-child(1) { transform: rotate(-2deg); }
+  #cf26 .cf-card:nth-child(2) { transform: rotate(1.5deg); }
+  #cf26 .cf-card:nth-child(3) { transform: rotate(-1deg); }
+  #cf26 .cf-card:nth-child(4) { transform: rotate(2deg); }
+  #cf26 .cf-card:hover { transform: rotate(0deg) translateY(-6px); box-shadow: 9px 9px 0 var(--ink); }
+  #cf26 .cf-card::after {
+    content: ''; position: absolute; top: -22px; right: -22px;
+    width: 60px; height: 60px; border-radius: 50%; background: var(--yellow); z-index: 0;
+  }
+  #cf26 .cf-card:nth-child(2)::after { background: var(--pink); }
+  #cf26 .cf-card:nth-child(3)::after { background: var(--cyan); }
+  #cf26 .cf-card:nth-child(4)::after { background: var(--purple); }
+  #cf26 .cf-card > * { position: relative; z-index: 1; }
+  #cf26 .cf-card .cf-card-icon { font-size: 26px; margin-bottom: 10px; }
+  #cf26 .cf-card h3 { font-family: 'Fredoka', sans-serif; font-size: 17px; text-transform: uppercase; }
+  #cf26 .cf-card p { font-size: 13.5px; margin-top: 6px; opacity: 0.75; font-weight: 500; }
+  #cf26 .cf-card .cf-card-go { font-family: 'Fredoka', sans-serif; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--pink); margin-top: 16px; display: inline-block; }
+
+  /* ---------- MAP ---------- */
+  #cf26 .cf-map-frame {
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+  #cf26 .cf-map-frame iframe { width: 100%; height: 360px; border: 0; display: block; }
+
+  /* ---------- SPONSORS ---------- */
+  #cf26 .cf-sponsors { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 18px; margin-top: 10px; }
+  #cf26 .cf-sponsor-slot {
+    border: 3px dashed var(--ink);
+    border-radius: 14px;
+    height: 94px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--ink);
+    opacity: 0.55;
+    text-align: center;
+    padding: 8px;
+    background: repeating-linear-gradient(135deg, transparent 0 10px, rgba(0,0,0,0.03) 10px 20px);
+  }
+
+  /* ---------- FOOTER ---------- */
+  #cf26 .cf-footer-wave { display: block; width: 100%; height: 40px; }
+  #cf26 .cf-footer {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 12px 24px 32px;
+    text-align: center;
+  }
+  #cf26 .cf-footer .cf-social { display: flex; gap: 16px; justify-content: center; margin-bottom: 20px; }
+  #cf26 .cf-footer .cf-social a {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--yellow); color: var(--ink);
+    border: 3px solid var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    transition: transform 0.15s ease;
+  }
+  #cf26 .cf-footer .cf-social a:nth-child(2) { background: var(--cyan); }
+  #cf26 .cf-footer .cf-social a:hover { transform: scale(1.12) rotate(-6deg); }
+  #cf26 .cf-footer p { font-size: 11px; opacity: 0.55; font-weight: 500; max-width: 520px; margin: 0 auto; letter-spacing: 0.2px; }
+
+  /* ---------- REVEAL ---------- */
+  #cf26 .cf-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  #cf26 .cf-reveal.cf-in { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 640px) {
+    #cf26 .cf-info-strip { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div id="cf26">
+
+  <!-- HERO -->
+  <section class="cf-hero" id="cf-hero">
+    <div class="cf-confetti">
+      <span class="cf-c-circle cf-float1" style="top:12%; left:8%;"></span>
+      <span class="cf-c-tri cf-float2" style="top:70%; left:12%;"></span>
+      <span class="cf-c-square cf-float3" style="top:20%; left:88%;"></span>
+      <span class="cf-c-ring cf-float1" style="top:78%; left:85%;"></span>
+      <span class="cf-c-circle cf-float3" style="top:8%; left:50%; background:var(--pink);"></span>
+      <span class="cf-c-square cf-float2" style="top:55%; left:5%; background:var(--cyan);"></span>
+      <span class="cf-c-tri cf-float1" style="top:60%; left:92%; border-bottom-color:var(--yellow);"></span>
+    </div>
+    <div class="cf-hero-shape cf-float1" style="top:6%; left:4%; width:70px; height:70px; border-radius:50%; background:var(--orange); opacity:0.9;"></div>
+    <div class="cf-hero-shape cf-float2" style="bottom:8%; right:6%; width:0;height:0; border-left:34px solid transparent; border-right:34px solid transparent; border-bottom:58px solid var(--yellow); opacity:0.9;"></div>
+    <div class="cf-hero-shape cf-float3" style="top:14%; right:10%; width:44px; height:44px; border:6px solid var(--cyan); border-radius:50%;"></div>
+
+    <div class="cf-hero-inner">
+      <span class="cf-eyebrow">✦ Bugalagrande · Valle del Cauca ✦</span>
+      <h1>Camp Fest<br><span class="cf-word2">Bugalagrande</span></h1>
+      <svg class="cf-squiggle" viewBox="0 0 160 20" fill="none">
+        <path d="M2 10 Q 20 -2, 38 10 T 74 10 T 110 10 T 146 10" stroke="#FFD400" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <p class="cf-hero-sub">Tres días de campamento juvenil para jóvenes de todo el Valle del Cauca.</p>
+      <div class="cf-badge-date" id="cf-badge">
+        <div class="cf-badge-circle">AGO</div>
+        <div class="cf-badge-text">
+          <strong>7 – 9 de agosto, 2026</strong>
+          <small>CENTRO RECREACIONAL BUGALAGRANDE</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALERTA / PLAN DE MANDO UNIFICADO -->
+  <div class="cf-alert">
+    <div class="cf-alert-inner">
+      <strong>⚠ Si tienes una emergencia escribe al</strong>
+      <a href="https://wa.link/cb29aq" target="_blank" rel="noopener">323 326 7879</a>
+      <span>Plan de Mando Unificado</span>
+    </div>
+  </div>
+
+  <!-- INFO STRIP -->
+  <div class="cf-info-strip">
+    <div class="cf-info-item">
+      <div class="cf-icon">🎉</div>
+      <h3>7 – 9 agosto</h3>
+      <p>Tres días de campamento</p>
+    </div>
+    <div class="cf-info-item">
+      <div class="cf-icon">📍</div>
+      <h3>C. Recreacional</h3>
+      <p>Sede oficial en Bugalagrande</p>
+    </div>
+    <div class="cf-info-item">
+      <div class="cf-icon">🙌</div>
+      <h3>+150 jóvenes</h3>
+      <p>De municipios del Valle</p>
+    </div>
+  </div>
+
+  <!-- SOBRE EL CAMPAMENTO -->
+  <section class="cf-section cf-reveal">
+    <div class="cf-section-head">
+      <span class="cf-tag">Sobre el evento</span>
+      <h2>Hecho por y para la juventud</h2>
+    </div>
+    <p class="cf-lead">Camp Fest reúne a jóvenes de distintos municipios del Valle del Cauca alrededor del liderazgo, la convivencia y la participación juvenil, con el acompañamiento de la Oficina de Juventud y la Secretaría de Desarrollo Social de Bugalagrande.</p>
+  </section>
+
+  <!-- DÍAS -->
+  <section class="cf-section cf-reveal">
+    <div class="cf-section-head">
+      <span class="cf-tag">Programación</span>
+      <h2>Los 3 días del campamento</h2>
+    </div>
+    <div class="cf-days">
+      <div class="cf-day-patch">
+        <div class="cf-day-num">01</div>
+        <div class="cf-day-label">Viernes 7</div>
+        <div class="cf-day-status">Próximamente</div>
+      </div>
+      <div class="cf-day-patch">
+        <div class="cf-day-num">02</div>
+        <div class="cf-day-label">Sábado 8</div>
+        <div class="cf-day-status">Próximamente</div>
+      </div>
+      <div class="cf-day-patch">
+        <div class="cf-day-num">03</div>
+        <div class="cf-day-label">Domingo 9</div>
+        <div class="cf-day-status">Próximamente</div>
+      </div>
+    </div>
+    <p class="cf-lead" style="margin-top:30px;">La programación oficial completa se publicará próximamente en esta misma página.</p>
+  </section>
+
+  <!-- CARDS -->
+  <section class="cf-section cf-reveal">
+    <div class="cf-section-head">
+      <span class="cf-tag">Antes de venir</span>
+      <h2>Información para campistas</h2>
+    </div>
+    <div class="cf-cards">
+      <a class="cf-card" href="cartilla-del-campista">
+        <div class="cf-card-icon">📖</div>
+        <h3>Cartilla del campista</h3>
+        <p>Todo lo que necesitas saber antes de llegar.</p>
+        <span class="cf-card-go">Ver cartilla →</span>
+      </a>
+      <a class="cf-card" href="i-mayores-de-18-anos">
+        <div class="cf-card-icon">🪪</div>
+        <h3>Mayores de 18 años</h3>
+        <p>Requisitos e inscripción para adultos jóvenes.</p>
+        <span class="cf-card-go">Ver información →</span>
+      </a>
+      <a class="cf-card" href="i-menores-de-edad">
+        <div class="cf-card-icon">👨‍👩‍👧</div>
+        <h3>Menores de edad</h3>
+        <p>Requisitos, permisos y acompañamiento.</p>
+        <span class="cf-card-go">Ver información →</span>
+      </a>
+      <a class="cf-card" href="organizadores">
+        <div class="cf-card-icon">🎪</div>
+        <h3>Organizadores</h3>
+        <p>Equipo y comité detrás de Camp Fest 2026.</p>
+        <span class="cf-card-go">Conocer al equipo →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- MAPA -->
+  <section class="cf-section cf-reveal">
+    <div class="cf-section-head">
+      <span class="cf-tag">Ubicación</span>
+      <h2>Centro Recreacional Bugalagrande</h2>
+    </div>
+    <div class="cf-map-frame">
+      <iframe src="https://maps-api-ssl.google.com/maps?hl=es&amp;ll=4.214235,-76.153864&amp;output=embed&amp;q=4.214336,-76.153904&amp;z=18" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <!-- PATROCINADORES -->
+  <section class="cf-section cf-reveal">
+    <div class="cf-section-head">
+      <span class="cf-tag">Aliados</span>
+      <h2>Patrocinadores</h2>
+    </div>
+    <p class="cf-lead" style="margin-bottom:26px;">Cierre de alianzas en proceso — los logos se publicarán a medida que se confirmen.</p>
+    <div class="cf-sponsors">
+      <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
+      <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
+      <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
+      <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <svg class="cf-footer-wave" viewBox="0 0 500 40" preserveAspectRatio="none">
+    <path d="M0 20 Q 25 0, 50 20 T 100 20 T 150 20 T 200 20 T 250 20 T 300 20 T 350 20 T 400 20 T 450 20 T 500 20 V40 H0 Z" fill="#1A1A1E"/>
+  </svg>
+  <footer class="cf-footer">
+    <div class="cf-social">
+      <a href="https://www.facebook.com/profile.php?id=61570267957827" target="_blank" rel="noopener">f</a>
+      <a href="https://www.instagram.com/bugalagrandejoven/?hl=es-la" target="_blank" rel="noopener">ig</a>
+    </div>
+    <p>© 2026 OFICINA DE JUVENTUD, SECRETARÍA DE DESARROLLO SOCIAL, ALCALDÍA MUNICIPAL DE BUGALAGRANDE. TODOS LOS DERECHOS RESERVADOS.</p>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById('cf26');
+    if (!root) return;
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* scroll reveal */
+    var items = root.querySelectorAll('.cf-reveal');
+    if ('IntersectionObserver' in window) {
+      var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('cf-in'); obs.unobserve(e.target); }
+        });
+      }, { threshold: 0.15 });
+      items.forEach(function (el) { obs.observe(el); });
+    } else {
+      items.forEach(function (el) { el.classList.add('cf-in'); });
+    }
+
+    /* mouse parallax on hero shapes */
+    if (!reduced) {
+      var hero = root.querySelector('#cf-hero');
+      var shapes = root.querySelectorAll('.cf-hero-shape');
+      if (hero && shapes.length) {
+        hero.addEventListener('mousemove', function (e) {
+          var r = hero.getBoundingClientRect();
+          var x = (e.clientX - r.left) / r.width - 0.5;
+          var y = (e.clientY - r.top) / r.height - 0.5;
+          shapes.forEach(function (s, i) {
+            var f = (i + 1) * 8;
+            s.style.transform = 'translate(' + (x * f) + 'px,' + (y * f) + 'px)';
+          });
+        });
+      }
+    }
+
+    /* confetti burst on badge click/hover */
+    var badge = root.querySelector('#cf-badge');
+    var colors = ['#FF2E8B', '#FFD400', '#00D2C6', '#8B2FF0', '#FF6B00'];
+    var fired = false;
+    function burst() {
+      if (reduced) return;
+      var rect = badge.getBoundingClientRect();
+      for (var i = 0; i < 14; i++) {
+        var dot = document.createElement('span');
+        dot.className = 'cf-burst';
+        dot.style.background = colors[i % colors.length];
+        dot.style.left = (rect.width / 2) + 'px';
+        dot.style.top = (rect.height / 2) + 'px';
+        badge.appendChild(dot);
+        var angle = Math.random() * Math.PI * 2;
+        var dist = 40 + Math.random() * 50;
+        var dx = Math.cos(angle) * dist;
+        var dy = Math.sin(angle) * dist;
+        dot.animate([
+          { transform: 'translate(0,0) scale(1)', opacity: 1 },
+          { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(0)', opacity: 0 }
+        ], { duration: 700 + Math.random() * 300, easing: 'cubic-bezier(.2,.8,.2,1)' });
+        (function (d) { setTimeout(function () { d.remove(); }, 1100); })(dot);
+      }
+    }
+    if (badge) {
+      badge.style.position = 'relative';
+      badge.style.overflow = 'visible';
+      badge.addEventListener('click', burst);
+      badge.addEventListener('mouseenter', function () {
+        if (!fired) { fired = true; burst(); setTimeout(function () { fired = false; }, 1200); }
+      });
+    }
+  })();
+</script>
