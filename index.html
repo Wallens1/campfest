@@ -1,24 +1,3 @@
-
-<!-- ===== REDISEÑO PROPUESTO ===== -->
-<style>
-/* Mejoras visuales */
-#cf26 .cf-hero{padding:100px 24px 130px;background:
-linear-gradient(135deg,#8B2FF0 0%,#6d1fd1 100%)}
-#cf26 .cf-hero::after{
-content:"";position:absolute;left:0;right:0;bottom:-40px;height:80px;
-background:repeating-linear-gradient(-45deg,#FFD400 0 18px,#FF2E8B 18px 36px,#00D2C6 36px 54px,#FFF7EA 54px 72px)}
-#cf26 .cf-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:28px}
-#cf26 .cf-btn{padding:16px 28px;border:3px solid #1A1A1E;border-radius:18px;
-font-weight:700;box-shadow:6px 6px 0 #1A1A1E}
-#cf26 .cf-btn.primary{background:#FFD400}
-#cf26 .cf-btn.secondary{background:#fff}
-#cf26 .cf-section:nth-of-type(even){background:#fff}
-#cf26 .cf-section:nth-of-type(odd){background:#FFF7EA}
-#cf26 .cf-card{border-radius:24px}
-#cf26 .cf-card:hover{transform:translateY(-8px) rotate(0)!important}
-#cf26 .cf-cta{background:#FFD400;border:4px solid #1A1A1E;border-radius:28px;
-padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
-</style>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
 
@@ -28,6 +7,7 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
     --yellow: #FFD400;
     --cyan: #00D2C6;
     --purple: #8B2FF0;
+    --purple-dark: #6D1FD1;
     --orange: #FF6B00;
     --ink: #1A1A1E;
     --cream: #FFF7EA;
@@ -63,12 +43,20 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
   /* ---------- HERO ---------- */
   #cf26 .cf-hero {
     position: relative;
-    background: var(--purple);
+    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
     color: var(--white);
-    padding: 84px 24px 110px;
+    padding: 100px 24px 130px;
     text-align: center;
     overflow: hidden;
     border-bottom: 6px solid var(--ink);
+  }
+  /* colorful stripe kept INSIDE the box so overflow:hidden doesn't clip it */
+  #cf26 .cf-hero::after {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: 0; height: 12px;
+    background: repeating-linear-gradient(-45deg,
+      var(--yellow) 0 18px, var(--pink) 18px 36px, var(--cyan) 36px 54px, var(--cream) 54px 72px);
+    z-index: 2;
   }
   #cf26 .cf-hero-inner { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; }
   #cf26 .cf-eyebrow {
@@ -138,6 +126,24 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
 
   #cf26 .cf-hero-shape { position: absolute; z-index: 1; }
 
+  /* ---------- HERO ACTIONS (Inscribirme / Más información) ---------- */
+  #cf26 .cf-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+  #cf26 .cf-btn {
+    display: inline-block;
+    padding: 14px 28px;
+    border: 3px solid var(--ink);
+    border-radius: 18px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 14.5px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    box-shadow: 6px 6px 0 var(--ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  #cf26 .cf-btn:hover { transform: translate(-2px,-2px); box-shadow: 8px 8px 0 var(--ink); }
+  #cf26 .cf-btn.cf-primary { background: var(--yellow); color: var(--ink); }
+  #cf26 .cf-btn.cf-secondary { background: var(--white); color: var(--ink); }
+
   /* ---------- ALERT / MANDO UNIFICADO ---------- */
   #cf26 .cf-alert {
     background: repeating-linear-gradient(45deg, var(--yellow) 0 22px, var(--ink) 22px 26px);
@@ -186,8 +192,11 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
   #cf26 .cf-info-item h3 { font-family: 'Fredoka', sans-serif; font-size: 18px; text-transform: uppercase; }
   #cf26 .cf-info-item p { font-size: 13px; opacity: 0.7; margin-top: 4px; font-weight: 500; }
 
-  /* ---------- SECTION SHARED ---------- */
-  #cf26 .cf-section { padding: 70px 24px; max-width: 1020px; margin: 0 auto; position: relative; z-index: 1; }
+  /* ---------- SECTION SHARED (alternating background) ---------- */
+  #cf26 .cf-section { padding: 70px 24px; position: relative; z-index: 1; }
+  #cf26 .cf-section:nth-of-type(even) { background: var(--white); }
+  #cf26 .cf-section:nth-of-type(odd) { background: var(--cream); }
+  #cf26 .cf-section-inner { max-width: 1020px; margin: 0 auto; }
   #cf26 .cf-section-head { text-align: center; margin-bottom: 42px; }
   #cf26 .cf-section-head .cf-tag {
     display: inline-block;
@@ -229,7 +238,7 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
     display: block;
     background: var(--white);
     border: 3px solid var(--ink);
-    border-radius: 18px;
+    border-radius: 24px;
     padding: 28px 22px;
     box-shadow: 6px 6px 0 var(--ink);
     transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -239,7 +248,7 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
   #cf26 .cf-card:nth-child(2) { transform: rotate(1.5deg); }
   #cf26 .cf-card:nth-child(3) { transform: rotate(-1deg); }
   #cf26 .cf-card:nth-child(4) { transform: rotate(2deg); }
-  #cf26 .cf-card:hover { transform: rotate(0deg) translateY(-6px); box-shadow: 9px 9px 0 var(--ink); }
+  #cf26 .cf-card:hover { transform: rotate(0deg) translateY(-8px); box-shadow: 9px 9px 0 var(--ink); }
   #cf26 .cf-card::after {
     content: ''; position: absolute; top: -22px; right: -22px;
     width: 60px; height: 60px; border-radius: 50%; background: var(--yellow); z-index: 0;
@@ -278,6 +287,20 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
     padding: 8px;
     background: repeating-linear-gradient(135deg, transparent 0 10px, rgba(0,0,0,0.03) 10px 20px);
   }
+
+  /* ---------- CTA FINAL ---------- */
+  #cf26 .cf-cta {
+    background: var(--yellow);
+    border: 4px solid var(--ink);
+    border-radius: 28px;
+    padding: 48px 28px;
+    text-align: center;
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+  #cf26 .cf-cta h2 { font-family: 'Fredoka', sans-serif; font-size: clamp(26px, 5vw, 36px); text-transform: uppercase; }
+  #cf26 .cf-cta p { margin-top: 10px; font-size: 15px; font-weight: 500; opacity: 0.85; }
+  #cf26 .cf-cta .cf-actions { margin-top: 22px; }
+  #cf26 .cf-cta .cf-btn.cf-primary { background: var(--ink); color: var(--cream); }
 
   /* ---------- FOOTER ---------- */
   #cf26 .cf-footer-wave { display: block; width: 100%; height: 40px; }
@@ -335,18 +358,21 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
         <path d="M2 10 Q 20 -2, 38 10 T 74 10 T 110 10 T 146 10" stroke="#FFD400" stroke-width="5" stroke-linecap="round"/>
       </svg>
       <p class="cf-hero-sub">Tres días de campamento juvenil para jóvenes de todo el Valle del Cauca.</p>
+
       <div class="cf-badge-date" id="cf-badge">
         <div class="cf-badge-circle">AGO</div>
         <div class="cf-badge-text">
           <strong>7 – 9 de agosto, 2026</strong>
           <small>CENTRO RECREACIONAL BUGALAGRANDE</small>
         </div>
+      </div>
+
       <div class="cf-actions">
-<a class="cf-btn primary" href="#inscripcion">Inscribirme</a>
-<a class="cf-btn secondary" href="#info">Más información</a>
-</div>
-</div>
-</section>
+        <a class="cf-btn cf-primary" href="#inscripcion">Inscribirme</a>
+        <a class="cf-btn cf-secondary" href="#info">Más información</a>
+      </div>
+    </div>
+  </section>
 
   <!-- ALERTA / PLAN DE MANDO UNIFICADO -->
   <div class="cf-alert">
@@ -377,95 +403,120 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
   </div>
 
   <!-- SOBRE EL CAMPAMENTO -->
-  <section class="cf-section cf-reveal">
-    <div class="cf-section-head">
-      <span class="cf-tag">Sobre el evento</span>
-      <h2>Hecho por y para la juventud</h2>
+  <section class="cf-section cf-reveal" id="info">
+    <div class="cf-section-inner">
+      <div class="cf-section-head">
+        <span class="cf-tag">Sobre el evento</span>
+        <h2>Hecho por y para la juventud</h2>
+      </div>
+      <p class="cf-lead">Camp Fest reúne a jóvenes de distintos municipios del Valle del Cauca alrededor del liderazgo, la convivencia y la participación juvenil, con el acompañamiento de la Oficina de Juventud y la Secretaría de Desarrollo Social de Bugalagrande.</p>
     </div>
-    <p class="cf-lead">Camp Fest reúne a jóvenes de distintos municipios del Valle del Cauca alrededor del liderazgo, la convivencia y la participación juvenil, con el acompañamiento de la Oficina de Juventud y la Secretaría de Desarrollo Social de Bugalagrande.</p>
   </section>
 
   <!-- DÍAS -->
   <section class="cf-section cf-reveal">
-    <div class="cf-section-head">
-      <span class="cf-tag">Programación</span>
-      <h2>Los 3 días del campamento</h2>
+    <div class="cf-section-inner">
+      <div class="cf-section-head">
+        <span class="cf-tag">Programación</span>
+        <h2>Los 3 días del campamento</h2>
+      </div>
+      <div class="cf-days">
+        <div class="cf-day-patch">
+          <div class="cf-day-num">01</div>
+          <div class="cf-day-label">Viernes 7</div>
+          <div class="cf-day-status">Próximamente</div>
+        </div>
+        <div class="cf-day-patch">
+          <div class="cf-day-num">02</div>
+          <div class="cf-day-label">Sábado 8</div>
+          <div class="cf-day-status">Próximamente</div>
+        </div>
+        <div class="cf-day-patch">
+          <div class="cf-day-num">03</div>
+          <div class="cf-day-label">Domingo 9</div>
+          <div class="cf-day-status">Próximamente</div>
+        </div>
+      </div>
+      <p class="cf-lead" style="margin-top:30px;">La programación oficial completa se publicará próximamente en esta misma página.</p>
     </div>
-    <div class="cf-days">
-      <div class="cf-day-patch">
-        <div class="cf-day-num">01</div>
-        <div class="cf-day-label">Viernes 7</div>
-        <div class="cf-day-status">Próximamente</div>
-      </div>
-      <div class="cf-day-patch">
-        <div class="cf-day-num">02</div>
-        <div class="cf-day-label">Sábado 8</div>
-        <div class="cf-day-status">Próximamente</div>
-      </div>
-      <div class="cf-day-patch">
-        <div class="cf-day-num">03</div>
-        <div class="cf-day-label">Domingo 9</div>
-        <div class="cf-day-status">Próximamente</div>
-      </div>
-    </div>
-    <p class="cf-lead" style="margin-top:30px;">La programación oficial completa se publicará próximamente en esta misma página.</p>
   </section>
 
   <!-- CARDS -->
   <section class="cf-section cf-reveal">
-    <div class="cf-section-head">
-      <span class="cf-tag">Antes de venir</span>
-      <h2>Información para campistas</h2>
-    </div>
-    <div class="cf-cards">
-      <a class="cf-card" href="cartilla-del-campista">
-        <div class="cf-card-icon">📖</div>
-        <h3>Cartilla del campista</h3>
-        <p>Todo lo que necesitas saber antes de llegar.</p>
-        <span class="cf-card-go">Ver cartilla →</span>
-      </a>
-      <a class="cf-card" href="i-mayores-de-18-anos">
-        <div class="cf-card-icon">🪪</div>
-        <h3>Mayores de 18 años</h3>
-        <p>Requisitos e inscripción para adultos jóvenes.</p>
-        <span class="cf-card-go">Ver información →</span>
-      </a>
-      <a class="cf-card" href="i-menores-de-edad">
-        <div class="cf-card-icon">👨‍👩‍👧</div>
-        <h3>Menores de edad</h3>
-        <p>Requisitos, permisos y acompañamiento.</p>
-        <span class="cf-card-go">Ver información →</span>
-      </a>
-      <a class="cf-card" href="organizadores">
-        <div class="cf-card-icon">🎪</div>
-        <h3>Organizadores</h3>
-        <p>Equipo y comité detrás de Camp Fest 2026.</p>
-        <span class="cf-card-go">Conocer al equipo →</span>
-      </a>
+    <div class="cf-section-inner">
+      <div class="cf-section-head">
+        <span class="cf-tag">Antes de venir</span>
+        <h2>Información para campistas</h2>
+      </div>
+      <div class="cf-cards">
+        <a class="cf-card" href="cartilla-del-campista">
+          <div class="cf-card-icon">📖</div>
+          <h3>Cartilla del campista</h3>
+          <p>Todo lo que necesitas saber antes de llegar.</p>
+          <span class="cf-card-go">Ver cartilla →</span>
+        </a>
+        <a class="cf-card" href="i-mayores-de-18-anos">
+          <div class="cf-card-icon">🪪</div>
+          <h3>Mayores de 18 años</h3>
+          <p>Requisitos e inscripción para adultos jóvenes.</p>
+          <span class="cf-card-go">Ver información →</span>
+        </a>
+        <a class="cf-card" href="i-menores-de-edad">
+          <div class="cf-card-icon">👨‍👩‍👧</div>
+          <h3>Menores de edad</h3>
+          <p>Requisitos, permisos y acompañamiento.</p>
+          <span class="cf-card-go">Ver información →</span>
+        </a>
+        <a class="cf-card" href="organizadores">
+          <div class="cf-card-icon">🎪</div>
+          <h3>Organizadores</h3>
+          <p>Equipo y comité detrás de Camp Fest 2026.</p>
+          <span class="cf-card-go">Conocer al equipo →</span>
+        </a>
+      </div>
     </div>
   </section>
 
   <!-- MAPA -->
   <section class="cf-section cf-reveal">
-    <div class="cf-section-head">
-      <span class="cf-tag">Ubicación</span>
-      <h2>Centro Recreacional Bugalagrande</h2>
+    <div class="cf-section-inner">
+      <div class="cf-section-head">
+        <span class="cf-tag">Ubicación</span>
+        <h2>Centro Recreacional Bugalagrande</h2>
+      </div>
+      <div class="cf-map-frame">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d761.1080146653964!2d-76.16130202112463!3d4.206754809564185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e39cb00515efd7b%3A0x3904a89e6427725f!2sCentro%20recreativo%20la%20Maria!5e1!3m2!1ses!2sco!4v1783661009816!5m2!1ses!2sco" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
     </div>
-    <div class="cf-map-frame">
-<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d761.1080146653964!2d-76.16130202112463!3d4.206754809564185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e39cb00515efd7b%3A0x3904a89e6427725f!2sCentro%20recreativo%20la%20Maria!5e1!3m2!1ses!2sco!4v1783661009816!5m2!1ses!2sco" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>  </section>
+  </section>
 
   <!-- PATROCINADORES -->
   <section class="cf-section cf-reveal">
-    <div class="cf-section-head">
-      <span class="cf-tag">Aliados</span>
-      <h2>Patrocinadores</h2>
+    <div class="cf-section-inner">
+      <div class="cf-section-head">
+        <span class="cf-tag">Aliados</span>
+        <h2>Patrocinadores</h2>
+      </div>
+      <p class="cf-lead" style="margin-bottom:26px;">Cierre de alianzas en proceso — los logos se publicarán a medida que se confirmen.</p>
+      <div class="cf-sponsors">
+        <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
+        <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
+        <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
+        <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
+      </div>
     </div>
-    <p class="cf-lead" style="margin-bottom:26px;">Cierre de alianzas en proceso — los logos se publicarán a medida que se confirmen.</p>
-    <div class="cf-sponsors">
-      <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
-      <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
-      <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
-      <div class="cf-sponsor-slot">LOGO PENDIENTE</div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cf-section cf-reveal" id="inscripcion">
+    <div class="cf-section-inner">
+      <div class="cf-cta">
+        <h2>¿Listo para vivir Camp Fest?</h2>
+        <p>Inscríbete y haz parte de la experiencia.</p>
+        <div class="cf-actions">
+          <a class="cf-btn cf-primary" href="#">Inscribirme</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -479,7 +530,7 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
       <a href="https://www.instagram.com/bugalagrandejoven/?hl=es-la" target="_blank" rel="noopener">ig</a>
     </div>
     <p>© 2026 OFICINA DE JUVENTUD, SECRETARÍA DE DESARROLLO SOCIAL, ALCALDÍA MUNICIPAL DE BUGALAGRANDE. TODOS LOS DERECHOS RESERVADOS.</p>
-  </footer><section class='cf-section'><div class='cf-cta'><h2>¿Listo para vivir Camp Fest?</h2><p>Inscríbete y haz parte de la experiencia.</p><div class='cf-actions'><a class='cf-btn primary' href='#'>Inscribirme</a></div></div></section>
+  </footer>
 
 </div>
 
@@ -524,7 +575,7 @@ padding:48px;text-align:center;box-shadow:8px 8px 0 #1A1A1E}
     var colors = ['#FF2E8B', '#FFD400', '#00D2C6', '#8B2FF0', '#FF6B00'];
     var fired = false;
     function burst() {
-      if (reduced) return;
+      if (reduced || !badge) return;
       var rect = badge.getBoundingClientRect();
       for (var i = 0; i < 14; i++) {
         var dot = document.createElement('span');
