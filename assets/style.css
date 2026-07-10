@@ -226,6 +226,29 @@ img { max-width: 100%; display: block; }
 .cf-card p { font-size: 13.5px; margin-top: 6px; opacity: 0.75; font-weight: 500; }
 .cf-card .cf-card-go { font-family: 'Fredoka', sans-serif; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--pink); margin-top: 16px; display: inline-block; }
 
+/* ---------- HOME PAGE HERO HELPERS ---------- */
+#cf26 .cf-confetti-1 { top: 12%; left: 8%; }
+#cf26 .cf-confetti-2 { top: 70%; left: 12%; }
+#cf26 .cf-confetti-3 { top: 20%; left: 88%; }
+#cf26 .cf-confetti-4 { top: 78%; left: 85%; }
+#cf26 .cf-confetti-5 { top: 8%; left: 50%; background: var(--pink); }
+#cf26 .cf-confetti-6 { top: 55%; left: 5%; background: var(--cyan); }
+#cf26 .cf-confetti-7 { top: 60%; left: 92%; border-bottom-color: var(--yellow); }
+#cf26 .cf-shape-1 {
+  top: 6%; left: 4%; width: 70px; height: 70px; border-radius: 50%;
+  background: var(--orange); opacity: 0.9;
+}
+#cf26 .cf-shape-2 {
+  bottom: 8%; right: 6%; width: 0; height: 0;
+  border-left: 34px solid transparent; border-right: 34px solid transparent; border-bottom: 58px solid var(--yellow);
+  opacity: 0.9;
+}
+#cf26 .cf-shape-3 {
+  top: 14%; right: 10%; width: 44px; height: 44px; border: 6px solid var(--cyan); border-radius: 50%;
+}
+#cf26 .cf-lead-spaced-top { margin-top: 30px; }
+#cf26 .cf-lead-spaced-bottom { margin-bottom: 26px; }
+
 /* ---------- CONTENT BLOCKS (checklist / info panels for subpages) ---------- */
 .cf-panel {
   background: var(--white); border: 3px solid var(--ink); border-radius: 20px;
@@ -357,11 +380,10 @@ img { max-width: 100%; display: block; }
   width: auto;
   height: auto;
   object-fit: contain;
-  filter: grayscale(1);
-  opacity: 0.8;
-  transition: filter 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
+  opacity: 0.95;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
-.cf-sponsor-card:hover img { filter: grayscale(0); opacity: 1; transform: scale(1.03); }
+.cf-sponsor-card:hover img { opacity: 1; transform: scale(1.03); }
 .cf-sponsor-name {
   font-family: 'Fredoka', sans-serif;
   font-size: 12px;
@@ -376,7 +398,7 @@ img { max-width: 100%; display: block; }
 }
 @media (prefers-reduced-motion: reduce) {
   .cf-sponsors-track { animation: none; }
-  .cf-sponsor-card img { filter: none; opacity: 1; }
+  .cf-sponsor-card img { opacity: 1; }
 }
 @media (max-width: 640px) {
   .cf-sponsor-group { gap: 14px; padding: 14px; }
