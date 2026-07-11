@@ -2,6 +2,7 @@
 
 <nav class="cf-nav">
     <a href="./" class="cf-active">Inicio</a>
+  <a href="itinerario/">Itinerario</a>
     <a href="cartilla-del-campista/">Cartilla del campista</a>
     <a href="i-mayores-de-18-anos/">Mayores de edad</a>
     <a href="i-menores-de-edad/">Menores de edad</a>
@@ -100,24 +101,50 @@
         <span class="cf-tag">Programación</span>
         <h2>Los 3 días del campamento</h2>
       </div>
-      <div class="cf-days">
-        <div class="cf-day-patch">
-          <div class="cf-day-num">01</div>
-          <div class="cf-day-label">Viernes 7</div>
-          <div class="cf-day-status">Próximamente</div>
-        </div>
-        <div class="cf-day-patch">
-          <div class="cf-day-num">02</div>
-          <div class="cf-day-label">Sábado 8</div>
-          <div class="cf-day-status">Próximamente</div>
-        </div>
-        <div class="cf-day-patch">
-          <div class="cf-day-num">03</div>
-          <div class="cf-day-label">Domingo 9</div>
-          <div class="cf-day-status">Próximamente</div>
-        </div>
+      <div class="cf-program-tabs" role="tablist" aria-label="Días del itinerario">
+        <button type="button" class="cf-program-tab is-active" role="tab" aria-selected="true" data-program-tab="d1">Día 1 · Viernes 7</button>
+        <button type="button" class="cf-program-tab" role="tab" aria-selected="false" data-program-tab="d2">Día 2 · Sábado 8</button>
+        <button type="button" class="cf-program-tab" role="tab" aria-selected="false" data-program-tab="d3">Día 3 · Domingo 9</button>
       </div>
-      <p class="cf-lead cf-lead-spaced-top">La programación oficial completa se publicará próximamente en esta misma página.</p>
+
+      <div class="cf-program-panels">
+        <article class="cf-program-panel is-active" role="tabpanel" data-program-panel="d1">
+          <h3>Llegada y bienvenida</h3>
+          <ul class="cf-program-list">
+            <li><strong>8:00 – 10:30:</strong> Llegada, registro y ubicación de campistas.</li>
+            <li><strong>10:30 – 12:30:</strong> Bienvenida oficial y muestras artísticas.</li>
+            <li><strong>2:30 – 3:30:</strong> Rompehielos e integración grupal.</li>
+            <li><strong>4:00 – 5:00:</strong> Actividades simultáneas por grupos.</li>
+            <li><strong>5:00 – 6:00:</strong> Charla de salud sexual y reproductiva.</li>
+            <li><strong>7:30 – 10:00:</strong> Reinado juvenil y noche de integración.</li>
+          </ul>
+        </article>
+
+        <article class="cf-program-panel" role="tabpanel" data-program-panel="d2" hidden>
+          <h3>Formación y recreación</h3>
+          <ul class="cf-program-list">
+            <li><strong>6:30 – 7:00:</strong> Chirimía (apertura cultural).</li>
+            <li><strong>8:30 – 9:30:</strong> Taller ambiental con Fundación Río y Riopaila.</li>
+            <li><strong>10:00 – 11:00:</strong> Charla institucional (Secretaría de Educación).</li>
+            <li><strong>2:00 – 3:00:</strong> Actividades de líderes juveniles por grupos.</li>
+            <li><strong>3:00 – 5:00:</strong> Formación simultánea en liderazgo, psicosocial y proyecto de vida.</li>
+            <li><strong>7:30 – 9:00:</strong> Show de talentos y fiesta de despedida.</li>
+          </ul>
+        </article>
+
+        <article class="cf-program-panel" role="tabpanel" data-program-panel="d3" hidden>
+          <h3>Cierre y salida</h3>
+          <ul class="cf-program-list">
+            <li><strong>7:00:</strong> Levantada, aseo y recogida de pertenencias.</li>
+            <li><strong>9:00:</strong> Desayuno de cierre (arroz con leche).</li>
+            <li><strong>10:00 – 11:00:</strong> Acto de despedida y cierre oficial del campamento.</li>
+          </ul>
+        </article>
+      </div>
+      <p class="cf-lead cf-lead-spaced-top">Consulta el itinerario preliminar del Camp Fest 2026 por bloques y horarios.</p>
+      <div class="cf-actions cf-actions-tight">
+        <a class="cf-btn cf-secondary" href="itinerario/">Ver itinerario completo</a>
+      </div>
     </div>
   </section>
 
@@ -335,5 +362,29 @@
         if (!fired) { fired = true; burst(); setTimeout(function () { fired = false; }, 1200); }
       });
     }
+
+    /* interactive programming tabs */
+    var programTabs = root.querySelectorAll('[data-program-tab]');
+    var programPanels = root.querySelectorAll('[data-program-panel]');
+
+    function setProgramDay(day) {
+      programTabs.forEach(function (tab) {
+        var active = tab.getAttribute('data-program-tab') === day;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      programPanels.forEach(function (panel) {
+        var active = panel.getAttribute('data-program-panel') === day;
+        panel.classList.toggle('is-active', active);
+        panel.hidden = !active;
+      });
+    }
+
+    programTabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        setProgramDay(tab.getAttribute('data-program-tab'));
+      });
+    });
   })();
 </script>
