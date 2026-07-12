@@ -3,328 +3,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generar Carta de Invitación · Camp Fest 2026</title>
-<style>
-
-:root{
-    --amarillo:#FFC93C;
-    --coral:#FF5D5D;
-    --teal:#1FB6A6;
-    --morado:#5B4B8A;
-    --tinta:#1A1A2E;
-    --crema:#FFF8EC;
-}
-
-*{ box-sizing:border-box; }
-
-body{
-    margin:0;
-    font-family:'Poppins', 'Segoe UI', sans-serif;
-    background:var(--crema);
-    color:var(--tinta);
-    min-height:100vh;
-    position:relative;
-    overflow-x:hidden;
-}
-
-/* ===== Formas Memphis decorativas ===== */
-
-.forma{
-    position:absolute;
-    z-index:0;
-    opacity:.9;
-}
-
-.forma.circulo{
-    width:90px; height:90px;
-    border-radius:50%;
-    background:var(--teal);
-    top:-30px; left:-30px;
-}
-
-.forma.triangulo{
-    width:0; height:0;
-    border-left:55px solid transparent;
-    border-right:55px solid transparent;
-    border-bottom:95px solid var(--coral);
-    top:60px; right:6%;
-    transform:rotate(15deg);
-}
-
-.forma.zigzag{
-    width:120px; height:40px;
-    background:
-        linear-gradient(135deg, var(--amarillo) 25%, transparent 25%) -10px 0,
-        linear-gradient(225deg, var(--amarillo) 25%, transparent 25%) -10px 0;
-    background-size:20px 20px;
-    bottom:5%; left:4%;
-}
-
-.forma.anillo{
-    width:70px; height:70px;
-    border-radius:50%;
-    border:14px solid var(--morado);
-    bottom:8%; right:8%;
-}
-
-/* ===== Layout principal ===== */
-
-.contenedor{
-    position:relative;
-    z-index:1;
-    max-width:640px;
-    margin:0 auto;
-    padding:56px 24px 80px;
-}
-
-.encabezado{
-    text-align:center;
-    margin-bottom:36px;
-}
-
-.encabezado .eyebrow{
-    display:inline-block;
-    background:var(--tinta);
-    color:var(--amarillo);
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    padding:6px 16px;
-    border-radius:999px;
-    margin-bottom:16px;
-}
-
-.encabezado h1{
-    font-size:32px;
-    font-weight:800;
-    margin:0 0 8px;
-    line-height:1.15;
-}
-
-.encabezado h1 span{
-    color:var(--coral);
-}
-
-.encabezado p{
-    font-size:15px;
-    color:#555;
-    margin:0;
-}
-
-/* ===== Tarjeta del formulario ===== */
-
-.tarjeta{
-    background:white;
-    border:3px solid var(--tinta);
-    border-radius:20px;
-    padding:36px 32px;
-    box-shadow:8px 8px 0 var(--tinta);
-}
-
-.campo{
-    margin-bottom:20px;
-}
-
-.campo label{
-    display:block;
-    font-size:13px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.5px;
-    margin-bottom:6px;
-    color:var(--morado);
-}
-
-.campo input{
-    width:100%;
-    padding:12px 14px;
-    font-size:15px;
-    font-family:inherit;
-    border:2px solid #ddd;
-    border-radius:10px;
-    background:var(--crema);
-    color:var(--tinta);
-    transition:border-color .15s ease, background .15s ease;
-}
-
-.campo input:focus{
-    outline:none;
-    border-color:var(--teal);
-    background:white;
-}
-
-.campo input.error{
-    border-color:var(--coral);
-    background:#fff0f0;
-}
-
-.campo .mensaje-error{
-    display:none;
-    font-size:12.5px;
-    color:var(--coral);
-    margin-top:5px;
-    font-weight:600;
-}
-
-.campo.invalido .mensaje-error{
-    display:block;
-}
-
-.fila-doble{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:16px;
-}
-
-@media (max-width: 520px){
-    .fila-doble{
-        grid-template-columns:1fr;
-    }
-}
-
-.boton-generar{
-    width:100%;
-    margin-top:12px;
-    padding:16px;
-    font-family:inherit;
-    font-size:16px;
-    font-weight:800;
-    letter-spacing:.3px;
-    color:white;
-    background:var(--coral);
-    border:3px solid var(--tinta);
-    border-radius:12px;
-    cursor:pointer;
-    box-shadow:5px 5px 0 var(--tinta);
-    transition:transform .12s ease, box-shadow .12s ease;
-}
-
-.boton-generar:hover{
-    transform:translate(-2px, -2px);
-    box-shadow:7px 7px 0 var(--tinta);
-}
-
-.boton-generar:active{
-    transform:translate(2px, 2px);
-    box-shadow:2px 2px 0 var(--tinta);
-}
-
-.boton-generar:disabled{
-    opacity:.6;
-    cursor:not-allowed;
-    transform:none;
-    box-shadow:5px 5px 0 var(--tinta);
-}
-
-.estado{
-    margin-top:16px;
-    padding:12px 16px;
-    border-radius:10px;
-    font-size:14px;
-    font-weight:600;
-    text-align:center;
-    display:none;
-}
-
-.estado.mostrar{
-    display:block;
-}
-
-.estado.ok{
-    background:#e2f7f2;
-    color:#0f7a67;
-    border:2px solid var(--teal);
-}
-
-.estado.fallo{
-    background:#ffeaea;
-    color:#c23b3b;
-    border:2px solid var(--coral);
-}
-
-.estado.cargando{
-    background:#fff8e6;
-    color:#8a6d00;
-    border:2px solid var(--amarillo);
-}
-
-</style>
+<title>Generar Constancia · Camp Fest 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
 </head>
-<body>
+<body >
 
-<div class="forma circulo"></div>
-<div class="forma triangulo"></div>
-<div class="forma zigzag"></div>
-<div class="forma anillo"></div>
+    <nav class="cf-nav">
+        <a href="../">Inicio</a>
+        <a href="../itinerario/">Itinerario</a>
+        <a href="../cartilla-del-campista/">Cartilla del campista</a>
+        <a href="../i-mayores-de-18-anos/">Mayores de edad</a>
+        <a href="../i-menores-de-edad/">Menores de edad</a>
+        <a href="../proceso-de-seleccion/">Proceso de selección</a>
+        <a href="./" class="cf-active">Generar Invitación</a>
+        <a href="../organizadores/">Organizadores</a>
+    </nav>
 
-<div class="contenedor">
+<header class="cf-subhero cf-tone-purple">
+  <div class="cf-confetti">
+    <span class="cf-c-circle cf-float1" style="top:14%; left:8%;"></span>
+    <span class="cf-c-tri cf-float2" style="top:20%; right:10%;"></span>
+    <span class="cf-c-square cf-float3" style="bottom:16%; left:14%;"></span>
+    <span class="cf-c-ring cf-float1" style="bottom:12%; right:8%;"></span>
+  </div>
+  <div class="cf-subhero-inner">
+    <a href="./" class="cf-back">← Volver al inicio</a>
+    <h1>Genera tu constancia de invitación</h1>
+    <p class="cf-subhero-sub">Completa tus datos y descarga en segundos la carta oficial de Camp Fest 2026.</p>
+  </div>
+</header>
 
-    <div class="encabezado">
-        <span class="eyebrow">Camp Fest 2026</span>
-        <h1>Generar carta de <span>invitación</span></h1>
-        <p>Completa los datos del participante para descargar la carta oficial en PDF.</p>
-    </div>
+<section class="cf-section">
 
-    <div class="tarjeta">
-        <form id="formCarta" novalidate>
+  <div class="cf-panel">
+    <h3><span class="cf-dot"></span>¿Para qué me sirve esta constancia?</h3>
+    <p>
+      Este documento certifica tu participación oficial en Camp Fest 2026 y puedes usarlo para adelantar
+      ante tu institución, empresa, colegio o entidad correspondiente los trámites de <strong>viáticos,
+      transporte, permisos o cualquier otro apoyo</strong> relacionado con tu asistencia al campamento.
+    </p>
+    <p style="margin-top:12px;">
+      Eso sí, campista: generar la carta <strong>no garantiza</strong> que se te acepte en el campamento, aun estas sujeto al proceso de selección, cuya respuesta se dara el 24 de Julio, este documento es para que adelantes tu gestión si lo consideras necesario,
+        la entidad puede no aprobar el
+      auxilio solicitado — cada organización tiene sus propios criterios. Pero como dicen por ahí,
+      "el que no arriesga, no gana", ¡así que nada se pierde con intentarlo! 🏕️✨
+    </p>
+    <p style="margin-top:12px;">
+      Si tu entidad te pide un documento más específico o con un formato distinto al que generamos
+      aquí, escríbenos directamente al <strong>314 659 1664</strong> y con gusto te colaboramos.
+    </p>
+  </div>
 
-            <div class="campo" data-campo="nombre">
-                <label for="nombre">Nombre completo</label>
-                <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan José Wallens Serna" autocomplete="name">
-                <div class="mensaje-error">Ingresa el nombre completo.</div>
-            </div>
+  <div class="cf-panel">
+    <h3><span class="cf-dot"></span>Datos del participante</h3>
 
-            <div class="fila-doble">
-                <div class="campo" data-campo="documento">
-                    <label for="documento">Documento de identidad</label>
-                    <input type="text" id="documento" name="documento" placeholder="Ej. 1111111111" inputmode="numeric">
-                    <div class="mensaje-error">Ingresa el número de documento.</div>
-                </div>
+    <form id="formCarta" novalidate>
 
-                <div class="campo" data-campo="municipio">
-                    <label for="municipio">Municipio de procedencia</label>
-                    <input type="text" id="municipio" name="municipio" placeholder="Ej. Bugalagrande">
-                    <div class="mensaje-error">Ingresa el municipio.</div>
-                </div>
-            </div>
+      <div class="cf-campo" data-campo="nombre">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan José" autocomplete="name">
+        <div class="cf-mensaje-error">Ingresa el nombre completo.</div>
+      </div>
 
-            <div class="campo" data-campo="organizacion">
-                <label for="organizacion">Organización</label>
-                <input type="text" id="organizacion" name="organizacion" placeholder="Ej. Subsistema de Participación Juvenil">
-                <div class="mensaje-error">Ingresa la organización.</div>
-            </div>
+      <div class="cf-fila-doble">
+        <div class="cf-campo" data-campo="documento">
+          <label for="documento">Documento de identidad</label>
+          <input type="text" id="documento" name="documento" placeholder="Ej. 1111111111" inputmode="numeric">
+          <div class="cf-mensaje-error">Ingresa el número de documento.</div>
+        </div>
 
-            <div class="campo" data-campo="rol">
-                <label for="rol">Rol</label>
-                <input type="text" id="rol" name="rol" placeholder="Ej. Consejero Municipal de Juventud">
-                <div class="mensaje-error">Ingresa el rol.</div>
-            </div>
+        <div class="cf-campo" data-campo="municipio">
+          <label for="municipio">Municipio de procedencia</label>
+          <input type="text" id="municipio" name="municipio" placeholder="Ej. Bugalagrande">
+          <div class="cf-mensaje-error">Ingresa el municipio.</div>
+        </div>
+      </div>
 
-            <div class="fila-doble">
-                <div class="campo" data-campo="entidad">
-                    <label for="entidad">Entidad destinataria</label>
-                    <input type="text" id="entidad" name="entidad" placeholder="Ej. Alcaldía Municipal de Bugalagrande">
-                    <div class="mensaje-error">Ingresa la entidad.</div>
-                </div>
+      <div class="cf-campo" data-campo="organizacion">
+        <label for="organizacion">Organización</label>
+        <input type="text" id="organizacion" name="organizacion" placeholder="Ej. Subsistema de Participación Juvenil">
+        <div class="cf-mensaje-error">Ingresa la organización.</div>
+      </div>
 
-                <div class="campo" data-campo="ciudad">
-                    <label for="ciudad">Ciudad</label>
-                    <input type="text" id="ciudad" name="ciudad" placeholder="Ej. Bugalagrande">
-                    <div class="mensaje-error">Ingresa la ciudad.</div>
-                </div>
-            </div>
+      <div class="cf-campo" data-campo="rol">
+        <label for="rol">Rol</label>
+        <input type="text" id="rol" name="rol" placeholder="Ej. Consejero Municipal de Juventud">
+        <div class="cf-mensaje-error">Ingresa el rol.</div>
+      </div>
 
-            <button type="submit" class="boton-generar" id="botonGenerar">
-                Generar y descargar PDF
-            </button>
+      <div class="cf-fila-doble">
+        <div class="cf-campo" data-campo="entidad">
+          <label for="entidad">Entidad destinataria</label>
+          <input type="text" id="entidad" name="entidad" placeholder="Ej. Alcaldía Municipal de Bugalagrande">
+          <div class="cf-mensaje-error">Ingresa la entidad.</div>
+        </div>
 
-            <div class="estado" id="estado"></div>
+        <div class="cf-campo" data-campo="ciudad">
+          <label for="ciudad">Ciudad</label>
+          <input type="text" id="ciudad" name="ciudad" placeholder="Ej. Bugalagrande">
+          <div class="cf-mensaje-error">Ingresa la ciudad.</div>
+        </div>
+      </div>
 
-        </form>
-    </div>
+      <button type="submit" class="cf-btn cf-btn-generar" id="botonGenerar" style="width:100%; justify-content:center;">
+        Generar y descargar PDF
+      </button>
 
-</div>
+      <div class="cf-estado" id="estado"></div>
+
+    </form>
+  </div>
+
+  <p style="text-align:center; font-size:13.5px; opacity:0.65; font-weight:500;">
+    ¿Necesitas un documento con un formato distinto al que generamos aquí?
+    Escríbenos al <strong>314 659 1664</strong> y lo revisamos contigo.
+  </p>
+
+</section>
+
+<footer class="cf-footer">
+  <div class="cf-social">
+    <a href="https://www.facebook.com/profile.php?id=61570267957827" target="_blank" rel="noopener">f</a>
+    <a href="https://www.instagram.com/bugalagrandejoven" target="_blank" rel="noopener">ig</a>
+  </div>
+  <p>Camp Fest 2026 · Bugalagrande, Valle del Cauca. Para emergencias o dudas, escribe al WhatsApp 323 326 7879.</p>
+</footer>
+
+<style>
+/* Estilos específicos del formulario, alineados a la identidad Memphis de Camp Fest */
+.cf-campo{ margin-bottom:20px; }
+.cf-campo label{
+  display:block; font-size:12.5px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.5px; margin-bottom:6px; color:var(--purple); font-family:'Fredoka', sans-serif;
+}
+.cf-campo input{
+  width:100%; padding:12px 14px; font-size:15px; font-family:'Poppins', sans-serif;
+  border:2px solid var(--ink); border-radius:10px; background:var(--cream); color:var(--ink);
+  transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.cf-campo input:focus{ outline:none; border-color:var(--cyan); background:var(--white); box-shadow:3px 3px 0 var(--ink); }
+.cf-campo input.cf-input-error{ border-color:var(--pink); background:#fff0f3; }
+.cf-campo .cf-mensaje-error{ display:none; font-size:12px; color:var(--pink); margin-top:5px; font-weight:600; }
+.cf-campo.cf-campo-invalido .cf-mensaje-error{ display:block; }
+
+.cf-fila-doble{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:520px){ .cf-fila-doble{ grid-template-columns:1fr; } }
+
+.cf-btn-generar{ border:none; cursor:pointer; font-size:15px; margin-top:6px; }
+.cf-btn-generar:disabled{ opacity:.6; cursor:not-allowed; }
+
+.cf-estado{
+  margin-top:16px; padding:12px 16px; border-radius:10px; font-size:14px; font-weight:600;
+  text-align:center; display:none; border:2px solid var(--ink); font-family:'Poppins', sans-serif;
+}
+.cf-estado.cf-estado-mostrar{ display:block; }
+.cf-estado.cf-estado-ok{ background:#e4fbf9; color:#0f7a67; border-color:var(--cyan); }
+.cf-estado.cf-estado-fallo{ background:#ffe6f1; color:#b4225f; border-color:var(--pink); }
+.cf-estado.cf-estado-cargando{ background:#fff7d6; color:#8a6d00; border-color:var(--yellow); }
+</style>
 
 <script>
 
@@ -339,20 +175,20 @@ const estado = document.getElementById("estado");
 const campos = ["nombre", "documento", "municipio", "organizacion", "rol", "entidad", "ciudad"];
 
 function mostrarEstado(tipo, texto){
-    estado.className = "estado mostrar " + tipo;
+    estado.className = "cf-estado cf-estado-mostrar cf-estado-" + tipo;
     estado.textContent = texto;
 }
 
 function ocultarEstado(){
-    estado.className = "estado";
+    estado.className = "cf-estado";
     estado.textContent = "";
 }
 
 function marcarError(campo, esInvalido){
     const contenedor = document.querySelector(`[data-campo="${campo}"]`);
     const input = document.getElementById(campo);
-    contenedor.classList.toggle("invalido", esInvalido);
-    input.classList.toggle("error", esInvalido);
+    contenedor.classList.toggle("cf-campo-invalido", esInvalido);
+    input.classList.toggle("cf-input-error", esInvalido);
 }
 
 function validar(datos){
