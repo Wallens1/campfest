@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generar Carta de Invitación · Camp Fest 2026</title>
+<style>
+
+:root{
+    --amarillo:#FFC93C;
+    --coral:#FF5D5D;
+    --teal:#1FB6A6;
+    --morado:#5B4B8A;
+    --tinta:#1A1A2E;
+    --crema:#FFF8EC;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+    margin:0;
+    font-family:'Poppins', 'Segoe UI', sans-serif;
+    background:var(--crema);
+    color:var(--tinta);
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+}
+
+/* ===== Formas Memphis decorativas ===== */
+
+.forma{
+    position:absolute;
+    z-index:0;
+    opacity:.9;
+}
+
+.forma.circulo{
+    width:90px; height:90px;
+    border-radius:50%;
+    background:var(--teal);
+    top:-30px; left:-30px;
+}
+
+.forma.triangulo{
+    width:0; height:0;
+    border-left:55px solid transparent;
+    border-right:55px solid transparent;
+    border-bottom:95px solid var(--coral);
+    top:60px; right:6%;
+    transform:rotate(15deg);
+}
+
+.forma.zigzag{
+    width:120px; height:40px;
+    background:
+        linear-gradient(135deg, var(--amarillo) 25%, transparent 25%) -10px 0,
+        linear-gradient(225deg, var(--amarillo) 25%, transparent 25%) -10px 0;
+    background-size:20px 20px;
+    bottom:5%; left:4%;
+}
+
+.forma.anillo{
+    width:70px; height:70px;
+    border-radius:50%;
+    border:14px solid var(--morado);
+    bottom:8%; right:8%;
+}
+
+/* ===== Layout principal ===== */
+
+.contenedor{
+    position:relative;
+    z-index:1;
+    max-width:640px;
+    margin:0 auto;
+    padding:56px 24px 80px;
+}
+
+.encabezado{
+    text-align:center;
+    margin-bottom:36px;
+}
+
+.encabezado .eyebrow{
+    display:inline-block;
+    background:var(--tinta);
+    color:var(--amarillo);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    padding:6px 16px;
+    border-radius:999px;
+    margin-bottom:16px;
+}
+
+.encabezado h1{
+    font-size:32px;
+    font-weight:800;
+    margin:0 0 8px;
+    line-height:1.15;
+}
+
+.encabezado h1 span{
+    color:var(--coral);
+}
+
+.encabezado p{
+    font-size:15px;
+    color:#555;
+    margin:0;
+}
+
+/* ===== Tarjeta del formulario ===== */
+
+.tarjeta{
+    background:white;
+    border:3px solid var(--tinta);
+    border-radius:20px;
+    padding:36px 32px;
+    box-shadow:8px 8px 0 var(--tinta);
+}
+
+.campo{
+    margin-bottom:20px;
+}
+
+.campo label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:6px;
+    color:var(--morado);
+}
+
+.campo input{
+    width:100%;
+    padding:12px 14px;
+    font-size:15px;
+    font-family:inherit;
+    border:2px solid #ddd;
+    border-radius:10px;
+    background:var(--crema);
+    color:var(--tinta);
+    transition:border-color .15s ease, background .15s ease;
+}
+
+.campo input:focus{
+    outline:none;
+    border-color:var(--teal);
+    background:white;
+}
+
+.campo input.error{
+    border-color:var(--coral);
+    background:#fff0f0;
+}
+
+.campo .mensaje-error{
+    display:none;
+    font-size:12.5px;
+    color:var(--coral);
+    margin-top:5px;
+    font-weight:600;
+}
+
+.campo.invalido .mensaje-error{
+    display:block;
+}
+
+.fila-doble{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+@media (max-width: 520px){
+    .fila-doble{
+        grid-template-columns:1fr;
+    }
+}
+
+.boton-generar{
+    width:100%;
+    margin-top:12px;
+    padding:16px;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:800;
+    letter-spacing:.3px;
+    color:white;
+    background:var(--coral);
+    border:3px solid var(--tinta);
+    border-radius:12px;
+    cursor:pointer;
+    box-shadow:5px 5px 0 var(--tinta);
+    transition:transform .12s ease, box-shadow .12s ease;
+}
+
+.boton-generar:hover{
+    transform:translate(-2px, -2px);
+    box-shadow:7px 7px 0 var(--tinta);
+}
+
+.boton-generar:active{
+    transform:translate(2px, 2px);
+    box-shadow:2px 2px 0 var(--tinta);
+}
+
+.boton-generar:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+    transform:none;
+    box-shadow:5px 5px 0 var(--tinta);
+}
+
+.estado{
+    margin-top:16px;
+    padding:12px 16px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    text-align:center;
+    display:none;
+}
+
+.estado.mostrar{
+    display:block;
+}
+
+.estado.ok{
+    background:#e2f7f2;
+    color:#0f7a67;
+    border:2px solid var(--teal);
+}
+
+.estado.fallo{
+    background:#ffeaea;
+    color:#c23b3b;
+    border:2px solid var(--coral);
+}
+
+.estado.cargando{
+    background:#fff8e6;
+    color:#8a6d00;
+    border:2px solid var(--amarillo);
+}
+
+</style>
+</head>
+<body>
+
+<div class="forma circulo"></div>
+<div class="forma triangulo"></div>
+<div class="forma zigzag"></div>
+<div class="forma anillo"></div>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+        <span class="eyebrow">Camp Fest 2026</span>
+        <h1>Generar carta de <span>invitación</span></h1>
+        <p>Completa los datos del participante para descargar la carta oficial en PDF.</p>
+    </div>
+
+    <div class="tarjeta">
+        <form id="formCarta" novalidate>
+
+            <div class="campo" data-campo="nombre">
+                <label for="nombre">Nombre completo</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan José Wallens Serna" autocomplete="name">
+                <div class="mensaje-error">Ingresa el nombre completo.</div>
+            </div>
+
+            <div class="fila-doble">
+                <div class="campo" data-campo="documento">
+                    <label for="documento">Documento de identidad</label>
+                    <input type="text" id="documento" name="documento" placeholder="Ej. 1111111111" inputmode="numeric">
+                    <div class="mensaje-error">Ingresa el número de documento.</div>
+                </div>
+
+                <div class="campo" data-campo="municipio">
+                    <label for="municipio">Municipio de procedencia</label>
+                    <input type="text" id="municipio" name="municipio" placeholder="Ej. Bugalagrande">
+                    <div class="mensaje-error">Ingresa el municipio.</div>
+                </div>
+            </div>
+
+            <div class="campo" data-campo="organizacion">
+                <label for="organizacion">Organización</label>
+                <input type="text" id="organizacion" name="organizacion" placeholder="Ej. Subsistema de Participación Juvenil">
+                <div class="mensaje-error">Ingresa la organización.</div>
+            </div>
+
+            <div class="campo" data-campo="rol">
+                <label for="rol">Rol</label>
+                <input type="text" id="rol" name="rol" placeholder="Ej. Consejero Municipal de Juventud">
+                <div class="mensaje-error">Ingresa el rol.</div>
+            </div>
+
+            <div class="fila-doble">
+                <div class="campo" data-campo="entidad">
+                    <label for="entidad">Entidad destinataria</label>
+                    <input type="text" id="entidad" name="entidad" placeholder="Ej. Alcaldía Municipal de Bugalagrande">
+                    <div class="mensaje-error">Ingresa la entidad.</div>
+                </div>
+
+                <div class="campo" data-campo="ciudad">
+                    <label for="ciudad">Ciudad</label>
+                    <input type="text" id="ciudad" name="ciudad" placeholder="Ej. Bugalagrande">
+                    <div class="mensaje-error">Ingresa la ciudad.</div>
+                </div>
+            </div>
+
+            <button type="submit" class="boton-generar" id="botonGenerar">
+                Generar y descargar PDF
+            </button>
+
+            <div class="estado" id="estado"></div>
+
+        </form>
+    </div>
+
+</div>
+
+<script>
+
+// Reemplaza esto con la URL real de tu backend en Railway
+const API_BASE = "https://campfest-api-production.up.railway.app";
+const ENDPOINT = `${API_BASE}/api/cartas/generar`;
+
+const form = document.getElementById("formCarta");
+const boton = document.getElementById("botonGenerar");
+const estado = document.getElementById("estado");
+
+const campos = ["nombre", "documento", "municipio", "organizacion", "rol", "entidad", "ciudad"];
+
+function mostrarEstado(tipo, texto){
+    estado.className = "estado mostrar " + tipo;
+    estado.textContent = texto;
+}
+
+function ocultarEstado(){
+    estado.className = "estado";
+    estado.textContent = "";
+}
+
+function marcarError(campo, esInvalido){
+    const contenedor = document.querySelector(`[data-campo="${campo}"]`);
+    const input = document.getElementById(campo);
+    contenedor.classList.toggle("invalido", esInvalido);
+    input.classList.toggle("error", esInvalido);
+}
+
+function validar(datos){
+    let valido = true;
+    campos.forEach((campo) => {
+        const vacio = !datos[campo] || datos[campo].trim() === "";
+        marcarError(campo, vacio);
+        if (vacio) valido = false;
+    });
+    return valido;
+}
+
+form.addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    ocultarEstado();
+
+    const datos = {};
+    campos.forEach((campo) => {
+        datos[campo] = document.getElementById(campo).value;
+    });
+
+    if (!validar(datos)){
+        mostrarEstado("fallo", "Por favor completa todos los campos antes de continuar.");
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = "Generando...";
+    mostrarEstado("cargando", "Generando el documento, un momento...");
+
+    try{
+
+        const respuesta = await fetch(ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datos)
+        });
+
+        if (!respuesta.ok){
+            let mensaje = "No se pudo generar la carta.";
+            try{
+                const cuerpo = await respuesta.json();
+                if (cuerpo.mensaje) mensaje = cuerpo.mensaje;
+            }catch(_e){}
+            throw new Error(mensaje);
+        }
+
+        const blob = await respuesta.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const enlace = document.createElement("a");
+        enlace.href = url;
+        enlace.download = `Carta-CampFest-${datos.nombre.replace(/\s+/g, "_")}.pdf`;
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
+
+        window.URL.revokeObjectURL(url);
+
+        mostrarEstado("ok", "¡Listo! Tu carta se descargó correctamente.");
+
+    }catch(error){
+
+        mostrarEstado("fallo", error.message || "Ocurrió un error al generar la carta.");
+
+    }finally{
+
+        boton.disabled = false;
+        boton.textContent = "Generar y descargar PDF";
+
+    }
+
+});
+
+campos.forEach((campo) => {
+    document.getElementById(campo).addEventListener("input", () => {
+        marcarError(campo, false);
+    });
+});
+
+</script>
+
+</body>
+</html>

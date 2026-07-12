@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificación de Carta · Camp Fest 2026</title>
+<style>
+
+:root{
+    --amarillo:#FFC93C;
+    --coral:#FF5D5D;
+    --teal:#1FB6A6;
+    --morado:#5B4B8A;
+    --tinta:#1A1A2E;
+    --crema:#FFF8EC;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+    margin:0;
+    font-family:'Poppins', 'Segoe UI', sans-serif;
+    background:var(--crema);
+    color:var(--tinta);
+    min-height:100vh;
+}
+
+.contenedor{
+    max-width:520px;
+    margin:0 auto;
+    padding:64px 24px 80px;
+}
+
+.encabezado{
+    text-align:center;
+    margin-bottom:32px;
+}
+
+.encabezado .eyebrow{
+    display:inline-block;
+    background:var(--tinta);
+    color:var(--teal);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    padding:6px 16px;
+    border-radius:999px;
+    margin-bottom:16px;
+}
+
+.encabezado h1{
+    font-size:28px;
+    font-weight:800;
+    margin:0 0 8px;
+}
+
+.encabezado p{
+    font-size:14px;
+    color:#555;
+    margin:0;
+}
+
+.tarjeta{
+    background:white;
+    border:3px solid var(--tinta);
+    border-radius:20px;
+    padding:32px;
+    box-shadow:8px 8px 0 var(--tinta);
+}
+
+.campo-busqueda{
+    display:flex;
+    gap:10px;
+    margin-bottom:8px;
+}
+
+.campo-busqueda input{
+    flex:1;
+    padding:12px 14px;
+    font-size:15px;
+    font-family:inherit;
+    border:2px solid #ddd;
+    border-radius:10px;
+    background:var(--crema);
+    text-transform:uppercase;
+    letter-spacing:1px;
+}
+
+.campo-busqueda input:focus{
+    outline:none;
+    border-color:var(--teal);
+    background:white;
+}
+
+.campo-busqueda button{
+    padding:12px 20px;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:800;
+    color:white;
+    background:var(--morado);
+    border:2px solid var(--tinta);
+    border-radius:10px;
+    cursor:pointer;
+    white-space:nowrap;
+}
+
+.campo-busqueda button:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+}
+
+.resultado{
+    margin-top:22px;
+    display:none;
+}
+
+.resultado.mostrar{
+    display:block;
+}
+
+.resultado.valido .caja{
+    border:2px solid var(--teal);
+    background:#e2f7f2;
+}
+
+.resultado.invalido .caja{
+    border:2px solid var(--coral);
+    background:#ffeaea;
+}
+
+.caja{
+    border-radius:14px;
+    padding:20px;
+}
+
+.resultado .estado-texto{
+    font-size:13px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:10px;
+}
+
+.resultado.valido .estado-texto{
+    color:#0f7a67;
+}
+
+.resultado.invalido .estado-texto{
+    color:#c23b3b;
+}
+
+.dato{
+    margin-bottom:8px;
+}
+
+.dato .etiqueta{
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    color:var(--morado);
+    display:block;
+    margin-bottom:2px;
+}
+
+.dato .valor{
+    font-size:17px;
+    font-weight:700;
+}
+
+.cargando-texto{
+    text-align:center;
+    font-size:14px;
+    color:#8a6d00;
+    margin-top:16px;
+    display:none;
+}
+
+.cargando-texto.mostrar{
+    display:block;
+}
+
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+        <span class="eyebrow">Camp Fest 2026</span>
+        <h1>Verificación de documento</h1>
+        <p>Ingresa el código de verificación que aparece en la carta.</p>
+    </div>
+
+    <div class="tarjeta">
+
+        <div class="campo-busqueda">
+            <input type="text" id="inputCodigo" placeholder="Ej. ABC123XYZ" autocomplete="off">
+            <button id="botonVerificar">Verificar</button>
+        </div>
+
+        <div class="cargando-texto" id="cargando">Consultando...</div>
+
+        <div class="resultado" id="resultado">
+            <div class="caja">
+                <div class="estado-texto" id="estadoTexto"></div>
+                <div id="datosParticipante"></div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+// Reemplaza esto con la URL real de tu backend en Railway
+const API_BASE = "https://campfest-api-production.up.railway.app";
+
+const input = document.getElementById("inputCodigo");
+const boton = document.getElementById("botonVerificar");
+const cargando = document.getElementById("cargando");
+const resultado = document.getElementById("resultado");
+const estadoTexto = document.getElementById("estadoTexto");
+const datosParticipante = document.getElementById("datosParticipante");
+
+async function verificar(codigo){
+
+    resultado.className = "resultado";
+    cargando.classList.add("mostrar");
+    boton.disabled = true;
+
+    try{
+
+        const respuesta = await fetch(
+            `${API_BASE}/api/cartas/verificar/${encodeURIComponent(codigo)}`
+        );
+
+        const cuerpo = await respuesta.json();
+
+        if (respuesta.ok && cuerpo.ok){
+
+            estadoTexto.textContent = "Documento válido";
+            datosParticipante.innerHTML = `
+                <div class="dato">
+                    <span class="etiqueta">Nombre</span>
+                    <span class="valor">${escaparHtml(cuerpo.nombre)}</span>
+                </div>
+                <div class="dato">
+                    <span class="etiqueta">Documento</span>
+                    <span class="valor">${escaparHtml(cuerpo.documento)}</span>
+                </div>
+            `;
+            resultado.className = "resultado mostrar valido";
+
+        } else {
+
+            estadoTexto.textContent = "No encontrado";
+            datosParticipante.innerHTML = `<p style="margin:0;">${escaparHtml(cuerpo.mensaje || "No se encontró ninguna carta con ese código.")}</p>`;
+            resultado.className = "resultado mostrar invalido";
+
+        }
+
+    }catch(error){
+
+        estadoTexto.textContent = "Error";
+        datosParticipante.innerHTML = `<p style="margin:0;">No se pudo consultar la verificación. Intenta de nuevo.</p>`;
+        resultado.className = "resultado mostrar invalido";
+
+    }finally{
+
+        cargando.classList.remove("mostrar");
+        boton.disabled = false;
+
+    }
+
+}
+
+function escaparHtml(texto){
+    const div = document.createElement("div");
+    div.textContent = texto;
+    return div.innerHTML;
+}
+
+boton.addEventListener("click", () => {
+    const codigo = input.value.trim();
+    if (codigo) verificar(codigo);
+});
+
+input.addEventListener("keydown", (evento) => {
+    if (evento.key === "Enter"){
+        const codigo = input.value.trim();
+        if (codigo) verificar(codigo);
+    }
+});
+
+// Si llegan con ?codigo=XXXX en la URL (por ejemplo desde el QR), verificar automáticamente
+const parametros = new URLSearchParams(window.location.search);
+const codigoUrl = parametros.get("codigo");
+if (codigoUrl){
+    input.value = codigoUrl;
+    verificar(codigoUrl);
+}
+
+</script>
+
+</body>
+</html>
