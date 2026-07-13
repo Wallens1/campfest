@@ -73,7 +73,9 @@ body{
     color:var(--morado);
 }
 
-.campo input{
+.campo input,
+.campo select,
+.campo textarea{
     width:100%;
     padding:12px 14px;
     font-size:15px;
@@ -83,7 +85,11 @@ body{
     background:var(--crema);
 }
 
-.campo input:focus{
+.campo textarea{ resize:vertical; min-height:70px; }
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus{
     outline:none;
     border-color:var(--teal);
     background:white;
@@ -399,3 +405,90 @@ body{
     font-size:12px;
     color:#888;
 }
+
+/* ===== BADGES DE PRIORIDAD / ESTADO (incidentes) ===== */
+
+.prioridad-badge, .estado-badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:10.5px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    border:2px solid var(--tinta);
+    white-space:nowrap;
+}
+
+.prioridad-badge.baja{ background:#e2f7f2; color:#0f7a67; }
+.prioridad-badge.media{ background:#fff4d9; color:#8a6400; }
+.prioridad-badge.alta{ background:#ffe3d9; color:#c2521f; }
+.prioridad-badge.critica{ background:#ffdede; color:#a3151c; }
+
+.estado-badge{ background:var(--crema); }
+.estado-badge.solucionado, .estado-badge.cerrado{ background:#e2f7ea; color:#0f7a3d; }
+.estado-badge.escalado{ background:#ffdede; color:#a3151c; }
+
+/* ===== REPORTE DE INCIDENTES ===== */
+
+.tarjeta-incidente{
+    background:white;
+    border:3px solid var(--tinta);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:8px 8px 0 var(--tinta);
+    margin-bottom:20px;
+}
+
+.lista-incidentes-mios{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.incidente-mini{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:10px 14px;
+    background:var(--crema);
+    border-radius:10px;
+    font-size:13px;
+    flex-wrap:wrap;
+}
+
+.incidente-mini .codigo{ font-weight:800; }
+.incidente-mini .descripcion{ color:#666; font-size:12px; }
+
+/* ===== GRID DE CARPAS ===== */
+
+.grid-carpas{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
+    gap:10px;
+}
+
+.carpa-card{
+    border:2px solid #ddd;
+    border-radius:10px;
+    padding:10px;
+    text-align:center;
+    cursor:pointer;
+    background:white;
+    transition:border-color .12s ease;
+}
+
+.carpa-card:hover{ border-color:var(--teal); }
+
+.carpa-card .nombre{ font-weight:700; font-size:13px; }
+.carpa-card .ocupacion{ font-size:11.5px; color:#777; margin-top:2px; }
+
+.carpa-card.seleccionada{
+    border-color:var(--morado);
+    background:#f1eef8;
+    box-shadow:3px 3px 0 var(--morado);
+}
+
+.carpa-card.llena .ocupacion{ color:var(--coral); font-weight:700; }
+.carpa-card.llena{ border-color:var(--coral); }

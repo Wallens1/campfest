@@ -213,22 +213,57 @@
         </div>
     </div>
 
-    <!-- Configuración de carpas (solo administrador) -->
-    <div class="tarjeta oculto" id="panelAdminCarpas">
-        <h3>Configurar capacidad de carpas</h3>
-        <form id="formCapacidadCarpa" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
-            <div class="campo" style="margin-bottom:0;">
-                <label for="inputNombreCarpa">Carpa</label>
-                <input type="text" id="inputNombreCarpa" placeholder="Ej: Carpa 4" required>
+    <!-- Administración (solo administrador) -->
+    <div class="oculto" id="panelAdministracion">
+
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Configurar capacidad de carpas</h3>
+            <form id="formCapacidadCarpa" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="inputNombreCarpa">Carpa</label>
+                    <input type="text" id="inputNombreCarpa" placeholder="Ej: Carpa 4" required>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="inputCapacidadCarpa">Capacidad</label>
+                    <input type="number" id="inputCapacidadCarpa" min="1" required>
+                </div>
+                <button type="submit" class="boton pequeno">Guardar</button>
+            </form>
+            <div class="mensaje" id="mensajeCarpa"></div>
+            <div class="lista-conteo" id="listaCapacidadCarpas" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Zonas de incidentes</h3>
+            <form id="formZona" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                <div class="campo" style="margin-bottom:0; flex:1;">
+                    <label for="inputNombreZona">Nueva zona</label>
+                    <input type="text" id="inputNombreZona" placeholder="Ej: Cancha de fútbol" required>
+                </div>
+                <button type="submit" class="boton pequeno">Agregar</button>
+            </form>
+            <div class="mensaje" id="mensajeZona"></div>
+            <div class="lista-conteo" id="listaZonas" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Usuarios (control y logística)</h3>
+            <div class="tabla-wrap">
+                <table class="tabla-participantes">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Rol</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="filasUsuarios"></tbody>
+                </table>
             </div>
-            <div class="campo" style="margin-bottom:0;">
-                <label for="inputCapacidadCarpa">Capacidad</label>
-                <input type="number" id="inputCapacidadCarpa" min="1" required>
-            </div>
-            <button type="submit" class="boton pequeno">Guardar</button>
-        </form>
-        <div class="mensaje" id="mensajeCarpa"></div>
-        <div class="lista-conteo" id="listaCapacidadCarpas" style="margin-top:12px;"></div>
+            <div class="mensaje" id="mensajeUsuarios"></div>
+        </div>
+
     </div>
 
 </div>

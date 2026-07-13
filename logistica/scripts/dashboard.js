@@ -8,7 +8,23 @@ const SUPABASE_URL = "https://lazarmjxajhdjvuhtzcl.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhemFybWp4YWpoZGp2dWh0emNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MDY4MzQsImV4cCI6MjA5OTM4MjgzNH0.j3muJDelPhZibma-yeuIhvjrvQ01e7DN0B-4UaYyCFM";
 
 
+const POLLING_MS = 7000;
+
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const CATEGORIAS = [
+    "inconveniente", "queja", "reclamo", "sugerencia", "accidente",
+    "emergencia_medica", "convivencia", "disciplina", "logistica",
+    "alimentacion", "objetos_perdidos", "seguridad", "otro"
+];
+
+const PRIORIDADES = ["baja", "media", "alta", "critica"];
+
+function humanizar(texto) {
+    if (!texto) return "—";
+    const limpio = String(texto).replace(/_/g, " ");
+    return limpio.charAt(0).toUpperCase() + limpio.slice(1);
+}
 
 // ==========================
 // Elementos
@@ -37,7 +53,7 @@ const fichaDocumento = document.getElementById("fichaDocumento");
 const gridInfo = document.getElementById("gridInfo");
 const bloqueIngreso = document.getElementById("bloqueIngreso");
 const formAsignacion = document.getElementById("formAsignacion");
-const inputCarpa = document.getElementById("inputCarpa");
+const gridCarpas = document.getElementById("gridCarpas");
 const checkboxLider = document.getElementById("checkboxLider");
 const tituloAlimentacion = document.getElementById("tituloAlimentacion");
 const checklistAlimentacion = document.getElementById("checklistAlimentacion");
@@ -46,6 +62,8 @@ const mensajeFicha = document.getElementById("mensajeFicha");
 
 let campoBusquedaActivo = "codigo";
 let participanteActualId = null;
+let carpaSeleccionada = null;
+let intervaloPolling = null;
 
 // ==========================
 // Utilidades
@@ -73,7 +91,7 @@ async function peticionApi(ruta, opciones = {}) {
     const { data: sesion } = await supabaseClient.auth.getSession();
     const token = sesion?.session?.access_token;
 
-    const respuesta = await fetch(`${API_BASE_URL}${ruta}`, {
+    const respuesta = await fetch(`${API_BASE}${ruta}`, {
         ...opciones,
         headers: {
             "Content-Type": "application/json",
@@ -111,12 +129,26 @@ async function verificarSesion() {
 function mostrarLogin() {
     pantallaLogin.classList.remove("oculto");
     pantallaPanel.classList.add("oculto");
+    if (intervaloPolling) clearInterval(intervaloPolling);
 }
 
 function mostrarPanel(sesion) {
     pantallaLogin.classList.add("oculto");
     pantallaPanel.classList.remove("oculto");
     usuarioActual.textContent = sesion.user.email;
+
+    llenarSelect(document.getElementById("inputCategoria"), CATEGORIAS, "Selecciona categoría");
+    llenarSelect(document.getElementById("inputPrioridad"), PRIORIDADES, "Selecciona prioridad");
+    cargarZonas();
+    cargarCarpas();
+
+    cargarMisIncidentes();
+    intervaloPolling = setInterval(cargarMisIncidentes, POLLING_MS);
+}
+
+function llenarSelect(select, valores, etiquetaTodos) {
+    select.innerHTML = `<option value="">${etiquetaTodos}</option>` +
+        valores.map((v) => `<option value="${v}">${humanizar(v)}</option>`).join("");
 }
 
 formLogin.addEventListener("submit", async (evento) => {
@@ -259,8 +291,11 @@ function renderizarFicha(datos) {
     renderizarInfo(participante);
     renderizarIngreso(participante);
 
-    inputCarpa.value = participante.carpa_asignada || "";
+    carpaSeleccionada = participante.carpa_asignada || null;
+    renderizarGridCarpas();
     checkboxLider.checked = !!participante.es_lider_carpa;
+
+    actualizarMensajeParticipanteVinculado();
 
     tituloAlimentacion.textContent = `Alimentación (${entregasRealizadas}/${totalServicios})`;
     renderizarAlimentacion(servicios, entregas);
@@ -340,10 +375,8 @@ formAsignacion.addEventListener("submit", async (evento) => {
 
     evento.preventDefault();
 
-    const carpa = inputCarpa.value.trim();
-
-    if (!carpa) {
-        mostrarMensaje(mensajeFicha, "Debes indicar la carpa asignada", "fallo");
+    if (!carpaSeleccionada) {
+        mostrarMensaje(mensajeFicha, "Selecciona una carpa en la grid", "fallo");
         return;
     }
 
@@ -351,7 +384,7 @@ formAsignacion.addEventListener("submit", async (evento) => {
 
         await peticionApi(`/api/logistica/participante/${participanteActualId}/asignacion`, {
             method: "POST",
-            body: JSON.stringify({ carpa, esLiderCarpa: checkboxLider.checked })
+            body: JSON.stringify({ carpa: carpaSeleccionada, esLiderCarpa: checkboxLider.checked })
         });
 
         mostrarMensaje(mensajeFicha, "Asignación guardada correctamente", "ok");
@@ -362,6 +395,160 @@ formAsignacion.addEventListener("submit", async (evento) => {
     }
 
 });
+
+// ==========================
+// Grid de carpas (definidas por el admin, con ocupación en vivo)
+// ==========================
+
+let carpasDisponibles = [];
+
+async function cargarCarpas() {
+
+    try {
+        const { carpas } = await peticionApi("/api/centro-control/carpas");
+        carpasDisponibles = carpas;
+        renderizarGridCarpas();
+    } catch (error) {
+        gridCarpas.innerHTML = `<p class="detalle">${error.message}</p>`;
+    }
+
+}
+
+function renderizarGridCarpas() {
+
+    if (carpasDisponibles.length === 0) {
+        gridCarpas.innerHTML = `<p class="detalle">El administrador todavía no ha configurado carpas.</p>`;
+        return;
+    }
+
+    gridCarpas.innerHTML = carpasDisponibles.map((carpa) => {
+
+        const esSeleccionada = carpa.nombre === carpaSeleccionada;
+        const llena = carpa.ocupacion >= carpa.capacidad && !esSeleccionada;
+
+        return `
+            <div class="carpa-card ${esSeleccionada ? "seleccionada" : ""} ${llena ? "llena" : ""}" data-nombre="${carpa.nombre}">
+                <div class="nombre">${carpa.nombre}</div>
+                <div class="ocupacion">${carpa.ocupacion}/${carpa.capacidad}</div>
+            </div>
+        `;
+
+    }).join("");
+
+    gridCarpas.querySelectorAll(".carpa-card").forEach((card) => {
+
+        card.addEventListener("click", () => {
+            carpaSeleccionada = card.dataset.nombre;
+            renderizarGridCarpas();
+        });
+
+    });
+
+}
+
+// ==========================
+// Reportar incidente
+// ==========================
+
+const btnAbrirFormIncidente = document.getElementById("btnAbrirFormIncidente");
+const tarjetaFormIncidente = document.getElementById("tarjetaFormIncidente");
+const formIncidente = document.getElementById("formIncidente");
+const mensajeIncidente = document.getElementById("mensajeIncidente");
+
+btnAbrirFormIncidente.addEventListener("click", () => {
+    tarjetaFormIncidente.classList.toggle("oculto");
+    actualizarMensajeParticipanteVinculado();
+    tarjetaFormIncidente.scrollIntoView({ behavior: "smooth" });
+});
+
+function actualizarMensajeParticipanteVinculado() {
+
+    const elemento = document.getElementById("mensajeParticipanteVinculado");
+
+    if (tarjetaFormIncidente.classList.contains("oculto")) return;
+
+    if (participanteActualId) {
+        mostrarMensaje(elemento, `Se vinculará a: ${fichaNombre.textContent}`, "ok");
+    } else {
+        mostrarMensaje(elemento, "Sin participante vinculado (incidente general)", "ok");
+    }
+
+}
+
+async function cargarZonas() {
+
+    try {
+        const { zonas } = await peticionApi("/api/centro-control/zonas");
+        const select = document.getElementById("inputZona");
+        select.innerHTML = `<option value="">Selecciona zona</option>` +
+            zonas.map((z) => `<option value="${z.nombre}">${humanizar(z.nombre)}</option>`).join("");
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+formIncidente.addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    ocultarMensaje(mensajeIncidente);
+
+    try {
+
+        await peticionApi("/api/incidentes", {
+            method: "POST",
+            body: JSON.stringify({
+                categoria: document.getElementById("inputCategoria").value,
+                descripcion: document.getElementById("inputDescripcionIncidente").value.trim(),
+                prioridad: document.getElementById("inputPrioridad").value,
+                zona: document.getElementById("inputZona").value,
+                lugar: document.getElementById("inputLugar").value.trim(),
+                participanteId: participanteActualId
+            })
+        });
+
+        mostrarMensaje(mensajeIncidente, "Incidente enviado al Centro de Control", "ok");
+        formIncidente.reset();
+        await cargarMisIncidentes();
+
+        setTimeout(() => {
+            tarjetaFormIncidente.classList.add("oculto");
+            ocultarMensaje(mensajeIncidente);
+        }, 1500);
+
+    } catch (error) {
+        mostrarMensaje(mensajeIncidente, error.message, "fallo");
+    }
+
+});
+
+async function cargarMisIncidentes() {
+
+    try {
+
+        const { incidentes } = await peticionApi("/api/incidentes/mios");
+        const contenedor = document.getElementById("listaMisIncidentes");
+
+        contenedor.innerHTML = incidentes.length === 0
+            ? `<p class="detalle">Todavía no has reportado ningún incidente.</p>`
+            : incidentes.map((incidente) => `
+                <div class="incidente-mini">
+                    <div>
+                        <span class="codigo">${incidente.codigo}</span>
+                        <div class="descripcion">${incidente.descripcion}</div>
+                    </div>
+                    <div>
+                        <span class="prioridad-badge ${incidente.prioridad}">${humanizar(incidente.prioridad)}</span>
+                        <span class="estado-badge ${incidente.estado}">${humanizar(incidente.estado)}</span>
+                    </div>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
 
 function renderizarAlimentacion(servicios, entregas) {
 

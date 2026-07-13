@@ -39,8 +39,45 @@
         <span class="marca">Camp Fest · Logística</span>
         <div>
             <span class="usuario-actual" id="usuarioActual"></span>
+            <button class="boton pequeno secundario" id="btnAbrirFormIncidente">Reportar incidente</button>
             <button class="boton pequeno" id="btnCerrarSesion">Cerrar sesión</button>
         </div>
+    </div>
+
+    <div class="tarjeta-incidente oculto" id="tarjetaFormIncidente">
+        <h3 style="margin-top:0;">Reportar incidente</h3>
+        <form id="formIncidente">
+            <div class="grid-info" style="margin-bottom:0;">
+                <div class="campo">
+                    <label for="inputCategoria">Categoría</label>
+                    <select id="inputCategoria" required></select>
+                </div>
+                <div class="campo">
+                    <label for="inputPrioridad">Prioridad</label>
+                    <select id="inputPrioridad" required></select>
+                </div>
+                <div class="campo">
+                    <label for="inputZona">Zona</label>
+                    <select id="inputZona"></select>
+                </div>
+                <div class="campo">
+                    <label for="inputLugar">Lugar específico</label>
+                    <input type="text" id="inputLugar" placeholder="Ej: Carpa 4">
+                </div>
+            </div>
+            <div class="campo">
+                <label for="inputDescripcionIncidente">Descripción</label>
+                <textarea id="inputDescripcionIncidente" required></textarea>
+            </div>
+            <div class="mensaje" id="mensajeParticipanteVinculado"></div>
+            <button type="submit" class="boton pequeno">Enviar al Centro de Control</button>
+        </form>
+        <div class="mensaje" id="mensajeIncidente"></div>
+    </div>
+
+    <div class="tarjeta-incidente" id="tarjetaMisIncidentes">
+        <h3 style="margin-top:0;">Mis incidentes reportados</h3>
+        <div class="lista-incidentes-mios" id="listaMisIncidentes"></div>
     </div>
 
     <div class="tabs-busqueda">
@@ -73,11 +110,8 @@
 
         <div class="seccion">
             <h3>Asignación de carpa</h3>
+            <div class="grid-carpas" id="gridCarpas" style="margin-bottom:14px;"></div>
             <form class="form-asignacion" id="formAsignacion">
-                <div class="campo">
-                    <label for="inputCarpa">Carpa</label>
-                    <input type="text" id="inputCarpa" placeholder="Ej: Carpa 4">
-                </div>
                 <label class="checkbox-lider">
                     <input type="checkbox" id="checkboxLider">
                     Líder de carpa

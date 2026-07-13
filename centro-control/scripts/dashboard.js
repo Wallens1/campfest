@@ -19,10 +19,7 @@ const CATEGORIAS = [
 
 const PRIORIDADES = ["baja", "media", "alta", "critica"];
 
-const ZONAS = [
-    "recepcion", "comedor", "escenario", "carpas",
-    "enfermeria", "banos", "zona_deportiva", "otra"
-];
+const ROLES = ["admin", "control", "logistica"];
 
 const ESTADOS = [
     "en_atencion", "pendiente_seguimiento", "escalado", "solucionado", "cerrado"
@@ -63,6 +60,28 @@ function minutosHasta(fechaIso) {
 function llenarSelect(select, valores, etiquetaTodos) {
     select.innerHTML = `<option value="">${etiquetaTodos}</option>` +
         valores.map((v) => `<option value="${v}">${humanizar(v)}</option>`).join("");
+}
+
+let zonasDisponibles = [];
+
+async function cargarZonasSelects() {
+
+    try {
+
+        const { zonas } = await peticionApi("/api/centro-control/zonas");
+        zonasDisponibles = zonas;
+
+        const nombres = zonas.map((z) => z.nombre);
+
+        llenarSelect(document.getElementById("inputZona"), nombres, "Selecciona zona");
+
+        document.getElementById("filtroZona").innerHTML = `<option value="">Todas las zonas</option>` +
+            nombres.map((n) => `<option value="${n}">${humanizar(n)}</option>`).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
 }
 
 async function peticionApi(ruta, opciones = {}) {
@@ -183,22 +202,25 @@ async function iniciarDashboard() {
     perfilActual = usuario;
     usuarioActual.textContent = `${usuario.nombre} · ${humanizar(usuario.rol)}`;
 
-    document.getElementById("panelAdminCarpas").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("panelAdministracion").classList.toggle("oculto", usuario.rol !== "admin");
 
     llenarSelect(document.getElementById("inputCategoria"), CATEGORIAS, "Selecciona categoría");
     llenarSelect(document.getElementById("inputPrioridad"), PRIORIDADES, "Selecciona prioridad");
-    llenarSelect(document.getElementById("inputZona"), ZONAS, "Selecciona zona");
+    await cargarZonasSelects();
 
     document.getElementById("filtroEstado").innerHTML += ESTADOS.map((e) => `<option value="${e}">${humanizar(e)}</option>`).join("");
     document.getElementById("filtroPrioridad").innerHTML += PRIORIDADES.map((p) => `<option value="${p}">${humanizar(p)}</option>`).join("");
     document.getElementById("filtroCategoria").innerHTML += CATEGORIAS.map((c) => `<option value="${c}">${humanizar(c)}</option>`).join("");
-    document.getElementById("filtroZona").innerHTML += ZONAS.map((z) => `<option value="${z}">${humanizar(z)}</option>`).join("");
 
     const { operadores } = await peticionApi("/api/centro-control/operadores");
     mapaOperadores = Object.fromEntries(operadores.map((o) => [o.id, o.nombre]));
     document.getElementById("filtroResponsable").innerHTML += operadores.map((o) => `<option value="${o.id}">${o.nombre}</option>`).join("");
 
-    if (usuario.rol === "admin") cargarCapacidadCarpas();
+    if (usuario.rol === "admin") {
+        cargarCapacidadCarpas();
+        cargarZonasAdmin();
+        cargarUsuariosAdmin();
+    }
 
     await actualizarTodo();
 
@@ -938,12 +960,33 @@ async function cargarCapacidadCarpas() {
             : carpas.map((c) => `
                 <div class="fila-conteo">
                     <span class="etiqueta">${c.nombre}</span>
-                    <span class="valor">Capacidad: ${c.capacidad}</span>
+                    <span class="valor">
+                        Capacidad: ${c.capacidad}
+                        <button class="boton pequeno secundario" data-eliminar-carpa="${c.nombre}" style="margin-left:8px;">Eliminar</button>
+                    </span>
                 </div>
             `).join("");
 
+        contenedor.querySelectorAll("[data-eliminar-carpa]").forEach((boton) => {
+            boton.addEventListener("click", () => eliminarCarpa(boton.dataset.eliminarCarpa));
+        });
+
     } catch (error) {
         console.error(error);
+    }
+
+}
+
+async function eliminarCarpa(nombre) {
+
+    if (!confirm(`¿Eliminar la carpa "${nombre}"?`)) return;
+
+    try {
+        await peticionApi(`/api/centro-control/carpas/${encodeURIComponent(nombre)}`, { method: "DELETE" });
+        await cargarCapacidadCarpas();
+        await cargarPanel();
+    } catch (error) {
+        alert(error.message);
     }
 
 }
@@ -974,6 +1017,145 @@ document.getElementById("formCapacidadCarpa").addEventListener("submit", async (
     }
 
 });
+
+// ==========================
+// Zonas (admin)
+// ==========================
+
+async function cargarZonasAdmin() {
+
+    try {
+
+        const { zonas } = await peticionApi("/api/centro-control/zonas");
+        const contenedor = document.getElementById("listaZonas");
+
+        contenedor.innerHTML = zonas.length === 0
+            ? `<p class="detalle">Todavía no hay zonas configuradas.</p>`
+            : zonas.map((z) => `
+                <div class="fila-conteo">
+                    <span class="etiqueta">${humanizar(z.nombre)}</span>
+                    <span class="valor">
+                        <button class="boton pequeno secundario" data-eliminar-zona="${z.nombre}">Eliminar</button>
+                    </span>
+                </div>
+            `).join("");
+
+        contenedor.querySelectorAll("[data-eliminar-zona]").forEach((boton) => {
+            boton.addEventListener("click", () => eliminarZona(boton.dataset.eliminarZona));
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function eliminarZona(nombre) {
+
+    if (!confirm(`¿Eliminar la zona "${humanizar(nombre)}"?`)) return;
+
+    try {
+        await peticionApi(`/api/centro-control/zonas/${encodeURIComponent(nombre)}`, { method: "DELETE" });
+        await cargarZonasAdmin();
+        await cargarZonasSelects();
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+document.getElementById("formZona").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+
+    const mensaje = document.getElementById("mensajeZona");
+    const input = document.getElementById("inputNombreZona");
+
+    try {
+
+        await peticionApi("/api/centro-control/zonas", {
+            method: "POST",
+            body: JSON.stringify({ nombre: input.value.trim().toLowerCase().replace(/\s+/g, "_") })
+        });
+
+        mostrarMensaje(mensaje, "Zona agregada correctamente", "ok");
+        input.value = "";
+        await cargarZonasAdmin();
+        await cargarZonasSelects();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+// ==========================
+// Usuarios (admin)
+// ==========================
+
+async function cargarUsuariosAdmin() {
+
+    try {
+
+        const { usuarios } = await peticionApi("/api/centro-control/usuarios");
+        const cuerpo = document.getElementById("filasUsuarios");
+
+        cuerpo.innerHTML = usuarios.map((u) => `
+            <tr data-id="${u.id}">
+                <td><input type="text" class="input-nombre-usuario" value="${u.nombre}" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px; font-family:inherit;"></td>
+                <td>${u.email || "—"}</td>
+                <td>
+                    <select class="select-rol-usuario" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px; font-family:inherit;">
+                        ${ROLES.map((r) => `<option value="${r}" ${r === u.rol ? "selected" : ""}>${humanizar(r)}</option>`).join("")}
+                    </select>
+                </td>
+                <td><button class="boton pequeno" data-guardar-usuario="${u.id}">Guardar</button></td>
+            </tr>
+        `).join("");
+
+        cuerpo.querySelectorAll("[data-guardar-usuario]").forEach((boton) => {
+
+            boton.addEventListener("click", () => {
+                const fila = boton.closest("tr");
+                guardarUsuario(
+                    boton.dataset.guardarUsuario,
+                    fila.querySelector(".input-nombre-usuario").value.trim(),
+                    fila.querySelector(".select-rol-usuario").value
+                );
+            });
+
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function guardarUsuario(id, nombre, rol) {
+
+    const mensaje = document.getElementById("mensajeUsuarios");
+
+    try {
+
+        await peticionApi(`/api/centro-control/usuarios/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ nombre, rol })
+        });
+
+        mostrarMensaje(mensaje, "Usuario actualizado correctamente", "ok");
+
+        if (id === perfilActual?.id) {
+            perfilActual.nombre = nombre;
+            perfilActual.rol = rol;
+            usuarioActual.textContent = `${nombre} · ${humanizar(rol)}`;
+        }
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+}
 
 // ==========================
 // Arranque
