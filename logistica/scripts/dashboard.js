@@ -521,6 +521,41 @@ async function cargarZonas() {
 
 }
 
+document.getElementById("inputCategoria").addEventListener("change", async (evento) => {
+
+    const contenedor = document.getElementById("responsablesCategoria");
+    const categoria = evento.target.value;
+
+    if (!categoria) {
+        contenedor.classList.add("oculto");
+        contenedor.innerHTML = "";
+        return;
+    }
+
+    try {
+
+        const { responsables } = await peticionApi(`/api/centro-control/responsables?categoria=${encodeURIComponent(categoria)}`);
+
+        contenedor.classList.remove("oculto");
+
+        contenedor.innerHTML = responsables.length === 0
+            ? `<p class="detalle">Ninguna rama tiene asignada esta categoría todavía.</p>`
+            : responsables.map((r) => `
+                <div class="incidente-mini">
+                    <div>
+                        <span class="codigo">${r.rol_en_rama === "lider" ? "⭐" : "•"} ${r.nombre}</span>
+                        <div class="descripcion">${r.rama_nombre}</div>
+                    </div>
+                    <div class="descripcion">${r.telefono || "sin teléfono"} · ${r.zona ? humanizar(r.zona) : "sin zona"}</div>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
+});
+
 formIncidente.addEventListener("submit", async (evento) => {
 
     evento.preventDefault();

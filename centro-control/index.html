@@ -110,6 +110,7 @@
                 </div>
             </div>
             <div class="mensaje" id="mensajeParticipanteIncidente"></div>
+            <div class="lista-conteo oculto" id="responsablesCategoria" style="margin-bottom:14px;"></div>
             <div class="campo">
                 <label for="inputDescripcion">Descripción</label>
                 <textarea id="inputDescripcion" required></textarea>
@@ -264,6 +265,28 @@
         </div>
 
         <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Ramas de logística</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                Ej: Alimentación, Carpas, Emergencias. Cada rama queda asociada a las categorías
+                de incidente que atiende, para poder mostrar sus responsables cuando llegue ese
+                tipo de problema.
+            </p>
+            <form id="formRama">
+                <div class="campo">
+                    <label for="inputNombreRama">Nombre de la rama</label>
+                    <input type="text" id="inputNombreRama" placeholder="Ej: Alimentación" required>
+                </div>
+                <div class="campo">
+                    <label>Categorías que atiende</label>
+                    <div id="categoriasRama" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+                </div>
+                <button type="submit" class="boton pequeno">Guardar rama</button>
+            </form>
+            <div class="mensaje" id="mensajeRama"></div>
+            <div class="lista-conteo" id="listaRamas" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Usuarios (control y logística)</h3>
             <div class="tabla-wrap">
                 <table class="tabla-participantes">
@@ -272,6 +295,10 @@
                             <th>Nombre</th>
                             <th>Correo</th>
                             <th>Rol</th>
+                            <th>Teléfono</th>
+                            <th>Rama</th>
+                            <th>Rol en la rama</th>
+                            <th>Zona</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -295,6 +322,11 @@
     <p id="detalleIncidenteDescripcion"></p>
 
     <div class="grid-info" id="detalleIncidenteInfo"></div>
+
+    <div class="seccion">
+        <h3>Responsables de esta categoría</h3>
+        <div class="lista-conteo" id="detalleResponsablesCategoria"></div>
+    </div>
 
     <div class="seccion">
         <h3>Bitácora</h3>

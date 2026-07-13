@@ -164,6 +164,41 @@ let perfilActual = null;
 let intervaloPolling = null;
 let panelDetalleAbierto = false;
 let mapaOperadores = {};
+let ramasDisponibles = [];
+
+async function cargarResponsablesPorCategoria(categoria, contenedor) {
+
+    if (!categoria) {
+        contenedor.classList.add("oculto");
+        contenedor.innerHTML = "";
+        return;
+    }
+
+    try {
+
+        const { responsables } = await peticionApi(`/api/centro-control/responsables?categoria=${encodeURIComponent(categoria)}`);
+
+        contenedor.classList.remove("oculto");
+
+        if (responsables.length === 0) {
+            contenedor.innerHTML = `<p class="detalle">Ninguna rama tiene asignada esta categoría todavía.</p>`;
+            return;
+        }
+
+        contenedor.innerHTML = responsables.map((r) => `
+            <div class="fila-conteo">
+                <span class="etiqueta">
+                    ${r.rol_en_rama === "lider" ? "⭐" : "•"} ${r.nombre} · ${r.rama_nombre}
+                </span>
+                <span class="valor">${r.telefono || "sin teléfono"} · ${r.zona ? humanizar(r.zona) : "sin zona"}</span>
+            </div>
+        `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
 
 // ==========================
 // Sesión
@@ -238,6 +273,7 @@ async function iniciarDashboard() {
     if (usuario.rol === "admin") {
         cargarCapacidadCarpas();
         cargarZonasAdmin();
+        await cargarRamasAdmin();
         cargarUsuariosAdmin();
     }
 
@@ -593,6 +629,10 @@ btnAbrirFormIncidente.addEventListener("click", () => {
     tarjetaFormIncidente.scrollIntoView({ behavior: "smooth" });
 });
 
+document.getElementById("inputCategoria").addEventListener("change", (evento) => {
+    cargarResponsablesPorCategoria(evento.target.value, document.getElementById("responsablesCategoria"));
+});
+
 document.getElementById("inputCodigoParticipante").addEventListener("blur", async (evento) => {
 
     const codigo = evento.target.value.trim();
@@ -846,6 +886,7 @@ async function abrirIncidente(id) {
         `).join("");
 
         renderizarAccionesIncidente(incidente);
+        cargarResponsablesPorCategoria(incidente.categoria, document.getElementById("detalleResponsablesCategoria"));
         ocultarMensaje(document.getElementById("mensajeDetalleIncidente"));
 
     } catch (error) {
@@ -1154,38 +1195,117 @@ document.getElementById("formZona").addEventListener("submit", async (evento) =>
 });
 
 // ==========================
-// Usuarios (admin)
+// Ramas de logística (admin)
 // ==========================
 
-async function cargarUsuariosAdmin() {
+function renderizarCheckboxesCategorias(contenedor, seleccionadas, prefijo) {
+
+    contenedor.innerHTML = CATEGORIAS.map((c) => `
+        <label style="display:flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600;">
+            <input type="checkbox" name="${prefijo}" value="${c}" ${seleccionadas.includes(c) ? "checked" : ""}>
+            ${humanizar(c)}
+        </label>
+    `).join("");
+
+}
+
+renderizarCheckboxesCategorias(document.getElementById("categoriasRama"), [], "categoriaNueva");
+
+document.getElementById("formRama").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+
+    const mensaje = document.getElementById("mensajeRama");
+    const nombre = document.getElementById("inputNombreRama").value.trim();
+
+    const categorias = [...document.querySelectorAll('#categoriasRama input[type="checkbox"]:checked')]
+        .map((c) => c.value);
 
     try {
 
-        const { usuarios } = await peticionApi("/api/centro-control/usuarios");
-        const cuerpo = document.getElementById("filasUsuarios");
+        await peticionApi("/api/centro-control/ramas", {
+            method: "POST",
+            body: JSON.stringify({ nombre, categorias })
+        });
 
-        cuerpo.innerHTML = usuarios.map((u) => `
-            <tr data-id="${u.id}">
-                <td><input type="text" class="input-nombre-usuario" value="${u.nombre}" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px; font-family:inherit;"></td>
-                <td>${u.email || "—"}</td>
-                <td>
-                    <select class="select-rol-usuario" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px; font-family:inherit;">
-                        ${ROLES.map((r) => `<option value="${r}" ${r === u.rol ? "selected" : ""}>${humanizar(r)}</option>`).join("")}
-                    </select>
-                </td>
-                <td><button class="boton pequeno" data-guardar-usuario="${u.id}">Guardar</button></td>
-            </tr>
-        `).join("");
+        mostrarMensaje(mensaje, "Rama guardada correctamente", "ok");
+        document.getElementById("formRama").reset();
+        renderizarCheckboxesCategorias(document.getElementById("categoriasRama"), [], "categoriaNueva");
+        await cargarRamasAdmin();
+        await cargarUsuariosAdmin();
 
-        cuerpo.querySelectorAll("[data-guardar-usuario]").forEach((boton) => {
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
 
-            boton.addEventListener("click", () => {
-                const fila = boton.closest("tr");
-                guardarUsuario(
-                    boton.dataset.guardarUsuario,
-                    fila.querySelector(".input-nombre-usuario").value.trim(),
-                    fila.querySelector(".select-rol-usuario").value
-                );
+});
+
+async function cargarRamasAdmin() {
+
+    try {
+
+        const { ramas } = await peticionApi("/api/centro-control/ramas");
+        ramasDisponibles = ramas;
+
+        const contenedor = document.getElementById("listaRamas");
+
+        contenedor.innerHTML = ramas.length === 0
+            ? `<p class="detalle">Todavía no hay ramas configuradas.</p>`
+            : ramas.map((r) => `
+                <div class="tarjeta" style="margin-bottom:10px; box-shadow:none; border-width:2px;" data-rama="${r.id}">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <strong>${r.nombre}</strong>
+                        <div>
+                            <button class="boton pequeno" data-guardar-rama="${r.id}">Guardar</button>
+                            <button class="boton pequeno secundario" data-eliminar-rama="${r.id}">Eliminar</button>
+                        </div>
+                    </div>
+                    <div class="categorias-rama" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+                </div>
+            `).join("");
+
+        ramas.forEach((r) => {
+            const contenedorCategorias = contenedor.querySelector(`[data-rama="${r.id}"] .categorias-rama`);
+            renderizarCheckboxesCategorias(contenedorCategorias, r.categorias || [], `categoria-${r.id}`);
+        });
+
+        contenedor.querySelectorAll("[data-guardar-rama]").forEach((boton) => {
+
+            boton.addEventListener("click", async () => {
+
+                const id = boton.dataset.guardarRama;
+                const categorias = [...contenedor.querySelectorAll(`[data-rama="${id}"] input[type="checkbox"]:checked`)]
+                    .map((c) => c.value);
+                const nombre = contenedor.querySelector(`[data-rama="${id}"] strong`).textContent;
+
+                try {
+                    await peticionApi(`/api/centro-control/ramas/${id}`, {
+                        method: "PATCH",
+                        body: JSON.stringify({ nombre, categorias })
+                    });
+                    await cargarUsuariosAdmin();
+                } catch (error) {
+                    alert(error.message);
+                }
+
+            });
+
+        });
+
+        contenedor.querySelectorAll("[data-eliminar-rama]").forEach((boton) => {
+
+            boton.addEventListener("click", async () => {
+
+                if (!confirm("¿Eliminar esta rama? Los usuarios asignados quedarán sin rama.")) return;
+
+                try {
+                    await peticionApi(`/api/centro-control/ramas/${boton.dataset.eliminarRama}`, { method: "DELETE" });
+                    await cargarRamasAdmin();
+                    await cargarUsuariosAdmin();
+                } catch (error) {
+                    alert(error.message);
+                }
+
             });
 
         });
@@ -1196,7 +1316,77 @@ async function cargarUsuariosAdmin() {
 
 }
 
-async function guardarUsuario(id, nombre, rol) {
+// ==========================
+// Usuarios (admin)
+// ==========================
+
+async function cargarUsuariosAdmin() {
+
+    try {
+
+        const { usuarios } = await peticionApi("/api/centro-control/usuarios");
+        const cuerpo = document.getElementById("filasUsuarios");
+
+        const estiloCampo = "padding:6px 8px; border:2px solid #ddd; border-radius:8px; font-family:inherit; width:100%;";
+
+        cuerpo.innerHTML = usuarios.map((u) => `
+            <tr data-id="${u.id}">
+                <td><input type="text" class="input-nombre-usuario" value="${u.nombre}" style="${estiloCampo}"></td>
+                <td>${u.email || "—"}</td>
+                <td>
+                    <select class="select-rol-usuario" style="${estiloCampo}">
+                        ${ROLES.map((r) => `<option value="${r}" ${r === u.rol ? "selected" : ""}>${humanizar(r)}</option>`).join("")}
+                    </select>
+                </td>
+                <td><input type="text" class="input-telefono-usuario" value="${u.telefono || ""}" placeholder="300..." style="${estiloCampo}"></td>
+                <td>
+                    <select class="select-rama-usuario" style="${estiloCampo}">
+                        <option value="">Sin rama</option>
+                        ${ramasDisponibles.map((r) => `<option value="${r.id}" ${r.id === u.rama_id ? "selected" : ""}>${r.nombre}</option>`).join("")}
+                    </select>
+                </td>
+                <td>
+                    <select class="select-rol-rama-usuario" style="${estiloCampo}">
+                        <option value="miembro" ${u.rol_en_rama === "miembro" ? "selected" : ""}>Miembro</option>
+                        <option value="lider" ${u.rol_en_rama === "lider" ? "selected" : ""}>Líder</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="select-zona-usuario" style="${estiloCampo}">
+                        <option value="">Sin zona</option>
+                        ${zonasDisponibles.map((z) => `<option value="${z.nombre}" ${z.nombre === u.zona ? "selected" : ""}>${humanizar(z.nombre)}</option>`).join("")}
+                    </select>
+                </td>
+                <td><button class="boton pequeno" data-guardar-usuario="${u.id}">Guardar</button></td>
+            </tr>
+        `).join("");
+
+        cuerpo.querySelectorAll("[data-guardar-usuario]").forEach((boton) => {
+
+            boton.addEventListener("click", () => {
+
+                const fila = boton.closest("tr");
+
+                guardarUsuario(boton.dataset.guardarUsuario, {
+                    nombre: fila.querySelector(".input-nombre-usuario").value.trim(),
+                    rol: fila.querySelector(".select-rol-usuario").value,
+                    telefono: fila.querySelector(".input-telefono-usuario").value.trim(),
+                    ramaId: fila.querySelector(".select-rama-usuario").value,
+                    rolEnRama: fila.querySelector(".select-rol-rama-usuario").value,
+                    zona: fila.querySelector(".select-zona-usuario").value
+                });
+
+            });
+
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function guardarUsuario(id, datos) {
 
     const mensaje = document.getElementById("mensajeUsuarios");
 
@@ -1204,15 +1394,15 @@ async function guardarUsuario(id, nombre, rol) {
 
         await peticionApi(`/api/centro-control/usuarios/${id}`, {
             method: "PATCH",
-            body: JSON.stringify({ nombre, rol })
+            body: JSON.stringify(datos)
         });
 
         mostrarMensaje(mensaje, "Usuario actualizado correctamente", "ok");
 
         if (id === perfilActual?.id) {
-            perfilActual.nombre = nombre;
-            perfilActual.rol = rol;
-            usuarioActual.textContent = `${nombre} · ${humanizar(rol)}`;
+            perfilActual.nombre = datos.nombre;
+            perfilActual.rol = datos.rol;
+            usuarioActual.textContent = `${datos.nombre} · ${humanizar(datos.rol)}`;
         }
 
     } catch (error) {
