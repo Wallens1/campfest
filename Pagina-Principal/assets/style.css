@@ -198,6 +198,8 @@ img { max-width: 100%; display: block; }
 .cf-section-head h2 { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: clamp(26px, 5vw, 38px); text-transform: uppercase; color: var(--ink); margin-top: 12px; }
 .cf-lead { max-width: 620px; margin: 16px auto 0; text-align: center; opacity: 0.8; font-size: 15.5px; font-weight: 500; }
 .cf-section-head.cf-left + .cf-lead { margin-left: 0; text-align: left; }
+.cf-source-note { max-width: 720px; margin: 18px auto 0; text-align: center; font-size: 11.5px; opacity: 0.55; font-weight: 500; }
+.cf-source-note a { color: inherit; text-decoration: underline; }
 
 /* ---------- DAYS / BADGES ---------- */
 .cf-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 26px; margin-top: 10px; }
