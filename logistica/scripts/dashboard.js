@@ -156,7 +156,10 @@ async function mostrarPanel(sesion) {
     cargarCarpas();
     await cargarRamas();
 
-    const puedeCrearTareas = perfilActual && (perfilActual.rol === "admin" || perfilActual.rol_en_rama === "lider");
+    // Ojo: esto es "para MI rama" — el admin no tiene una rama propia, así
+    // que estas herramientas son solo para líderes; el admin gestiona todo
+    // esto (cualquier rama) desde la pestaña Cronograma del Centro de Control.
+    const puedeCrearTareas = !!perfilActual && perfilActual.rol_en_rama === "lider" && !!perfilActual.rama_id;
     document.getElementById("tarjetaCrearTarea").classList.toggle("oculto", !puedeCrearTareas);
     document.getElementById("tarjetaEscribirObservacion").classList.toggle("oculto", !puedeCrearTareas);
     document.getElementById("tarjetaPedirAyuda").classList.toggle("oculto", !puedeCrearTareas);
@@ -790,7 +793,11 @@ function renderizarListaTareas(contenedor, tareas) {
 
     contenedor.querySelectorAll("[data-tarea]").forEach((card) => {
         card.addEventListener("click", (evento) => {
-            if (evento.target.closest("button, input, select, form")) return;
+            // El detalle expandido vive DENTRO de esta misma tarjeta; cualquier
+            // clic ahí adentro (un texto, un espacio, no solo los botones) no
+            // debe volver a alternar el colapsado, o se cierra apenas se
+            // intenta interactuar con lo que hay dentro.
+            if (evento.target.closest('[id^="detalleTarea-"]')) return;
             abrirDetalleTarea(card.dataset.tarea, false);
         });
     });

@@ -1668,7 +1668,10 @@ function renderizarTareasPorRama(tareas) {
 
     contenedor.querySelectorAll("[data-tarea-actividad]").forEach((fila) => {
         fila.addEventListener("click", (evento) => {
-            if (evento.target.closest("button, input, select, form")) return;
+            // Mismo motivo que en el panel de logística: el detalle expandido
+            // vive dentro de esta misma fila, así que cualquier clic ahí
+            // adentro no debe volver a colapsarlo.
+            if (evento.target.closest('[id^="detalleTareaActividad-"]')) return;
             abrirDetalleTareaEnActividad(fila.dataset.tareaActividad);
         });
     });
