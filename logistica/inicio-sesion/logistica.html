@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logística · Camp Fest 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+
+:root{
+    --amarillo:#FFC93C;
+    --coral:#FF5D5D;
+    --teal:#1FB6A6;
+    --morado:#5B4B8A;
+    --tinta:#1A1A2E;
+    --crema:#FFF8EC;
+    --verde:#1FB65D;
+    --rojo:#E23D3D;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+    margin:0;
+    font-family:'Poppins', 'Segoe UI', sans-serif;
+    background:var(--crema);
+    color:var(--tinta);
+    min-height:100vh;
+}
+
+.oculto{ display:none !important; }
+
+/* ===== LOGIN ===== */
+
+#pantallaLogin{
+    max-width:400px;
+    margin:80px auto;
+    padding:0 24px;
+}
+
+.tarjeta{
+    background:white;
+    border:3px solid var(--tinta);
+    border-radius:20px;
+    padding:32px;
+    box-shadow:8px 8px 0 var(--tinta);
+}
+
+.encabezado-login{
+    text-align:center;
+    margin-bottom:28px;
+}
+
+.encabezado-login .eyebrow{
+    display:inline-block;
+    background:var(--tinta);
+    color:var(--amarillo);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    padding:6px 16px;
+    border-radius:999px;
+    margin-bottom:14px;
+}
+
+.encabezado-login h1{
+    font-size:24px;
+    font-weight:800;
+    margin:0;
+}
+
+.campo{ margin-bottom:16px; }
+
+.campo label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:6px;
+    color:var(--morado);
+}
+
+.campo input{
+    width:100%;
+    padding:12px 14px;
+    font-size:15px;
+    font-family:inherit;
+    border:2px solid #ddd;
+    border-radius:10px;
+    background:var(--crema);
+}
+
+.campo input:focus{
+    outline:none;
+    border-color:var(--teal);
+    background:white;
+}
+
+.boton{
+    width:100%;
+    padding:14px;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:800;
+    color:white;
+    background:var(--coral);
+    border:3px solid var(--tinta);
+    border-radius:12px;
+    cursor:pointer;
+    box-shadow:5px 5px 0 var(--tinta);
+    transition:transform .12s ease;
+}
+
+.boton:hover{ transform:translate(-2px,-2px); }
+.boton:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--tinta); }
+.boton:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+
+.boton.secundario{
+    background:var(--morado);
+}
+
+.boton.pequeno{
+    width:auto;
+    padding:10px 18px;
+    font-size:13px;
+    box-shadow:3px 3px 0 var(--tinta);
+}
+
+.mensaje{
+    margin-top:14px;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:13.5px;
+    font-weight:600;
+    text-align:center;
+    display:none;
+}
+
+.mensaje.mostrar{ display:block; }
+.mensaje.ok{ background:#e2f7f2; color:#0f7a67; border:2px solid var(--teal); }
+.mensaje.fallo{ background:#ffeaea; color:#c23b3b; border:2px solid var(--coral); }
+
+/* ===== PANEL ===== */
+
+#pantallaPanel{
+    max-width:760px;
+    margin:0 auto;
+    padding:32px 20px 80px;
+}
+
+.barra-superior{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:24px;
+}
+
+.barra-superior .marca{
+    font-weight:800;
+    font-size:18px;
+}
+
+.barra-superior .usuario-actual{
+    font-size:13px;
+    color:#555;
+}
+
+.buscador{
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+.buscador input{
+    flex:1;
+    padding:12px 14px;
+    font-size:15px;
+    font-family:inherit;
+    border:2px solid #ddd;
+    border-radius:10px;
+    background:white;
+}
+
+.buscador input:focus{
+    outline:none;
+    border-color:var(--teal);
+}
+
+.tabs-busqueda{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+}
+
+.tab-busqueda{
+    padding:6px 14px;
+    font-size:12.5px;
+    font-weight:700;
+    border-radius:999px;
+    border:2px solid var(--tinta);
+    background:white;
+    cursor:pointer;
+}
+
+.tab-busqueda.activo{
+    background:var(--tinta);
+    color:white;
+}
+
+.resultados{
+    margin-bottom:24px;
+}
+
+.resultado-item{
+    background:white;
+    border:2px solid #ddd;
+    border-radius:12px;
+    padding:12px 16px;
+    margin-bottom:8px;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    transition:border-color .12s ease;
+}
+
+.resultado-item:hover{
+    border-color:var(--teal);
+}
+
+.resultado-item .nombre{ font-weight:700; }
+.resultado-item .detalle{ font-size:12.5px; color:#777; }
+
+/* ===== FICHA DEL PARTICIPANTE ===== */
+
+.ficha{
+    background:white;
+    border:3px solid var(--tinta);
+    border-radius:20px;
+    padding:28px;
+    box-shadow:8px 8px 0 var(--tinta);
+}
+
+.badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:20px;
+}
+
+.badge{
+    padding:7px 14px;
+    border-radius:999px;
+    font-size:12.5px;
+    font-weight:700;
+    border:2px solid var(--tinta);
+}
+
+.badge.verde{ background:#e2f7ea; color:#0f7a3d; }
+.badge.rojo{ background:#ffeaea; color:#c23b3b; }
+.badge.neutro{ background:var(--crema); }
+
+.ficha h2{
+    font-size:20px;
+    margin:0 0 4px;
+}
+
+.ficha .documento{
+    color:#777;
+    font-size:13.5px;
+    margin-bottom:20px;
+}
+
+.grid-info{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:24px;
+}
+
+@media (max-width:520px){
+    .grid-info{ grid-template-columns:1fr; }
+}
+
+.dato .etiqueta{
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    color:var(--morado);
+    display:block;
+    margin-bottom:2px;
+}
+
+.dato .valor{
+    font-size:14.5px;
+    font-weight:600;
+}
+
+.dato.alerta .valor{
+    color:var(--coral);
+}
+
+.seccion{
+    border-top:2px solid #eee;
+    padding-top:20px;
+    margin-top:20px;
+}
+
+.seccion h3{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    color:var(--azul, var(--morado));
+    margin:0 0 14px;
+}
+
+.form-asignacion{
+    display:flex;
+    gap:10px;
+    align-items:flex-end;
+    flex-wrap:wrap;
+}
+
+.form-asignacion .campo{
+    flex:1;
+    min-width:140px;
+    margin-bottom:0;
+}
+
+.checkbox-lider{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13.5px;
+    font-weight:600;
+    padding-bottom:12px;
+}
+
+.checklist-alimentacion{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+@media (max-width:520px){
+    .checklist-alimentacion{ grid-template-columns:1fr; }
+}
+
+.item-servicio{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 14px;
+    border:2px solid #ddd;
+    border-radius:10px;
+    font-size:13.5px;
+}
+
+.item-servicio.entregado{
+    background:#e2f7f2;
+    border-color:var(--teal);
+}
+
+.item-servicio button{
+    font-family:inherit;
+    font-size:12px;
+    font-weight:700;
+    padding:6px 12px;
+    border-radius:8px;
+    border:2px solid var(--tinta);
+    background:var(--amarillo);
+    cursor:pointer;
+}
+
+.item-servicio button:disabled{
+    background:#eee;
+    color:#999;
+    cursor:default;
+}
+
+.item-servicio .marcado{
+    font-size:11.5px;
+    color:#0f7a67;
+    font-weight:700;
+}
+
+.historial-item{
+    padding:10px 0;
+    border-bottom:1px solid #eee;
+    font-size:13.5px;
+}
+
+.historial-item:last-child{ border-bottom:none; }
+
+.historial-item .hora{
+    font-weight:700;
+    color:var(--morado);
+}
+
+.historial-item .descripcion{
+    margin:2px 0;
+}
+
+.historial-item .usuario{
+    font-size:12px;
+    color:#888;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ===== PANTALLA DE LOGIN ===== -->
+
+<div id="pantallaLogin">
+    <div class="tarjeta">
+        <div class="encabezado-login">
+            <span class="eyebrow">Camp Fest 2026</span>
+            <h1>Acceso Logística</h1>
+        </div>
+
+        <form id="formLogin">
+            <div class="campo">
+                <label for="email">Correo</label>
+                <input type="email" id="email" autocomplete="username" required>
+            </div>
+            <div class="campo">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="boton" id="botonLogin">Ingresar</button>
+        </form>
+
+        <div class="mensaje" id="mensajeLogin"></div>
+    </div>
+</div>
+
+<!-- ===== PANEL PRINCIPAL ===== -->
+
+<div id="pantallaPanel" class="oculto">
+
+    <div class="barra-superior">
+        <div class="marca">Camp Fest · Logística</div>
+        <div>
+            <span class="usuario-actual" id="nombreUsuarioActual"></span>
+            &nbsp;·&nbsp;
+            <button class="boton pequeno secundario" id="botonCerrarSesion">Cerrar sesión</button>
+        </div>
+    </div>
+
+    <div class="tabs-busqueda">
+        <div class="tab-busqueda activo" data-tipo="codigo">Código</div>
+        <div class="tab-busqueda" data-tipo="documento">Documento</div>
+        <div class="tab-busqueda" data-tipo="nombre">Nombre</div>
+    </div>
+
+    <div class="buscador">
+        <input type="text" id="inputBusqueda" placeholder="Ingresa el código enviado por WhatsApp">
+        <button class="boton pequeno" id="botonBuscar" style="width:auto;">Buscar</button>
+    </div>
+
+    <div class="mensaje" id="mensajeBusqueda"></div>
+
+    <div class="resultados oculto" id="contenedorResultados"></div>
+
+    <div class="ficha oculto" id="fichaParticipante"></div>
+
+</div>
+
+<script>
+
+// Reemplaza esto con tus valores reales
+const API_BASE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhemFybWp4YWpoZGp2dWh0emNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MDY4MzQsImV4cCI6MjA5OTM4MjgzNH0.j3muJDelPhZibma-yeuIhvjrvQ01e7DN0B-4UaYyCFM";
+const SUPABASE_URL = "https://lazarmjxajhdjvuhtzcl.supabase.co/rest/v1/";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhemFybWp4YWpoZGp2dWh0emNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MDY4MzQsImV4cCI6MjA5OTM4MjgzNH0.j3muJDelPhZibma-yeuIhvjrvQ01e7DN0B-4UaYyCFM";
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+//==========================
+// Elementos
+//==========================
+
+const pantallaLogin = document.getElementById("pantallaLogin");
+const pantallaPanel = document.getElementById("pantallaPanel");
+const formLogin = document.getElementById("formLogin");
+const mensajeLogin = document.getElementById("mensajeLogin");
+const botonLogin = document.getElementById("botonLogin");
+const nombreUsuarioActual = document.getElementById("nombreUsuarioActual");
+const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+
+const inputBusqueda = document.getElementById("inputBusqueda");
+const botonBuscar = document.getElementById("botonBuscar");
+const mensajeBusqueda = document.getElementById("mensajeBusqueda");
+const contenedorResultados = document.getElementById("contenedorResultados");
+const fichaParticipante = document.getElementById("fichaParticipante");
+const tabsBusqueda = document.querySelectorAll(".tab-busqueda");
+
+let tipoBusqueda = "codigo";
+let sesionActual = null;
+
+//==========================
+// Utilidades
+//==========================
+
+function escaparHtml(texto){
+    const div = document.createElement("div");
+    div.textContent = texto ?? "";
+    return div.innerHTML;
+}
+
+function mostrarMensaje(elemento, tipo, texto){
+    elemento.className = `mensaje mostrar ${tipo}`;
+    elemento.textContent = texto;
+}
+
+function ocultarMensaje(elemento){
+    elemento.className = "mensaje";
+    elemento.textContent = "";
+}
+
+async function llamarApi(ruta, opciones = {}){
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    const respuesta = await fetch(`${API_BASE}${ruta}`, {
+        ...opciones,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token || ""}`,
+            ...(opciones.headers || {})
+        }
+    });
+
+    const cuerpo = await respuesta.json();
+
+    if (!respuesta.ok){
+        throw new Error(cuerpo.mensaje || "Ocurrió un error inesperado");
+    }
+
+    return cuerpo;
+
+}
+
+//==========================
+// Login
+//==========================
+
+formLogin.addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    ocultarMensaje(mensajeLogin);
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    botonLogin.disabled = true;
+    botonLogin.textContent = "Ingresando...";
+
+    try{
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+        if (error) throw error;
+
+        sesionActual = data.session;
+
+        await mostrarPanel();
+
+    }catch(error){
+
+        mostrarMensaje(mensajeLogin, "fallo", error.message || "No se pudo iniciar sesión");
+
+    }finally{
+
+        botonLogin.disabled = false;
+        botonLogin.textContent = "Ingresar";
+
+    }
+
+});
+
+botonCerrarSesion.addEventListener("click", async () => {
+    await supabaseClient.auth.signOut();
+    location.reload();
+});
+
+async function mostrarPanel(){
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    if (!session){
+        pantallaLogin.classList.remove("oculto");
+        pantallaPanel.classList.add("oculto");
+        return;
+    }
+
+    nombreUsuarioActual.textContent = session.user.email;
+
+    pantallaLogin.classList.add("oculto");
+    pantallaPanel.classList.remove("oculto");
+
+}
+
+// Al cargar, revisar si ya hay una sesión activa
+(async () => {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session){
+        sesionActual = session;
+        await mostrarPanel();
+    }
+})();
+
+//==========================
+// Tabs de tipo de búsqueda
+//==========================
+
+const placeholders = {
+    codigo: "Ingresa el código enviado por WhatsApp",
+    documento: "Ingresa el número de documento",
+    nombre: "Ingresa el nombre del participante"
+};
+
+tabsBusqueda.forEach((tab) => {
+    tab.addEventListener("click", () => {
+        tabsBusqueda.forEach((t) => t.classList.remove("activo"));
+        tab.classList.add("activo");
+        tipoBusqueda = tab.dataset.tipo;
+        inputBusqueda.placeholder = placeholders[tipoBusqueda];
+        inputBusqueda.value = "";
+        inputBusqueda.focus();
+    });
+});
+
+//==========================
+// Búsqueda
+//==========================
+
+async function buscar(){
+
+    const valor = inputBusqueda.value.trim();
+
+    if (!valor){
+        mostrarMensaje(mensajeBusqueda, "fallo", "Escribe algo para buscar");
+        return;
+    }
+
+    ocultarMensaje(mensajeBusqueda);
+    fichaParticipante.classList.add("oculto");
+    contenedorResultados.classList.add("oculto");
+    contenedorResultados.innerHTML = "";
+
+    botonBuscar.disabled = true;
+    botonBuscar.textContent = "Buscando...";
+
+    try{
+
+        const parametros = new URLSearchParams({ [tipoBusqueda]: valor });
+
+        const respuesta = await llamarApi(`/api/logistica/buscar?${parametros.toString()}`);
+
+        if (respuesta.resultados.length === 0){
+            mostrarMensaje(mensajeBusqueda, "fallo", "No se encontró ningún participante");
+            return;
+        }
+
+        if (respuesta.resultados.length === 1){
+            await cargarFicha(respuesta.resultados[0].id);
+            return;
+        }
+
+        // Varios resultados (típico al buscar por nombre)
+        contenedorResultados.classList.remove("oculto");
+        respuesta.resultados.forEach((p) => {
+            const item = document.createElement("div");
+            item.className = "resultado-item";
+            item.innerHTML = `
+                <div>
+                    <div class="nombre">${escaparHtml(p.nombre)}</div>
+                    <div class="detalle">${escaparHtml(p.documento)} · ${escaparHtml(p.municipio || "")}</div>
+                </div>
+                <div class="detalle">${escaparHtml(p.codigo)}</div>
+            `;
+            item.addEventListener("click", () => cargarFicha(p.id));
+            contenedorResultados.appendChild(item);
+        });
+
+    }catch(error){
+
+        mostrarMensaje(mensajeBusqueda, "fallo", error.message);
+
+    }finally{
+
+        botonBuscar.disabled = false;
+        botonBuscar.textContent = "Buscar";
+
+    }
+
+}
+
+botonBuscar.addEventListener("click", buscar);
+inputBusqueda.addEventListener("keydown", (e) => { if (e.key === "Enter") buscar(); });
+
+//==========================
+// Cargar y renderizar la ficha completa de un participante
+//==========================
+
+async function cargarFicha(id){
+
+    contenedorResultados.classList.add("oculto");
+    ocultarMensaje(mensajeBusqueda);
+
+    try{
+
+        const respuesta = await llamarApi(`/api/logistica/participante/${id}`);
+        renderizarFicha(respuesta);
+
+    }catch(error){
+
+        mostrarMensaje(mensajeBusqueda, "fallo", error.message);
+
+    }
+
+}
+
+function renderizarFicha(datos){
+
+    const p = datos.participante;
+
+    const entregasPorServicio = {};
+    datos.entregas.forEach((e) => { entregasPorServicio[e.servicio] = e; });
+
+    const badgeIngreso = p.ingreso_registrado
+        ? `<span class="badge verde">🟢 Ingresó</span>`
+        : `<span class="badge rojo">🔴 Pendiente de ingreso</span>`;
+
+    const badgeAlimentacion = `<span class="badge neutro">${datos.entregasRealizadas}/${datos.totalServicios} entregas</span>`;
+
+    const badgeCarpa = `<span class="badge neutro">Carpa: ${p.carpa_asignada ? escaparHtml(p.carpa_asignada) : "sin asignar"}</span>`;
+
+    const badgeLider = `<span class="badge neutro">Líder de carpa: ${p.es_lider_carpa ? "Sí" : "No"}</span>`;
+
+    const checklistHtml = datos.servicios.map((s) => {
+
+        const entrega = entregasPorServicio[s.id];
+
+        if (entrega){
+            const hora = new Date(entrega.hora).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+            return `
+                <div class="item-servicio entregado">
+                    <span>${s.label}</span>
+                    <span class="marcado">✓ ${hora}</span>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="item-servicio">
+                <span>${s.label}</span>
+                <button data-servicio="${s.id}" class="boton-marcar-servicio">Marcar</button>
+            </div>
+        `;
+
+    }).join("");
+
+    const historialHtml = datos.historial.length > 0
+        ? datos.historial.map((h) => {
+            const fecha = new Date(h.creado_en).toLocaleString("es-CO", {
+                hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit"
+            });
+            return `
+                <div class="historial-item">
+                    <div class="hora">${fecha}</div>
+                    <div class="descripcion">${escaparHtml(h.descripcion)}</div>
+                </div>
+            `;
+        }).join("")
+        : `<p style="color:#999; font-size:13.5px;">Sin eventos registrados todavía.</p>`;
+
+    fichaParticipante.innerHTML = `
+
+        <div class="badges">
+            ${badgeIngreso}
+            ${badgeAlimentacion}
+            ${badgeCarpa}
+            ${badgeLider}
+        </div>
+
+        <h2>${escaparHtml(p.nombre)}</h2>
+        <div class="documento">Documento: ${escaparHtml(p.documento)} · Código: ${escaparHtml(p.codigo)}</div>
+
+        <div class="grid-info">
+            <div class="dato"><span class="etiqueta">Edad</span><span class="valor">${escaparHtml(p.edad ?? "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Municipio</span><span class="valor">${escaparHtml(p.municipio || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Teléfono</span><span class="valor">${escaparHtml(p.telefono || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Estado de admisión</span><span class="valor">${escaparHtml(p.estado_admision)}</span></div>
+            <div class="dato"><span class="etiqueta">Contacto de emergencia</span><span class="valor">${escaparHtml(p.contacto_emergencia_nombre || "—")} ${escaparHtml(p.contacto_emergencia_telefono || "")}</span></div>
+            <div class="dato ${p.restricciones ? 'alerta' : ''}"><span class="etiqueta">Restricciones</span><span class="valor">${escaparHtml(p.restricciones || "Ninguna")}</span></div>
+        </div>
+
+        <div class="seccion">
+            <h3>Ingreso</h3>
+            <button class="boton pequeno" id="botonRegistrarIngreso" ${p.ingreso_registrado ? "disabled" : ""}>
+                ${p.ingreso_registrado ? "Ingreso ya registrado" : "Registrar ingreso"}
+            </button>
+        </div>
+
+        <div class="seccion">
+            <h3>Asignación de carpa</h3>
+            <div class="form-asignacion">
+                <div class="campo">
+                    <label>Carpa</label>
+                    <input type="text" id="inputCarpa" value="${escaparHtml(p.carpa_asignada || "")}" placeholder="Ej. Carpa 4">
+                </div>
+                <div class="checkbox-lider">
+                    <input type="checkbox" id="checkboxLider" ${p.es_lider_carpa ? "checked" : ""}>
+                    <label for="checkboxLider">Líder de carpa</label>
+                </div>
+                <button class="boton pequeno" id="botonGuardarAsignacion">Guardar</button>
+            </div>
+        </div>
+
+        <div class="seccion">
+            <h3>Alimentación</h3>
+            <div class="checklist-alimentacion">
+                ${checklistHtml}
+            </div>
+        </div>
+
+        <div class="seccion">
+            <h3>Historial</h3>
+            ${historialHtml}
+        </div>
+
+        <div class="mensaje" id="mensajeFicha"></div>
+
+    `;
+
+    fichaParticipante.classList.remove("oculto");
+
+    // Eventos de la ficha recién renderizada
+
+    document.getElementById("botonRegistrarIngreso").addEventListener("click", async () => {
+        await accionFicha(() => llamarApi(`/api/logistica/participante/${p.id}/ingreso`, { method: "POST" }), p.id);
+    });
+
+    document.getElementById("botonGuardarAsignacion").addEventListener("click", async () => {
+        const carpa = document.getElementById("inputCarpa").value.trim();
+        const esLiderCarpa = document.getElementById("checkboxLider").checked;
+        await accionFicha(() => llamarApi(`/api/logistica/participante/${p.id}/asignacion`, {
+            method: "POST",
+            body: JSON.stringify({ carpa, esLiderCarpa })
+        }), p.id);
+    });
+
+    fichaParticipante.querySelectorAll(".boton-marcar-servicio").forEach((boton) => {
+        boton.addEventListener("click", async () => {
+            const servicio = boton.dataset.servicio;
+            await accionFicha(() => llamarApi(`/api/logistica/participante/${p.id}/alimentacion`, {
+                method: "POST",
+                body: JSON.stringify({ servicio })
+            }), p.id);
+        });
+    });
+
+}
+
+async function accionFicha(accion, participanteId){
+
+    const mensajeFicha = document.getElementById("mensajeFicha");
+
+    try{
+
+        const resultado = await accion();
+        await cargarFicha(participanteId);
+
+        // Volvemos a tomar el mensaje porque la ficha se re-renderizó
+        const nuevoMensaje = document.getElementById("mensajeFicha");
+        mostrarMensaje(nuevoMensaje, "ok", resultado.mensaje);
+
+    }catch(error){
+
+        mostrarMensaje(mensajeFicha, "fallo", error.message);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
