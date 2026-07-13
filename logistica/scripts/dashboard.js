@@ -320,31 +320,64 @@ function renderizarBadges(participante, entregasRealizadas, totalServicios) {
 
 }
 
+function contactoCompleto(nombre, telefono) {
+    const partes = [nombre, telefono].filter(Boolean);
+    return partes.length > 0 ? partes.join(" · ") : null;
+}
+
+function siONoConDetalle(participante, campoBooleano, campoDetalle) {
+
+    if (!participante[campoBooleano]) {
+        return { valor: "No", alerta: false };
+    }
+
+    const detalle = participante[campoDetalle];
+
+    return { valor: detalle ? `Sí: ${detalle}` : "Sí", alerta: true };
+
+}
+
 function renderizarInfo(participante) {
 
+    const condicionMedica = siONoConDetalle(participante, "tiene_condicion_medica", "condicion_medica_detalle");
+    const restriccionAlimentaria = siONoConDetalle(participante, "tiene_restricciones_alimentarias", "restricciones_alimentarias_detalle");
+    const alergiaMedicamento = siONoConDetalle(participante, "alergia_medicamento", "alergia_medicamento_detalle");
+    const alergiaAlimento = siONoConDetalle(participante, "alergia_alimento", "alergia_alimento_detalle");
+
     const campos = [
-        { campo: "edad", etiqueta: "Edad" },
-        { campo: "municipio", etiqueta: "Municipio" },
-        { campo: "telefono", etiqueta: "Teléfono" },
-        { campo: "contacto_emergencia", etiqueta: "Contacto de emergencia" },
-        { campo: "estado_admision", etiqueta: "Estado de admisión" },
-        { campo: "restricciones", etiqueta: "Restricciones médicas/alimentarias", alerta: true },
-        { campo: "codigo", etiqueta: "Código" }
+        { etiqueta: "Tipo de documento", valor: participante.tipo_documento },
+        { etiqueta: "Fecha de nacimiento", valor: participante.fecha_nacimiento },
+        { etiqueta: "Edad", valor: participante.edad },
+        { etiqueta: "Municipio", valor: participante.municipio },
+        { etiqueta: "Zona", valor: participante.zona_rural_urbana },
+        { etiqueta: "Teléfono personal", valor: participante.telefono },
+        { etiqueta: "Correo personal", valor: participante.correo_personal },
+        { etiqueta: "Contacto de emergencia 1", valor: contactoCompleto(participante.contacto_emergencia_nombre, participante.contacto_emergencia_telefono) },
+        { etiqueta: "Contacto de emergencia 2", valor: contactoCompleto(participante.contacto_emergencia_2_nombre, participante.contacto_emergencia_2_telefono) },
+        { etiqueta: "RH", valor: participante.rh },
+        { etiqueta: "Condición médica/discapacidad", valor: condicionMedica.valor, alerta: condicionMedica.alerta },
+        { etiqueta: "Restricción alimentaria", valor: restriccionAlimentaria.valor, alerta: restriccionAlimentaria.alerta },
+        { etiqueta: "Alergia a medicamento", valor: alergiaMedicamento.valor, alerta: alergiaMedicamento.alerta },
+        { etiqueta: "Alergia a alimento", valor: alergiaAlimento.valor, alerta: alergiaAlimento.alerta },
+        { etiqueta: "EPS", valor: participante.eps },
+        {
+            etiqueta: "Certificado EPS",
+            valor: participante.certificado_eps_url
+                ? `<a href="${participante.certificado_eps_url}" target="_blank" rel="noopener">Ver certificado</a>`
+                : null
+        },
+        { etiqueta: "Carpa propia", valor: participante.carpa_propia ? "Sí" : "No" },
+        { etiqueta: "Instancia del Subsistema", valor: participante.subsistema_instancia },
+        { etiqueta: "Estado de admisión", valor: participante.estado_admision },
+        { etiqueta: "Código", valor: participante.codigo }
     ];
 
-    gridInfo.innerHTML = campos.map(({ campo, etiqueta, alerta }) => {
-
-        const valor = participante[campo];
-        const esAlerta = alerta && valor;
-
-        return `
-            <div class="dato ${esAlerta ? "alerta" : ""}">
-                <span class="etiqueta">${etiqueta}</span>
-                <span class="valor">${valor || "—"}</span>
-            </div>
-        `;
-
-    }).join("");
+    gridInfo.innerHTML = campos.map(({ etiqueta, valor, alerta }) => `
+        <div class="dato ${alerta ? "alerta" : ""}">
+            <span class="etiqueta">${etiqueta}</span>
+            <span class="valor">${valor || "—"}</span>
+        </div>
+    `).join("");
 
 }
 

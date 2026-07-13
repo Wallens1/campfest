@@ -108,6 +108,25 @@ async function peticionApi(ruta, opciones = {}) {
 
 }
 
+async function subirArchivo(ruta, formData) {
+
+    const { data: sesion } = await supabaseClient.auth.getSession();
+    const token = sesion?.session?.access_token;
+
+    const respuesta = await fetch(`${API_BASE}${ruta}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+    });
+
+    const cuerpo = await respuesta.json();
+
+    if (!respuesta.ok) throw new Error(cuerpo.mensaje || "Ocurrió un error inesperado");
+
+    return cuerpo;
+
+}
+
 async function descargarArchivo(ruta, nombreArchivo) {
 
     const respuesta = await peticionApi(ruta, { binario: true });
@@ -1014,6 +1033,51 @@ document.getElementById("formCapacidadCarpa").addEventListener("submit", async (
 
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+// ==========================
+// Importar participantes (admin)
+// ==========================
+
+document.getElementById("formImportarParticipantes").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+
+    const mensaje = document.getElementById("mensajeImportarParticipantes");
+    const input = document.getElementById("inputArchivoParticipantes");
+    const boton = document.getElementById("btnImportarParticipantes");
+
+    if (!input.files[0]) return;
+
+    const formData = new FormData();
+    formData.append("archivo", input.files[0]);
+
+    boton.disabled = true;
+    ocultarMensaje(mensaje);
+
+    try {
+
+        const resultado = await subirArchivo("/api/centro-control/participantes/importar", formData);
+
+        const detalleErrores = resultado.errores.length > 0
+            ? ` · ${resultado.errores.length} con error (fila ${resultado.errores.map((e) => e.fila).join(", ")})`
+            : "";
+
+        mostrarMensaje(
+            mensaje,
+            `${resultado.insertados} nuevos importados · ${resultado.omitidos} ya existían${detalleErrores}`,
+            "ok"
+        );
+
+        document.getElementById("formImportarParticipantes").reset();
+        await Promise.all([cargarPanel(), cargarParticipantes()]);
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    } finally {
+        boton.disabled = false;
     }
 
 });

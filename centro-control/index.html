@@ -217,6 +217,23 @@
     <div class="oculto" id="panelAdministracion">
 
         <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Importar participantes desde Excel</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                Debe ser el .xlsx exportado del formulario de inscripción. Los documentos que ya
+                existan en el sistema se omiten (no se sobrescriben); a los nuevos se les asigna
+                su código CF automáticamente.
+            </p>
+            <form id="formImportarParticipantes" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                <div class="campo" style="margin-bottom:0; flex:1;">
+                    <label for="inputArchivoParticipantes">Archivo .xlsx</label>
+                    <input type="file" id="inputArchivoParticipantes" accept=".xlsx" required>
+                </div>
+                <button type="submit" class="boton pequeno" id="btnImportarParticipantes">Subir</button>
+            </form>
+            <div class="mensaje" id="mensajeImportarParticipantes"></div>
+        </div>
+
+        <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Configurar capacidad de carpas</h3>
             <form id="formCapacidadCarpa" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
                 <div class="campo" style="margin-bottom:0;">
