@@ -43,6 +43,8 @@
         </div>
     </div>
 
+    <div class="alertas-barra" id="alertasBarraLogistica"></div>
+
     <div class="tabs-modulo">
         <button class="tab-modulo activo" data-vista="registro">Registro</button>
         <button class="tab-modulo" data-vista="comunicacion">Comunicación</button>
@@ -150,8 +152,9 @@
             <div class="lista-incidentes-mios" id="listaMisIncidentes"></div>
         </div>
 
-        <div class="tarjeta-incidente">
+        <div class="tarjeta-incidente oculto" id="tarjetaPedirAyuda">
             <h3 style="margin-top:0;">Pedir ayuda a otra rama</h3>
+            <p style="font-size:12px; color:#777; margin-top:-6px;">Solo los líderes de rama pueden pedir ayuda a otra rama.</p>
             <form id="formSolicitud">
                 <div class="campo">
                     <label for="inputRamaDestinoSolicitud">Rama a la que pides ayuda</label>
@@ -160,6 +163,10 @@
                 <div class="campo">
                     <label for="inputTituloSolicitud">¿Qué necesitas?</label>
                     <input type="text" id="inputTituloSolicitud" placeholder="Ej: Necesitamos 2 personas en el comedor" required>
+                </div>
+                <div class="campo">
+                    <label for="inputCantidadPersonasSolicitud">¿Cuántas personas necesitas?</label>
+                    <input type="number" id="inputCantidadPersonasSolicitud" min="1" placeholder="Déjalo vacío si no importa la cantidad">
                 </div>
                 <div class="campo">
                     <label for="inputDescripcionSolicitud">Detalle (opcional)</label>

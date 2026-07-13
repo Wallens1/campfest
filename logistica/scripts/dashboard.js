@@ -63,6 +63,7 @@ const mensajeFicha = document.getElementById("mensajeFicha");
 let campoBusquedaActivo = "codigo";
 let participanteActualId = null;
 let carpaSeleccionada = null;
+let detalleTareaAbiertoId = null;
 let intervaloPolling = null;
 let perfilActual = null;
 let ramasDisponibles = [];
@@ -158,6 +159,7 @@ async function mostrarPanel(sesion) {
     const puedeCrearTareas = perfilActual && (perfilActual.rol === "admin" || perfilActual.rol_en_rama === "lider");
     document.getElementById("tarjetaCrearTarea").classList.toggle("oculto", !puedeCrearTareas);
     document.getElementById("tarjetaEscribirObservacion").classList.toggle("oculto", !puedeCrearTareas);
+    document.getElementById("tarjetaPedirAyuda").classList.toggle("oculto", !puedeCrearTareas);
 
     if (puedeCrearTareas && perfilActual.rama_id) {
         try {
@@ -188,8 +190,9 @@ async function cargarRamas() {
         ramasDisponibles = ramas;
         mapaRamas = Object.fromEntries(ramas.map((r) => [r.id, r.nombre]));
 
-        document.getElementById("inputRamaDestinoSolicitud").innerHTML = ramas
-            .map((r) => `<option value="${r.id}">${r.nombre}</option>`).join("");
+        document.getElementById("inputRamaDestinoSolicitud").innerHTML =
+            ramas.map((r) => `<option value="${r.id}">${r.nombre}</option>`).join("") +
+            `<option value="todas">🆘 Todas las ramas (urgente)</option>`;
 
     } catch (error) {
         console.error(error);
@@ -777,8 +780,9 @@ function renderizarListaTareas(contenedor, tareas) {
             </div>
             ${t.descripcion ? `<div class="descripcion">${t.descripcion}</div>` : ""}
             <div class="descripcion">
-                ${t.tipo === "solicitud" ? `De ${mapaRamas[t.rama_origen_id] || "—"} para ${mapaRamas[t.rama_id] || "—"}` : `Rama: ${mapaRamas[t.rama_id] || "—"}`}
+                ${t.tipo === "solicitud" ? `De ${mapaRamas[t.rama_origen_id] || "—"} para ${t.rama_id ? (mapaRamas[t.rama_id] || "—") : "🆘 todas las ramas"}` : `Rama: ${mapaRamas[t.rama_id] || "—"}`}
                 ${t.hora_programada ? ` · Listo antes de: ${formatearHora(t.hora_programada)}` : ""}
+                ${t.cantidad_personas ? ` · ${t.checks_count || 0}/${t.cantidad_personas} aceptaron` : ""}
             </div>
             <div class="oculto" id="detalleTarea-${t.id}"></div>
         </div>
@@ -786,10 +790,17 @@ function renderizarListaTareas(contenedor, tareas) {
 
     contenedor.querySelectorAll("[data-tarea]").forEach((card) => {
         card.addEventListener("click", (evento) => {
-            if (evento.target.closest("button")) return;
+            if (evento.target.closest("button, input, select, form")) return;
             abrirDetalleTarea(card.dataset.tarea, false);
         });
     });
+
+    // El polling reconstruye esta lista cada pocos segundos; si había un
+    // detalle abierto, se vuelve a abrir con datos frescos en vez de quedar
+    // colapsado como si el usuario nunca hubiera hecho clic.
+    if (detalleTareaAbiertoId && tareas.some((t) => t.id === detalleTareaAbiertoId)) {
+        abrirDetalleTarea(detalleTareaAbiertoId, true);
+    }
 
 }
 
@@ -799,19 +810,39 @@ async function abrirDetalleTarea(id, forzar) {
 
     if (!forzar && !contenedor.classList.contains("oculto")) {
         contenedor.classList.add("oculto");
+        detalleTareaAbiertoId = null;
         return;
     }
 
+    detalleTareaAbiertoId = id;
+
     try {
 
-        const [{ tarea, checks }, { subtareas }, { comentarios }] = await Promise.all([
-            peticionApi(`/api/tareas/${id}`),
-            peticionApi(`/api/tareas/${id}/subtareas`),
-            peticionApi(`/api/tareas/${id}/comentarios`)
+        const { tarea, checks, ramas } = await peticionApi(`/api/tareas/${id}`);
+        const ramaIdsTarea = ramas && ramas.length > 0 ? ramas.map((r) => r.id) : [tarea.rama_id];
+
+        // Subtareas y comentarios se piden aparte: si una de las dos falla
+        // (por ejemplo, si todavía no se corrió esa migración en Supabase),
+        // no debe tumbar el resto del detalle.
+        const [comentarios, subtareas] = await Promise.all([
+            peticionApi(`/api/tareas/${id}/comentarios`).then((r) => r.comentarios).catch(() => []),
+            tarea.tipo === "tarea"
+                ? peticionApi(`/api/tareas/${id}/subtareas`).then((r) => r.subtareas).catch(() => [])
+                : Promise.resolve(null)
         ]);
 
         const yaMarcado = checks.some((c) => c.usuario_id === perfilActual?.id);
-        const esLider = !!perfilActual && (perfilActual.rol === "admin" || (perfilActual.rama_id === tarea.rama_id && perfilActual.rol_en_rama === "lider"));
+
+        // "Quitar check"/subtareas los gestiona el líder de la rama que ayuda
+        // (vigila a su propia gente); "dar el check final" en una solicitud
+        // lo hace el líder que PIDIÓ la ayuda, no el que la atendió.
+        const esLiderRamaDestino = !!perfilActual && (perfilActual.rol === "admin" || (ramaIdsTarea.includes(perfilActual.rama_id) && perfilActual.rol_en_rama === "lider"));
+        const esLider = esLiderRamaDestino;
+        const puedeCompletar = tarea.tipo === "solicitud"
+            ? !!perfilActual && (perfilActual.rol === "admin" || perfilActual.id === tarea.creado_por || (perfilActual.rama_id === tarea.rama_origen_id && perfilActual.rol_en_rama === "lider"))
+            : esLiderRamaDestino;
+
+        const cupoLleno = !!tarea.cantidad_personas && checks.length >= tarea.cantidad_personas;
 
         const filasChecks = checks.length === 0
             ? `<p class="detalle">Nadie se ha marcado todavía.</p>`
@@ -822,35 +853,61 @@ async function abrirDetalleTarea(id, forzar) {
                 </div>
             `).join("");
 
+        const cupoTexto = tarea.cantidad_personas
+            ? `<p class="detalle" style="margin-top:4px;">${checks.length}/${tarea.cantidad_personas} personas necesarias${cupoLleno ? " · cupo cubierto" : ""}</p>`
+            : "";
+
+        const botonMarcarHtml = yaMarcado
+            ? `<span class="badge verde">Ya marcaste tu participación</span>`
+            : cupoLleno
+                ? `<span class="badge rojo">Cupo cubierto, ya no se necesita más gente</span>`
+                : `<button class="boton pequeno" data-marcar="1">Marqué que ayudé</button>`;
+
         const acciones = tarea.estado !== "pendiente"
             ? `<p class="detalle" style="margin-top:8px;">Cerrado ${formatearHora(tarea.completada_en)}</p>`
             : `
+                ${cupoTexto}
                 <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                    ${!yaMarcado ? `<button class="boton pequeno" data-marcar="1">Marqué que ayudé</button>` : `<span class="badge verde">Ya marcaste tu participación</span>`}
-                    ${esLider ? `<button class="boton pequeno secundario" data-completar="1">Dar check final</button>` : ""}
+                    ${botonMarcarHtml}
+                    ${puedeCompletar ? `<button class="boton pequeno secundario" data-completar="1">Dar check final</button>` : ""}
                 </div>
             `;
 
         const puedeMarcarSubtarea = (s) => perfilActual && (perfilActual.id === s.asignado_a || esLider);
 
-        const filasSubtareas = subtareas.length === 0
-            ? `<p class="detalle">Sin subtareas asignadas.</p>`
-            : subtareas.map((s) => `
-                <div class="fila-conteo" style="margin-top:4px;">
-                    <span class="etiqueta">
-                        ${s.estado === "hecha" ? "✅" : "⬜"} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}
-                    </span>
-                    ${s.estado === "pendiente" && puedeMarcarSubtarea(s) ? `<button class="boton pequeno" data-hecha-subtarea="${s.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar hecha</button>` : ""}
-                </div>
-            `).join("");
+        // Las subtareas por persona solo tienen sentido para "tarea" (deberes
+        // dentro de mi propia rama); una "solicitud" de ayuda a otra rama se
+        // resuelve con el mecanismo de checks, no con subtareas individuales.
+        const bloqueSubtareas = tarea.tipo !== "tarea" ? "" : (() => {
 
-        const formularioSubtarea = esLider ? `
-            <form class="form-nueva-subtarea" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
-                <input type="text" placeholder="Nueva subtarea" class="input-titulo-subtarea" style="flex:1; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
-                <select class="select-asignado-subtarea" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;"></select>
-                <button type="submit" class="boton pequeno" style="width:auto;">Agregar</button>
-            </form>
-        ` : "";
+            const filasSubtareas = subtareas.length === 0
+                ? `<p class="detalle">Sin subtareas asignadas.</p>`
+                : subtareas.map((s) => `
+                    <div class="fila-conteo" style="margin-top:4px;">
+                        <span class="etiqueta">
+                            ${s.estado === "hecha" ? "✅" : "⬜"} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}
+                        </span>
+                        ${s.estado === "pendiente" && puedeMarcarSubtarea(s) ? `<button class="boton pequeno" data-hecha-subtarea="${s.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar hecha</button>` : ""}
+                    </div>
+                `).join("");
+
+            const formularioSubtarea = esLider ? `
+                <form class="form-nueva-subtarea" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                    <input type="text" placeholder="Nueva subtarea" class="input-titulo-subtarea" style="flex:1; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                    <select class="select-asignado-subtarea" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;"></select>
+                    <button type="submit" class="boton pequeno" style="width:auto;">Agregar</button>
+                </form>
+            ` : "";
+
+            return `
+                <div style="margin-top:14px; padding-top:8px; border-top:1px solid #ddd;">
+                    <strong style="font-size:12px;">Subtareas:</strong>
+                    ${filasSubtareas}
+                    ${formularioSubtarea}
+                </div>
+            `;
+
+        })();
 
         const filasComentarios = comentarios.length === 0
             ? `<p class="detalle">Sin comentarios todavía.</p>`
@@ -862,17 +919,18 @@ async function abrirDetalleTarea(id, forzar) {
                 </div>
             `).join("");
 
+        const lineaRamas = tarea.tipo === "tarea" && ramaIdsTarea.length > 1
+            ? `<p class="detalle" style="margin-top:4px;">Ramas responsables: ${ramaIdsTarea.map((idRama) => mapaRamas[idRama] || "—").join(", ")}</p>`
+            : "";
+
         contenedor.innerHTML = `
+            ${lineaRamas}
             <div style="margin-top:8px; padding-top:8px; border-top:1px solid #ddd;">
                 <strong style="font-size:12px;">Participaron:</strong>
                 ${filasChecks}
                 ${acciones}
             </div>
-            <div style="margin-top:14px; padding-top:8px; border-top:1px solid #ddd;">
-                <strong style="font-size:12px;">Subtareas:</strong>
-                ${filasSubtareas}
-                ${formularioSubtarea}
-            </div>
+            ${bloqueSubtareas}
             <div style="margin-top:14px; padding-top:8px; border-top:1px solid #ddd;">
                 <strong style="font-size:12px;">Comentarios:</strong>
                 ${filasComentarios}
@@ -1029,15 +1087,42 @@ async function cargarSolicitudes() {
 
         const { tareas } = await peticionApi("/api/tareas?tipo=solicitud");
 
-        const recibidas = tareas.filter((t) => perfilActual && t.rama_id === perfilActual.rama_id);
+        const recibidas = tareas.filter((t) => perfilActual && (t.rama_id === perfilActual.rama_id || t.rama_id === null));
         const enviadas = tareas.filter((t) => perfilActual && t.creado_por === perfilActual.id);
 
         renderizarListaTareas(document.getElementById("listaSolicitudesRecibidas"), recibidas);
         renderizarListaTareas(document.getElementById("listaSolicitudesEnviadas"), enviadas);
+        renderizarAlertasSolicitudes(recibidas);
 
     } catch (error) {
         console.error(error);
     }
+
+}
+
+function renderizarAlertasSolicitudes(recibidas) {
+
+    const contenedor = document.getElementById("alertasBarraLogistica");
+
+    const pendientes = recibidas.filter((t) => {
+        if (t.estado !== "pendiente") return false;
+        const yaCubierto = t.cantidad_personas && t.checks_count >= t.cantidad_personas;
+        return !yaCubierto;
+    });
+
+    contenedor.innerHTML = pendientes.map((t) => `
+        <div class="alerta-chip" data-tarea-alerta="${t.id}">
+            <span>🆘 ${mapaRamas[t.rama_origen_id] || "Una rama"} necesita ayuda: ${t.titulo}</span>
+            <span class="numero">${t.cantidad_personas ? `${t.checks_count || 0}/${t.cantidad_personas}` : ""}</span>
+        </div>
+    `).join("");
+
+    contenedor.querySelectorAll("[data-tarea-alerta]").forEach((chip) => {
+        chip.addEventListener("click", () => {
+            document.querySelector('.tab-modulo[data-vista="comunicacion"]').click();
+            setTimeout(() => abrirDetalleTarea(chip.dataset.tareaAlerta, true), 150);
+        });
+    });
 
 }
 
@@ -1059,13 +1144,16 @@ document.getElementById("formSolicitud").addEventListener("submit", async (event
 
     try {
 
+        const ramaSeleccionada = document.getElementById("inputRamaDestinoSolicitud").value;
+
         await peticionApi("/api/tareas", {
             method: "POST",
             body: JSON.stringify({
                 tipo: "solicitud",
-                ramaId: document.getElementById("inputRamaDestinoSolicitud").value,
+                ramaId: ramaSeleccionada === "todas" ? null : ramaSeleccionada,
                 titulo: document.getElementById("inputTituloSolicitud").value.trim(),
-                descripcion: document.getElementById("inputDescripcionSolicitud").value.trim()
+                descripcion: document.getElementById("inputDescripcionSolicitud").value.trim(),
+                cantidadPersonas: document.getElementById("inputCantidadPersonasSolicitud").value || null
             })
         });
 

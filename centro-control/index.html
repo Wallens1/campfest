@@ -290,19 +290,24 @@
             <div class="grid-info" id="detalleActividadInfo" style="margin-top:14px;"></div>
 
             <div class="seccion oculto" id="bloqueCrearTareaActividad">
-                <h3>Asignar tarea a una rama</h3>
-                <form id="formTareaActividad" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
-                    <div class="campo" style="margin-bottom:0;">
-                        <label for="inputRamaTareaActividad">Rama</label>
-                        <select id="inputRamaTareaActividad" required></select>
+                <h3>Asignar tarea (una o varias ramas)</h3>
+                <p style="font-size:12px; color:#777; margin-top:-8px;">
+                    El líder de cada rama que marques queda automáticamente como responsable.
+                </p>
+                <form id="formTareaActividad">
+                    <div class="campo">
+                        <label>Ramas responsables</label>
+                        <div id="ramasTareaActividad" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
                     </div>
-                    <div class="campo" style="margin-bottom:0; flex:1; min-width:180px;">
-                        <label for="inputTituloTareaActividad">¿Qué debe hacer?</label>
-                        <input type="text" id="inputTituloTareaActividad" placeholder="Ej: Sonido y luces" required>
-                    </div>
-                    <div class="campo" style="margin-bottom:0;">
-                        <label for="inputHoraTareaActividad">Debe estar listo a las</label>
-                        <input type="time" id="inputHoraTareaActividad">
+                    <div class="grid-info" style="margin-bottom:0;">
+                        <div class="campo">
+                            <label for="inputTituloTareaActividad">¿Qué debe hacer?</label>
+                            <input type="text" id="inputTituloTareaActividad" placeholder="Ej: Sonido y luces" required>
+                        </div>
+                        <div class="campo">
+                            <label for="inputHoraTareaActividad">Debe estar listo a las</label>
+                            <input type="time" id="inputHoraTareaActividad">
+                        </div>
                     </div>
                     <button type="submit" class="boton pequeno">Asignar</button>
                 </form>
@@ -324,16 +329,22 @@
         <div class="tarjeta oculto" id="tarjetaAnaliticaAdmin" style="margin-top:14px;">
             <h3>Analítica de cumplimiento</h3>
 
-            <div class="graficos-fila" style="grid-template-columns:1fr 1fr;">
+            <div class="graficos-fila" style="grid-template-columns:1fr 1fr 1fr;">
                 <div class="grafico-tarjeta">
                     <h3>% cumplimiento por rama</h3>
                     <canvas id="graficoCumplimientoRamas"></canvas>
+                </div>
+                <div class="grafico-tarjeta">
+                    <h3>Cuánto ha hecho cada rama</h3>
+                    <canvas id="graficoPastelRamas"></canvas>
                 </div>
                 <div class="grafico-tarjeta">
                     <h3>Tareas por hora programada</h3>
                     <canvas id="graficoTareasPorHora"></canvas>
                 </div>
             </div>
+
+            <div class="lista-conteo" id="listaPorcentajesRamas" style="margin-top:14px;"></div>
 
             <div class="grid-info" style="margin-top:16px;">
                 <div>

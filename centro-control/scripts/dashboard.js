@@ -346,7 +346,8 @@ async function cargarSolicitudesInternas() {
             : tareas.slice(0, 20).map((t) => `
                 <div class="feed-item">
                     <span class="hora">${formatearHora(t.creado_en)}</span>
-                    ${mapaRamas[t.rama_origen_id] || "—"} → ${mapaRamas[t.rama_id] || "—"} · ${t.titulo}
+                    ${mapaRamas[t.rama_origen_id] || "—"} → ${t.rama_id ? (mapaRamas[t.rama_id] || "—") : "🆘 todas las ramas"} · ${t.titulo}
+                    ${t.cantidad_personas ? ` (${t.checks_count || 0}/${t.cantidad_personas})` : ""}
                     <div class="usuario"><span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span></div>
                 </div>
             `).join("");
@@ -626,6 +627,30 @@ function crearOActualizarGrafico(idCanvas, tipo, labels, valores, color) {
         options: {
             plugins: { legend: { display: false } },
             scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+
+}
+
+const PALETA_PASTEL = ["#5B4B8A", "#1FB6A6", "#FF5D5D", "#FFC93C", "#1FB65D", "#E23D3D", "#1A1A2E"];
+
+function crearOActualizarGraficoPastel(idCanvas, labels, valores) {
+
+    if (graficos[idCanvas]) {
+        graficos[idCanvas].data.labels = labels;
+        graficos[idCanvas].data.datasets[0].data = valores;
+        graficos[idCanvas].update();
+        return;
+    }
+
+    graficos[idCanvas] = new Chart(document.getElementById(idCanvas), {
+        type: "pie",
+        data: {
+            labels,
+            datasets: [{ data: valores, backgroundColor: labels.map((_, i) => PALETA_PASTEL[i % PALETA_PASTEL.length]) }]
+        },
+        options: {
+            plugins: { legend: { display: true, position: "bottom", labels: { font: { size: 10 } } } }
         }
     });
 
@@ -1575,8 +1600,12 @@ async function abrirDetalleActividad(id) {
         document.getElementById("bloqueCrearTareaActividad").classList.toggle("oculto", perfilActual?.rol !== "admin");
 
         if (perfilActual?.rol === "admin") {
-            document.getElementById("inputRamaTareaActividad").innerHTML = ramasDisponibles
-                .map((r) => `<option value="${r.id}">${r.nombre}</option>`).join("");
+            document.getElementById("ramasTareaActividad").innerHTML = ramasDisponibles.map((r) => `
+                <label style="display:flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600;">
+                    <input type="checkbox" name="ramaNuevaTarea" value="${r.id}">
+                    ${r.nombre}
+                </label>
+            `).join("");
         }
 
         renderizarTareasPorRama(tareas);
@@ -1617,23 +1646,149 @@ function renderizarTareasPorRama(tareas) {
         return;
     }
 
-    const porRama = {};
-    tareas.forEach((t) => {
-        const clave = mapaRamas[t.rama_id] || "Sin rama";
-        (porRama[clave] = porRama[clave] || []).push(t);
-    });
+    contenedor.innerHTML = tareas.map((t) => {
 
-    contenedor.innerHTML = Object.entries(porRama).map(([rama, lista]) => `
-        <div style="margin-bottom:12px;">
-            <strong style="font-size:13px;">${rama}</strong>
-            ${lista.map((t) => `
-                <div class="fila-conteo" style="margin-top:6px;">
-                    <span class="etiqueta">${t.titulo}${t.hora_programada ? ` · Listo a las ${formatearFechaHora(t.hora_programada)}` : ""}</span>
+        const nombresRamas = (t.ramas && t.ramas.length > 0 ? t.ramas : [t.rama_id])
+            .map((idRama) => mapaRamas[idRama] || "Sin rama").join(", ");
+
+        return `
+            <div class="fila-conteo" data-tarea-actividad="${t.id}" style="margin-top:6px; cursor:pointer; flex-direction:column; align-items:stretch; gap:4px;">
+                <div style="display:flex; justify-content:space-between; width:100%; gap:8px;">
+                    <span class="etiqueta">${t.titulo}</span>
                     <span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span>
                 </div>
-            `).join("")}
-        </div>
-    `).join("");
+                <div class="detalle">
+                    Ramas: ${nombresRamas}${t.hora_programada ? ` · Listo a las ${formatearFechaHora(t.hora_programada)}` : ""}
+                </div>
+                <div class="oculto" id="detalleTareaActividad-${t.id}"></div>
+            </div>
+        `;
+
+    }).join("");
+
+    contenedor.querySelectorAll("[data-tarea-actividad]").forEach((fila) => {
+        fila.addEventListener("click", (evento) => {
+            if (evento.target.closest("button, input, select, form")) return;
+            abrirDetalleTareaEnActividad(fila.dataset.tareaActividad);
+        });
+    });
+
+}
+
+async function abrirDetalleTareaEnActividad(tareaId) {
+
+    const contenedor = document.getElementById(`detalleTareaActividad-${tareaId}`);
+
+    if (!contenedor.classList.contains("oculto")) {
+        contenedor.classList.add("oculto");
+        return;
+    }
+
+    try {
+
+        const [{ tarea, ramas }, { subtareas }] = await Promise.all([
+            peticionApi(`/api/tareas/${tareaId}`),
+            peticionApi(`/api/tareas/${tareaId}/subtareas`)
+        ]);
+
+        const miembrosPorRama = await Promise.all(
+            ramas.map((r) => peticionApi(`/api/centro-control/ramas/${r.id}/miembros`).then((res) => res.miembros))
+        );
+        const miembros = [...new Map(miembrosPorRama.flat().map((m) => [m.id, m])).values()];
+
+        const filasSubtareas = subtareas.length === 0
+            ? `<p class="detalle">Sin subtareas asignadas.</p>`
+            : subtareas.map((s) => `
+                <div class="fila-conteo" style="margin-top:4px;">
+                    <span class="etiqueta">${s.estado === "hecha" ? "✅" : "⬜"} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}</span>
+                </div>
+            `).join("");
+
+        contenedor.innerHTML = `
+            <div style="margin-top:8px; padding-top:8px; border-top:1px solid #ddd;">
+                <strong style="font-size:12px;">Subtareas:</strong>
+                ${filasSubtareas}
+                <form class="form-nueva-subtarea-admin" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                    <input type="text" placeholder="Nueva subtarea" class="input-titulo-subtarea-admin" style="flex:1; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                    <select class="select-asignado-subtarea-admin" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                        <option value="">Sin asignar</option>
+                        ${miembros.map((m) => `<option value="${m.id}">${m.nombre}</option>`).join("")}
+                    </select>
+                    <button type="submit" class="boton pequeno" style="width:auto;">Agregar</button>
+                </form>
+            </div>
+            <div style="margin-top:14px; padding-top:8px; border-top:1px solid #ddd;">
+                <strong style="font-size:12px;">Reasignar ramas:</strong>
+                <div class="checkboxes-reasignar-rama" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:6px;">
+                    ${ramasDisponibles.map((r) => `
+                        <label style="display:flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600;">
+                            <input type="checkbox" value="${r.id}" ${ramas.some((asignada) => asignada.id === r.id) ? "checked" : ""}>
+                            ${r.nombre}
+                        </label>
+                    `).join("")}
+                </div>
+                <button class="boton pequeno secundario" data-guardar-ramas="1" style="width:auto; margin-top:8px;">Guardar ramas</button>
+            </div>
+        `;
+
+        contenedor.classList.remove("oculto");
+
+        contenedor.querySelector(".form-nueva-subtarea-admin").addEventListener("submit", (evento) => {
+            evento.preventDefault();
+            evento.stopPropagation();
+            const form = evento.target;
+            crearSubtareaEnActividad(
+                tareaId,
+                form.querySelector(".input-titulo-subtarea-admin").value.trim(),
+                form.querySelector(".select-asignado-subtarea-admin").value
+            );
+        });
+
+        contenedor.querySelector("[data-guardar-ramas]").addEventListener("click", (evento) => {
+            evento.stopPropagation();
+            const seleccionadas = [...contenedor.querySelectorAll(".checkboxes-reasignar-rama input:checked")].map((c) => c.value);
+            reasignarRamasTarea(tareaId, seleccionadas);
+        });
+
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+async function crearSubtareaEnActividad(tareaId, titulo, asignadoA) {
+
+    if (!titulo) return;
+
+    try {
+        await peticionApi(`/api/tareas/${tareaId}/subtareas`, {
+            method: "POST",
+            body: JSON.stringify({ titulo, asignadoA: asignadoA || null })
+        });
+        document.getElementById(`detalleTareaActividad-${tareaId}`).classList.add("oculto");
+        await abrirDetalleTareaEnActividad(tareaId);
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+async function reasignarRamasTarea(tareaId, ramaIds) {
+
+    if (ramaIds.length === 0) {
+        alert("Debes dejar al menos una rama marcada");
+        return;
+    }
+
+    try {
+        await peticionApi(`/api/tareas/${tareaId}/ramas`, {
+            method: "PATCH",
+            body: JSON.stringify({ ramaIds })
+        });
+        await abrirDetalleActividad(actividadAbiertaId);
+    } catch (error) {
+        alert(error.message);
+    }
 
 }
 
@@ -1642,6 +1797,13 @@ document.getElementById("formTareaActividad").addEventListener("submit", async (
     evento.preventDefault();
     const mensaje = document.getElementById("mensajeTareaActividad");
     const hora = document.getElementById("inputHoraTareaActividad").value;
+
+    const ramaIds = [...document.querySelectorAll('input[name="ramaNuevaTarea"]:checked')].map((c) => c.value);
+
+    if (ramaIds.length === 0) {
+        mostrarMensaje(mensaje, "Marca al menos una rama responsable", "fallo");
+        return;
+    }
 
     try {
 
@@ -1652,13 +1814,13 @@ document.getElementById("formTareaActividad").addEventListener("submit", async (
             body: JSON.stringify({
                 tipo: "tarea",
                 actividadId: actividadAbiertaId,
-                ramaId: document.getElementById("inputRamaTareaActividad").value,
+                ramaIds,
                 titulo: document.getElementById("inputTituloTareaActividad").value.trim(),
                 horaProgramada: hora ? new Date(`${actividad.fecha}T${hora}`).toISOString() : null
             })
         });
 
-        mostrarMensaje(mensaje, "Tarea asignada correctamente", "ok");
+        mostrarMensaje(mensaje, "Tarea asignada correctamente (el líder de cada rama ya quedó como responsable)", "ok");
         document.getElementById("formTareaActividad").reset();
         await abrirDetalleActividad(actividadAbiertaId);
 
@@ -1688,6 +1850,27 @@ async function cargarAnaliticaAdmin() {
             cumplimientoRamas.map((r) => r.porcentajeCumplimiento),
             "#1FB6A6"
         );
+
+        crearOActualizarGraficoPastel(
+            "graficoPastelRamas",
+            cumplimientoRamas.map((r) => r.rama),
+            cumplimientoRamas.map((r) => r.completadas)
+        );
+
+        const totalCompletadas = cumplimientoRamas.reduce((s, r) => s + r.completadas, 0);
+
+        document.getElementById("listaPorcentajesRamas").innerHTML = cumplimientoRamas.length === 0
+            ? `<p class="detalle">Todavía no hay tareas registradas.</p>`
+            : cumplimientoRamas.map((r) => `
+                <div class="fila-conteo">
+                    <span class="etiqueta">${r.rama}</span>
+                    <span class="valor">
+                        ${r.completadas}/${r.total} tareas hechas
+                        ${totalCompletadas > 0 ? ` · ${Math.round((r.completadas / totalCompletadas) * 100)}% del total completado` : ""}
+                        · ${r.porcentajeCumplimiento}% a tiempo
+                    </span>
+                </div>
+            `).join("");
 
         const horas = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, "0"));
 
