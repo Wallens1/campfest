@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camp Fest · Centro de Control</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="pantallaLogin">
+    <div class="tarjeta">
+        <div class="encabezado-login">
+            <span class="eyebrow">Camp Fest · Centro de Control</span>
+            <h1>Centro de Operaciones</h1>
+        </div>
+
+        <form id="formLogin">
+            <div class="campo">
+                <label for="inputEmail">Correo</label>
+                <input type="email" id="inputEmail" autocomplete="username" required>
+            </div>
+            <div class="campo">
+                <label for="inputPassword">Contraseña</label>
+                <input type="password" id="inputPassword" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="boton" id="btnLogin">Iniciar sesión</button>
+        </form>
+
+        <div class="mensaje" id="mensajeLogin"></div>
+    </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboard" class="oculto">
+
+    <div class="barra-superior">
+        <span class="marca">🛰️ Camp Fest · Centro de Control</span>
+        <div class="acciones-rapidas">
+            <span class="usuario-actual" id="usuarioActual"></span>
+            <button class="boton pequeno" id="btnAbrirFormIncidente">Registrar incidente</button>
+            <button class="boton pequeno secundario" id="btnEnfocarBusqueda">Buscar</button>
+            <button class="boton pequeno terciario" id="btnExportarExcel">Exportar Excel</button>
+            <button class="boton pequeno amarillo" id="btnExportarPdf">Exportar PDF</button>
+            <button class="boton pequeno" id="btnCerrarSesion">Cerrar sesión</button>
+        </div>
+    </div>
+
+    <!-- Panel de alertas: siempre visible -->
+    <div class="alertas-barra" id="alertasBarra"></div>
+
+    <!-- Estadísticas -->
+    <div class="stats-fila">
+        <div class="tarjeta grupo-stat">
+            <h3>Participantes</h3>
+            <div class="stats-grid" id="statsParticipantes"></div>
+        </div>
+        <div class="tarjeta grupo-stat">
+            <h3>Alimentación</h3>
+            <div class="stats-grid" id="statsAlimentacion"></div>
+        </div>
+        <div class="tarjeta grupo-stat">
+            <h3>Incidentes</h3>
+            <div class="stats-grid" id="statsIncidentes"></div>
+        </div>
+        <div class="tarjeta grupo-stat">
+            <h3>Carpas</h3>
+            <div class="stats-grid" id="statsCarpas"></div>
+        </div>
+    </div>
+
+    <!-- Búsqueda global -->
+    <div class="tarjeta" style="margin-bottom:14px;">
+        <form class="busqueda-global" id="formBusquedaGlobal">
+            <input type="text" id="inputBusquedaGlobal" placeholder="Buscar por nombre, documento, código, teléfono, carpa o código de incidente...">
+            <button type="submit" class="boton pequeno">Buscar</button>
+        </form>
+        <div class="resultados-globales oculto" id="resultadosGlobales"></div>
+    </div>
+
+    <!-- Formulario de registro de incidente -->
+    <div class="tarjeta oculto" id="tarjetaFormIncidente" style="margin-bottom:14px;">
+        <h3>Registrar incidente</h3>
+        <form id="formIncidente">
+            <div class="grid-info" style="margin-bottom:0;">
+                <div class="campo">
+                    <label for="inputCategoria">Categoría</label>
+                    <select id="inputCategoria" required></select>
+                </div>
+                <div class="campo">
+                    <label for="inputPrioridad">Prioridad</label>
+                    <select id="inputPrioridad" required></select>
+                </div>
+                <div class="campo">
+                    <label for="inputZona">Zona</label>
+                    <select id="inputZona"></select>
+                </div>
+                <div class="campo">
+                    <label for="inputLugar">Lugar específico</label>
+                    <input type="text" id="inputLugar" placeholder="Ej: Carpa 4">
+                </div>
+                <div class="campo">
+                    <label for="inputReportadoPor">Reportado por (logística)</label>
+                    <input type="text" id="inputReportadoPor" placeholder="Ej: Logística 2">
+                </div>
+                <div class="campo">
+                    <label for="inputCodigoParticipante">Código de participante (opcional)</label>
+                    <input type="text" id="inputCodigoParticipante" placeholder="Código enviado por WhatsApp">
+                </div>
+            </div>
+            <div class="mensaje" id="mensajeParticipanteIncidente"></div>
+            <div class="campo">
+                <label for="inputDescripcion">Descripción</label>
+                <textarea id="inputDescripcion" required></textarea>
+            </div>
+            <button type="submit" class="boton pequeno">Guardar incidente</button>
+        </form>
+        <div class="mensaje" id="mensajeIncidente"></div>
+    </div>
+
+    <!-- Layout principal: tabla de incidentes + columna lateral -->
+    <div class="layout-principal">
+
+        <div class="tarjeta">
+            <h3>Incidentes</h3>
+
+            <div class="filtros">
+                <select id="filtroEstado"><option value="">Todos los estados</option></select>
+                <select id="filtroPrioridad"><option value="">Todas las prioridades</option></select>
+                <select id="filtroCategoria"><option value="">Todas las categorías</option></select>
+                <select id="filtroZona"><option value="">Todas las zonas</option></select>
+                <select id="filtroResponsable"><option value="">Todos los responsables</option></select>
+                <input type="date" id="filtroFecha">
+                <button class="boton pequeno" id="btnLimpiarFiltros">Limpiar</button>
+            </div>
+
+            <div class="tabla-wrap">
+                <table class="tabla-incidentes">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Hora</th>
+                            <th>Lugar</th>
+                            <th>Categoría</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                            <th>Responsable</th>
+                            <th>Transcurrido</th>
+                            <th>Próx. seguimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filasIncidentes"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-lateral">
+
+            <div class="tarjeta">
+                <h3>Cola de seguimiento</h3>
+                <div class="lista-scroll" id="colaSeguimiento"></div>
+            </div>
+
+            <div class="tarjeta">
+                <h3>Actividad reciente</h3>
+                <div class="lista-scroll" id="feedActividad"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Gráficos -->
+    <div class="graficos-fila">
+        <div class="tarjeta grafico-tarjeta">
+            <h3>Por categoría</h3>
+            <canvas id="graficoCategoria"></canvas>
+        </div>
+        <div class="tarjeta grafico-tarjeta">
+            <h3>Por prioridad</h3>
+            <canvas id="graficoPrioridad"></canvas>
+        </div>
+        <div class="tarjeta grafico-tarjeta">
+            <h3>Por zona</h3>
+            <canvas id="graficoZona"></canvas>
+        </div>
+        <div class="tarjeta grafico-tarjeta">
+            <h3>Por hora del día</h3>
+            <canvas id="graficoHora"></canvas>
+        </div>
+    </div>
+
+    <!-- Participantes -->
+    <div class="tarjeta" style="margin-bottom:14px;">
+        <h3>Participantes</h3>
+        <div class="tabla-wrap" style="max-height:420px;">
+            <table class="tabla-participantes">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Municipio</th>
+                        <th>Carpa</th>
+                        <th>Líder</th>
+                        <th>Ingreso</th>
+                        <th>Alimentación</th>
+                        <th>Incidentes activos</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="filasParticipantes"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Configuración de carpas (solo administrador) -->
+    <div class="tarjeta oculto" id="panelAdminCarpas">
+        <h3>Configurar capacidad de carpas</h3>
+        <form id="formCapacidadCarpa" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+            <div class="campo" style="margin-bottom:0;">
+                <label for="inputNombreCarpa">Carpa</label>
+                <input type="text" id="inputNombreCarpa" placeholder="Ej: Carpa 4" required>
+            </div>
+            <div class="campo" style="margin-bottom:0;">
+                <label for="inputCapacidadCarpa">Capacidad</label>
+                <input type="number" id="inputCapacidadCarpa" min="1" required>
+            </div>
+            <button type="submit" class="boton pequeno">Guardar</button>
+        </form>
+        <div class="mensaje" id="mensajeCarpa"></div>
+        <div class="lista-conteo" id="listaCapacidadCarpas" style="margin-top:12px;"></div>
+    </div>
+
+</div>
+
+<!-- ===== PANEL DE DETALLE DEL INCIDENTE ===== -->
+<div class="overlay-detalle oculto" id="overlayDetalle"></div>
+<div class="panel-detalle" id="panelDetalle">
+    <button class="cerrar-panel" id="btnCerrarDetalle">✕</button>
+
+    <div class="badges" id="detalleIncidenteBadges"></div>
+    <h2 id="detalleIncidenteCodigo"></h2>
+    <p id="detalleIncidenteDescripcion"></p>
+
+    <div class="grid-info" id="detalleIncidenteInfo"></div>
+
+    <div class="seccion">
+        <h3>Bitácora</h3>
+        <div id="bitacoraIncidente"></div>
+    </div>
+
+    <div class="campo" style="margin-top:14px;">
+        <label for="inputObservacionesSeguimiento">Observaciones del seguimiento</label>
+        <textarea id="inputObservacionesSeguimiento"></textarea>
+    </div>
+
+    <div class="acciones-incidente" id="accionesIncidente"></div>
+    <div class="acciones-incidente">
+        <button class="boton pequeno secundario" id="btnImprimirIncidente">Imprimir</button>
+    </div>
+
+    <div class="mensaje" id="mensajeDetalleIncidente"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="scripts/dashboard.js" defer></script>
+</body>
+</html>

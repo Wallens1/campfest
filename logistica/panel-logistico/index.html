@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camp Fest · Ingreso de logística</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="pantallaLogin">
+    <div class="tarjeta">
+        <div class="encabezado-login">
+            <span class="eyebrow">Camp Fest · Logística</span>
+            <h1>Ingreso de participantes</h1>
+        </div>
+
+        <form id="formLogin">
+            <div class="campo">
+                <label for="inputEmail">Correo</label>
+                <input type="email" id="inputEmail" autocomplete="username" required>
+            </div>
+            <div class="campo">
+                <label for="inputPassword">Contraseña</label>
+                <input type="password" id="inputPassword" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="boton" id="btnLogin">Iniciar sesión</button>
+        </form>
+
+        <div class="mensaje" id="mensajeLogin"></div>
+    </div>
+</div>
+
+<!-- ===== PANEL ===== -->
+<div id="pantallaPanel" class="oculto">
+
+    <div class="barra-superior">
+        <span class="marca">Camp Fest · Logística</span>
+        <div>
+            <span class="usuario-actual" id="usuarioActual"></span>
+            <button class="boton pequeno" id="btnCerrarSesion">Cerrar sesión</button>
+        </div>
+    </div>
+
+    <div class="tabs-busqueda">
+        <button class="tab-busqueda activo" data-campo="codigo">Código</button>
+        <button class="tab-busqueda" data-campo="documento">Documento</button>
+        <button class="tab-busqueda" data-campo="nombre">Nombre</button>
+    </div>
+
+    <form class="buscador" id="formBuscar">
+        <input type="text" id="inputBusqueda" placeholder="Ingresa el código enviado por WhatsApp" required>
+        <button type="submit" class="boton pequeno">Buscar</button>
+    </form>
+
+    <div class="mensaje" id="mensajeBusqueda"></div>
+
+    <div class="resultados" id="resultados"></div>
+
+    <div class="ficha oculto" id="ficha">
+        <div class="badges" id="badges"></div>
+
+        <h2 id="fichaNombre"></h2>
+        <div class="documento" id="fichaDocumento"></div>
+
+        <div class="grid-info" id="gridInfo"></div>
+
+        <div class="seccion">
+            <h3>Ingreso</h3>
+            <div id="bloqueIngreso"></div>
+        </div>
+
+        <div class="seccion">
+            <h3>Asignación de carpa</h3>
+            <form class="form-asignacion" id="formAsignacion">
+                <div class="campo">
+                    <label for="inputCarpa">Carpa</label>
+                    <input type="text" id="inputCarpa" placeholder="Ej: Carpa 4">
+                </div>
+                <label class="checkbox-lider">
+                    <input type="checkbox" id="checkboxLider">
+                    Líder de carpa
+                </label>
+                <button type="submit" class="boton pequeno">Guardar</button>
+            </form>
+        </div>
+
+        <div class="seccion">
+            <h3 id="tituloAlimentacion">Alimentación</h3>
+            <div class="checklist-alimentacion" id="checklistAlimentacion"></div>
+        </div>
+
+        <div class="seccion">
+            <h3>Historial</h3>
+            <div id="historial"></div>
+        </div>
+
+        <div class="mensaje" id="mensajeFicha"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../scripts/dashboard.js" defer></script>
+</body>
+</html>
