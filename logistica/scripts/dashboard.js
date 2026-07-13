@@ -1314,7 +1314,14 @@ async function abrirDetalleActividadCronograma(id) {
             <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${actividad.encargados_metodologicos || "—"}</span></div>
         `;
 
-        const tareasDeMiRama = tareas.filter((t) => perfilActual && t.rama_id === perfilActual.rama_id);
+        // Una tarea puede tener 2+ ramas asignadas (t.ramas), no solo su
+        // rama_id "principal" — hay que revisar la lista completa o se
+        // pierden las tareas donde mi rama quedó como secundaria.
+        const tareasDeMiRama = tareas.filter((t) => {
+            if (!perfilActual) return false;
+            const ramasDeEsta = t.ramas && t.ramas.length > 0 ? t.ramas : [t.rama_id];
+            return ramasDeEsta.includes(perfilActual.rama_id);
+        });
         renderizarListaTareas(document.getElementById("listaTareasMiRamaActividad"), tareasDeMiRama);
 
     } catch (error) {
