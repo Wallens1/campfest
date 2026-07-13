@@ -47,6 +47,15 @@
         </div>
     </div>
 
+    <div class="tabs-modulo">
+        <button class="tab-modulo activo" data-vista="panel">Panel</button>
+        <button class="tab-modulo" data-vista="cronograma">Cronograma</button>
+        <button class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion">Administración</button>
+    </div>
+
+    <!-- ===== VISTA: PANEL ===== -->
+    <section id="vistaPanel">
+
     <!-- Panel de alertas: siempre visible -->
     <div class="alertas-barra" id="alertasBarra"></div>
 
@@ -168,6 +177,11 @@
                 <div class="lista-scroll" id="feedActividad"></div>
             </div>
 
+            <div class="tarjeta">
+                <h3>Solicitudes internas entre ramas</h3>
+                <div class="lista-scroll" id="listaSolicitudesInternas"></div>
+            </div>
+
         </div>
 
     </div>
@@ -214,8 +228,150 @@
         </div>
     </div>
 
-    <!-- Administración (solo administrador) -->
-    <div class="oculto" id="panelAdministracion">
+    </section>
+
+    <!-- ===== VISTA: CRONOGRAMA ===== -->
+    <section id="vistaCronograma" class="oculto">
+
+        <div class="tarjeta oculto" id="tarjetaCronogramaAdmin" style="margin-bottom:14px;">
+            <h3>Nueva actividad</h3>
+            <form id="formActividad">
+                <div class="grid-info" style="margin-bottom:0;">
+                    <div class="campo">
+                        <label for="inputTituloActividad">Título</label>
+                        <input type="text" id="inputTituloActividad" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputFechaActividad">Fecha</label>
+                        <input type="date" id="inputFechaActividad" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputHoraInicioActividad">Hora inicio</label>
+                        <input type="time" id="inputHoraInicioActividad" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputHoraFinActividad">Hora fin</label>
+                        <input type="time" id="inputHoraFinActividad" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputEspacioActividad">Espacio usado</label>
+                        <input type="text" id="inputEspacioActividad" placeholder="Ej: Escenario principal">
+                    </div>
+                    <div class="campo">
+                        <label for="inputAsistentesActividad">Asistentes estimados</label>
+                        <input type="number" id="inputAsistentesActividad" min="0">
+                    </div>
+                </div>
+                <div class="campo">
+                    <label for="inputMaterialesActividad">Materiales usados</label>
+                    <textarea id="inputMaterialesActividad"></textarea>
+                </div>
+                <div class="campo">
+                    <label for="inputEncargadosMetodologicosActividad">Encargados metodológicos (informativo)</label>
+                    <input type="text" id="inputEncargadosMetodologicosActividad" placeholder="Ej: Tallerista invitado Juan Pérez">
+                </div>
+                <div class="campo">
+                    <label for="inputDescripcionActividad">Descripción</label>
+                    <textarea id="inputDescripcionActividad"></textarea>
+                </div>
+                <button type="submit" class="boton pequeno">Crear actividad</button>
+            </form>
+            <div class="mensaje" id="mensajeActividad"></div>
+        </div>
+
+        <div id="listaActividades"></div>
+
+        <!-- ===== DETALLE DE ACTIVIDAD (tareas por rama) ===== -->
+        <div class="tarjeta oculto" id="tarjetaDetalleActividad" style="margin-top:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="detalleActividadTitulo" style="margin:0;"></h2>
+                <button class="boton pequeno secundario" id="btnCerrarDetalleActividad">Cerrar</button>
+            </div>
+            <div class="grid-info" id="detalleActividadInfo" style="margin-top:14px;"></div>
+
+            <div class="seccion oculto" id="bloqueCrearTareaActividad">
+                <h3>Asignar tarea a una rama</h3>
+                <form id="formTareaActividad" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                    <div class="campo" style="margin-bottom:0;">
+                        <label for="inputRamaTareaActividad">Rama</label>
+                        <select id="inputRamaTareaActividad" required></select>
+                    </div>
+                    <div class="campo" style="margin-bottom:0; flex:1; min-width:180px;">
+                        <label for="inputTituloTareaActividad">¿Qué debe hacer?</label>
+                        <input type="text" id="inputTituloTareaActividad" placeholder="Ej: Sonido y luces" required>
+                    </div>
+                    <div class="campo" style="margin-bottom:0;">
+                        <label for="inputHoraTareaActividad">Debe estar listo a las</label>
+                        <input type="time" id="inputHoraTareaActividad">
+                    </div>
+                    <button type="submit" class="boton pequeno">Asignar</button>
+                </form>
+                <div class="mensaje" id="mensajeTareaActividad"></div>
+            </div>
+
+            <div class="seccion">
+                <h3>Tareas por rama</h3>
+                <div id="listaTareasActividad"></div>
+            </div>
+
+            <div class="seccion">
+                <h3>Resumen de cumplimiento de esta actividad</h3>
+                <div id="detalleActividadResumen"></div>
+            </div>
+        </div>
+
+        <!-- ===== ANALÍTICA (admin) ===== -->
+        <div class="tarjeta oculto" id="tarjetaAnaliticaAdmin" style="margin-top:14px;">
+            <h3>Analítica de cumplimiento</h3>
+
+            <div class="graficos-fila" style="grid-template-columns:1fr 1fr;">
+                <div class="grafico-tarjeta">
+                    <h3>% cumplimiento por rama</h3>
+                    <canvas id="graficoCumplimientoRamas"></canvas>
+                </div>
+                <div class="grafico-tarjeta">
+                    <h3>Tareas por hora programada</h3>
+                    <canvas id="graficoTareasPorHora"></canvas>
+                </div>
+            </div>
+
+            <div class="grid-info" style="margin-top:16px;">
+                <div>
+                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">Destacados 🌟</h3>
+                    <div id="listaDestacadosPositivos"></div>
+                </div>
+                <div>
+                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">Necesitan seguimiento ⚠️</h3>
+                    <div id="listaDestacadosNegativos"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== RESUMEN REDUCIDO (control) ===== -->
+        <div class="tarjeta oculto" id="tarjetaResumenControl" style="margin-top:14px;">
+            <h3>Resumen del cronograma</h3>
+            <div class="stats-grid" id="statsResumenControl" style="grid-template-columns:1fr; margin-bottom:16px;"></div>
+
+            <div class="grid-info">
+                <div>
+                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">Próximas</h3>
+                    <div id="listaActividadesProximas"></div>
+                </div>
+                <div>
+                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">En curso</h3>
+                    <div id="listaActividadesEnCurso"></div>
+                </div>
+                <div>
+                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">Terminadas</h3>
+                    <div id="listaActividadesTerminadas"></div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ===== VISTA: ADMINISTRACIÓN (solo administrador) ===== -->
+    <section class="oculto" id="vistaAdministracion">
 
         <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Importar participantes desde Excel</h3>
@@ -308,7 +464,7 @@
             <div class="mensaje" id="mensajeUsuarios"></div>
         </div>
 
-    </div>
+    </section>
 
 </div>
 

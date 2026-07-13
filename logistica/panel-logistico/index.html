@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Camp Fest · Ingreso de logística</title>
+<title>Camp Fest · Logística</title>
 <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
@@ -39,100 +39,231 @@
         <span class="marca">Camp Fest · Logística</span>
         <div>
             <span class="usuario-actual" id="usuarioActual"></span>
-            <button class="boton pequeno secundario" id="btnAbrirFormIncidente">Reportar incidente</button>
             <button class="boton pequeno" id="btnCerrarSesion">Cerrar sesión</button>
         </div>
     </div>
 
-    <div class="tarjeta-incidente oculto" id="tarjetaFormIncidente">
-        <h3 style="margin-top:0;">Reportar incidente</h3>
-        <form id="formIncidente">
-            <div class="grid-info" style="margin-bottom:0;">
-                <div class="campo">
-                    <label for="inputCategoria">Categoría</label>
-                    <select id="inputCategoria" required></select>
-                </div>
-                <div class="campo">
-                    <label for="inputPrioridad">Prioridad</label>
-                    <select id="inputPrioridad" required></select>
-                </div>
-                <div class="campo">
-                    <label for="inputZona">Zona</label>
-                    <select id="inputZona"></select>
-                </div>
-                <div class="campo">
-                    <label for="inputLugar">Lugar específico</label>
-                    <input type="text" id="inputLugar" placeholder="Ej: Carpa 4">
-                </div>
-            </div>
-            <div class="lista-incidentes-mios oculto" id="responsablesCategoria" style="margin-bottom:14px;"></div>
-            <div class="campo">
-                <label for="inputDescripcionIncidente">Descripción</label>
-                <textarea id="inputDescripcionIncidente" required></textarea>
-            </div>
-            <div class="mensaje" id="mensajeParticipanteVinculado"></div>
-            <button type="submit" class="boton pequeno">Enviar al Centro de Control</button>
+    <div class="tabs-modulo">
+        <button class="tab-modulo activo" data-vista="registro">Registro</button>
+        <button class="tab-modulo" data-vista="comunicacion">Comunicación</button>
+        <button class="tab-modulo" data-vista="tareas">Tareas</button>
+        <button class="tab-modulo" data-vista="cronograma">Mi cronograma</button>
+    </div>
+
+    <!-- ===== VISTA: REGISTRO ===== -->
+    <section id="vistaRegistro">
+
+        <div class="tabs-busqueda">
+            <button class="tab-busqueda activo" data-campo="codigo">Código</button>
+            <button class="tab-busqueda" data-campo="documento">Documento</button>
+            <button class="tab-busqueda" data-campo="nombre">Nombre</button>
+        </div>
+
+        <form class="buscador" id="formBuscar">
+            <input type="text" id="inputBusqueda" placeholder="Ingresa el código enviado por WhatsApp" required>
+            <button type="submit" class="boton pequeno">Buscar</button>
         </form>
-        <div class="mensaje" id="mensajeIncidente"></div>
-    </div>
 
-    <div class="tarjeta-incidente" id="tarjetaMisIncidentes">
-        <h3 style="margin-top:0;">Mis incidentes reportados</h3>
-        <div class="lista-incidentes-mios" id="listaMisIncidentes"></div>
-    </div>
+        <div class="mensaje" id="mensajeBusqueda"></div>
 
-    <div class="tabs-busqueda">
-        <button class="tab-busqueda activo" data-campo="codigo">Código</button>
-        <button class="tab-busqueda" data-campo="documento">Documento</button>
-        <button class="tab-busqueda" data-campo="nombre">Nombre</button>
-    </div>
+        <div class="resultados" id="resultados"></div>
 
-    <form class="buscador" id="formBuscar">
-        <input type="text" id="inputBusqueda" placeholder="Ingresa el código enviado por WhatsApp" required>
-        <button type="submit" class="boton pequeno">Buscar</button>
-    </form>
+        <div class="ficha oculto" id="ficha">
+            <div class="badges" id="badges"></div>
 
-    <div class="mensaje" id="mensajeBusqueda"></div>
+            <h2 id="fichaNombre"></h2>
+            <div class="documento" id="fichaDocumento"></div>
 
-    <div class="resultados" id="resultados"></div>
+            <div class="grid-info" id="gridInfo"></div>
 
-    <div class="ficha oculto" id="ficha">
-        <div class="badges" id="badges"></div>
+            <div class="seccion">
+                <h3>Ingreso</h3>
+                <div id="bloqueIngreso"></div>
+            </div>
 
-        <h2 id="fichaNombre"></h2>
-        <div class="documento" id="fichaDocumento"></div>
+            <div class="seccion">
+                <h3>Asignación de carpa</h3>
+                <div class="grid-carpas" id="gridCarpas" style="margin-bottom:14px;"></div>
+                <form class="form-asignacion" id="formAsignacion">
+                    <label class="checkbox-lider">
+                        <input type="checkbox" id="checkboxLider">
+                        Líder de carpa
+                    </label>
+                    <button type="submit" class="boton pequeno">Guardar</button>
+                </form>
+            </div>
 
-        <div class="grid-info" id="gridInfo"></div>
+            <div class="seccion">
+                <h3 id="tituloAlimentacion">Alimentación</h3>
+                <div class="checklist-alimentacion" id="checklistAlimentacion"></div>
+            </div>
 
-        <div class="seccion">
-            <h3>Ingreso</h3>
-            <div id="bloqueIngreso"></div>
+            <div class="seccion">
+                <h3>Historial</h3>
+                <div id="historial"></div>
+            </div>
+
+            <div class="mensaje" id="mensajeFicha"></div>
         </div>
 
-        <div class="seccion">
-            <h3>Asignación de carpa</h3>
-            <div class="grid-carpas" id="gridCarpas" style="margin-bottom:14px;"></div>
-            <form class="form-asignacion" id="formAsignacion">
-                <label class="checkbox-lider">
-                    <input type="checkbox" id="checkboxLider">
-                    Líder de carpa
-                </label>
-                <button type="submit" class="boton pequeno">Guardar</button>
+    </section>
+
+    <!-- ===== VISTA: COMUNICACIÓN ===== -->
+    <section id="vistaComunicacion" class="oculto">
+
+        <div class="tarjeta-incidente">
+            <h3 style="margin-top:0;">Reportar incidente al Centro de Control</h3>
+            <button class="boton pequeno secundario" id="btnAbrirFormIncidente" style="margin-bottom:14px;">Nuevo incidente</button>
+
+            <form id="formIncidente" class="oculto">
+                <div class="grid-info" style="margin-bottom:0;">
+                    <div class="campo">
+                        <label for="inputCategoria">Categoría</label>
+                        <select id="inputCategoria" required></select>
+                    </div>
+                    <div class="campo">
+                        <label for="inputPrioridad">Prioridad</label>
+                        <select id="inputPrioridad" required></select>
+                    </div>
+                    <div class="campo">
+                        <label for="inputZona">Zona</label>
+                        <select id="inputZona"></select>
+                    </div>
+                    <div class="campo">
+                        <label for="inputLugar">Lugar específico</label>
+                        <input type="text" id="inputLugar" placeholder="Ej: Carpa 4">
+                    </div>
+                </div>
+                <div class="lista-incidentes-mios oculto" id="responsablesCategoria" style="margin-bottom:14px;"></div>
+                <div class="campo">
+                    <label for="inputDescripcionIncidente">Descripción</label>
+                    <textarea id="inputDescripcionIncidente" required></textarea>
+                </div>
+                <div class="mensaje" id="mensajeParticipanteVinculado"></div>
+                <button type="submit" class="boton pequeno">Enviar al Centro de Control</button>
             </form>
+            <div class="mensaje" id="mensajeIncidente"></div>
         </div>
 
-        <div class="seccion">
-            <h3 id="tituloAlimentacion">Alimentación</h3>
-            <div class="checklist-alimentacion" id="checklistAlimentacion"></div>
+        <div class="tarjeta-incidente">
+            <h3 style="margin-top:0;">Mis incidentes reportados</h3>
+            <div class="lista-incidentes-mios" id="listaMisIncidentes"></div>
         </div>
 
-        <div class="seccion">
-            <h3>Historial</h3>
-            <div id="historial"></div>
+        <div class="tarjeta-incidente">
+            <h3 style="margin-top:0;">Pedir ayuda a otra rama</h3>
+            <form id="formSolicitud">
+                <div class="campo">
+                    <label for="inputRamaDestinoSolicitud">Rama a la que pides ayuda</label>
+                    <select id="inputRamaDestinoSolicitud" required></select>
+                </div>
+                <div class="campo">
+                    <label for="inputTituloSolicitud">¿Qué necesitas?</label>
+                    <input type="text" id="inputTituloSolicitud" placeholder="Ej: Necesitamos 2 personas en el comedor" required>
+                </div>
+                <div class="campo">
+                    <label for="inputDescripcionSolicitud">Detalle (opcional)</label>
+                    <textarea id="inputDescripcionSolicitud"></textarea>
+                </div>
+                <button type="submit" class="boton pequeno">Enviar solicitud</button>
+            </form>
+            <div class="mensaje" id="mensajeSolicitud"></div>
         </div>
 
-        <div class="mensaje" id="mensajeFicha"></div>
-    </div>
+        <div class="tarjeta-incidente">
+            <h3 style="margin-top:0;">Solicitudes para mi rama</h3>
+            <div id="listaSolicitudesRecibidas"></div>
+        </div>
+
+        <div class="tarjeta-incidente">
+            <h3 style="margin-top:0;">Solicitudes que yo pedí</h3>
+            <div id="listaSolicitudesEnviadas"></div>
+        </div>
+
+    </section>
+
+    <!-- ===== VISTA: TAREAS ===== -->
+    <section id="vistaTareas" class="oculto">
+
+        <div class="tarjeta-incidente oculto" id="tarjetaCrearTarea">
+            <h3 style="margin-top:0;">Nueva tarea para mi rama</h3>
+            <form id="formTarea">
+                <div class="campo">
+                    <label for="inputTituloTarea">Título</label>
+                    <input type="text" id="inputTituloTarea" required>
+                </div>
+                <div class="campo">
+                    <label for="inputDescripcionTarea">Detalle</label>
+                    <textarea id="inputDescripcionTarea"></textarea>
+                </div>
+                <div class="campo">
+                    <label for="inputHoraProgramadaTarea">Hora en que debe estar listo (opcional)</label>
+                    <input type="datetime-local" id="inputHoraProgramadaTarea">
+                </div>
+                <button type="submit" class="boton pequeno">Crear tarea</button>
+            </form>
+            <div class="mensaje" id="mensajeTarea"></div>
+        </div>
+
+        <div class="tarjeta-incidente">
+            <h3 style="margin-top:0;">Tareas de mi rama</h3>
+            <div id="listaTareas"></div>
+        </div>
+
+        <div class="tarjeta-incidente oculto" id="tarjetaEscribirObservacion">
+            <h3 style="margin-top:0;">Escribir observación a alguien de mi rama</h3>
+            <form id="formObservacion">
+                <div class="campo">
+                    <label for="inputMiembroObservacion">Integrante</label>
+                    <select id="inputMiembroObservacion" required></select>
+                </div>
+                <div class="campo">
+                    <label for="inputTipoObservacion">Tipo</label>
+                    <select id="inputTipoObservacion">
+                        <option value="positiva">Positiva</option>
+                        <option value="neutral" selected>Neutral</option>
+                        <option value="negativa">Negativa</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="inputTextoObservacion">Observación</label>
+                    <textarea id="inputTextoObservacion" required></textarea>
+                </div>
+                <button type="submit" class="boton pequeno">Guardar observación</button>
+            </form>
+            <div class="mensaje" id="mensajeObservacion"></div>
+        </div>
+
+        <div class="tarjeta-incidente">
+            <h3 style="margin-top:0;">Mis observaciones</h3>
+            <div id="listaObservaciones"></div>
+        </div>
+
+    </section>
+
+    <!-- ===== VISTA: MI CRONOGRAMA ===== -->
+    <section id="vistaCronograma" class="oculto">
+
+        <div class="tarjeta-incidente">
+            <h3 style="margin-top:0;">Actividades del evento</h3>
+            <div id="listaActividadesCronograma"></div>
+        </div>
+
+        <div class="tarjeta-incidente oculto" id="tarjetaDetalleActividadCronograma">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0;" id="detalleActividadCronogramaTitulo"></h3>
+                <button class="boton pequeno secundario" id="btnCerrarDetalleActividadCronograma">Cerrar</button>
+            </div>
+            <div class="grid-info" id="detalleActividadCronogramaInfo" style="margin-top:14px;"></div>
+
+            <div class="seccion">
+                <h3>Tareas de mi rama para esta actividad</h3>
+                <div id="listaTareasMiRamaActividad"></div>
+            </div>
+        </div>
+
+    </section>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>

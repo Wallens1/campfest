@@ -165,6 +165,7 @@ let intervaloPolling = null;
 let panelDetalleAbierto = false;
 let mapaOperadores = {};
 let ramasDisponibles = [];
+let mapaRamas = {};
 
 async function cargarResponsablesPorCategoria(categoria, contenedor) {
 
@@ -247,6 +248,36 @@ btnCerrarSesion.addEventListener("click", async () => {
     mostrarLogin();
 });
 
+// ==========================
+// Navegación entre pestañas
+// ==========================
+
+document.querySelectorAll(".tab-modulo").forEach((tab) => {
+
+    tab.addEventListener("click", () => {
+
+        document.querySelectorAll(".tab-modulo").forEach((t) => t.classList.remove("activo"));
+        tab.classList.add("activo");
+
+        const vista = tab.dataset.vista;
+
+        document.getElementById("vistaPanel").classList.toggle("oculto", vista !== "panel");
+        document.getElementById("vistaCronograma").classList.toggle("oculto", vista !== "cronograma");
+        document.getElementById("vistaAdministracion").classList.toggle("oculto", vista !== "administracion");
+
+        if (vista === "cronograma") {
+            cargarActividades();
+            if (perfilActual?.rol === "admin") {
+                cargarAnaliticaAdmin();
+            } else {
+                cargarResumenControl();
+            }
+        }
+
+    });
+
+});
+
 async function iniciarDashboard() {
 
     pantallaLogin.classList.add("oculto");
@@ -256,7 +287,10 @@ async function iniciarDashboard() {
     perfilActual = usuario;
     usuarioActual.textContent = `${usuario.nombre} · ${humanizar(usuario.rol)}`;
 
-    document.getElementById("panelAdministracion").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("tabAdministracion").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("tarjetaCronogramaAdmin").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("tarjetaAnaliticaAdmin").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("tarjetaResumenControl").classList.toggle("oculto", usuario.rol === "admin");
 
     llenarSelect(document.getElementById("inputCategoria"), CATEGORIAS, "Selecciona categoría");
     llenarSelect(document.getElementById("inputPrioridad"), PRIORIDADES, "Selecciona prioridad");
@@ -269,6 +303,9 @@ async function iniciarDashboard() {
     const { operadores } = await peticionApi("/api/centro-control/operadores");
     mapaOperadores = Object.fromEntries(operadores.map((o) => [o.id, o.nombre]));
     document.getElementById("filtroResponsable").innerHTML += operadores.map((o) => `<option value="${o.id}">${o.nombre}</option>`).join("");
+
+    const { ramas: todasLasRamas } = await peticionApi("/api/centro-control/ramas");
+    mapaRamas = Object.fromEntries(todasLasRamas.map((r) => [r.id, r.nombre]));
 
     if (usuario.rol === "admin") {
         cargarCapacidadCarpas();
@@ -290,9 +327,33 @@ async function actualizarTodo() {
         cargarActividad(),
         cargarGraficos(),
         cargarParticipantes(),
+        cargarSolicitudesInternas(),
         panelDetalleAbierto ? Promise.resolve() : cargarIncidentes(),
         panelDetalleAbierto ? Promise.resolve() : cargarColaSeguimiento()
     ]);
+
+}
+
+async function cargarSolicitudesInternas() {
+
+    try {
+
+        const { tareas } = await peticionApi("/api/tareas?tipo=solicitud");
+        const contenedor = document.getElementById("listaSolicitudesInternas");
+
+        contenedor.innerHTML = tareas.length === 0
+            ? `<p class="detalle">Sin solicitudes internas registradas.</p>`
+            : tareas.slice(0, 20).map((t) => `
+                <div class="feed-item">
+                    <span class="hora">${formatearHora(t.creado_en)}</span>
+                    ${mapaRamas[t.rama_origen_id] || "—"} → ${mapaRamas[t.rama_id] || "—"} · ${t.titulo}
+                    <div class="usuario"><span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span></div>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
 
 }
 
@@ -1407,6 +1468,315 @@ async function guardarUsuario(id, datos) {
 
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+}
+
+// ==========================
+// Cronograma (actividades)
+// ==========================
+
+function formatearFechaHora(fechaIso) {
+    if (!fechaIso) return "—";
+    return new Date(fechaIso).toLocaleString("es-CO", {
+        day: "2-digit", month: "2-digit", hour: "numeric", minute: "2-digit"
+    });
+}
+
+async function cargarActividades() {
+
+    try {
+
+        const { actividades } = await peticionApi("/api/actividades");
+        const contenedor = document.getElementById("listaActividades");
+
+        contenedor.innerHTML = actividades.length === 0
+            ? `<p class="detalle">Todavía no hay actividades programadas.</p>`
+            : actividades.map((a) => `
+                <div class="incidente-item ${a.cancelada ? "fila-vencido" : ""}" data-actividad="${a.id}">
+                    <div class="fila-superior">
+                        <span class="codigo-incidente">${a.titulo}</span>
+                        ${a.cancelada ? `<span class="badge rojo">Cancelada</span>` : ""}
+                    </div>
+                    <div class="descripcion">${formatearFechaHora(a.hora_inicio)} — ${formatearFechaHora(a.hora_fin)} ${a.espacio_usado ? `· ${a.espacio_usado}` : ""}</div>
+                </div>
+            `).join("");
+
+        contenedor.querySelectorAll("[data-actividad]").forEach((card) => {
+            card.addEventListener("click", () => abrirDetalleActividad(card.dataset.actividad));
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+document.getElementById("formActividad").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeActividad");
+
+    const fecha = document.getElementById("inputFechaActividad").value;
+    const horaInicio = document.getElementById("inputHoraInicioActividad").value;
+    const horaFin = document.getElementById("inputHoraFinActividad").value;
+
+    try {
+
+        await peticionApi("/api/actividades", {
+            method: "POST",
+            body: JSON.stringify({
+                titulo: document.getElementById("inputTituloActividad").value.trim(),
+                descripcion: document.getElementById("inputDescripcionActividad").value.trim(),
+                fecha,
+                horaInicio: new Date(`${fecha}T${horaInicio}`).toISOString(),
+                horaFin: new Date(`${fecha}T${horaFin}`).toISOString(),
+                materialesUsados: document.getElementById("inputMaterialesActividad").value.trim(),
+                espacioUsado: document.getElementById("inputEspacioActividad").value.trim(),
+                cantidadAsistentesEstimada: document.getElementById("inputAsistentesActividad").value || null,
+                encargadosMetodologicos: document.getElementById("inputEncargadosMetodologicosActividad").value.trim()
+            })
+        });
+
+        mostrarMensaje(mensaje, "Actividad creada correctamente", "ok");
+        document.getElementById("formActividad").reset();
+        await cargarActividades();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+let actividadAbiertaId = null;
+
+async function abrirDetalleActividad(id) {
+
+    try {
+
+        const { actividad, tareas } = await peticionApi(`/api/actividades/${id}`);
+        actividadAbiertaId = id;
+
+        const contenedor = document.getElementById("tarjetaDetalleActividad");
+        contenedor.classList.remove("oculto");
+        contenedor.scrollIntoView({ behavior: "smooth" });
+
+        document.getElementById("detalleActividadTitulo").textContent = actividad.titulo;
+
+        document.getElementById("detalleActividadInfo").innerHTML = `
+            <div class="dato"><span class="etiqueta">Fecha</span><span class="valor">${actividad.fecha}</span></div>
+            <div class="dato"><span class="etiqueta">Horario</span><span class="valor">${formatearFechaHora(actividad.hora_inicio)} — ${formatearFechaHora(actividad.hora_fin)}</span></div>
+            <div class="dato"><span class="etiqueta">Espacio</span><span class="valor">${actividad.espacio_usado || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Asistentes estimados</span><span class="valor">${actividad.cantidad_asistentes_estimada ?? "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Materiales</span><span class="valor">${actividad.materiales_usados || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${actividad.encargados_metodologicos || "—"}</span></div>
+        `;
+
+        document.getElementById("bloqueCrearTareaActividad").classList.toggle("oculto", perfilActual?.rol !== "admin");
+
+        if (perfilActual?.rol === "admin") {
+            document.getElementById("inputRamaTareaActividad").innerHTML = ramasDisponibles
+                .map((r) => `<option value="${r.id}">${r.nombre}</option>`).join("");
+        }
+
+        renderizarTareasPorRama(tareas);
+
+        try {
+            const { resumen } = await peticionApi(`/api/actividades/${id}/resumen`);
+            const contenedorResumen = document.getElementById("detalleActividadResumen");
+
+            contenedorResumen.innerHTML = resumen.length === 0
+                ? `<p class="detalle">Sin tareas registradas todavía.</p>`
+                : resumen.map((r) => `
+                    <div class="fila-conteo" style="margin-top:4px;">
+                        <span class="etiqueta">${r.rama}</span>
+                        <span class="valor">✅ ${r.aTiempo} a tiempo · ⏰ ${r.tarde} tarde · ⬜ ${r.pendientes} pendientes</span>
+                    </div>
+                `).join("");
+        } catch (error) {
+            console.error(error);
+        }
+
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+document.getElementById("btnCerrarDetalleActividad").addEventListener("click", () => {
+    document.getElementById("tarjetaDetalleActividad").classList.add("oculto");
+    actividadAbiertaId = null;
+});
+
+function renderizarTareasPorRama(tareas) {
+
+    const contenedor = document.getElementById("listaTareasActividad");
+
+    if (tareas.length === 0) {
+        contenedor.innerHTML = `<p class="detalle">Todavía no se han asignado tareas a ninguna rama.</p>`;
+        return;
+    }
+
+    const porRama = {};
+    tareas.forEach((t) => {
+        const clave = mapaRamas[t.rama_id] || "Sin rama";
+        (porRama[clave] = porRama[clave] || []).push(t);
+    });
+
+    contenedor.innerHTML = Object.entries(porRama).map(([rama, lista]) => `
+        <div style="margin-bottom:12px;">
+            <strong style="font-size:13px;">${rama}</strong>
+            ${lista.map((t) => `
+                <div class="fila-conteo" style="margin-top:6px;">
+                    <span class="etiqueta">${t.titulo}${t.hora_programada ? ` · Listo a las ${formatearFechaHora(t.hora_programada)}` : ""}</span>
+                    <span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span>
+                </div>
+            `).join("")}
+        </div>
+    `).join("");
+
+}
+
+document.getElementById("formTareaActividad").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeTareaActividad");
+    const hora = document.getElementById("inputHoraTareaActividad").value;
+
+    try {
+
+        const { actividad } = await peticionApi(`/api/actividades/${actividadAbiertaId}`);
+
+        await peticionApi("/api/tareas", {
+            method: "POST",
+            body: JSON.stringify({
+                tipo: "tarea",
+                actividadId: actividadAbiertaId,
+                ramaId: document.getElementById("inputRamaTareaActividad").value,
+                titulo: document.getElementById("inputTituloTareaActividad").value.trim(),
+                horaProgramada: hora ? new Date(`${actividad.fecha}T${hora}`).toISOString() : null
+            })
+        });
+
+        mostrarMensaje(mensaje, "Tarea asignada correctamente", "ok");
+        document.getElementById("formTareaActividad").reset();
+        await abrirDetalleActividad(actividadAbiertaId);
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+// ==========================
+// Analítica de cumplimiento (admin) y resumen reducido (control)
+// ==========================
+
+async function cargarAnaliticaAdmin() {
+
+    try {
+
+        const [{ ramas: cumplimientoRamas }, { porHora }, { destacadosPositivos, destacadosNegativos }] = await Promise.all([
+            peticionApi("/api/actividades/reportes/ramas"),
+            peticionApi("/api/actividades/reportes/horas"),
+            peticionApi("/api/actividades/reportes/personas")
+        ]);
+
+        crearOActualizarGrafico(
+            "graficoCumplimientoRamas", "bar",
+            cumplimientoRamas.map((r) => r.rama),
+            cumplimientoRamas.map((r) => r.porcentajeCumplimiento),
+            "#1FB6A6"
+        );
+
+        const horas = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, "0"));
+
+        crearOActualizarGrafico(
+            "graficoTareasPorHora", "bar",
+            horas,
+            horas.map((h) => porHora[h] || 0),
+            "#5B4B8A"
+        );
+
+        const contenedorPositivos = document.getElementById("listaDestacadosPositivos");
+        const contenedorNegativos = document.getElementById("listaDestacadosNegativos");
+
+        contenedorPositivos.innerHTML = destacadosPositivos.length === 0
+            ? `<p class="detalle">Todavía no hay suficientes datos.</p>`
+            : destacadosPositivos.map((p) => `
+                <div class="fila-conteo" style="margin-top:4px;">
+                    <span class="etiqueta">${p.nombre}</span>
+                    <span class="valor">${p.porcentaje}% a tiempo (${p.aTiempo}/${p.total})</span>
+                </div>
+            `).join("");
+
+        contenedorNegativos.innerHTML = destacadosNegativos.length === 0
+            ? `<p class="detalle">Todavía no hay suficientes datos.</p>`
+            : destacadosNegativos.map((p) => `
+                <div class="fila-conteo" style="margin-top:4px;">
+                    <span class="etiqueta">${p.nombre}</span>
+                    <span class="valor">${p.porcentaje}% a tiempo (${p.tarde} tarde de ${p.total})</span>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function cargarResumenControl() {
+
+    try {
+
+        const [{ actividades }, { ramas: cumplimientoRamas }] = await Promise.all([
+            peticionApi("/api/actividades"),
+            peticionApi("/api/actividades/reportes/ramas")
+        ]);
+
+        const promedioGeneral = cumplimientoRamas.length === 0
+            ? null
+            : Math.round(cumplimientoRamas.reduce((s, r) => s + r.porcentajeCumplimiento, 0) / cumplimientoRamas.length);
+
+        document.getElementById("statsResumenControl").innerHTML = `
+            <div class="stat-tile">
+                <div class="stat-numero">${promedioGeneral ?? "—"}${promedioGeneral !== null ? "%" : ""}</div>
+                <span class="stat-etiqueta">Cumplimiento general del cronograma</span>
+            </div>
+        `;
+
+        const ahora = Date.now();
+        const proximas = [];
+        const enCurso = [];
+        const terminadas = [];
+
+        actividades.forEach((a) => {
+            if (a.cancelada) return;
+            const inicio = new Date(a.hora_inicio).getTime();
+            const fin = new Date(a.hora_fin).getTime();
+            if (ahora < inicio) proximas.push(a);
+            else if (ahora >= inicio && ahora <= fin) enCurso.push(a);
+            else terminadas.push(a);
+        });
+
+        const filaActividad = (a) => `
+            <div class="fila-conteo" style="margin-top:4px;">
+                <span class="etiqueta">${a.titulo}</span>
+                <span class="valor">${formatearFechaHora(a.hora_inicio)}</span>
+            </div>
+        `;
+
+        document.getElementById("listaActividadesProximas").innerHTML = proximas.length === 0
+            ? `<p class="detalle">Ninguna.</p>` : proximas.map(filaActividad).join("");
+
+        document.getElementById("listaActividadesEnCurso").innerHTML = enCurso.length === 0
+            ? `<p class="detalle">Ninguna.</p>` : enCurso.map(filaActividad).join("");
+
+        document.getElementById("listaActividadesTerminadas").innerHTML = terminadas.length === 0
+            ? `<p class="detalle">Ninguna.</p>` : terminadas.map(filaActividad).join("");
+
+    } catch (error) {
+        console.error(error);
     }
 
 }

@@ -64,6 +64,9 @@ let campoBusquedaActivo = "codigo";
 let participanteActualId = null;
 let carpaSeleccionada = null;
 let intervaloPolling = null;
+let perfilActual = null;
+let ramasDisponibles = [];
+let mapaRamas = {};
 
 // ==========================
 // Utilidades
@@ -132,18 +135,66 @@ function mostrarLogin() {
     if (intervaloPolling) clearInterval(intervaloPolling);
 }
 
-function mostrarPanel(sesion) {
+async function mostrarPanel(sesion) {
+
     pantallaLogin.classList.add("oculto");
     pantallaPanel.classList.remove("oculto");
     usuarioActual.textContent = sesion.user.email;
+
+    try {
+        const { usuario } = await peticionApi("/api/centro-control/perfil");
+        perfilActual = usuario;
+        usuarioActual.textContent = `${usuario.nombre} · ${humanizar(usuario.rol)}`;
+    } catch (error) {
+        console.error(error);
+    }
 
     llenarSelect(document.getElementById("inputCategoria"), CATEGORIAS, "Selecciona categoría");
     llenarSelect(document.getElementById("inputPrioridad"), PRIORIDADES, "Selecciona prioridad");
     cargarZonas();
     cargarCarpas();
+    await cargarRamas();
 
+    const puedeCrearTareas = perfilActual && (perfilActual.rol === "admin" || perfilActual.rol_en_rama === "lider");
+    document.getElementById("tarjetaCrearTarea").classList.toggle("oculto", !puedeCrearTareas);
+    document.getElementById("tarjetaEscribirObservacion").classList.toggle("oculto", !puedeCrearTareas);
+
+    if (puedeCrearTareas && perfilActual.rama_id) {
+        try {
+            const { miembros } = await peticionApi(`/api/centro-control/ramas/${perfilActual.rama_id}/miembros`);
+            document.getElementById("inputMiembroObservacion").innerHTML = miembros
+                .filter((m) => m.id !== perfilActual.id)
+                .map((m) => `<option value="${m.id}">${m.nombre}</option>`).join("");
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    actualizarTodoPolling();
+    intervaloPolling = setInterval(actualizarTodoPolling, POLLING_MS);
+}
+
+function actualizarTodoPolling() {
     cargarMisIncidentes();
-    intervaloPolling = setInterval(cargarMisIncidentes, POLLING_MS);
+    cargarSolicitudes();
+    cargarTareas();
+    cargarObservaciones();
+}
+
+async function cargarRamas() {
+
+    try {
+        const { ramas } = await peticionApi("/api/centro-control/ramas");
+        ramasDisponibles = ramas;
+        mapaRamas = Object.fromEntries(ramas.map((r) => [r.id, r.nombre]));
+
+        document.getElementById("inputRamaDestinoSolicitud").innerHTML = ramas
+            .map((r) => `<option value="${r.id}">${r.nombre}</option>`).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
 }
 
 function llenarSelect(select, valores, etiquetaTodos) {
@@ -180,6 +231,30 @@ btnCerrarSesion.addEventListener("click", async () => {
     resultados.innerHTML = "";
     inputBusqueda.value = "";
     mostrarLogin();
+});
+
+// ==========================
+// Navegación entre pestañas
+// ==========================
+
+document.querySelectorAll(".tab-modulo").forEach((tab) => {
+
+    tab.addEventListener("click", () => {
+
+        document.querySelectorAll(".tab-modulo").forEach((t) => t.classList.remove("activo"));
+        tab.classList.add("activo");
+
+        const vista = tab.dataset.vista;
+
+        document.getElementById("vistaRegistro").classList.toggle("oculto", vista !== "registro");
+        document.getElementById("vistaComunicacion").classList.toggle("oculto", vista !== "comunicacion");
+        document.getElementById("vistaTareas").classList.toggle("oculto", vista !== "tareas");
+        document.getElementById("vistaCronograma").classList.toggle("oculto", vista !== "cronograma");
+
+        if (vista === "cronograma") cargarCronograma();
+
+    });
+
 });
 
 // ==========================
@@ -484,21 +559,20 @@ function renderizarGridCarpas() {
 // ==========================
 
 const btnAbrirFormIncidente = document.getElementById("btnAbrirFormIncidente");
-const tarjetaFormIncidente = document.getElementById("tarjetaFormIncidente");
 const formIncidente = document.getElementById("formIncidente");
 const mensajeIncidente = document.getElementById("mensajeIncidente");
 
 btnAbrirFormIncidente.addEventListener("click", () => {
-    tarjetaFormIncidente.classList.toggle("oculto");
+    formIncidente.classList.toggle("oculto");
     actualizarMensajeParticipanteVinculado();
-    tarjetaFormIncidente.scrollIntoView({ behavior: "smooth" });
+    formIncidente.scrollIntoView({ behavior: "smooth" });
 });
 
 function actualizarMensajeParticipanteVinculado() {
 
     const elemento = document.getElementById("mensajeParticipanteVinculado");
 
-    if (tarjetaFormIncidente.classList.contains("oculto")) return;
+    if (formIncidente.classList.contains("oculto")) return;
 
     if (participanteActualId) {
         mostrarMensaje(elemento, `Se vinculará a: ${fichaNombre.textContent}`, "ok");
@@ -580,7 +654,7 @@ formIncidente.addEventListener("submit", async (evento) => {
         await cargarMisIncidentes();
 
         setTimeout(() => {
-            tarjetaFormIncidente.classList.add("oculto");
+            formIncidente.classList.add("oculto");
             ocultarMensaje(mensajeIncidente);
         }, 1500);
 
@@ -683,6 +757,480 @@ function renderizarHistorial(eventos) {
     `).join("");
 
 }
+
+// ==========================
+// Solicitudes internas y tareas (misma UI, filtradas por tipo)
+// ==========================
+
+function renderizarListaTareas(contenedor, tareas) {
+
+    if (tareas.length === 0) {
+        contenedor.innerHTML = `<p class="detalle">Nada por aquí todavía.</p>`;
+        return;
+    }
+
+    contenedor.innerHTML = tareas.map((t) => `
+        <div class="incidente-mini" data-tarea="${t.id}" style="cursor:pointer; flex-direction:column; align-items:stretch; gap:4px;">
+            <div style="display:flex; justify-content:space-between; width:100%; gap:8px;">
+                <span class="codigo">${t.titulo}</span>
+                <span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span>
+            </div>
+            ${t.descripcion ? `<div class="descripcion">${t.descripcion}</div>` : ""}
+            <div class="descripcion">
+                ${t.tipo === "solicitud" ? `De ${mapaRamas[t.rama_origen_id] || "—"} para ${mapaRamas[t.rama_id] || "—"}` : `Rama: ${mapaRamas[t.rama_id] || "—"}`}
+                ${t.hora_programada ? ` · Listo antes de: ${formatearHora(t.hora_programada)}` : ""}
+            </div>
+            <div class="oculto" id="detalleTarea-${t.id}"></div>
+        </div>
+    `).join("");
+
+    contenedor.querySelectorAll("[data-tarea]").forEach((card) => {
+        card.addEventListener("click", (evento) => {
+            if (evento.target.closest("button")) return;
+            abrirDetalleTarea(card.dataset.tarea, false);
+        });
+    });
+
+}
+
+async function abrirDetalleTarea(id, forzar) {
+
+    const contenedor = document.getElementById(`detalleTarea-${id}`);
+
+    if (!forzar && !contenedor.classList.contains("oculto")) {
+        contenedor.classList.add("oculto");
+        return;
+    }
+
+    try {
+
+        const [{ tarea, checks }, { subtareas }, { comentarios }] = await Promise.all([
+            peticionApi(`/api/tareas/${id}`),
+            peticionApi(`/api/tareas/${id}/subtareas`),
+            peticionApi(`/api/tareas/${id}/comentarios`)
+        ]);
+
+        const yaMarcado = checks.some((c) => c.usuario_id === perfilActual?.id);
+        const esLider = !!perfilActual && (perfilActual.rol === "admin" || (perfilActual.rama_id === tarea.rama_id && perfilActual.rol_en_rama === "lider"));
+
+        const filasChecks = checks.length === 0
+            ? `<p class="detalle">Nadie se ha marcado todavía.</p>`
+            : checks.map((c) => `
+                <div class="fila-conteo" style="margin-top:4px;">
+                    <span class="etiqueta">${c.nombre}</span>
+                    ${esLider ? `<button class="boton pequeno secundario" data-quitar-check="${c.usuario_id}" style="width:auto; padding:4px 10px; font-size:11px;">Quitar</button>` : ""}
+                </div>
+            `).join("");
+
+        const acciones = tarea.estado !== "pendiente"
+            ? `<p class="detalle" style="margin-top:8px;">Cerrado ${formatearHora(tarea.completada_en)}</p>`
+            : `
+                <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                    ${!yaMarcado ? `<button class="boton pequeno" data-marcar="1">Marqué que ayudé</button>` : `<span class="badge verde">Ya marcaste tu participación</span>`}
+                    ${esLider ? `<button class="boton pequeno secundario" data-completar="1">Dar check final</button>` : ""}
+                </div>
+            `;
+
+        const puedeMarcarSubtarea = (s) => perfilActual && (perfilActual.id === s.asignado_a || esLider);
+
+        const filasSubtareas = subtareas.length === 0
+            ? `<p class="detalle">Sin subtareas asignadas.</p>`
+            : subtareas.map((s) => `
+                <div class="fila-conteo" style="margin-top:4px;">
+                    <span class="etiqueta">
+                        ${s.estado === "hecha" ? "✅" : "⬜"} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}
+                    </span>
+                    ${s.estado === "pendiente" && puedeMarcarSubtarea(s) ? `<button class="boton pequeno" data-hecha-subtarea="${s.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar hecha</button>` : ""}
+                </div>
+            `).join("");
+
+        const formularioSubtarea = esLider ? `
+            <form class="form-nueva-subtarea" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                <input type="text" placeholder="Nueva subtarea" class="input-titulo-subtarea" style="flex:1; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                <select class="select-asignado-subtarea" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;"></select>
+                <button type="submit" class="boton pequeno" style="width:auto;">Agregar</button>
+            </form>
+        ` : "";
+
+        const filasComentarios = comentarios.length === 0
+            ? `<p class="detalle">Sin comentarios todavía.</p>`
+            : comentarios.map((c) => `
+                <div class="historial-item">
+                    <span class="hora">${formatearHora(c.creado_en)}</span>
+                    <div class="descripcion">${c.texto}</div>
+                    <div class="usuario">${c.nombre || "—"}</div>
+                </div>
+            `).join("");
+
+        contenedor.innerHTML = `
+            <div style="margin-top:8px; padding-top:8px; border-top:1px solid #ddd;">
+                <strong style="font-size:12px;">Participaron:</strong>
+                ${filasChecks}
+                ${acciones}
+            </div>
+            <div style="margin-top:14px; padding-top:8px; border-top:1px solid #ddd;">
+                <strong style="font-size:12px;">Subtareas:</strong>
+                ${filasSubtareas}
+                ${formularioSubtarea}
+            </div>
+            <div style="margin-top:14px; padding-top:8px; border-top:1px solid #ddd;">
+                <strong style="font-size:12px;">Comentarios:</strong>
+                ${filasComentarios}
+                <form class="form-nuevo-comentario" style="display:flex; gap:6px; margin-top:8px;">
+                    <input type="text" placeholder="Escribe un comentario" class="input-nuevo-comentario" style="flex:1; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                    <button type="submit" class="boton pequeno" style="width:auto;">Comentar</button>
+                </form>
+            </div>
+        `;
+
+        contenedor.classList.remove("oculto");
+
+        contenedor.querySelectorAll("[data-quitar-check]").forEach((boton) => {
+            boton.addEventListener("click", (evento) => {
+                evento.stopPropagation();
+                quitarParticipacionTarea(id, boton.dataset.quitarCheck);
+            });
+        });
+
+        const botonMarcar = contenedor.querySelector("[data-marcar]");
+        if (botonMarcar) {
+            botonMarcar.addEventListener("click", (evento) => {
+                evento.stopPropagation();
+                marcarParticipacionTarea(id);
+            });
+        }
+
+        const botonCompletar = contenedor.querySelector("[data-completar]");
+        if (botonCompletar) {
+            botonCompletar.addEventListener("click", (evento) => {
+                evento.stopPropagation();
+                completarTarea(id);
+            });
+        }
+
+        contenedor.querySelectorAll("[data-hecha-subtarea]").forEach((boton) => {
+            boton.addEventListener("click", (evento) => {
+                evento.stopPropagation();
+                marcarSubtareaHecha(id, boton.dataset.hechaSubtarea);
+            });
+        });
+
+        const selectAsignado = contenedor.querySelector(".select-asignado-subtarea");
+        if (selectAsignado) {
+            peticionApi(`/api/centro-control/ramas/${tarea.rama_id}/miembros`).then(({ miembros }) => {
+                selectAsignado.innerHTML = `<option value="">Sin asignar</option>` +
+                    miembros.map((m) => `<option value="${m.id}">${m.nombre}</option>`).join("");
+            }).catch(() => {});
+        }
+
+        const formSubtarea = contenedor.querySelector(".form-nueva-subtarea");
+        if (formSubtarea) {
+            formSubtarea.addEventListener("submit", (evento) => {
+                evento.preventDefault();
+                evento.stopPropagation();
+                crearSubtarea(
+                    id,
+                    formSubtarea.querySelector(".input-titulo-subtarea").value.trim(),
+                    formSubtarea.querySelector(".select-asignado-subtarea").value
+                );
+            });
+        }
+
+        const formComentario = contenedor.querySelector(".form-nuevo-comentario");
+        formComentario.addEventListener("submit", (evento) => {
+            evento.preventDefault();
+            evento.stopPropagation();
+            crearComentario(id, formComentario.querySelector(".input-nuevo-comentario").value.trim());
+        });
+
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+async function crearSubtarea(tareaId, titulo, asignadoA) {
+
+    if (!titulo) return;
+
+    try {
+        await peticionApi(`/api/tareas/${tareaId}/subtareas`, {
+            method: "POST",
+            body: JSON.stringify({ titulo, asignadoA: asignadoA || null })
+        });
+        await abrirDetalleTarea(tareaId, true);
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+async function marcarSubtareaHecha(tareaId, subId) {
+
+    try {
+        await peticionApi(`/api/tareas/${tareaId}/subtareas/${subId}/hecha`, { method: "POST" });
+        await abrirDetalleTarea(tareaId, true);
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+async function crearComentario(tareaId, texto) {
+
+    if (!texto) return;
+
+    try {
+        await peticionApi(`/api/tareas/${tareaId}/comentarios`, {
+            method: "POST",
+            body: JSON.stringify({ texto })
+        });
+        await abrirDetalleTarea(tareaId, true);
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+async function marcarParticipacionTarea(id) {
+    try {
+        await peticionApi(`/api/tareas/${id}/check`, { method: "POST" });
+        await Promise.all([cargarSolicitudes(), cargarTareas()]);
+        await abrirDetalleTarea(id, true);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function quitarParticipacionTarea(id, usuarioId) {
+    if (!confirm("¿Quitar esta participación?")) return;
+    try {
+        await peticionApi(`/api/tareas/${id}/check/${usuarioId}`, { method: "DELETE" });
+        await abrirDetalleTarea(id, true);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function completarTarea(id) {
+    if (!confirm("¿Dar el check final y cerrar este caso?")) return;
+    try {
+        await peticionApi(`/api/tareas/${id}/completar`, { method: "POST" });
+        await Promise.all([cargarSolicitudes(), cargarTareas()]);
+        await abrirDetalleTarea(id, true);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function cargarSolicitudes() {
+
+    try {
+
+        const { tareas } = await peticionApi("/api/tareas?tipo=solicitud");
+
+        const recibidas = tareas.filter((t) => perfilActual && t.rama_id === perfilActual.rama_id);
+        const enviadas = tareas.filter((t) => perfilActual && t.creado_por === perfilActual.id);
+
+        renderizarListaTareas(document.getElementById("listaSolicitudesRecibidas"), recibidas);
+        renderizarListaTareas(document.getElementById("listaSolicitudesEnviadas"), enviadas);
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function cargarTareas() {
+
+    try {
+        const { tareas } = await peticionApi("/api/tareas?tipo=tarea");
+        renderizarListaTareas(document.getElementById("listaTareas"), tareas);
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+document.getElementById("formSolicitud").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeSolicitud");
+
+    try {
+
+        await peticionApi("/api/tareas", {
+            method: "POST",
+            body: JSON.stringify({
+                tipo: "solicitud",
+                ramaId: document.getElementById("inputRamaDestinoSolicitud").value,
+                titulo: document.getElementById("inputTituloSolicitud").value.trim(),
+                descripcion: document.getElementById("inputDescripcionSolicitud").value.trim()
+            })
+        });
+
+        mostrarMensaje(mensaje, "Solicitud enviada correctamente", "ok");
+        document.getElementById("formSolicitud").reset();
+        await cargarSolicitudes();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+document.getElementById("formTarea").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeTarea");
+    const horaProgramada = document.getElementById("inputHoraProgramadaTarea").value;
+
+    try {
+
+        await peticionApi("/api/tareas", {
+            method: "POST",
+            body: JSON.stringify({
+                tipo: "tarea",
+                ramaId: perfilActual?.rama_id,
+                titulo: document.getElementById("inputTituloTarea").value.trim(),
+                descripcion: document.getElementById("inputDescripcionTarea").value.trim(),
+                horaProgramada: horaProgramada ? new Date(horaProgramada).toISOString() : null
+            })
+        });
+
+        mostrarMensaje(mensaje, "Tarea creada correctamente", "ok");
+        document.getElementById("formTarea").reset();
+        await cargarTareas();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+// ==========================
+// Observaciones individuales
+// ==========================
+
+async function cargarObservaciones() {
+
+    try {
+
+        const { observaciones } = await peticionApi("/api/observaciones");
+        const contenedor = document.getElementById("listaObservaciones");
+
+        contenedor.innerHTML = observaciones.length === 0
+            ? `<p class="detalle">Sin observaciones todavía.</p>`
+            : observaciones.map((o) => `
+                <div class="historial-item">
+                    <span class="hora">${formatearHora(o.creado_en)}</span>
+                    <span class="badge ${o.tipo === "positiva" ? "verde" : o.tipo === "negativa" ? "rojo" : "neutro"}" style="margin-left:6px;">${humanizar(o.tipo)}</span>
+                    <div class="descripcion">${o.texto}</div>
+                    <div class="usuario">${o.destinatario_nombre ? `Para: ${o.destinatario_nombre} · ` : ""}Escrita por: ${o.autor_nombre || "—"}</div>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+document.getElementById("formObservacion").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeObservacion");
+
+    try {
+
+        await peticionApi("/api/observaciones", {
+            method: "POST",
+            body: JSON.stringify({
+                usuarioId: document.getElementById("inputMiembroObservacion").value,
+                tipo: document.getElementById("inputTipoObservacion").value,
+                texto: document.getElementById("inputTextoObservacion").value.trim()
+            })
+        });
+
+        mostrarMensaje(mensaje, "Observación guardada correctamente", "ok");
+        document.getElementById("formObservacion").reset();
+        await cargarObservaciones();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+// ==========================
+// Mi cronograma
+// ==========================
+
+function formatearFechaHora(fechaIso) {
+    if (!fechaIso) return "—";
+    return new Date(fechaIso).toLocaleString("es-CO", {
+        day: "2-digit", month: "2-digit", hour: "numeric", minute: "2-digit"
+    });
+}
+
+async function cargarCronograma() {
+
+    try {
+
+        const { actividades } = await peticionApi("/api/actividades");
+        const contenedor = document.getElementById("listaActividadesCronograma");
+
+        contenedor.innerHTML = actividades.length === 0
+            ? `<p class="detalle">Todavía no se ha cargado el cronograma del evento.</p>`
+            : actividades.map((a) => `
+                <div class="incidente-mini" data-actividad="${a.id}" style="cursor:pointer;">
+                    <div>
+                        <span class="codigo">${a.titulo}${a.cancelada ? ' <span class="badge rojo">Cancelada</span>' : ""}</span>
+                        <div class="descripcion">${formatearFechaHora(a.hora_inicio)} — ${formatearFechaHora(a.hora_fin)} ${a.espacio_usado ? `· ${a.espacio_usado}` : ""}</div>
+                    </div>
+                </div>
+            `).join("");
+
+        contenedor.querySelectorAll("[data-actividad]").forEach((card) => {
+            card.addEventListener("click", () => abrirDetalleActividadCronograma(card.dataset.actividad));
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function abrirDetalleActividadCronograma(id) {
+
+    try {
+
+        const { actividad, tareas } = await peticionApi(`/api/actividades/${id}`);
+
+        document.getElementById("tarjetaDetalleActividadCronograma").classList.remove("oculto");
+        document.getElementById("tarjetaDetalleActividadCronograma").scrollIntoView({ behavior: "smooth" });
+
+        document.getElementById("detalleActividadCronogramaTitulo").textContent = actividad.titulo;
+
+        document.getElementById("detalleActividadCronogramaInfo").innerHTML = `
+            <div class="dato"><span class="etiqueta">Horario</span><span class="valor">${formatearFechaHora(actividad.hora_inicio)} — ${formatearFechaHora(actividad.hora_fin)}</span></div>
+            <div class="dato"><span class="etiqueta">Espacio</span><span class="valor">${actividad.espacio_usado || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Materiales</span><span class="valor">${actividad.materiales_usados || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${actividad.encargados_metodologicos || "—"}</span></div>
+        `;
+
+        const tareasDeMiRama = tareas.filter((t) => perfilActual && t.rama_id === perfilActual.rama_id);
+        renderizarListaTareas(document.getElementById("listaTareasMiRamaActividad"), tareasDeMiRama);
+
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+document.getElementById("btnCerrarDetalleActividadCronograma").addEventListener("click", () => {
+    document.getElementById("tarjetaDetalleActividadCronograma").classList.add("oculto");
+});
 
 // ==========================
 // Arranque

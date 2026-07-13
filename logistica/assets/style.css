@@ -185,6 +185,30 @@ body{
     border-color:var(--teal);
 }
 
+.tabs-modulo{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.tab-modulo{
+    padding:10px 18px;
+    font-size:13px;
+    font-weight:800;
+    border-radius:12px;
+    border:3px solid var(--tinta);
+    background:white;
+    cursor:pointer;
+    font-family:inherit;
+    box-shadow:3px 3px 0 var(--tinta);
+}
+
+.tab-modulo.activo{
+    background:var(--morado);
+    color:white;
+}
+
 .tabs-busqueda{
     display:flex;
     gap:8px;
