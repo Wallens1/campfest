@@ -1521,7 +1521,11 @@ async function cargarActividades() {
                 <div class="incidente-item ${a.cancelada ? "fila-vencido" : ""}" data-actividad="${a.id}">
                     <div class="fila-superior">
                         <span class="codigo-incidente">${a.titulo}</span>
-                        ${a.cancelada ? `<span class="badge rojo">Cancelada</span>` : ""}
+                        <span>
+                            ${a.cancelada ? `<span class="badge rojo">Cancelada</span>` : ""}
+                            <span class="badge ${a.montaje_completado ? "verde" : "neutro"}">${a.montaje_completado ? "Montaje listo" : "Montaje pendiente"}</span>
+                            <span class="badge ${a.finalizada ? "verde" : "neutro"}">${a.finalizada ? "Finalizada" : "Sin finalizar"}</span>
+                        </span>
                     </div>
                     <div class="descripcion">${formatearFechaHora(a.hora_inicio)} — ${formatearFechaHora(a.hora_fin)} ${a.espacio_usado ? `· ${a.espacio_usado}` : ""}</div>
                 </div>
@@ -1597,6 +1601,8 @@ async function abrirDetalleActividad(id) {
             <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${actividad.encargados_metodologicos || "—"}</span></div>
         `;
 
+        renderizarFasesActividad(actividad);
+
         document.getElementById("bloqueCrearTareaActividad").classList.toggle("oculto", perfilActual?.rol !== "admin");
 
         if (perfilActual?.rol === "admin") {
@@ -1628,6 +1634,53 @@ async function abrirDetalleActividad(id) {
 
     } catch (error) {
         alert(error.message);
+    }
+
+}
+
+function renderizarFasesActividad(actividad) {
+
+    const contenedor = document.getElementById("detalleActividadFases");
+
+    const puedeGestionar = perfilActual?.rol === "admin";
+
+    contenedor.innerHTML = `
+        <h3>Cierre de la actividad</h3>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <span class="badge ${actividad.montaje_completado ? "verde" : "neutro"}">
+                ${actividad.montaje_completado ? "Montaje listo" : "Montaje pendiente"}
+            </span>
+            <span class="badge ${actividad.finalizada ? "verde" : "neutro"}">
+                ${actividad.finalizada ? "Actividad finalizada" : "Actividad no finalizada"}
+            </span>
+            ${puedeGestionar && !actividad.montaje_completado ? `<button class="boton pequeno secundario" id="btnMarcarMontaje" style="width:auto;">Marcar montaje listo</button>` : ""}
+            ${puedeGestionar && actividad.montaje_completado && !actividad.finalizada ? `<button class="boton pequeno" id="btnMarcarFinalizada" style="width:auto;">Marcar actividad terminada</button>` : ""}
+        </div>
+        <div class="mensaje" id="mensajeFasesActividad"></div>
+    `;
+
+    const btnMontaje = document.getElementById("btnMarcarMontaje");
+    if (btnMontaje) {
+        btnMontaje.addEventListener("click", () => marcarFaseActividad(actividad.id, "montaje"));
+    }
+
+    const btnFinalizada = document.getElementById("btnMarcarFinalizada");
+    if (btnFinalizada) {
+        btnFinalizada.addEventListener("click", () => marcarFaseActividad(actividad.id, "finalizar"));
+    }
+
+}
+
+async function marcarFaseActividad(actividadId, fase) {
+
+    const mensaje = document.getElementById("mensajeFasesActividad");
+
+    try {
+        await peticionApi(`/api/actividades/${actividadId}/${fase}`, { method: "POST" });
+        await abrirDetalleActividad(actividadId);
+        await cargarActividades();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
     }
 
 }
@@ -1707,18 +1760,22 @@ async function abrirDetalleTareaEnActividad(tareaId) {
                 </div>
             `).join("");
 
+        const formularioSubtareaAdmin = tarea.estado === "pendiente" ? `
+            <form class="form-nueva-subtarea-admin" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                <input type="text" placeholder="Nueva subtarea" class="input-titulo-subtarea-admin" style="flex:1; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                <select class="select-asignado-subtarea-admin" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                    <option value="">Sin asignar</option>
+                    ${miembros.map((m) => `<option value="${m.id}">${m.nombre}</option>`).join("")}
+                </select>
+                <button type="submit" class="boton pequeno" style="width:auto;">Agregar</button>
+            </form>
+        ` : `<p class="detalle" style="margin-top:6px;">Esta tarea ya está cerrada; no se le pueden asignar subtareas nuevas.</p>`;
+
         contenedor.innerHTML = `
             <div style="margin-top:8px; padding-top:8px; border-top:1px solid #ddd;">
                 <strong style="font-size:12px;">Subtareas:</strong>
                 ${filasSubtareas}
-                <form class="form-nueva-subtarea-admin" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
-                    <input type="text" placeholder="Nueva subtarea" class="input-titulo-subtarea-admin" style="flex:1; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
-                    <select class="select-asignado-subtarea-admin" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
-                        <option value="">Sin asignar</option>
-                        ${miembros.map((m) => `<option value="${m.id}">${m.nombre}</option>`).join("")}
-                    </select>
-                    <button type="submit" class="boton pequeno" style="width:auto;">Agregar</button>
-                </form>
+                ${formularioSubtareaAdmin}
             </div>
             <div style="margin-top:14px; padding-top:8px; border-top:1px solid #ddd;">
                 <strong style="font-size:12px;">Reasignar ramas:</strong>
@@ -1736,16 +1793,19 @@ async function abrirDetalleTareaEnActividad(tareaId) {
 
         contenedor.classList.remove("oculto");
 
-        contenedor.querySelector(".form-nueva-subtarea-admin").addEventListener("submit", (evento) => {
-            evento.preventDefault();
-            evento.stopPropagation();
-            const form = evento.target;
-            crearSubtareaEnActividad(
-                tareaId,
-                form.querySelector(".input-titulo-subtarea-admin").value.trim(),
-                form.querySelector(".select-asignado-subtarea-admin").value
-            );
-        });
+        const formSubtareaAdmin = contenedor.querySelector(".form-nueva-subtarea-admin");
+        if (formSubtareaAdmin) {
+            formSubtareaAdmin.addEventListener("submit", (evento) => {
+                evento.preventDefault();
+                evento.stopPropagation();
+                const form = evento.target;
+                crearSubtareaEnActividad(
+                    tareaId,
+                    form.querySelector(".input-titulo-subtarea-admin").value.trim(),
+                    form.querySelector(".select-asignado-subtarea-admin").value
+                );
+            });
+        }
 
         contenedor.querySelector("[data-guardar-ramas]").addEventListener("click", (evento) => {
             evento.stopPropagation();

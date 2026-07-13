@@ -898,7 +898,7 @@ async function abrirDetalleTarea(id, forzar) {
                     </div>
                 `).join("");
 
-            const formularioSubtarea = esLider ? `
+            const formularioSubtarea = esLider && tarea.estado === "pendiente" ? `
                 <form class="form-nueva-subtarea" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
                     <input type="text" placeholder="Nueva subtarea" class="input-titulo-subtarea" style="flex:1; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
                     <select class="select-asignado-subtarea" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;"></select>
@@ -1280,7 +1280,11 @@ async function cargarCronograma() {
             : actividades.map((a) => `
                 <div class="incidente-mini" data-actividad="${a.id}" style="cursor:pointer;">
                     <div>
-                        <span class="codigo">${a.titulo}${a.cancelada ? ' <span class="badge rojo">Cancelada</span>' : ""}</span>
+                        <span class="codigo">
+                            ${a.titulo}${a.cancelada ? ' <span class="badge rojo">Cancelada</span>' : ""}
+                            <span class="badge ${a.montaje_completado ? "verde" : "neutro"}">${a.montaje_completado ? "Montaje listo" : "Montaje pendiente"}</span>
+                            <span class="badge ${a.finalizada ? "verde" : "neutro"}">${a.finalizada ? "Finalizada" : "Sin finalizar"}</span>
+                        </span>
                         <div class="descripcion">${formatearFechaHora(a.hora_inicio)} — ${formatearFechaHora(a.hora_fin)} ${a.espacio_usado ? `· ${a.espacio_usado}` : ""}</div>
                     </div>
                 </div>
@@ -1324,8 +1328,56 @@ async function abrirDetalleActividadCronograma(id) {
         });
         renderizarListaTareas(document.getElementById("listaTareasMiRamaActividad"), tareasDeMiRama);
 
+        const esLiderDeRamaInvolucrada = perfilActual?.rol_en_rama === "lider" && tareasDeMiRama.length > 0;
+        renderizarFasesActividadCronograma(actividad, esLiderDeRamaInvolucrada);
+
     } catch (error) {
         alert(error.message);
+    }
+
+}
+
+function renderizarFasesActividadCronograma(actividad, puedeGestionar) {
+
+    const contenedor = document.getElementById("detalleActividadCronogramaFases");
+
+    contenedor.innerHTML = `
+        <h3>Cierre de la actividad</h3>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <span class="badge ${actividad.montaje_completado ? "verde" : "neutro"}">
+                ${actividad.montaje_completado ? "Montaje listo" : "Montaje pendiente"}
+            </span>
+            <span class="badge ${actividad.finalizada ? "verde" : "neutro"}">
+                ${actividad.finalizada ? "Actividad finalizada" : "Actividad no finalizada"}
+            </span>
+            ${puedeGestionar && !actividad.montaje_completado ? `<button class="boton pequeno secundario" id="btnMarcarMontajeCronograma" style="width:auto;">Marcar montaje listo</button>` : ""}
+            ${puedeGestionar && actividad.montaje_completado && !actividad.finalizada ? `<button class="boton pequeno" id="btnMarcarFinalizadaCronograma" style="width:auto;">Marcar actividad terminada</button>` : ""}
+        </div>
+        <div class="mensaje" id="mensajeFasesActividadCronograma"></div>
+    `;
+
+    const btnMontaje = document.getElementById("btnMarcarMontajeCronograma");
+    if (btnMontaje) {
+        btnMontaje.addEventListener("click", () => marcarFaseActividadCronograma(actividad.id, "montaje"));
+    }
+
+    const btnFinalizada = document.getElementById("btnMarcarFinalizadaCronograma");
+    if (btnFinalizada) {
+        btnFinalizada.addEventListener("click", () => marcarFaseActividadCronograma(actividad.id, "finalizar"));
+    }
+
+}
+
+async function marcarFaseActividadCronograma(actividadId, fase) {
+
+    const mensaje = document.getElementById("mensajeFasesActividadCronograma");
+
+    try {
+        await peticionApi(`/api/actividades/${actividadId}/${fase}`, { method: "POST" });
+        await abrirDetalleActividadCronograma(actividadId);
+        await cargarCronograma();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
     }
 
 }
