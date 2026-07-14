@@ -1366,8 +1366,42 @@ async function abrirDetalleActividadCronograma(id) {
         const esLiderDeRamaInvolucrada = perfilActual?.rol_en_rama === "lider" && tareasDeMiRama.length > 0;
         renderizarFasesActividadCronograma(actividad, esLiderDeRamaInvolucrada);
 
+        await cargarMisMaterialesDeActividad(id);
+
     } catch (error) {
         alert(error.message);
+    }
+
+}
+
+async function cargarMisMaterialesDeActividad(actividadId) {
+
+    const bloque = document.getElementById("bloqueMaterialesActividadCronograma");
+
+    if (!perfilActual || perfilActual.rol_en_rama !== "lider") {
+        bloque.classList.add("oculto");
+        return;
+    }
+
+    try {
+
+        const { lotes } = await peticionApi("/api/materiales/lotes/mios");
+        const lotesDeEstaActividad = lotes.filter((l) => l.actividadId === actividadId);
+
+        bloque.classList.toggle("oculto", lotesDeEstaActividad.length === 0);
+
+        document.getElementById("listaMaterialesActividadCronograma").innerHTML = lotesDeEstaActividad.map((l) => `
+            <div class="incidente-mini columna">
+                ${l.lineas.map((linea) => `
+                    <div class="fila-conteo">
+                        <span class="nombre-fila-conteo">${linea.materialNombre} — ${linea.pendiente > 0 ? `${linea.pendiente} pendiente de devolver` : "devuelto"}</span>
+                    </div>
+                `).join("")}
+            </div>
+        `).join("");
+
+    } catch (error) {
+        console.error(error);
     }
 
 }

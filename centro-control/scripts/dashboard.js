@@ -1637,6 +1637,14 @@ async function abrirDetalleActividad(id) {
 
         renderizarTareasPorRama(tareas);
 
+        document.getElementById("bloqueAsignarMaterialActividad").classList.toggle("oculto", perfilActual?.rol !== "admin");
+
+        if (perfilActual?.rol === "admin") {
+            await poblarSelectLideres(document.getElementById("inputLiderMaterialActividad"));
+        }
+
+        cargarMaterialesDeActividad(id);
+
         try {
             const { resumen } = await peticionApi(`/api/actividades/${id}/resumen`);
             const contenedorResumen = document.getElementById("detalleActividadResumen");
@@ -2152,19 +2160,23 @@ document.getElementById("formNuevoMaterial").addEventListener("submit", async (e
 
 });
 
-async function cargarLideresParaLote() {
+async function poblarSelectLideres(select) {
 
     try {
         const { usuarios } = await peticionApi("/api/centro-control/usuarios");
         const lideres = usuarios.filter((u) => u.rol_en_rama === "lider");
 
-        document.getElementById("inputLiderLote").innerHTML = lideres
+        select.innerHTML = lideres
             .map((l) => `<option value="${l.id}">${l.nombre}${l.rama_id && mapaRamas[l.rama_id] ? ` (${mapaRamas[l.rama_id]})` : ""}</option>`)
             .join("");
     } catch (error) {
         console.error(error);
     }
 
+}
+
+function cargarLideresParaLote() {
+    return poblarSelectLideres(document.getElementById("inputLiderLote"));
 }
 
 async function cargarActividadesParaLote() {
@@ -2195,6 +2207,93 @@ function renderizarChecklistMaterialesLote(materiales) {
         `).join("");
 
 }
+
+async function cargarMaterialesDeActividad(actividadId) {
+
+    try {
+
+        const { lotes } = await peticionApi(`/api/materiales/lotes/actividad/${actividadId}`);
+        const contenedor = document.getElementById("listaMaterialesActividad");
+
+        contenedor.innerHTML = lotes.length === 0
+            ? `<p class="detalle">Todavía no se han asignado materiales a esta actividad.</p>`
+            : lotes.map((l) => `
+                <div class="fila-conteo" style="margin-top:4px; flex-direction:column; align-items:stretch;">
+                    <strong style="font-size:12.5px;">${l.liderNombre}</strong>
+                    ${l.lineas.map((linea) => `
+                        <span style="font-size:12px; color:#666;">
+                            ${linea.materialNombre} — ${linea.pendiente > 0 ? `${linea.pendiente} pendiente de devolver` : "devuelto"}
+                        </span>
+                    `).join("")}
+                </div>
+            `).join("");
+
+        if (perfilActual?.rol === "admin") {
+            const { materiales } = await peticionApi("/api/materiales");
+            renderizarChecklistMaterialesActividad(materiales);
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+function renderizarChecklistMaterialesActividad(materiales) {
+
+    const contenedor = document.getElementById("checklistMaterialesActividad");
+
+    contenedor.innerHTML = materiales.length === 0
+        ? `<p class="detalle">No hay materiales en el inventario.</p>`
+        : materiales.map((m) => `
+            <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                <input type="checkbox" class="checkbox-material-actividad" value="${m.id}">
+                <span style="flex:1; font-size:13px;">${m.nombre} <span style="color:#888; font-size:11.5px;">(disponible: ${m.disponible})</span></span>
+                <input type="number" class="cantidad-material-actividad" min="1" max="${m.disponible}" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+            </div>
+        `).join("");
+
+}
+
+document.getElementById("formMaterialActividad").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeMaterialActividad");
+
+    const items = [];
+    document.querySelectorAll(".checkbox-material-actividad:checked").forEach((checkbox) => {
+        const fila = checkbox.closest("div");
+        const cantidad = fila.querySelector(".cantidad-material-actividad").value;
+        if (cantidad && Number(cantidad) > 0) {
+            items.push({ materialId: checkbox.value, cantidad: Number(cantidad) });
+        }
+    });
+
+    if (items.length === 0) {
+        mostrarMensaje(mensaje, "Marca al menos un material con una cantidad válida", "fallo");
+        return;
+    }
+
+    try {
+
+        await peticionApi("/api/materiales/lotes", {
+            method: "POST",
+            body: JSON.stringify({
+                liderId: document.getElementById("inputLiderMaterialActividad").value,
+                actividadId: actividadAbiertaId,
+                items
+            })
+        });
+
+        mostrarMensaje(mensaje, "Materiales asignados correctamente", "ok");
+        document.getElementById("formMaterialActividad").reset();
+        await cargarMaterialesDeActividad(actividadAbiertaId);
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
 
 document.getElementById("formCrearLote").addEventListener("submit", async (evento) => {
 
