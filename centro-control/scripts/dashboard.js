@@ -1785,6 +1785,11 @@ async function abrirDetalleActividad(id) {
 
         renderizarFasesActividad(actividad);
 
+        document.getElementById("btnCancelarActividad").classList.toggle(
+            "oculto",
+            perfilActual?.rol !== "admin" || actividad.cancelada
+        );
+
         document.getElementById("bloqueCrearTareaActividad").classList.toggle("oculto", perfilActual?.rol !== "admin");
 
         if (perfilActual?.rol === "admin") {
@@ -1878,6 +1883,20 @@ async function marcarFaseActividad(actividadId, fase) {
 document.getElementById("btnCerrarDetalleActividad").addEventListener("click", () => {
     document.getElementById("tarjetaDetalleActividad").classList.add("oculto");
     actividadAbiertaId = null;
+});
+
+document.getElementById("btnCancelarActividad").addEventListener("click", async () => {
+
+    if (!confirm("¿Cancelar esta actividad? Los materiales ya asignados para ella se liberarán automáticamente.")) return;
+
+    try {
+        await peticionApi(`/api/actividades/${actividadAbiertaId}/cancelar`, { method: "POST" });
+        await abrirDetalleActividad(actividadAbiertaId);
+        await cargarActividades();
+    } catch (error) {
+        alert(error.message);
+    }
+
 });
 
 function renderizarTareasPorRama(tareas) {

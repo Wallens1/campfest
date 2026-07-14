@@ -182,11 +182,14 @@ async function mostrarPanel(sesion) {
     document.getElementById("tarjetaEscribirObservacion").classList.toggle("oculto", !puedeCrearTareas);
     document.getElementById("tarjetaPedirAyuda").classList.toggle("oculto", !puedeCrearTareas);
 
-    // Los materiales solo se le asignan a líderes; el resto de logística
-    // únicamente ve la disponibilidad del catálogo (sección de arriba).
+    // Los materiales solo se ASIGNAN a líderes (por eso "Mis lotes" sigue
+    // siendo solo para ellos), pero cualquier miembro de una rama puede
+    // avisar que necesita algo — al entregarse, el lote de todas formas
+    // termina a nombre del líder de esa rama.
+    const perteneceARama = !!perfilActual && !!perfilActual.rama_id;
     document.getElementById("tarjetaMisLotesMaterial").classList.toggle("oculto", !puedeCrearTareas);
-    document.getElementById("tarjetaSolicitarMaterial").classList.toggle("oculto", !puedeCrearTareas);
-    document.getElementById("tarjetaMisSolicitudesMaterial").classList.toggle("oculto", !puedeCrearTareas);
+    document.getElementById("tarjetaSolicitarMaterial").classList.toggle("oculto", !perteneceARama);
+    document.getElementById("tarjetaMisSolicitudesMaterial").classList.toggle("oculto", !perteneceARama);
 
     llenarSelect(document.getElementById("filtroObjetivoMaterialLogistica"), OBJETIVOS_MATERIAL, "Todos los objetivos");
 
@@ -1627,10 +1630,14 @@ async function cargarMateriales() {
         renderizarCatalogoMateriales(materiales);
 
         const esLider = !!perfilActual && perfilActual.rol_en_rama === "lider" && !!perfilActual.rama_id;
+        const perteneceARama = !!perfilActual && !!perfilActual.rama_id;
 
         if (esLider) {
-            renderizarChecklistSolicitudMaterial(materiales);
             cargarMisLotesMaterial();
+        }
+
+        if (perteneceARama) {
+            renderizarChecklistSolicitudMaterial(materiales);
             cargarActividadesParaSolicitudMaterial();
             cargarMisSolicitudesMaterial();
         }

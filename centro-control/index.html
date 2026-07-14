@@ -309,9 +309,12 @@
 
         <!-- ===== DETALLE DE ACTIVIDAD (tareas por rama) ===== -->
         <div class="tarjeta oculto" id="tarjetaDetalleActividad" style="margin-top:14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                 <h2 id="detalleActividadTitulo" style="margin:0;"></h2>
-                <button class="boton pequeno secundario" id="btnCerrarDetalleActividad">Cerrar</button>
+                <div style="display:flex; gap:8px;">
+                    <button class="boton pequeno secundario oculto" id="btnCancelarActividad" style="width:auto;">Cancelar actividad</button>
+                    <button class="boton pequeno secundario" id="btnCerrarDetalleActividad" style="width:auto;">Cerrar</button>
+                </div>
             </div>
             <div class="grid-info" id="detalleActividadInfo" style="margin-top:14px;"></div>
 
@@ -696,6 +699,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=8" defer></script>
+<script src="scripts/dashboard.js?v=9" defer></script>
 </body>
 </html>
