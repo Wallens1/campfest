@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Camp Fest · Logística</title>
-<link rel="stylesheet" href="../assets/style.css?v=2">
+<link rel="stylesheet" href="../assets/style.css?v=4">
 </head>
 <body>
 
@@ -50,6 +50,7 @@
         <button class="tab-modulo" data-vista="comunicacion">Comunicación</button>
         <button class="tab-modulo" data-vista="tareas">Tareas</button>
         <button class="tab-modulo" data-vista="cronograma">Mi cronograma</button>
+        <button class="tab-modulo" data-vista="materiales">Materiales</button>
     </div>
 
     <!-- ===== VISTA: REGISTRO ===== -->
@@ -114,7 +115,7 @@
     <section id="vistaComunicacion" class="oculto">
 
         <div class="tarjeta-incidente">
-            <h3 style="margin-top:0;">Reportar incidente al Centro de Control</h3>
+            <h3>Reportar incidente al Centro de Control</h3>
             <button class="boton pequeno secundario" id="btnAbrirFormIncidente" style="margin-bottom:14px;">Nuevo incidente</button>
 
             <form id="formIncidente" class="oculto">
@@ -148,12 +149,12 @@
         </div>
 
         <div class="tarjeta-incidente">
-            <h3 style="margin-top:0;">Mis incidentes reportados</h3>
+            <h3>Mis incidentes reportados</h3>
             <div class="lista-incidentes-mios" id="listaMisIncidentes"></div>
         </div>
 
         <div class="tarjeta-incidente oculto" id="tarjetaPedirAyuda">
-            <h3 style="margin-top:0;">Pedir ayuda a otra rama</h3>
+            <h3>Pedir ayuda a otra rama</h3>
             <p style="font-size:12px; color:#777; margin-top:-6px;">Solo los líderes de rama pueden pedir ayuda a otra rama.</p>
             <form id="formSolicitud">
                 <div class="campo">
@@ -178,12 +179,12 @@
         </div>
 
         <div class="tarjeta-incidente">
-            <h3 style="margin-top:0;">Solicitudes para mi rama</h3>
+            <h3>Solicitudes para mi rama</h3>
             <div id="listaSolicitudesRecibidas"></div>
         </div>
 
         <div class="tarjeta-incidente">
-            <h3 style="margin-top:0;">Solicitudes que yo pedí</h3>
+            <h3>Solicitudes que yo pedí</h3>
             <div id="listaSolicitudesEnviadas"></div>
         </div>
 
@@ -193,7 +194,7 @@
     <section id="vistaTareas" class="oculto">
 
         <div class="tarjeta-incidente oculto" id="tarjetaCrearTarea">
-            <h3 style="margin-top:0;">Nueva tarea para mi rama</h3>
+            <h3>Nueva tarea para mi rama</h3>
             <form id="formTarea">
                 <div class="campo">
                     <label for="inputTituloTarea">Título</label>
@@ -213,12 +214,12 @@
         </div>
 
         <div class="tarjeta-incidente">
-            <h3 style="margin-top:0;">Tareas de mi rama</h3>
+            <h3>Tareas de mi rama</h3>
             <div id="listaTareas"></div>
         </div>
 
         <div class="tarjeta-incidente oculto" id="tarjetaEscribirObservacion">
-            <h3 style="margin-top:0;">Escribir observación a alguien de mi rama</h3>
+            <h3>Escribir observación a alguien de mi rama</h3>
             <form id="formObservacion">
                 <div class="campo">
                     <label for="inputMiembroObservacion">Integrante</label>
@@ -242,7 +243,7 @@
         </div>
 
         <div class="tarjeta-incidente">
-            <h3 style="margin-top:0;">Mis observaciones</h3>
+            <h3>Mis observaciones</h3>
             <div id="listaObservaciones"></div>
         </div>
 
@@ -252,7 +253,7 @@
     <section id="vistaCronograma" class="oculto">
 
         <div class="tarjeta-incidente">
-            <h3 style="margin-top:0;">Actividades del evento</h3>
+            <h3>Actividades del evento</h3>
             <div id="listaActividadesCronograma"></div>
         </div>
 
@@ -273,9 +274,59 @@
 
     </section>
 
+    <!-- ===== VISTA: MATERIALES ===== -->
+    <section id="vistaMateriales" class="oculto">
+
+        <div class="tarjeta-incidente">
+            <h3>Inventario de materiales</h3>
+            <div class="grid-info" style="margin-bottom:10px;">
+                <div class="campo">
+                    <label for="filtroObjetivoMaterialLogistica">Objetivo</label>
+                    <select id="filtroObjetivoMaterialLogistica"></select>
+                </div>
+                <div class="campo">
+                    <label for="filtroUbicacionMaterialLogistica">Ubicación</label>
+                    <input type="text" id="filtroUbicacionMaterialLogistica" placeholder="Ej: Bodega 1">
+                </div>
+            </div>
+            <div id="listaCatalogoMateriales"></div>
+        </div>
+
+        <div class="tarjeta-incidente oculto" id="tarjetaMisLotesMaterial">
+            <h3>Mis lotes asignados</h3>
+            <div id="listaMisLotesMaterial"></div>
+        </div>
+
+        <div class="tarjeta-incidente oculto" id="tarjetaSolicitarMaterial">
+            <h3>Solicitar materiales</h3>
+            <form id="formSolicitarMaterial">
+                <div class="campo">
+                    <label for="inputActividadSolicitudMaterial">Actividad (opcional)</label>
+                    <select id="inputActividadSolicitudMaterial"><option value="">Sin actividad</option></select>
+                </div>
+                <div class="campo">
+                    <label>Materiales</label>
+                    <div id="checklistSolicitudMaterial"></div>
+                </div>
+                <div class="campo">
+                    <label for="inputNotasSolicitudMaterial">Notas (opcional)</label>
+                    <textarea id="inputNotasSolicitudMaterial"></textarea>
+                </div>
+                <button type="submit" class="boton pequeno">Enviar solicitud</button>
+            </form>
+            <div class="mensaje" id="mensajeSolicitarMaterial"></div>
+        </div>
+
+        <div class="tarjeta-incidente oculto" id="tarjetaMisSolicitudesMaterial">
+            <h3>Mis solicitudes</h3>
+            <div id="listaMisSolicitudesMaterial"></div>
+        </div>
+
+    </section>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../scripts/dashboard.js?v=4" defer></script>
+<script src="../scripts/dashboard.js?v=6" defer></script>
 </body>
 </html>

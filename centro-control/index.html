@@ -50,6 +50,7 @@
     <div class="tabs-modulo">
         <button class="tab-modulo activo" data-vista="panel">Panel</button>
         <button class="tab-modulo" data-vista="cronograma">Cronograma</button>
+        <button class="tab-modulo" data-vista="inventario">Inventario</button>
         <button class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion">Administración</button>
     </div>
 
@@ -383,6 +384,92 @@
 
     </section>
 
+    <!-- ===== VISTA: INVENTARIO ===== -->
+    <section id="vistaInventario" class="oculto">
+
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Inventario de materiales</h3>
+            <div class="grid-info" style="margin-bottom:10px;">
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroObjetivoMaterial">Objetivo</label>
+                    <select id="filtroObjetivoMaterial"></select>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroUbicacionMaterial">Ubicación</label>
+                    <input type="text" id="filtroUbicacionMaterial" placeholder="Ej: Bodega 1">
+                </div>
+            </div>
+            <div id="listaInventario"></div>
+        </div>
+
+        <div class="tarjeta oculto" id="bloqueGestionInventarioAdmin" style="margin-bottom:14px;">
+            <h3>Nuevo material</h3>
+            <form id="formNuevoMaterial">
+                <div class="grid-info" style="margin-bottom:0;">
+                    <div class="campo">
+                        <label for="inputNombreMaterial">Nombre</label>
+                        <input type="text" id="inputNombreMaterial" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputObjetivoMaterial">Objetivo</label>
+                        <select id="inputObjetivoMaterial" required></select>
+                    </div>
+                    <div class="campo">
+                        <label for="inputUbicacionMaterial">Ubicación</label>
+                        <input type="text" id="inputUbicacionMaterial" placeholder="Bodega, contenedor...">
+                    </div>
+                    <div class="campo">
+                        <label for="inputCantidadMaterial">Cantidad total</label>
+                        <input type="number" id="inputCantidadMaterial" min="0" required>
+                    </div>
+                </div>
+                <div class="campo">
+                    <label for="inputDescripcionMaterial">Descripción (opcional)</label>
+                    <textarea id="inputDescripcionMaterial"></textarea>
+                </div>
+                <button type="submit" class="boton pequeno">Crear material</button>
+            </form>
+            <div class="mensaje" id="mensajeNuevoMaterial"></div>
+        </div>
+
+        <div class="tarjeta oculto" id="bloqueCrearLoteAdmin" style="margin-bottom:14px;">
+            <h3>Asignar lote a un líder</h3>
+            <form id="formCrearLote">
+                <div class="grid-info" style="margin-bottom:0;">
+                    <div class="campo">
+                        <label for="inputLiderLote">Líder</label>
+                        <select id="inputLiderLote" required></select>
+                    </div>
+                    <div class="campo">
+                        <label for="inputActividadLote">Actividad (opcional)</label>
+                        <select id="inputActividadLote"><option value="">Sin actividad</option></select>
+                    </div>
+                </div>
+                <div class="campo">
+                    <label>Materiales a incluir</label>
+                    <div id="checklistMaterialesLote"></div>
+                </div>
+                <button type="submit" class="boton pequeno">Asignar lote</button>
+            </form>
+            <div class="mensaje" id="mensajeCrearLote"></div>
+        </div>
+
+        <div class="tarjeta oculto" id="bloqueSolicitudesMaterialAdmin" style="margin-bottom:14px;">
+            <h3>Solicitudes de materiales pendientes</h3>
+            <div id="listaSolicitudesMaterial"></div>
+        </div>
+
+        <div class="tarjeta oculto" id="bloqueExportarInventarioAdmin">
+            <h3>Exportar</h3>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="boton pequeno terciario" id="btnExportarInventarioExcel" style="width:auto;">Inventario (Excel)</button>
+                <button class="boton pequeno amarillo" id="btnExportarInventarioPdf" style="width:auto;">Inventario (PDF)</button>
+                <button class="boton pequeno secundario" id="btnExportarHistorialMaterial" style="width:auto;">Historial (Excel)</button>
+            </div>
+        </div>
+
+    </section>
+
     <!-- ===== VISTA: ADMINISTRACIÓN (solo administrador) ===== -->
     <section class="oculto" id="vistaAdministracion">
 
@@ -517,6 +604,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=4" defer></script>
+<script src="scripts/dashboard.js?v=5" defer></script>
 </body>
 </html>

@@ -488,6 +488,10 @@ body{
     margin-bottom:20px;
 }
 
+.tarjeta-incidente h3{
+    margin-top:0;
+}
+
 .lista-incidentes-mios{
     display:flex;
     flex-direction:column;
@@ -508,6 +512,92 @@ body{
 
 .incidente-mini .codigo{ font-weight:800; }
 .incidente-mini .descripcion{ color:#666; font-size:12px; }
+
+.incidente-mini.columna{
+    flex-direction:column;
+    align-items:stretch;
+    gap:4px;
+}
+
+.tarjeta-actividad{ cursor:pointer; }
+
+.fila-encabezado-actividad{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    width:100%;
+}
+
+.badges-actividad{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+}
+
+/* ===== TARJETAS EXPANDIBLES (solicitudes / tareas) ===== */
+
+.tarjeta-expandible{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:4px;
+    padding:10px 14px;
+    background:var(--crema);
+    border-radius:10px;
+    font-size:13px;
+    cursor:pointer;
+    border:2px solid transparent;
+    transition:border-color .12s ease;
+}
+
+.tarjeta-expandible:hover{
+    border-color:var(--teal);
+}
+
+.tarjeta-expandible.abierta{
+    border-color:var(--morado);
+}
+
+.tarjeta-expandible .fila-encabezado{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    width:100%;
+}
+
+.tarjeta-expandible .fila-encabezado .codigo{
+    min-width:0;
+    flex:1;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-weight:800;
+}
+
+.fila-conteo{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:4px;
+}
+
+.nombre-fila-conteo{
+    font-size:13px;
+    font-weight:600;
+}
+
+@media (max-width:480px){
+    .tarjeta-expandible .fila-encabezado .codigo{
+        white-space:normal;
+        overflow:visible;
+        text-overflow:unset;
+    }
+}
 
 /* ===== GRID DE CARPAS ===== */
 

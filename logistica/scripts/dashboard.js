@@ -20,6 +20,8 @@ const CATEGORIAS = [
 
 const PRIORIDADES = ["baja", "media", "alta", "critica"];
 
+const OBJETIVOS_MATERIAL = ["logistica", "entretenimiento", "auxilios", "decoracion", "emergencias", "utilidades"];
+
 function humanizar(texto) {
     if (!texto) return "—";
     const limpio = String(texto).replace(/_/g, " ");
@@ -63,7 +65,10 @@ const mensajeFicha = document.getElementById("mensajeFicha");
 let campoBusquedaActivo = "codigo";
 let participanteActualId = null;
 let carpaSeleccionada = null;
-let detalleTareaAbiertoId = null;
+// Reemplaza al viejo global único: cada lista de tarjetas expandibles
+// (solicitudesRecibidas/solicitudesEnviadas/tareas/actividad) puede tener su
+// propio detalle abierto a la vez, sin pisarse entre sí.
+const detallesTareaAbiertos = {};
 let intervaloPolling = null;
 let perfilActual = null;
 let ramasDisponibles = [];
@@ -164,6 +169,14 @@ async function mostrarPanel(sesion) {
     document.getElementById("tarjetaEscribirObservacion").classList.toggle("oculto", !puedeCrearTareas);
     document.getElementById("tarjetaPedirAyuda").classList.toggle("oculto", !puedeCrearTareas);
 
+    // Los materiales solo se le asignan a líderes; el resto de logística
+    // únicamente ve la disponibilidad del catálogo (sección de arriba).
+    document.getElementById("tarjetaMisLotesMaterial").classList.toggle("oculto", !puedeCrearTareas);
+    document.getElementById("tarjetaSolicitarMaterial").classList.toggle("oculto", !puedeCrearTareas);
+    document.getElementById("tarjetaMisSolicitudesMaterial").classList.toggle("oculto", !puedeCrearTareas);
+
+    llenarSelect(document.getElementById("filtroObjetivoMaterialLogistica"), OBJETIVOS_MATERIAL, "Todos los objetivos");
+
     if (puedeCrearTareas && perfilActual.rama_id) {
         try {
             const { miembros } = await peticionApi(`/api/centro-control/ramas/${perfilActual.rama_id}/miembros`);
@@ -256,8 +269,10 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
         document.getElementById("vistaComunicacion").classList.toggle("oculto", vista !== "comunicacion");
         document.getElementById("vistaTareas").classList.toggle("oculto", vista !== "tareas");
         document.getElementById("vistaCronograma").classList.toggle("oculto", vista !== "cronograma");
+        document.getElementById("vistaMateriales").classList.toggle("oculto", vista !== "materiales");
 
         if (vista === "cronograma") cargarCronograma();
+        if (vista === "materiales") cargarMateriales();
 
     });
 
@@ -768,7 +783,7 @@ function renderizarHistorial(eventos) {
 // Solicitudes internas y tareas (misma UI, filtradas por tipo)
 // ==========================
 
-function renderizarListaTareas(contenedor, tareas) {
+function renderizarListaTareas(contenedor, tareas, contenedorKey) {
 
     if (tareas.length === 0) {
         contenedor.innerHTML = `<p class="detalle">Nada por aquí todavía.</p>`;
@@ -776,8 +791,8 @@ function renderizarListaTareas(contenedor, tareas) {
     }
 
     contenedor.innerHTML = tareas.map((t) => `
-        <div class="incidente-mini" data-tarea="${t.id}" style="cursor:pointer; flex-direction:column; align-items:stretch; gap:4px;">
-            <div style="display:flex; justify-content:space-between; width:100%; gap:8px;">
+        <div class="tarjeta-expandible" data-tarea="${t.id}">
+            <div class="fila-encabezado">
                 <span class="codigo">${t.titulo}</span>
                 <span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span>
             </div>
@@ -787,7 +802,7 @@ function renderizarListaTareas(contenedor, tareas) {
                 ${t.hora_programada ? ` · Listo antes de: ${formatearHora(t.hora_programada)}` : ""}
                 ${t.cantidad_personas ? ` · ${t.checks_count || 0}/${t.cantidad_personas} aceptaron` : ""}
             </div>
-            <div class="oculto" id="detalleTarea-${t.id}"></div>
+            <div class="oculto" id="detalleTarea-${contenedorKey}-${t.id}"></div>
         </div>
     `).join("");
 
@@ -798,30 +813,43 @@ function renderizarListaTareas(contenedor, tareas) {
             // debe volver a alternar el colapsado, o se cierra apenas se
             // intenta interactuar con lo que hay dentro.
             if (evento.target.closest('[id^="detalleTarea-"]')) return;
-            abrirDetalleTarea(card.dataset.tarea, false);
+            abrirDetalleTarea(card.dataset.tarea, false, contenedorKey);
         });
     });
 
     // El polling reconstruye esta lista cada pocos segundos; si había un
-    // detalle abierto, se vuelve a abrir con datos frescos en vez de quedar
-    // colapsado como si el usuario nunca hubiera hecho clic.
-    if (detalleTareaAbiertoId && tareas.some((t) => t.id === detalleTareaAbiertoId)) {
-        abrirDetalleTarea(detalleTareaAbiertoId, true);
+    // detalle abierto EN ESTE CONTENEDOR, se vuelve a abrir con datos frescos
+    // en vez de quedar colapsado como si el usuario nunca hubiera hecho clic.
+    const idAbierto = detallesTareaAbiertos[contenedorKey];
+    if (idAbierto && tareas.some((t) => t.id === idAbierto)) {
+        abrirDetalleTarea(idAbierto, true, contenedorKey);
     }
 
 }
 
-async function abrirDetalleTarea(id, forzar) {
+async function abrirDetalleTarea(id, forzar, contenedorKey) {
 
-    const contenedor = document.getElementById(`detalleTarea-${id}`);
+    const contenedor = document.getElementById(`detalleTarea-${contenedorKey}-${id}`);
+
+    // El contenedor puede no existir todavía (p. ej. la alerta cambia de
+    // pestaña y dispara esto antes de que esa lista se haya renderizado).
+    if (!contenedor) return;
 
     if (!forzar && !contenedor.classList.contains("oculto")) {
         contenedor.classList.add("oculto");
-        detalleTareaAbiertoId = null;
+        contenedor.closest(".tarjeta-expandible")?.classList.remove("abierta");
+        delete detallesTareaAbiertos[contenedorKey];
         return;
     }
 
-    detalleTareaAbiertoId = id;
+    // Si el polling intenta forzar un refresh mientras el usuario está
+    // escribiendo dentro de ESTE detalle (comentario o nueva subtarea), no lo
+    // reconstruimos: perdería el texto y el foco a mitad de escritura.
+    if (forzar && contenedor.contains(document.activeElement)) {
+        return;
+    }
+
+    detallesTareaAbiertos[contenedorKey] = id;
 
     try {
 
@@ -854,8 +882,8 @@ async function abrirDetalleTarea(id, forzar) {
         const filasChecks = checks.length === 0
             ? `<p class="detalle">Nadie se ha marcado todavía.</p>`
             : checks.map((c) => `
-                <div class="fila-conteo" style="margin-top:4px;">
-                    <span class="etiqueta">${c.nombre}</span>
+                <div class="fila-conteo">
+                    <span class="nombre-fila-conteo">${c.nombre}</span>
                     ${esLider ? `<button class="boton pequeno secundario" data-quitar-check="${c.usuario_id}" style="width:auto; padding:4px 10px; font-size:11px;">Quitar</button>` : ""}
                 </div>
             `).join("");
@@ -890,8 +918,8 @@ async function abrirDetalleTarea(id, forzar) {
             const filasSubtareas = subtareas.length === 0
                 ? `<p class="detalle">Sin subtareas asignadas.</p>`
                 : subtareas.map((s) => `
-                    <div class="fila-conteo" style="margin-top:4px;">
-                        <span class="etiqueta">
+                    <div class="fila-conteo">
+                        <span class="nombre-fila-conteo">
                             ${s.estado === "hecha" ? "✅" : "⬜"} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}
                         </span>
                         ${s.estado === "pendiente" && puedeMarcarSubtarea(s) ? `<button class="boton pequeno" data-hecha-subtarea="${s.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar hecha</button>` : ""}
@@ -949,11 +977,12 @@ async function abrirDetalleTarea(id, forzar) {
         `;
 
         contenedor.classList.remove("oculto");
+        contenedor.closest(".tarjeta-expandible")?.classList.add("abierta");
 
         contenedor.querySelectorAll("[data-quitar-check]").forEach((boton) => {
             boton.addEventListener("click", (evento) => {
                 evento.stopPropagation();
-                quitarParticipacionTarea(id, boton.dataset.quitarCheck);
+                quitarParticipacionTarea(id, boton.dataset.quitarCheck, contenedorKey);
             });
         });
 
@@ -961,7 +990,7 @@ async function abrirDetalleTarea(id, forzar) {
         if (botonMarcar) {
             botonMarcar.addEventListener("click", (evento) => {
                 evento.stopPropagation();
-                marcarParticipacionTarea(id);
+                marcarParticipacionTarea(id, contenedorKey);
             });
         }
 
@@ -969,14 +998,14 @@ async function abrirDetalleTarea(id, forzar) {
         if (botonCompletar) {
             botonCompletar.addEventListener("click", (evento) => {
                 evento.stopPropagation();
-                completarTarea(id);
+                completarTarea(id, contenedorKey);
             });
         }
 
         contenedor.querySelectorAll("[data-hecha-subtarea]").forEach((boton) => {
             boton.addEventListener("click", (evento) => {
                 evento.stopPropagation();
-                marcarSubtareaHecha(id, boton.dataset.hechaSubtarea);
+                marcarSubtareaHecha(id, boton.dataset.hechaSubtarea, contenedorKey);
             });
         });
 
@@ -996,7 +1025,8 @@ async function abrirDetalleTarea(id, forzar) {
                 crearSubtarea(
                     id,
                     formSubtarea.querySelector(".input-titulo-subtarea").value.trim(),
-                    formSubtarea.querySelector(".select-asignado-subtarea").value
+                    formSubtarea.querySelector(".select-asignado-subtarea").value,
+                    contenedorKey
                 );
             });
         }
@@ -1005,7 +1035,7 @@ async function abrirDetalleTarea(id, forzar) {
         formComentario.addEventListener("submit", (evento) => {
             evento.preventDefault();
             evento.stopPropagation();
-            crearComentario(id, formComentario.querySelector(".input-nuevo-comentario").value.trim());
+            crearComentario(id, formComentario.querySelector(".input-nuevo-comentario").value.trim(), contenedorKey);
         });
 
     } catch (error) {
@@ -1014,7 +1044,7 @@ async function abrirDetalleTarea(id, forzar) {
 
 }
 
-async function crearSubtarea(tareaId, titulo, asignadoA) {
+async function crearSubtarea(tareaId, titulo, asignadoA, contenedorKey) {
 
     if (!titulo) return;
 
@@ -1023,25 +1053,25 @@ async function crearSubtarea(tareaId, titulo, asignadoA) {
             method: "POST",
             body: JSON.stringify({ titulo, asignadoA: asignadoA || null })
         });
-        await abrirDetalleTarea(tareaId, true);
+        await abrirDetalleTarea(tareaId, true, contenedorKey);
     } catch (error) {
         alert(error.message);
     }
 
 }
 
-async function marcarSubtareaHecha(tareaId, subId) {
+async function marcarSubtareaHecha(tareaId, subId, contenedorKey) {
 
     try {
         await peticionApi(`/api/tareas/${tareaId}/subtareas/${subId}/hecha`, { method: "POST" });
-        await abrirDetalleTarea(tareaId, true);
+        await abrirDetalleTarea(tareaId, true, contenedorKey);
     } catch (error) {
         alert(error.message);
     }
 
 }
 
-async function crearComentario(tareaId, texto) {
+async function crearComentario(tareaId, texto, contenedorKey) {
 
     if (!texto) return;
 
@@ -1050,39 +1080,39 @@ async function crearComentario(tareaId, texto) {
             method: "POST",
             body: JSON.stringify({ texto })
         });
-        await abrirDetalleTarea(tareaId, true);
+        await abrirDetalleTarea(tareaId, true, contenedorKey);
     } catch (error) {
         alert(error.message);
     }
 
 }
 
-async function marcarParticipacionTarea(id) {
+async function marcarParticipacionTarea(id, contenedorKey) {
     try {
         await peticionApi(`/api/tareas/${id}/check`, { method: "POST" });
         await Promise.all([cargarSolicitudes(), cargarTareas()]);
-        await abrirDetalleTarea(id, true);
+        await abrirDetalleTarea(id, true, contenedorKey);
     } catch (error) {
         alert(error.message);
     }
 }
 
-async function quitarParticipacionTarea(id, usuarioId) {
+async function quitarParticipacionTarea(id, usuarioId, contenedorKey) {
     if (!confirm("¿Quitar esta participación?")) return;
     try {
         await peticionApi(`/api/tareas/${id}/check/${usuarioId}`, { method: "DELETE" });
-        await abrirDetalleTarea(id, true);
+        await abrirDetalleTarea(id, true, contenedorKey);
     } catch (error) {
         alert(error.message);
     }
 }
 
-async function completarTarea(id) {
+async function completarTarea(id, contenedorKey) {
     if (!confirm("¿Dar el check final y cerrar este caso?")) return;
     try {
         await peticionApi(`/api/tareas/${id}/completar`, { method: "POST" });
         await Promise.all([cargarSolicitudes(), cargarTareas()]);
-        await abrirDetalleTarea(id, true);
+        await abrirDetalleTarea(id, true, contenedorKey);
     } catch (error) {
         alert(error.message);
     }
@@ -1097,8 +1127,8 @@ async function cargarSolicitudes() {
         const recibidas = tareas.filter((t) => perfilActual && (t.rama_id === perfilActual.rama_id || t.rama_id === null));
         const enviadas = tareas.filter((t) => perfilActual && t.creado_por === perfilActual.id);
 
-        renderizarListaTareas(document.getElementById("listaSolicitudesRecibidas"), recibidas);
-        renderizarListaTareas(document.getElementById("listaSolicitudesEnviadas"), enviadas);
+        renderizarListaTareas(document.getElementById("listaSolicitudesRecibidas"), recibidas, "solicitudesRecibidas");
+        renderizarListaTareas(document.getElementById("listaSolicitudesEnviadas"), enviadas, "solicitudesEnviadas");
         renderizarAlertasSolicitudes(recibidas);
 
     } catch (error) {
@@ -1127,7 +1157,9 @@ function renderizarAlertasSolicitudes(recibidas) {
     contenedor.querySelectorAll("[data-tarea-alerta]").forEach((chip) => {
         chip.addEventListener("click", () => {
             document.querySelector('.tab-modulo[data-vista="comunicacion"]').click();
-            setTimeout(() => abrirDetalleTarea(chip.dataset.tareaAlerta, true), 150);
+            // Esta alerta siempre viene de "recibidas" (se construye a partir
+            // de esa misma lista), así que la clave de contenedor es fija.
+            setTimeout(() => abrirDetalleTarea(chip.dataset.tareaAlerta, true, "solicitudesRecibidas"), 150);
         });
     });
 
@@ -1137,7 +1169,7 @@ async function cargarTareas() {
 
     try {
         const { tareas } = await peticionApi("/api/tareas?tipo=tarea");
-        renderizarListaTareas(document.getElementById("listaTareas"), tareas);
+        renderizarListaTareas(document.getElementById("listaTareas"), tareas, "tareas");
     } catch (error) {
         console.error(error);
     }
@@ -1278,13 +1310,16 @@ async function cargarCronograma() {
         contenedor.innerHTML = actividades.length === 0
             ? `<p class="detalle">Todavía no se ha cargado el cronograma del evento.</p>`
             : actividades.map((a) => `
-                <div class="incidente-mini" data-actividad="${a.id}" style="cursor:pointer;">
-                    <div>
-                        <span class="codigo">
-                            ${a.titulo}${a.cancelada ? ' <span class="badge rojo">Cancelada</span>' : ""}
-                            <span class="badge ${a.montaje_completado ? "verde" : "neutro"}">${a.montaje_completado ? "Montaje listo" : "Montaje pendiente"}</span>
-                            <span class="badge ${a.finalizada ? "verde" : "neutro"}">${a.finalizada ? "Finalizada" : "Sin finalizar"}</span>
-                        </span>
+                <div class="incidente-mini tarjeta-actividad" data-actividad="${a.id}">
+                    <div style="width:100%;">
+                        <div class="fila-encabezado-actividad">
+                            <span class="codigo">${a.titulo}</span>
+                            <div class="badges-actividad">
+                                ${a.cancelada ? '<span class="badge rojo">Cancelada</span>' : ""}
+                                <span class="badge ${a.montaje_completado ? "verde" : "neutro"}">${a.montaje_completado ? "Montaje listo" : "Montaje pendiente"}</span>
+                                <span class="badge ${a.finalizada ? "verde" : "neutro"}">${a.finalizada ? "Finalizada" : "Sin finalizar"}</span>
+                            </div>
+                        </div>
                         <div class="descripcion">${formatearFechaHora(a.hora_inicio)} — ${formatearFechaHora(a.hora_fin)} ${a.espacio_usado ? `· ${a.espacio_usado}` : ""}</div>
                     </div>
                 </div>
@@ -1326,7 +1361,7 @@ async function abrirDetalleActividadCronograma(id) {
             const ramasDeEsta = t.ramas && t.ramas.length > 0 ? t.ramas : [t.rama_id];
             return ramasDeEsta.includes(perfilActual.rama_id);
         });
-        renderizarListaTareas(document.getElementById("listaTareasMiRamaActividad"), tareasDeMiRama);
+        renderizarListaTareas(document.getElementById("listaTareasMiRamaActividad"), tareasDeMiRama, "actividad");
 
         const esLiderDeRamaInvolucrada = perfilActual?.rol_en_rama === "lider" && tareasDeMiRama.length > 0;
         renderizarFasesActividadCronograma(actividad, esLiderDeRamaInvolucrada);
@@ -1385,6 +1420,238 @@ async function marcarFaseActividadCronograma(actividadId, fase) {
 document.getElementById("btnCerrarDetalleActividadCronograma").addEventListener("click", () => {
     document.getElementById("tarjetaDetalleActividadCronograma").classList.add("oculto");
 });
+
+// ==========================
+// Materiales
+// ==========================
+
+document.getElementById("filtroObjetivoMaterialLogistica").addEventListener("change", cargarMateriales);
+document.getElementById("filtroUbicacionMaterialLogistica").addEventListener("input", () => {
+    clearTimeout(window._filtroMaterialLogisticaTimeout);
+    window._filtroMaterialLogisticaTimeout = setTimeout(cargarMateriales, 350);
+});
+
+async function cargarMateriales() {
+
+    try {
+
+        const objetivo = document.getElementById("filtroObjetivoMaterialLogistica").value;
+        const ubicacion = document.getElementById("filtroUbicacionMaterialLogistica").value.trim();
+
+        const params = new URLSearchParams();
+        if (objetivo) params.set("objetivo", objetivo);
+        if (ubicacion) params.set("ubicacion", ubicacion);
+
+        const { materiales } = await peticionApi(`/api/materiales?${params.toString()}`);
+
+        renderizarCatalogoMateriales(materiales);
+
+        const esLider = !!perfilActual && perfilActual.rol_en_rama === "lider" && !!perfilActual.rama_id;
+
+        if (esLider) {
+            renderizarChecklistSolicitudMaterial(materiales);
+            cargarMisLotesMaterial();
+            cargarActividadesParaSolicitudMaterial();
+            cargarMisSolicitudesMaterial();
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+function renderizarCatalogoMateriales(materiales) {
+
+    const contenedor = document.getElementById("listaCatalogoMateriales");
+
+    contenedor.innerHTML = materiales.length === 0
+        ? `<p class="detalle">Todavía no hay materiales registrados.</p>`
+        : materiales.map((m) => `
+            <div class="incidente-mini columna">
+                <div style="display:flex; justify-content:space-between; gap:8px;">
+                    <span class="codigo">${m.nombre}</span>
+                    <span class="badge ${m.disponible > 0 ? "verde" : "rojo"}">${m.disponible}/${m.cantidad_total} disponibles</span>
+                </div>
+                <div class="descripcion">
+                    ${humanizar(m.objetivo)}${m.ubicacion ? ` · ${m.ubicacion}` : ""}${m.danadaOPerdida > 0 ? ` · ${m.danadaOPerdida} dañados/perdidos` : ""}
+                </div>
+                ${m.tenedores.length > 0 ? `<div class="descripcion">Tienen: ${m.tenedores.map((t) => `${t.liderNombre} (${t.cantidad})`).join(", ")}</div>` : ""}
+            </div>
+        `).join("");
+
+}
+
+async function cargarMisLotesMaterial() {
+
+    try {
+
+        const { lotes } = await peticionApi("/api/materiales/lotes/mios");
+        const contenedor = document.getElementById("listaMisLotesMaterial");
+
+        contenedor.innerHTML = lotes.length === 0
+            ? `<p class="detalle">No tienes materiales asignados.</p>`
+            : lotes.map((l) => `
+                <div class="incidente-mini columna">
+                    <div class="descripcion">${l.actividadTitulo ? `Actividad: ${l.actividadTitulo}` : "Sin actividad vinculada"} · ${new Date(l.creadoEn).toLocaleString("es-CO")}</div>
+                    ${l.lineas.map((linea) => `
+                        <div class="fila-conteo">
+                            <span class="nombre-fila-conteo">${linea.materialNombre} — ${linea.pendiente > 0 ? `${linea.pendiente} pendiente` : "devuelto"}</span>
+                        </div>
+                        ${linea.pendiente > 0 ? `
+                            <form class="form-devolver-material" data-lote="${l.id}" data-linea="${linea.id}" style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; align-items:end;">
+                                <label style="font-size:11px;">Buen estado
+                                    <input type="number" min="0" max="${linea.pendiente}" class="input-buen-estado" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
+                                </label>
+                                <label style="font-size:11px;">Dañado
+                                    <input type="number" min="0" max="${linea.pendiente}" class="input-danado" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
+                                </label>
+                                <label style="font-size:11px;">Perdido
+                                    <input type="number" min="0" max="${linea.pendiente}" class="input-perdido" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
+                                </label>
+                                <button type="submit" class="boton pequeno secundario" style="width:auto; padding:6px 12px; font-size:11px;">Devolver</button>
+                            </form>
+                        ` : ""}
+                    `).join("")}
+                </div>
+            `).join("");
+
+        contenedor.querySelectorAll(".form-devolver-material").forEach((form) => {
+            form.addEventListener("submit", (evento) => {
+                evento.preventDefault();
+                devolverLineaMaterial(
+                    form.dataset.lote,
+                    form.dataset.linea,
+                    form.querySelector(".input-buen-estado").value,
+                    form.querySelector(".input-danado").value,
+                    form.querySelector(".input-perdido").value
+                );
+            });
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function devolverLineaMaterial(loteId, materialLoteId, buenEstado, danada, perdida) {
+
+    try {
+
+        await peticionApi(`/api/materiales/lotes/${loteId}/devolver`, {
+            method: "POST",
+            body: JSON.stringify({
+                lineas: [{
+                    materialLoteId,
+                    cantidadBuenEstado: Number(buenEstado || 0),
+                    cantidadDanada: Number(danada || 0),
+                    cantidadPerdida: Number(perdida || 0)
+                }]
+            })
+        });
+
+        await Promise.all([cargarMisLotesMaterial(), cargarMateriales()]);
+
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+async function cargarActividadesParaSolicitudMaterial() {
+
+    try {
+        const { actividades } = await peticionApi("/api/actividades");
+
+        document.getElementById("inputActividadSolicitudMaterial").innerHTML = `<option value="">Sin actividad</option>` +
+            actividades.filter((a) => !a.cancelada).map((a) => `<option value="${a.id}">${a.titulo}</option>`).join("");
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+function renderizarChecklistSolicitudMaterial(materiales) {
+
+    const contenedor = document.getElementById("checklistSolicitudMaterial");
+
+    contenedor.innerHTML = materiales.length === 0
+        ? `<p class="detalle">No hay materiales en el catálogo.</p>`
+        : materiales.map((m) => `
+            <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                <input type="checkbox" class="checkbox-material-solicitud" value="${m.id}">
+                <span style="flex:1; font-size:13px;">${m.nombre} <span style="color:#888; font-size:11.5px;">(disponible: ${m.disponible})</span></span>
+                <input type="number" class="cantidad-material-solicitud" min="1" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+            </div>
+        `).join("");
+
+}
+
+document.getElementById("formSolicitarMaterial").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeSolicitarMaterial");
+
+    const items = [];
+    document.querySelectorAll(".checkbox-material-solicitud:checked").forEach((checkbox) => {
+        const fila = checkbox.closest("div");
+        const cantidad = fila.querySelector(".cantidad-material-solicitud").value;
+        if (cantidad && Number(cantidad) > 0) {
+            items.push({ materialId: checkbox.value, cantidad: Number(cantidad) });
+        }
+    });
+
+    if (items.length === 0) {
+        mostrarMensaje(mensaje, "Marca al menos un material con una cantidad válida", "fallo");
+        return;
+    }
+
+    try {
+
+        await peticionApi("/api/materiales/solicitudes", {
+            method: "POST",
+            body: JSON.stringify({
+                actividadId: document.getElementById("inputActividadSolicitudMaterial").value || null,
+                notas: document.getElementById("inputNotasSolicitudMaterial").value.trim(),
+                items
+            })
+        });
+
+        mostrarMensaje(mensaje, "Solicitud enviada correctamente", "ok");
+        document.getElementById("formSolicitarMaterial").reset();
+        await cargarMisSolicitudesMaterial();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+async function cargarMisSolicitudesMaterial() {
+
+    try {
+
+        const { solicitudes } = await peticionApi("/api/materiales/solicitudes");
+        const contenedor = document.getElementById("listaMisSolicitudesMaterial");
+
+        contenedor.innerHTML = solicitudes.length === 0
+            ? `<p class="detalle">No has hecho solicitudes todavía.</p>`
+            : solicitudes.map((s) => `
+                <div class="incidente-mini columna">
+                    <div style="display:flex; justify-content:space-between; gap:8px;">
+                        <span class="codigo">${s.items.map((i) => `${i.materialNombre} × ${i.cantidad}`).join(", ")}</span>
+                        <span class="estado-badge ${s.estado}">${humanizar(s.estado)}</span>
+                    </div>
+                    <div class="descripcion">${new Date(s.creado_en).toLocaleString("es-CO")}${s.notas ? ` · ${s.notas}` : ""}</div>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
 
 // ==========================
 // Arranque

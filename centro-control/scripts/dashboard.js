@@ -25,6 +25,8 @@ const ESTADOS = [
     "en_atencion", "pendiente_seguimiento", "escalado", "solucionado", "cerrado"
 ];
 
+const OBJETIVOS_MATERIAL = ["logistica", "entretenimiento", "auxilios", "decoracion", "emergencias", "utilidades"];
+
 // ==========================
 // Utilidades
 // ==========================
@@ -263,6 +265,7 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
 
         document.getElementById("vistaPanel").classList.toggle("oculto", vista !== "panel");
         document.getElementById("vistaCronograma").classList.toggle("oculto", vista !== "cronograma");
+        document.getElementById("vistaInventario").classList.toggle("oculto", vista !== "inventario");
         document.getElementById("vistaAdministracion").classList.toggle("oculto", vista !== "administracion");
 
         if (vista === "cronograma") {
@@ -271,6 +274,15 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
                 cargarAnaliticaAdmin();
             } else {
                 cargarResumenControl();
+            }
+        }
+
+        if (vista === "inventario") {
+            cargarInventario();
+            if (perfilActual?.rol === "admin") {
+                cargarLideresParaLote();
+                cargarActividadesParaLote();
+                cargarSolicitudesMaterialAdmin();
             }
         }
 
@@ -291,6 +303,15 @@ async function iniciarDashboard() {
     document.getElementById("tarjetaCronogramaAdmin").classList.toggle("oculto", usuario.rol !== "admin");
     document.getElementById("tarjetaAnaliticaAdmin").classList.toggle("oculto", usuario.rol !== "admin");
     document.getElementById("tarjetaResumenControl").classList.toggle("oculto", usuario.rol === "admin");
+
+    document.getElementById("bloqueGestionInventarioAdmin").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("bloqueCrearLoteAdmin").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("bloqueSolicitudesMaterialAdmin").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("bloqueExportarInventarioAdmin").classList.toggle("oculto", usuario.rol !== "admin");
+
+    llenarSelect(document.getElementById("filtroObjetivoMaterial"), OBJETIVOS_MATERIAL, "Todos los objetivos");
+    document.getElementById("inputObjetivoMaterial").innerHTML = OBJETIVOS_MATERIAL
+        .map((o) => `<option value="${o}">${humanizar(o)}</option>`).join("");
 
     llenarSelect(document.getElementById("inputCategoria"), CATEGORIAS, "Selecciona categoría");
     llenarSelect(document.getElementById("inputPrioridad"), PRIORIDADES, "Selecciona prioridad");
@@ -2026,6 +2047,263 @@ async function cargarResumenControl() {
     }
 
 }
+
+// ==========================
+// Inventario de materiales
+// ==========================
+
+let materialesInventario = [];
+
+document.getElementById("filtroObjetivoMaterial").addEventListener("change", cargarInventario);
+document.getElementById("filtroUbicacionMaterial").addEventListener("input", () => {
+    clearTimeout(window._filtroMaterialTimeout);
+    window._filtroMaterialTimeout = setTimeout(cargarInventario, 350);
+});
+
+async function cargarInventario() {
+
+    try {
+
+        const objetivo = document.getElementById("filtroObjetivoMaterial").value;
+        const ubicacion = document.getElementById("filtroUbicacionMaterial").value.trim();
+
+        const params = new URLSearchParams();
+        if (objetivo) params.set("objetivo", objetivo);
+        if (ubicacion) params.set("ubicacion", ubicacion);
+
+        const { materiales } = await peticionApi(`/api/materiales?${params.toString()}`);
+        materialesInventario = materiales;
+
+        renderizarListaInventario(materiales);
+
+        if (perfilActual?.rol === "admin") {
+            renderizarChecklistMaterialesLote(materiales);
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+function renderizarListaInventario(materiales) {
+
+    const contenedor = document.getElementById("listaInventario");
+
+    contenedor.innerHTML = materiales.length === 0
+        ? `<p class="detalle">Todavía no hay materiales registrados.</p>`
+        : materiales.map((m) => `
+            <div class="tarjeta" style="margin-bottom:10px; box-shadow:none; border-width:2px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <strong>${m.nombre}</strong>
+                    <span class="badge ${m.disponible > 0 ? "verde" : "rojo"}">${m.disponible}/${m.cantidad_total} disponibles</span>
+                </div>
+                <div style="font-size:12px; color:#777; margin-top:4px;">
+                    ${humanizar(m.objetivo)}${m.ubicacion ? ` · ${m.ubicacion}` : ""}${m.danadaOPerdida > 0 ? ` · ${m.danadaOPerdida} dañados/perdidos` : ""}
+                </div>
+                ${m.tenedores.length > 0 ? `<div style="font-size:12px; color:#777; margin-top:2px;">Tienen: ${m.tenedores.map((t) => `${t.liderNombre} (${t.cantidad})`).join(", ")}</div>` : ""}
+                ${perfilActual?.rol === "admin" ? `<button class="boton pequeno secundario" data-eliminar-material="${m.id}" style="width:auto; margin-top:8px; padding:6px 12px; font-size:11px;">Eliminar</button>` : ""}
+            </div>
+        `).join("");
+
+    if (perfilActual?.rol === "admin") {
+        contenedor.querySelectorAll("[data-eliminar-material]").forEach((boton) => {
+            boton.addEventListener("click", () => eliminarMaterial(boton.dataset.eliminarMaterial));
+        });
+    }
+
+}
+
+async function eliminarMaterial(id) {
+    if (!confirm("¿Eliminar este material del inventario?")) return;
+    try {
+        await peticionApi(`/api/materiales/${id}`, { method: "DELETE" });
+        await cargarInventario();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+document.getElementById("formNuevoMaterial").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeNuevoMaterial");
+
+    try {
+
+        await peticionApi("/api/materiales", {
+            method: "POST",
+            body: JSON.stringify({
+                nombre: document.getElementById("inputNombreMaterial").value.trim(),
+                descripcion: document.getElementById("inputDescripcionMaterial").value.trim(),
+                objetivo: document.getElementById("inputObjetivoMaterial").value,
+                ubicacion: document.getElementById("inputUbicacionMaterial").value.trim(),
+                cantidadTotal: document.getElementById("inputCantidadMaterial").value
+            })
+        });
+
+        mostrarMensaje(mensaje, "Material creado correctamente", "ok");
+        document.getElementById("formNuevoMaterial").reset();
+        await cargarInventario();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+async function cargarLideresParaLote() {
+
+    try {
+        const { usuarios } = await peticionApi("/api/centro-control/usuarios");
+        const lideres = usuarios.filter((u) => u.rol_en_rama === "lider");
+
+        document.getElementById("inputLiderLote").innerHTML = lideres
+            .map((l) => `<option value="${l.id}">${l.nombre}${l.rama_id && mapaRamas[l.rama_id] ? ` (${mapaRamas[l.rama_id]})` : ""}</option>`)
+            .join("");
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function cargarActividadesParaLote() {
+
+    try {
+        const { actividades } = await peticionApi("/api/actividades");
+
+        document.getElementById("inputActividadLote").innerHTML = `<option value="">Sin actividad</option>` +
+            actividades.filter((a) => !a.cancelada).map((a) => `<option value="${a.id}">${a.titulo}</option>`).join("");
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+function renderizarChecklistMaterialesLote(materiales) {
+
+    const contenedor = document.getElementById("checklistMaterialesLote");
+
+    contenedor.innerHTML = materiales.length === 0
+        ? `<p class="detalle">No hay materiales para asignar.</p>`
+        : materiales.map((m) => `
+            <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                <input type="checkbox" class="checkbox-material-lote" value="${m.id}">
+                <span style="flex:1; font-size:13px;">${m.nombre} <span style="color:#888; font-size:11.5px;">(disponible: ${m.disponible})</span></span>
+                <input type="number" class="cantidad-material-lote" min="1" max="${m.disponible}" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+            </div>
+        `).join("");
+
+}
+
+document.getElementById("formCrearLote").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeCrearLote");
+
+    const items = [];
+    document.querySelectorAll(".checkbox-material-lote:checked").forEach((checkbox) => {
+        const fila = checkbox.closest("div");
+        const cantidad = fila.querySelector(".cantidad-material-lote").value;
+        if (cantidad && Number(cantidad) > 0) {
+            items.push({ materialId: checkbox.value, cantidad: Number(cantidad) });
+        }
+    });
+
+    if (items.length === 0) {
+        mostrarMensaje(mensaje, "Marca al menos un material con una cantidad válida", "fallo");
+        return;
+    }
+
+    try {
+
+        await peticionApi("/api/materiales/lotes", {
+            method: "POST",
+            body: JSON.stringify({
+                liderId: document.getElementById("inputLiderLote").value,
+                actividadId: document.getElementById("inputActividadLote").value || null,
+                items
+            })
+        });
+
+        mostrarMensaje(mensaje, "Lote asignado correctamente", "ok");
+        document.getElementById("formCrearLote").reset();
+        await cargarInventario();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+async function cargarSolicitudesMaterialAdmin() {
+
+    try {
+
+        const { solicitudes } = await peticionApi("/api/materiales/solicitudes?estado=pendiente");
+        const contenedor = document.getElementById("listaSolicitudesMaterial");
+
+        contenedor.innerHTML = solicitudes.length === 0
+            ? `<p class="detalle">No hay solicitudes pendientes.</p>`
+            : solicitudes.map((s) => `
+                <div class="tarjeta" style="margin-bottom:10px; box-shadow:none; border-width:2px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                        <strong>${s.solicitante_nombre}</strong>
+                        <span style="font-size:11.5px; color:#777;">${new Date(s.creado_en).toLocaleString("es-CO")}</span>
+                    </div>
+                    <div style="font-size:12.5px; margin-top:4px;">
+                        ${s.items.map((i) => `${i.materialNombre} × ${i.cantidad}`).join(", ")}
+                    </div>
+                    ${s.notas ? `<div style="font-size:12px; color:#777; margin-top:4px;">${s.notas}</div>` : ""}
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="boton pequeno" data-aprobar-solicitud="${s.id}" style="width:auto;">Aprobar y entregar</button>
+                        <button class="boton pequeno secundario" data-rechazar-solicitud="${s.id}" style="width:auto;">Rechazar</button>
+                    </div>
+                </div>
+            `).join("");
+
+        contenedor.querySelectorAll("[data-aprobar-solicitud]").forEach((boton) => {
+            boton.addEventListener("click", () => resolverSolicitudMaterial(boton.dataset.aprobarSolicitud, "aprobar"));
+        });
+
+        contenedor.querySelectorAll("[data-rechazar-solicitud]").forEach((boton) => {
+            boton.addEventListener("click", () => {
+                const motivo = prompt("Motivo del rechazo (opcional):") || "";
+                resolverSolicitudMaterial(boton.dataset.rechazarSolicitud, "rechazar", motivo);
+            });
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function resolverSolicitudMaterial(id, accion, motivo) {
+
+    try {
+        await peticionApi(`/api/materiales/solicitudes/${id}/resolver`, {
+            method: "POST",
+            body: JSON.stringify({ accion, motivo })
+        });
+        await Promise.all([cargarSolicitudesMaterialAdmin(), cargarInventario()]);
+    } catch (error) {
+        alert(error.message);
+    }
+
+}
+
+document.getElementById("btnExportarInventarioExcel").addEventListener("click", () => {
+    descargarArchivo("/api/materiales/exportar/excel", "inventario-campfest.xlsx");
+});
+
+document.getElementById("btnExportarInventarioPdf").addEventListener("click", () => {
+    descargarArchivo("/api/materiales/exportar/pdf", "inventario-campfest.pdf");
+});
+
+document.getElementById("btnExportarHistorialMaterial").addEventListener("click", () => {
+    descargarArchivo("/api/materiales/exportar/historial", "historial-materiales-campfest.xlsx");
+});
 
 // ==========================
 // Arranque
