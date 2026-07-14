@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Camp Fest · Centro de Control</title>
-<link rel="stylesheet" href="assets/style.css?v=2">
+<link rel="stylesheet" href="assets/style.css?v=3">
 </head>
 <body>
 
@@ -35,6 +35,11 @@
 <!-- ===== DASHBOARD ===== -->
 <div id="dashboard" class="oculto">
 
+    <div class="banner-critico oculto" id="bannerCritico">
+        <span id="textoBannerCritico"></span>
+        <button class="boton pequeno" id="btnCerrarBannerCritico" style="width:auto;">Visto</button>
+    </div>
+
     <div class="barra-superior">
         <span class="marca">🛰️ Camp Fest · Centro de Control</span>
         <div class="acciones-rapidas">
@@ -43,7 +48,23 @@
             <button class="boton pequeno secundario" id="btnEnfocarBusqueda">Buscar</button>
             <button class="boton pequeno terciario" id="btnExportarExcel">Exportar Excel</button>
             <button class="boton pequeno amarillo" id="btnExportarPdf">Exportar PDF</button>
+            <button class="boton pequeno secundario" id="btnAyudaRoles" style="width:auto; padding:10px 14px;">?</button>
             <button class="boton pequeno" id="btnCerrarSesion">Cerrar sesión</button>
+        </div>
+    </div>
+
+    <div class="oculto" id="panelAyudaRoles">
+        <div class="tarjeta" style="max-width:520px; margin:0 auto 14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0;">¿Qué puedo hacer con mi rol?</h3>
+                <button class="boton pequeno secundario" id="btnCerrarAyudaRoles" style="width:auto;">Cerrar</button>
+            </div>
+            <div style="margin-top:12px; font-size:13px; line-height:1.5;">
+                <p><strong>Admin:</strong> gestiona todo — cronograma, inventario de materiales, usuarios, ramas, zonas y carpas; resuelve solicitudes; exporta reportes.</p>
+                <p><strong>Control:</strong> registra y da seguimiento a incidentes; ve el cronograma y el inventario en modo lectura (resumido); no gestiona usuarios ni materiales.</p>
+                <p><strong>Logística (miembro de una rama):</strong> usa el panel de logística para registrar participantes, reportar incidentes, ver sus tareas y los materiales de su rama.</p>
+                <p><strong>Logística (líder de una rama):</strong> además crea tareas/solicitudes para su rama, asigna subtareas, escribe observaciones a su gente, solicita materiales y marca las fases (montaje/finalizada) de las actividades donde participa.</p>
+            </div>
         </div>
     </div>
 
@@ -567,6 +588,47 @@
         </div>
 
         <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Nuevo usuario</h3>
+            <form id="formNuevoUsuario">
+                <div class="grid-info" style="margin-bottom:0;">
+                    <div class="campo">
+                        <label for="inputNombreNuevoUsuario">Nombre</label>
+                        <input type="text" id="inputNombreNuevoUsuario" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputEmailNuevoUsuario">Correo</label>
+                        <input type="email" id="inputEmailNuevoUsuario" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputPasswordNuevoUsuario">Contraseña temporal</label>
+                        <input type="text" id="inputPasswordNuevoUsuario" minlength="6" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputRolNuevoUsuario">Rol</label>
+                        <select id="inputRolNuevoUsuario" required></select>
+                    </div>
+                    <div class="campo">
+                        <label for="inputTelefonoNuevoUsuario">Teléfono</label>
+                        <input type="text" id="inputTelefonoNuevoUsuario">
+                    </div>
+                    <div class="campo">
+                        <label for="inputRamaNuevoUsuario">Rama (opcional)</label>
+                        <select id="inputRamaNuevoUsuario"><option value="">Sin rama</option></select>
+                    </div>
+                    <div class="campo">
+                        <label for="inputRolEnRamaNuevoUsuario">Rol en la rama</label>
+                        <select id="inputRolEnRamaNuevoUsuario">
+                            <option value="miembro">Miembro</option>
+                            <option value="lider">Líder</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="boton pequeno">Crear usuario</button>
+            </form>
+            <div class="mensaje" id="mensajeNuevoUsuario"></div>
+        </div>
+
+        <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Usuarios (control y logística)</h3>
             <div class="tabla-wrap">
                 <table class="tabla-participantes">
@@ -586,6 +648,12 @@
                 </table>
             </div>
             <div class="mensaje" id="mensajeUsuarios"></div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Respaldo</h3>
+            <p class="detalle" style="margin-top:-6px;">Un solo Excel con participantes, incidentes, materiales y actividades — para archivo, no reemplaza los exports de cada módulo.</p>
+            <button class="boton pequeno terciario" id="btnExportarTodo" style="width:auto;">Exportar todo el evento</button>
         </div>
 
     </section>
@@ -628,6 +696,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=7" defer></script>
+<script src="scripts/dashboard.js?v=8" defer></script>
 </body>
 </html>

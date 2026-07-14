@@ -42,6 +42,19 @@ function mostrarMensaje(elemento, texto, tipo) {
     elemento.className = `mensaje mostrar ${tipo}`;
 }
 
+// Deshabilita el botón de enviar (y lo marca "Guardando...") mientras dura la
+// petición, para dar feedback y evitar doble clic en formularios largos.
+async function conBotonDeshabilitado(formulario, funcion) {
+    const boton = formulario.querySelector('button[type="submit"]');
+    const textoOriginal = boton ? boton.textContent : null;
+    if (boton) { boton.disabled = true; boton.textContent = "Guardando..."; }
+    try {
+        await funcion();
+    } finally {
+        if (boton) { boton.disabled = false; boton.textContent = textoOriginal; }
+    }
+}
+
 function ocultarMensaje(elemento) {
     elemento.className = "mensaje";
 }
@@ -335,6 +348,9 @@ async function iniciarDashboard() {
         cargarZonasAdmin();
         await cargarRamasAdmin();
         cargarUsuariosAdmin();
+        llenarSelect(document.getElementById("inputRolNuevoUsuario"), ROLES, "Selecciona rol");
+        document.getElementById("inputRamaNuevoUsuario").innerHTML = `<option value="">Sin rama</option>` +
+            Object.entries(mapaRamas).map(([id, nombre]) => `<option value="${id}">${nombre}</option>`).join("");
     }
 
     await actualizarTodo();
@@ -396,6 +412,7 @@ async function cargarPanel() {
             <div class="stat-tile"><div class="stat-numero">${datos.participantes.ingresados}</div><span class="stat-etiqueta">Ingresaron</span></div>
             <div class="stat-tile"><div class="stat-numero">${datos.participantes.pendientes}</div><span class="stat-etiqueta">Pendientes</span></div>
             <div class="stat-tile"><div class="stat-numero">${datos.participantes.retirados}</div><span class="stat-etiqueta">Retirados</span></div>
+            <div class="stat-tile"><div class="stat-numero">${datos.participantes.ocupacionActual}</div><span class="stat-etiqueta">Actualmente en el camp</span></div>
         `;
 
         document.getElementById("statsAlimentacion").innerHTML = `
@@ -420,12 +437,67 @@ async function cargarPanel() {
         `;
 
         renderizarAlertas(datos.alertas);
+        revisarIncidentesCriticosNuevos(datos.alertas.criticos);
 
     } catch (error) {
         console.error(error);
     }
 
 }
+
+// ==========================
+// Alerta de incidentes críticos (sonido + banner)
+// ==========================
+
+const idsCriticosVistos = new Set();
+
+function reproducirBeepCritico() {
+
+    try {
+        const contexto = new (window.AudioContext || window.webkitAudioContext)();
+        const oscilador = contexto.createOscillator();
+        const volumen = contexto.createGain();
+        oscilador.type = "square";
+        oscilador.frequency.value = 880;
+        volumen.gain.value = 0.15;
+        oscilador.connect(volumen);
+        volumen.connect(contexto.destination);
+        oscilador.start();
+        setTimeout(() => { oscilador.stop(); contexto.close(); }, 400);
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+function revisarIncidentesCriticosNuevos(alertasCriticasYAltas) {
+
+    const nuevos = alertasCriticasYAltas.filter((i) => i.prioridad === "critica" && !idsCriticosVistos.has(i.id));
+
+    if (nuevos.length === 0) return;
+
+    nuevos.forEach((i) => idsCriticosVistos.add(i.id));
+
+    reproducirBeepCritico();
+
+    const banner = document.getElementById("bannerCritico");
+    document.getElementById("textoBannerCritico").textContent =
+        `🚨 ${nuevos.length} incidente${nuevos.length > 1 ? "s" : ""} crítico${nuevos.length > 1 ? "s" : ""} nuevo${nuevos.length > 1 ? "s" : ""}: ${nuevos.map((i) => i.codigo).join(", ")}`;
+    banner.classList.remove("oculto");
+
+}
+
+document.getElementById("btnCerrarBannerCritico").addEventListener("click", () => {
+    document.getElementById("bannerCritico").classList.add("oculto");
+});
+
+document.getElementById("btnAyudaRoles").addEventListener("click", () => {
+    document.getElementById("panelAyudaRoles").classList.toggle("oculto");
+});
+
+document.getElementById("btnCerrarAyudaRoles").addEventListener("click", () => {
+    document.getElementById("panelAyudaRoles").classList.add("oculto");
+});
 
 function renderizarAlertas(alertas) {
 
@@ -1429,6 +1501,40 @@ async function cargarRamasAdmin() {
 // Usuarios (admin)
 // ==========================
 
+document.getElementById("formNuevoUsuario").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeNuevoUsuario");
+
+    await conBotonDeshabilitado(evento.target, async () => {
+
+        try {
+
+            await peticionApi("/api/centro-control/usuarios", {
+                method: "POST",
+                body: JSON.stringify({
+                    nombre: document.getElementById("inputNombreNuevoUsuario").value.trim(),
+                    email: document.getElementById("inputEmailNuevoUsuario").value.trim(),
+                    password: document.getElementById("inputPasswordNuevoUsuario").value,
+                    rol: document.getElementById("inputRolNuevoUsuario").value,
+                    telefono: document.getElementById("inputTelefonoNuevoUsuario").value.trim(),
+                    ramaId: document.getElementById("inputRamaNuevoUsuario").value || null,
+                    rolEnRama: document.getElementById("inputRolEnRamaNuevoUsuario").value
+                })
+            });
+
+            mostrarMensaje(mensaje, "Usuario creado correctamente — comunícale la contraseña por fuera del sistema", "ok");
+            document.getElementById("formNuevoUsuario").reset();
+            await cargarUsuariosAdmin();
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
+
+});
+
 async function cargarUsuariosAdmin() {
 
     try {
@@ -1616,36 +1722,40 @@ document.getElementById("formActividad").addEventListener("submit", async (event
         return;
     }
 
-    try {
+    await conBotonDeshabilitado(evento.target, async () => {
 
-        const { actividad } = await peticionApi("/api/actividades", {
-            method: "POST",
-            body: JSON.stringify({
-                titulo: document.getElementById("inputTituloActividad").value.trim(),
-                descripcion: document.getElementById("inputDescripcionActividad").value.trim(),
-                fecha,
-                horaInicio: new Date(`${fecha}T${horaInicio}`).toISOString(),
-                horaFin: new Date(`${fecha}T${horaFin}`).toISOString(),
-                espacioUsado: document.getElementById("inputEspacioActividad").value.trim(),
-                cantidadAsistentesEstimada: document.getElementById("inputAsistentesActividad").value || null,
-                encargadosMetodologicos: document.getElementById("inputEncargadosMetodologicosActividad").value.trim()
-            })
-        });
+        try {
 
-        if (items.length > 0) {
-            await peticionApi("/api/materiales/lotes", {
+            const { actividad } = await peticionApi("/api/actividades", {
                 method: "POST",
-                body: JSON.stringify({ liderId, actividadId: actividad.id, items })
+                body: JSON.stringify({
+                    titulo: document.getElementById("inputTituloActividad").value.trim(),
+                    descripcion: document.getElementById("inputDescripcionActividad").value.trim(),
+                    fecha,
+                    horaInicio: new Date(`${fecha}T${horaInicio}`).toISOString(),
+                    horaFin: new Date(`${fecha}T${horaFin}`).toISOString(),
+                    espacioUsado: document.getElementById("inputEspacioActividad").value.trim(),
+                    cantidadAsistentesEstimada: document.getElementById("inputAsistentesActividad").value || null,
+                    encargadosMetodologicos: document.getElementById("inputEncargadosMetodologicosActividad").value.trim()
+                })
             });
+
+            if (items.length > 0) {
+                await peticionApi("/api/materiales/lotes", {
+                    method: "POST",
+                    body: JSON.stringify({ liderId, actividadId: actividad.id, items })
+                });
+            }
+
+            mostrarMensaje(mensaje, "Actividad creada correctamente" + (items.length > 0 ? " y materiales asignados" : ""), "ok");
+            document.getElementById("formActividad").reset();
+            await Promise.all([cargarActividades(), cargarMaterialesParaNuevaActividad()]);
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
         }
 
-        mostrarMensaje(mensaje, "Actividad creada correctamente" + (items.length > 0 ? " y materiales asignados" : ""), "ok");
-        document.getElementById("formActividad").reset();
-        await Promise.all([cargarActividades(), cargarMaterialesParaNuevaActividad()]);
-
-    } catch (error) {
-        mostrarMensaje(mensaje, error.message, "fallo");
-    }
+    });
 
 });
 
@@ -2188,26 +2298,30 @@ document.getElementById("formNuevoMaterial").addEventListener("submit", async (e
     evento.preventDefault();
     const mensaje = document.getElementById("mensajeNuevoMaterial");
 
-    try {
+    await conBotonDeshabilitado(evento.target, async () => {
 
-        await peticionApi("/api/materiales", {
-            method: "POST",
-            body: JSON.stringify({
-                nombre: document.getElementById("inputNombreMaterial").value.trim(),
-                descripcion: document.getElementById("inputDescripcionMaterial").value.trim(),
-                objetivo: document.getElementById("inputObjetivoMaterial").value,
-                ubicacion: document.getElementById("inputUbicacionMaterial").value.trim(),
-                cantidadTotal: document.getElementById("inputCantidadMaterial").value
-            })
-        });
+        try {
 
-        mostrarMensaje(mensaje, "Material creado correctamente", "ok");
-        document.getElementById("formNuevoMaterial").reset();
-        await cargarInventario();
+            await peticionApi("/api/materiales", {
+                method: "POST",
+                body: JSON.stringify({
+                    nombre: document.getElementById("inputNombreMaterial").value.trim(),
+                    descripcion: document.getElementById("inputDescripcionMaterial").value.trim(),
+                    objetivo: document.getElementById("inputObjetivoMaterial").value,
+                    ubicacion: document.getElementById("inputUbicacionMaterial").value.trim(),
+                    cantidadTotal: document.getElementById("inputCantidadMaterial").value
+                })
+            });
 
-    } catch (error) {
-        mostrarMensaje(mensaje, error.message, "fallo");
-    }
+            mostrarMensaje(mensaje, "Material creado correctamente", "ok");
+            document.getElementById("formNuevoMaterial").reset();
+            await cargarInventario();
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
 
 });
 
@@ -2325,24 +2439,28 @@ document.getElementById("formMaterialActividad").addEventListener("submit", asyn
         return;
     }
 
-    try {
+    await conBotonDeshabilitado(evento.target, async () => {
 
-        await peticionApi("/api/materiales/lotes", {
-            method: "POST",
-            body: JSON.stringify({
-                liderId: document.getElementById("inputLiderMaterialActividad").value,
-                actividadId: actividadAbiertaId,
-                items
-            })
-        });
+        try {
 
-        mostrarMensaje(mensaje, "Materiales asignados correctamente", "ok");
-        document.getElementById("formMaterialActividad").reset();
-        await cargarMaterialesDeActividad(actividadAbiertaId);
+            await peticionApi("/api/materiales/lotes", {
+                method: "POST",
+                body: JSON.stringify({
+                    liderId: document.getElementById("inputLiderMaterialActividad").value,
+                    actividadId: actividadAbiertaId,
+                    items
+                })
+            });
 
-    } catch (error) {
-        mostrarMensaje(mensaje, error.message, "fallo");
-    }
+            mostrarMensaje(mensaje, "Materiales asignados correctamente", "ok");
+            document.getElementById("formMaterialActividad").reset();
+            await cargarMaterialesDeActividad(actividadAbiertaId);
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
 
 });
 
@@ -2365,24 +2483,28 @@ document.getElementById("formCrearLote").addEventListener("submit", async (event
         return;
     }
 
-    try {
+    await conBotonDeshabilitado(evento.target, async () => {
 
-        await peticionApi("/api/materiales/lotes", {
-            method: "POST",
-            body: JSON.stringify({
-                liderId: document.getElementById("inputLiderLote").value,
-                actividadId: document.getElementById("inputActividadLote").value || null,
-                items
-            })
-        });
+        try {
 
-        mostrarMensaje(mensaje, "Lote asignado correctamente", "ok");
-        document.getElementById("formCrearLote").reset();
-        await cargarInventario();
+            await peticionApi("/api/materiales/lotes", {
+                method: "POST",
+                body: JSON.stringify({
+                    liderId: document.getElementById("inputLiderLote").value,
+                    actividadId: document.getElementById("inputActividadLote").value || null,
+                    items
+                })
+            });
 
-    } catch (error) {
-        mostrarMensaje(mensaje, error.message, "fallo");
-    }
+            mostrarMensaje(mensaje, "Lote asignado correctamente", "ok");
+            document.getElementById("formCrearLote").reset();
+            await cargarInventario();
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
 
 });
 
@@ -2390,7 +2512,8 @@ async function cargarSolicitudesMaterialAdmin() {
 
     try {
 
-        const { solicitudes } = await peticionApi("/api/materiales/solicitudes?estado=pendiente");
+        const { solicitudes: todas } = await peticionApi("/api/materiales/solicitudes");
+        const solicitudes = todas.filter((s) => s.estado === "pendiente" || s.estado === "aprobada");
         const contenedor = document.getElementById("listaSolicitudesMaterial");
 
         contenedor.innerHTML = solicitudes.length === 0
@@ -2399,14 +2522,18 @@ async function cargarSolicitudesMaterialAdmin() {
                 <div class="tarjeta" style="margin-bottom:10px; box-shadow:none; border-width:2px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                         <strong>${s.solicitante_nombre}</strong>
-                        <span style="font-size:11.5px; color:#777;">${new Date(s.creado_en).toLocaleString("es-CO")}</span>
+                        <span style="display:flex; align-items:center; gap:8px;">
+                            <span class="badge ${s.estado === "aprobada" ? "verde" : "neutro"}">${humanizar(s.estado)}</span>
+                            <span style="font-size:11.5px; color:#777;">${new Date(s.creado_en).toLocaleString("es-CO")}</span>
+                        </span>
                     </div>
                     <div style="font-size:12.5px; margin-top:4px;">
                         ${s.items.map((i) => `${i.materialNombre} × ${i.cantidad}`).join(", ")}
                     </div>
                     ${s.notas ? `<div style="font-size:12px; color:#777; margin-top:4px;">${s.notas}</div>` : ""}
                     <div style="display:flex; gap:8px; margin-top:10px;">
-                        <button class="boton pequeno" data-aprobar-solicitud="${s.id}" style="width:auto;">Aprobar y entregar</button>
+                        ${s.estado === "pendiente" ? `<button class="boton pequeno" data-aprobar-solicitud="${s.id}" style="width:auto;">Aprobar</button>` : ""}
+                        ${s.estado === "aprobada" ? `<button class="boton pequeno" data-entregar-solicitud="${s.id}" style="width:auto;">Entregar</button>` : ""}
                         <button class="boton pequeno secundario" data-rechazar-solicitud="${s.id}" style="width:auto;">Rechazar</button>
                     </div>
                 </div>
@@ -2414,6 +2541,10 @@ async function cargarSolicitudesMaterialAdmin() {
 
         contenedor.querySelectorAll("[data-aprobar-solicitud]").forEach((boton) => {
             boton.addEventListener("click", () => resolverSolicitudMaterial(boton.dataset.aprobarSolicitud, "aprobar"));
+        });
+
+        contenedor.querySelectorAll("[data-entregar-solicitud]").forEach((boton) => {
+            boton.addEventListener("click", () => resolverSolicitudMaterial(boton.dataset.entregarSolicitud, "entregar"));
         });
 
         contenedor.querySelectorAll("[data-rechazar-solicitud]").forEach((boton) => {
@@ -2442,6 +2573,10 @@ async function resolverSolicitudMaterial(id, accion, motivo) {
     }
 
 }
+
+document.getElementById("btnExportarTodo").addEventListener("click", () => {
+    descargarArchivo("/api/centro-control/exportar/todo", "campfest-respaldo-completo.xlsx");
+});
 
 document.getElementById("btnExportarInventarioExcel").addEventListener("click", () => {
     descargarArchivo("/api/materiales/exportar/excel", "inventario-campfest.xlsx");

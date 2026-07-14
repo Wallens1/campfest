@@ -83,6 +83,19 @@ function mostrarMensaje(elemento, texto, tipo) {
     elemento.className = `mensaje mostrar ${tipo}`;
 }
 
+// Deshabilita el botón de enviar (y lo marca "Guardando...") mientras dura la
+// petición, para dar feedback y evitar doble clic en formularios largos.
+async function conBotonDeshabilitado(formulario, funcion) {
+    const boton = formulario.querySelector('button[type="submit"]');
+    const textoOriginal = boton ? boton.textContent : null;
+    if (boton) { boton.disabled = true; boton.textContent = "Guardando..."; }
+    try {
+        await funcion();
+    } finally {
+        if (boton) { boton.disabled = false; boton.textContent = textoOriginal; }
+    }
+}
+
 function ocultarMensaje(elemento) {
     elemento.className = "mensaje";
 }
@@ -250,6 +263,14 @@ btnCerrarSesion.addEventListener("click", async () => {
     resultados.innerHTML = "";
     inputBusqueda.value = "";
     mostrarLogin();
+});
+
+document.getElementById("btnAyudaRoles").addEventListener("click", () => {
+    document.getElementById("panelAyudaRoles").classList.toggle("oculto");
+});
+
+document.getElementById("btnCerrarAyudaRoles").addEventListener("click", () => {
+    document.getElementById("panelAyudaRoles").classList.add("oculto");
 });
 
 // ==========================
@@ -728,35 +749,39 @@ formIncidente.addEventListener("submit", async (evento) => {
     evento.preventDefault();
     ocultarMensaje(mensajeIncidente);
 
-    try {
+    await conBotonDeshabilitado(evento.target, async () => {
 
-        await peticionApi("/api/incidentes", {
-            method: "POST",
-            body: JSON.stringify({
-                categoria: document.getElementById("inputCategoria").value,
-                descripcion: document.getElementById("inputDescripcionIncidente").value.trim(),
-                prioridad: document.getElementById("inputPrioridad").value,
-                zona: document.getElementById("inputZona").value,
-                lugar: document.getElementById("inputLugar").value.trim(),
-                participanteId: participanteVinculadoIncidente?.id || null
-            })
-        });
+        try {
 
-        mostrarMensaje(mensajeIncidente, "Incidente enviado al Centro de Control", "ok");
-        formIncidente.reset();
-        participanteVinculadoIncidente = null;
-        document.getElementById("resultadosParticipanteIncidente").innerHTML = "";
-        actualizarMensajeParticipanteVinculado();
-        await cargarMisIncidentes();
+            await peticionApi("/api/incidentes", {
+                method: "POST",
+                body: JSON.stringify({
+                    categoria: document.getElementById("inputCategoria").value,
+                    descripcion: document.getElementById("inputDescripcionIncidente").value.trim(),
+                    prioridad: document.getElementById("inputPrioridad").value,
+                    zona: document.getElementById("inputZona").value,
+                    lugar: document.getElementById("inputLugar").value.trim(),
+                    participanteId: participanteVinculadoIncidente?.id || null
+                })
+            });
 
-        setTimeout(() => {
-            formIncidente.classList.add("oculto");
-            ocultarMensaje(mensajeIncidente);
-        }, 1500);
+            mostrarMensaje(mensajeIncidente, "Incidente enviado al Centro de Control", "ok");
+            formIncidente.reset();
+            participanteVinculadoIncidente = null;
+            document.getElementById("resultadosParticipanteIncidente").innerHTML = "";
+            actualizarMensajeParticipanteVinculado();
+            await cargarMisIncidentes();
 
-    } catch (error) {
-        mostrarMensaje(mensajeIncidente, error.message, "fallo");
-    }
+            setTimeout(() => {
+                formIncidente.classList.add("oculto");
+                ocultarMensaje(mensajeIncidente);
+            }, 1500);
+
+        } catch (error) {
+            mostrarMensaje(mensajeIncidente, error.message, "fallo");
+        }
+
+    });
 
 });
 
@@ -1256,28 +1281,32 @@ document.getElementById("formSolicitud").addEventListener("submit", async (event
     evento.preventDefault();
     const mensaje = document.getElementById("mensajeSolicitud");
 
-    try {
+    await conBotonDeshabilitado(evento.target, async () => {
 
-        const ramaSeleccionada = document.getElementById("inputRamaDestinoSolicitud").value;
+        try {
 
-        await peticionApi("/api/tareas", {
-            method: "POST",
-            body: JSON.stringify({
-                tipo: "solicitud",
-                ramaId: ramaSeleccionada === "todas" ? null : ramaSeleccionada,
-                titulo: document.getElementById("inputTituloSolicitud").value.trim(),
-                descripcion: document.getElementById("inputDescripcionSolicitud").value.trim(),
-                cantidadPersonas: document.getElementById("inputCantidadPersonasSolicitud").value || null
-            })
-        });
+            const ramaSeleccionada = document.getElementById("inputRamaDestinoSolicitud").value;
 
-        mostrarMensaje(mensaje, "Solicitud enviada correctamente", "ok");
-        document.getElementById("formSolicitud").reset();
-        await cargarSolicitudes();
+            await peticionApi("/api/tareas", {
+                method: "POST",
+                body: JSON.stringify({
+                    tipo: "solicitud",
+                    ramaId: ramaSeleccionada === "todas" ? null : ramaSeleccionada,
+                    titulo: document.getElementById("inputTituloSolicitud").value.trim(),
+                    descripcion: document.getElementById("inputDescripcionSolicitud").value.trim(),
+                    cantidadPersonas: document.getElementById("inputCantidadPersonasSolicitud").value || null
+                })
+            });
 
-    } catch (error) {
-        mostrarMensaje(mensaje, error.message, "fallo");
-    }
+            mostrarMensaje(mensaje, "Solicitud enviada correctamente", "ok");
+            document.getElementById("formSolicitud").reset();
+            await cargarSolicitudes();
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
 
 });
 
@@ -1287,26 +1316,30 @@ document.getElementById("formTarea").addEventListener("submit", async (evento) =
     const mensaje = document.getElementById("mensajeTarea");
     const horaProgramada = document.getElementById("inputHoraProgramadaTarea").value;
 
-    try {
+    await conBotonDeshabilitado(evento.target, async () => {
 
-        await peticionApi("/api/tareas", {
-            method: "POST",
-            body: JSON.stringify({
-                tipo: "tarea",
-                ramaId: perfilActual?.rama_id,
-                titulo: document.getElementById("inputTituloTarea").value.trim(),
-                descripcion: document.getElementById("inputDescripcionTarea").value.trim(),
-                horaProgramada: horaProgramada ? new Date(horaProgramada).toISOString() : null
-            })
-        });
+        try {
 
-        mostrarMensaje(mensaje, "Tarea creada correctamente", "ok");
-        document.getElementById("formTarea").reset();
-        await cargarTareas();
+            await peticionApi("/api/tareas", {
+                method: "POST",
+                body: JSON.stringify({
+                    tipo: "tarea",
+                    ramaId: perfilActual?.rama_id,
+                    titulo: document.getElementById("inputTituloTarea").value.trim(),
+                    descripcion: document.getElementById("inputDescripcionTarea").value.trim(),
+                    horaProgramada: horaProgramada ? new Date(horaProgramada).toISOString() : null
+                })
+            });
 
-    } catch (error) {
-        mostrarMensaje(mensaje, error.message, "fallo");
-    }
+            mostrarMensaje(mensaje, "Tarea creada correctamente", "ok");
+            document.getElementById("formTarea").reset();
+            await cargarTareas();
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
 
 });
 
@@ -1343,24 +1376,28 @@ document.getElementById("formObservacion").addEventListener("submit", async (eve
     evento.preventDefault();
     const mensaje = document.getElementById("mensajeObservacion");
 
-    try {
+    await conBotonDeshabilitado(evento.target, async () => {
 
-        await peticionApi("/api/observaciones", {
-            method: "POST",
-            body: JSON.stringify({
-                usuarioId: document.getElementById("inputMiembroObservacion").value,
-                tipo: document.getElementById("inputTipoObservacion").value,
-                texto: document.getElementById("inputTextoObservacion").value.trim()
-            })
-        });
+        try {
 
-        mostrarMensaje(mensaje, "Observación guardada correctamente", "ok");
-        document.getElementById("formObservacion").reset();
-        await cargarObservaciones();
+            await peticionApi("/api/observaciones", {
+                method: "POST",
+                body: JSON.stringify({
+                    usuarioId: document.getElementById("inputMiembroObservacion").value,
+                    tipo: document.getElementById("inputTipoObservacion").value,
+                    texto: document.getElementById("inputTextoObservacion").value.trim()
+                })
+            });
 
-    } catch (error) {
-        mostrarMensaje(mensaje, error.message, "fallo");
-    }
+            mostrarMensaje(mensaje, "Observación guardada correctamente", "ok");
+            document.getElementById("formObservacion").reset();
+            await cargarObservaciones();
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
 
 });
 
@@ -1403,6 +1440,40 @@ async function cargarCronograma() {
         contenedor.querySelectorAll("[data-actividad]").forEach((card) => {
             card.addEventListener("click", () => abrirDetalleActividadCronograma(card.dataset.actividad));
         });
+
+        cargarMiCumplimiento();
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function cargarMiCumplimiento() {
+
+    const tarjeta = document.getElementById("tarjetaMiCumplimiento");
+
+    if (!perfilActual || perfilActual.rol_en_rama !== "lider" || !perfilActual.rama_id) {
+        tarjeta.classList.add("oculto");
+        return;
+    }
+
+    try {
+
+        const { ramas } = await peticionApi("/api/actividades/reportes/ramas");
+        const miRama = ramas.find((r) => r.rama === mapaRamas[perfilActual.rama_id]);
+
+        tarjeta.classList.remove("oculto");
+
+        document.getElementById("miCumplimiento").innerHTML = !miRama
+            ? `<p class="detalle">Todavía no hay tareas del cronograma para tu rama.</p>`
+            : `
+                <div class="fila-conteo">
+                    <span class="nombre-fila-conteo">${miRama.completadas}/${miRama.total} tareas hechas</span>
+                    <span class="badge ${miRama.porcentajeCumplimiento >= 70 ? "verde" : "rojo"}">${miRama.porcentajeCumplimiento}% a tiempo</span>
+                </div>
+                ${miRama.atrasoPromedioMinutos > 0 ? `<p class="detalle" style="margin-top:4px;">Atraso promedio: ${miRama.atrasoPromedioMinutos} min</p>` : ""}
+            `;
 
     } catch (error) {
         console.error(error);
@@ -1716,24 +1787,28 @@ document.getElementById("formSolicitarMaterial").addEventListener("submit", asyn
         return;
     }
 
-    try {
+    await conBotonDeshabilitado(evento.target, async () => {
 
-        await peticionApi("/api/materiales/solicitudes", {
-            method: "POST",
-            body: JSON.stringify({
-                actividadId: document.getElementById("inputActividadSolicitudMaterial").value || null,
-                notas: document.getElementById("inputNotasSolicitudMaterial").value.trim(),
-                items
-            })
-        });
+        try {
 
-        mostrarMensaje(mensaje, "Solicitud enviada correctamente", "ok");
-        document.getElementById("formSolicitarMaterial").reset();
-        await cargarMisSolicitudesMaterial();
+            await peticionApi("/api/materiales/solicitudes", {
+                method: "POST",
+                body: JSON.stringify({
+                    actividadId: document.getElementById("inputActividadSolicitudMaterial").value || null,
+                    notas: document.getElementById("inputNotasSolicitudMaterial").value.trim(),
+                    items
+                })
+            });
 
-    } catch (error) {
-        mostrarMensaje(mensaje, error.message, "fallo");
-    }
+            mostrarMensaje(mensaje, "Solicitud enviada correctamente", "ok");
+            document.getElementById("formSolicitarMaterial").reset();
+            await cargarMisSolicitudesMaterial();
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
 
 });
 
