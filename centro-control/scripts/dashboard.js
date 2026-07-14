@@ -1790,7 +1790,7 @@ async function abrirDetalleActividad(id) {
             perfilActual?.rol !== "admin" || actividad.cancelada
         );
 
-        document.getElementById("bloqueCrearTareaActividad").classList.toggle("oculto", perfilActual?.rol !== "admin");
+        document.getElementById("bloqueCrearTareaActividad").classList.toggle("oculto", perfilActual?.rol !== "admin" || actividad.cancelada);
 
         if (perfilActual?.rol === "admin") {
             document.getElementById("ramasTareaActividad").innerHTML = ramasDisponibles.map((r) => `
@@ -1803,7 +1803,7 @@ async function abrirDetalleActividad(id) {
 
         renderizarTareasPorRama(tareas);
 
-        document.getElementById("bloqueAsignarMaterialActividad").classList.toggle("oculto", perfilActual?.rol !== "admin");
+        document.getElementById("bloqueAsignarMaterialActividad").classList.toggle("oculto", perfilActual?.rol !== "admin" || actividad.cancelada);
 
         if (perfilActual?.rol === "admin") {
             await poblarSelectLideres(document.getElementById("inputLiderMaterialActividad"));
@@ -1837,7 +1837,7 @@ function renderizarFasesActividad(actividad) {
 
     const contenedor = document.getElementById("detalleActividadFases");
 
-    const puedeGestionar = perfilActual?.rol === "admin";
+    const puedeGestionar = perfilActual?.rol === "admin" && !actividad.cancelada;
 
     contenedor.innerHTML = `
         <h3>Cierre de la actividad</h3>

@@ -1512,7 +1512,7 @@ async function abrirDetalleActividadCronograma(id) {
         });
         renderizarListaTareas(document.getElementById("listaTareasMiRamaActividad"), tareasDeMiRama, "actividad");
 
-        const esLiderDeRamaInvolucrada = perfilActual?.rol_en_rama === "lider" && tareasDeMiRama.length > 0;
+        const esLiderDeRamaInvolucrada = perfilActual?.rol_en_rama === "lider" && tareasDeMiRama.length > 0 && !actividad.cancelada;
         renderizarFasesActividadCronograma(actividad, esLiderDeRamaInvolucrada);
 
         await cargarMisMaterialesDeActividad(id);
