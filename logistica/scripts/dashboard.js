@@ -583,25 +583,97 @@ const btnAbrirFormIncidente = document.getElementById("btnAbrirFormIncidente");
 const formIncidente = document.getElementById("formIncidente");
 const mensajeIncidente = document.getElementById("mensajeIncidente");
 
+// Campista vinculado al incidente que se está redactando (independiente de
+// si hay una ficha abierta en la pestaña Registro). Se puede precargar desde
+// esa ficha como atajo, pero siempre se puede buscar/cambiar/quitar aquí mismo.
+let participanteVinculadoIncidente = null;
+
 btnAbrirFormIncidente.addEventListener("click", () => {
+
     formIncidente.classList.toggle("oculto");
+
+    if (!formIncidente.classList.contains("oculto") && !participanteVinculadoIncidente && participanteActualId) {
+        participanteVinculadoIncidente = { id: participanteActualId, nombre: fichaNombre.textContent };
+    }
+
     actualizarMensajeParticipanteVinculado();
     formIncidente.scrollIntoView({ behavior: "smooth" });
+
 });
 
 function actualizarMensajeParticipanteVinculado() {
 
     const elemento = document.getElementById("mensajeParticipanteVinculado");
 
-    if (formIncidente.classList.contains("oculto")) return;
-
-    if (participanteActualId) {
-        mostrarMensaje(elemento, `Se vinculará a: ${fichaNombre.textContent}`, "ok");
+    if (participanteVinculadoIncidente) {
+        elemento.innerHTML = "";
+        mostrarMensaje(elemento, `Vinculado a: ${participanteVinculadoIncidente.nombre}`, "ok");
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "boton pequeno secundario";
+        boton.style.width = "auto";
+        boton.style.marginLeft = "8px";
+        boton.style.padding = "2px 10px";
+        boton.style.fontSize = "11px";
+        boton.textContent = "Quitar";
+        boton.addEventListener("click", () => {
+            participanteVinculadoIncidente = null;
+            actualizarMensajeParticipanteVinculado();
+        });
+        elemento.appendChild(boton);
     } else {
         mostrarMensaje(elemento, "Sin participante vinculado (incidente general)", "ok");
     }
 
 }
+
+function detectarCampoBusquedaParticipante(valor) {
+    if (/^cf-/i.test(valor)) return "codigo";
+    if (/^\d+$/.test(valor)) return "documento";
+    return "nombre";
+}
+
+document.getElementById("btnBuscarParticipanteIncidente").addEventListener("click", async () => {
+
+    const valor = document.getElementById("inputBuscarParticipanteIncidente").value.trim();
+    const contenedor = document.getElementById("resultadosParticipanteIncidente");
+
+    if (!valor) {
+        contenedor.innerHTML = "";
+        return;
+    }
+
+    try {
+
+        const campo = detectarCampoBusquedaParticipante(valor);
+        const parametros = new URLSearchParams({ [campo]: valor });
+        const { resultados } = await peticionApi(`/api/logistica/buscar?${parametros.toString()}`);
+
+        contenedor.innerHTML = resultados.length === 0
+            ? `<p class="detalle">No se encontraron participantes.</p>`
+            : resultados.map((p) => `
+                <div class="resultado-item" data-participante="${p.id}" data-nombre="${p.nombre}" style="margin-bottom:6px;">
+                    <div>
+                        <div class="nombre">${p.nombre}</div>
+                        <div class="detalle">${p.documento}</div>
+                    </div>
+                </div>
+            `).join("");
+
+        contenedor.querySelectorAll("[data-participante]").forEach((fila) => {
+            fila.addEventListener("click", () => {
+                participanteVinculadoIncidente = { id: fila.dataset.participante, nombre: fila.dataset.nombre };
+                contenedor.innerHTML = "";
+                document.getElementById("inputBuscarParticipanteIncidente").value = "";
+                actualizarMensajeParticipanteVinculado();
+            });
+        });
+
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">${error.message}</p>`;
+    }
+
+});
 
 async function cargarZonas() {
 
@@ -666,12 +738,15 @@ formIncidente.addEventListener("submit", async (evento) => {
                 prioridad: document.getElementById("inputPrioridad").value,
                 zona: document.getElementById("inputZona").value,
                 lugar: document.getElementById("inputLugar").value.trim(),
-                participanteId: participanteActualId
+                participanteId: participanteVinculadoIncidente?.id || null
             })
         });
 
         mostrarMensaje(mensajeIncidente, "Incidente enviado al Centro de Control", "ok");
         formIncidente.reset();
+        participanteVinculadoIncidente = null;
+        document.getElementById("resultadosParticipanteIncidente").innerHTML = "";
+        actualizarMensajeParticipanteVinculado();
         await cargarMisIncidentes();
 
         setTimeout(() => {
