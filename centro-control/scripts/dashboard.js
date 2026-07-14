@@ -272,6 +272,8 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
             cargarActividades();
             if (perfilActual?.rol === "admin") {
                 cargarAnaliticaAdmin();
+                cargarMaterialesParaNuevaActividad();
+                poblarSelectLideres(document.getElementById("inputResponsableActividad"), "Sin materiales para esta actividad");
             } else {
                 cargarResumenControl();
             }
@@ -1562,6 +1564,33 @@ async function cargarActividades() {
 
 }
 
+async function cargarMaterialesParaNuevaActividad() {
+
+    try {
+        const { materiales } = await peticionApi("/api/materiales");
+        renderizarChecklistMaterialesNuevaActividad(materiales);
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+function renderizarChecklistMaterialesNuevaActividad(materiales) {
+
+    const contenedor = document.getElementById("checklistMaterialesNuevaActividad");
+
+    contenedor.innerHTML = materiales.length === 0
+        ? `<p class="detalle">No hay materiales en el inventario todavía (se pueden crear en la pestaña Inventario).</p>`
+        : materiales.map((m) => `
+            <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                <input type="checkbox" class="checkbox-material-nueva-actividad" value="${m.id}">
+                <span style="flex:1; font-size:13px;">${m.nombre} <span style="color:#888; font-size:11.5px;">(disponible: ${m.disponible})</span></span>
+                <input type="number" class="cantidad-material-nueva-actividad" min="1" max="${m.disponible}" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+            </div>
+        `).join("");
+
+}
+
 document.getElementById("formActividad").addEventListener("submit", async (evento) => {
 
     evento.preventDefault();
@@ -1571,9 +1600,25 @@ document.getElementById("formActividad").addEventListener("submit", async (event
     const horaInicio = document.getElementById("inputHoraInicioActividad").value;
     const horaFin = document.getElementById("inputHoraFinActividad").value;
 
+    const items = [];
+    document.querySelectorAll(".checkbox-material-nueva-actividad:checked").forEach((checkbox) => {
+        const fila = checkbox.closest("div");
+        const cantidad = fila.querySelector(".cantidad-material-nueva-actividad").value;
+        if (cantidad && Number(cantidad) > 0) {
+            items.push({ materialId: checkbox.value, cantidad: Number(cantidad) });
+        }
+    });
+
+    const liderId = document.getElementById("inputResponsableActividad").value;
+
+    if (items.length > 0 && !liderId) {
+        mostrarMensaje(mensaje, "Elige el responsable que recibe los materiales marcados", "fallo");
+        return;
+    }
+
     try {
 
-        await peticionApi("/api/actividades", {
+        const { actividad } = await peticionApi("/api/actividades", {
             method: "POST",
             body: JSON.stringify({
                 titulo: document.getElementById("inputTituloActividad").value.trim(),
@@ -1581,16 +1626,22 @@ document.getElementById("formActividad").addEventListener("submit", async (event
                 fecha,
                 horaInicio: new Date(`${fecha}T${horaInicio}`).toISOString(),
                 horaFin: new Date(`${fecha}T${horaFin}`).toISOString(),
-                materialesUsados: document.getElementById("inputMaterialesActividad").value.trim(),
                 espacioUsado: document.getElementById("inputEspacioActividad").value.trim(),
                 cantidadAsistentesEstimada: document.getElementById("inputAsistentesActividad").value || null,
                 encargadosMetodologicos: document.getElementById("inputEncargadosMetodologicosActividad").value.trim()
             })
         });
 
-        mostrarMensaje(mensaje, "Actividad creada correctamente", "ok");
+        if (items.length > 0) {
+            await peticionApi("/api/materiales/lotes", {
+                method: "POST",
+                body: JSON.stringify({ liderId, actividadId: actividad.id, items })
+            });
+        }
+
+        mostrarMensaje(mensaje, "Actividad creada correctamente" + (items.length > 0 ? " y materiales asignados" : ""), "ok");
         document.getElementById("formActividad").reset();
-        await cargarActividades();
+        await Promise.all([cargarActividades(), cargarMaterialesParaNuevaActividad()]);
 
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
@@ -1618,8 +1669,8 @@ async function abrirDetalleActividad(id) {
             <div class="dato"><span class="etiqueta">Horario</span><span class="valor">${formatearFechaHora(actividad.hora_inicio)} — ${formatearFechaHora(actividad.hora_fin)}</span></div>
             <div class="dato"><span class="etiqueta">Espacio</span><span class="valor">${actividad.espacio_usado || "—"}</span></div>
             <div class="dato"><span class="etiqueta">Asistentes estimados</span><span class="valor">${actividad.cantidad_asistentes_estimada ?? "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Materiales</span><span class="valor">${actividad.materiales_usados || "—"}</span></div>
             <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${actividad.encargados_metodologicos || "—"}</span></div>
+            ${actividad.materiales_usados ? `<div class="dato"><span class="etiqueta">Materiales (nota antigua)</span><span class="valor">${actividad.materiales_usados}</span></div>` : ""}
         `;
 
         renderizarFasesActividad(actividad);
@@ -2160,15 +2211,15 @@ document.getElementById("formNuevoMaterial").addEventListener("submit", async (e
 
 });
 
-async function poblarSelectLideres(select) {
+async function poblarSelectLideres(select, etiquetaVacio) {
 
     try {
         const { usuarios } = await peticionApi("/api/centro-control/usuarios");
         const lideres = usuarios.filter((u) => u.rol_en_rama === "lider");
 
-        select.innerHTML = lideres
-            .map((l) => `<option value="${l.id}">${l.nombre}${l.rama_id && mapaRamas[l.rama_id] ? ` (${mapaRamas[l.rama_id]})` : ""}</option>`)
-            .join("");
+        select.innerHTML = `<option value="">${etiquetaVacio || "Selecciona un líder"}</option>` +
+            lideres.map((l) => `<option value="${l.id}">${l.nombre}${l.rama_id && mapaRamas[l.rama_id] ? ` (${mapaRamas[l.rama_id]})` : ""}</option>`)
+                .join("");
     } catch (error) {
         console.error(error);
     }

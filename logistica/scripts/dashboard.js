@@ -1349,8 +1349,8 @@ async function abrirDetalleActividadCronograma(id) {
         document.getElementById("detalleActividadCronogramaInfo").innerHTML = `
             <div class="dato"><span class="etiqueta">Horario</span><span class="valor">${formatearFechaHora(actividad.hora_inicio)} — ${formatearFechaHora(actividad.hora_fin)}</span></div>
             <div class="dato"><span class="etiqueta">Espacio</span><span class="valor">${actividad.espacio_usado || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Materiales</span><span class="valor">${actividad.materiales_usados || "—"}</span></div>
             <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${actividad.encargados_metodologicos || "—"}</span></div>
+            ${actividad.materiales_usados ? `<div class="dato"><span class="etiqueta">Materiales (nota antigua)</span><span class="valor">${actividad.materiales_usados}</span></div>` : ""}
         `;
 
         // Una tarea puede tener 2+ ramas asignadas (t.ramas), no solo su

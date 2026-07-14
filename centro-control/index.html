@@ -264,8 +264,12 @@
                     </div>
                 </div>
                 <div class="campo">
-                    <label for="inputMaterialesActividad">Materiales usados</label>
-                    <textarea id="inputMaterialesActividad"></textarea>
+                    <label>Materiales del inventario para esta actividad</label>
+                    <div id="checklistMaterialesNuevaActividad"></div>
+                </div>
+                <div class="campo">
+                    <label for="inputResponsableActividad">Responsable que recibe los materiales</label>
+                    <select id="inputResponsableActividad"><option value="">Sin materiales para esta actividad</option></select>
                 </div>
                 <div class="campo">
                     <label for="inputEncargadosMetodologicosActividad">Encargados metodológicos (informativo)</label>
@@ -624,6 +628,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=6" defer></script>
+<script src="scripts/dashboard.js?v=7" defer></script>
 </body>
 </html>
