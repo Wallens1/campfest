@@ -47,6 +47,17 @@ img { max-width: 100%; display: block; }
 }
 .cf-nav a:hover { border-color: var(--yellow); transform: translateY(-1px); }
 .cf-nav a.cf-active { background: var(--pink); color: var(--white); }
+@media (max-width: 680px) {
+  .cf-nav {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .cf-nav::-webkit-scrollbar { display: none; }
+  .cf-nav a { flex: 0 0 auto; white-space: nowrap; }
+}
 
 /* ---------- confetti bg layer ---------- */
 .cf-confetti { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
@@ -684,7 +695,7 @@ img { max-width: 100%; display: block; }
   display:block; font-size:12.5px; font-weight:700; text-transform:uppercase;
   letter-spacing:.5px; margin-bottom:6px; color:var(--purple); font-family:'Fredoka', sans-serif;
 }
-.cf-campo input,
+.cf-campo input:not([type="checkbox"]):not([type="radio"]),
 .cf-campo select,
 .cf-campo textarea{
   width:100%; padding:12px 14px; font-size:15px; font-family:'Poppins', sans-serif;
@@ -712,9 +723,12 @@ img { max-width: 100%; display: block; }
 
 .cf-checkbox-grupo{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:20px; }
 .cf-checkbox-grupo label{
-  display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600;
-  background:var(--cream); border:2px solid var(--ink); border-radius:999px; padding:6px 14px;
+  display:flex; align-items:flex-start; gap:6px; font-size:13.5px; font-weight:600;
+  background:var(--cream); border:2px solid var(--ink); border-radius:14px; padding:6px 14px;
+  max-width:100%;
 }
+.cf-checkbox-grupo label input{ flex:0 0 auto; width:16px; height:16px; margin-top:2px; }
+.cf-checkbox-grupo label span{ min-width:0; }
 .cf-checkbox-grupo input{ accent-color:var(--purple); }
 
 .cf-btn-generar{ border:none; cursor:pointer; font-size:15px; margin-top:6px; }
