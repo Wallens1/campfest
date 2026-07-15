@@ -567,6 +567,15 @@
                 <button class="boton pequeno secundario" id="btnVerEliminadosInscripcion" style="width:auto;">Ver eliminados</button>
                 <button class="boton pequeno oculto" id="btnEnviarCorreoMasivo" style="width:auto;">Enviar correo a todos los pendientes</button>
             </div>
+
+            <div class="grid-info oculto" id="bloqueCorreoPruebaLibre" style="margin-top:10px; align-items:flex-end;">
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="correoPruebaLibre">Probar contenido del correo (a cualquier dirección)</label>
+                    <input type="email" id="correoPruebaLibre" placeholder="tu-correo@ejemplo.com">
+                </div>
+                <button class="boton pequeno secundario" id="btnEnviarCorreoPruebaLibre" style="width:auto; height:fit-content;">Enviar correo de prueba</button>
+            </div>
+
             <div class="mensaje" id="mensajeInscripciones"></div>
 
             <div class="tabla-wrap" style="margin-top:14px;">
@@ -777,6 +786,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=13" defer></script>
+<script src="scripts/dashboard.js?v=14" defer></script>
 </body>
 </html>

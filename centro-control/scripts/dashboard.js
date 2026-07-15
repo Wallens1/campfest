@@ -343,6 +343,7 @@ async function iniciarDashboard() {
     document.getElementById("bloqueExportarInventarioAdmin").classList.toggle("oculto", usuario.rol !== "admin");
 
     document.getElementById("btnEnviarCorreoMasivo").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("bloqueCorreoPruebaLibre").classList.toggle("oculto", usuario.rol !== "admin");
     llenarSelect(document.getElementById("filtroMunicipioInscripcion"), MUNICIPIOS_VALLE, "Todos los municipios");
 
     llenarSelect(document.getElementById("filtroObjetivoMaterial"), OBJETIVOS_MATERIAL, "Todos los objetivos");
@@ -2884,6 +2885,29 @@ async function enviarCorreoPruebaInscripcion(id) {
         cargarInscripciones();
     }
 }
+
+document.getElementById("btnEnviarCorreoPruebaLibre").addEventListener("click", async () => {
+
+    const input = document.getElementById("correoPruebaLibre");
+    const correo = input.value.trim();
+    const mensaje = document.getElementById("mensajeInscripciones");
+
+    if (!correo) {
+        mostrarMensaje(mensaje, "Escribe una dirección de correo para probar.", "fallo");
+        return;
+    }
+
+    try {
+        await peticionApi("/api/centro-control/inscripciones/enviar-correo-prueba-libre", {
+            method: "POST",
+            body: JSON.stringify({ correo })
+        });
+        mostrarMensaje(mensaje, `Correo de prueba enviado a ${correo}. Esto no afecta ninguna inscripción real.`, "ok");
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
 
 document.getElementById("btnEnviarCorreoMasivo").addEventListener("click", async () => {
 
