@@ -2704,10 +2704,38 @@ async function cargarInscripciones() {
 
 }
 
+const EDAD_MINIMA_PERMITIDA = 14;
+const EDAD_MAXIMA_PERMITIDA = 28;
+
+function edadFueraDeRango(edad) {
+    return edad != null && (edad < EDAD_MINIMA_PERMITIDA || edad > EDAD_MAXIMA_PERMITIDA);
+}
+
+function actualizarAvisoEdadInscripciones(participantes) {
+
+    const aviso = document.getElementById("avisoEdadInscripciones");
+    const fueraDeRango = participantes.filter((p) => edadFueraDeRango(p.edad));
+
+    if (fueraDeRango.length === 0) {
+        aviso.classList.remove("mostrar");
+        aviso.innerHTML = "";
+        return;
+    }
+
+    const nombres = fueraDeRango.slice(0, 5).map((p) => `${p.nombre} (${p.edad} años)`).join(", ");
+    const extra = fueraDeRango.length > 5 ? ` y ${fueraDeRango.length - 5} más` : "";
+
+    aviso.innerHTML = `⚠️ ${fueraDeRango.length} inscripción${fueraDeRango.length === 1 ? "" : "es"} fuera del rango de edad permitido (${EDAD_MINIMA_PERMITIDA}–${EDAD_MAXIMA_PERMITIDA} años): ${nombres}${extra}.`;
+    aviso.classList.add("mostrar");
+
+}
+
 function renderizarTablaInscripciones(participantes) {
 
     const cuerpo = document.getElementById("filasInscripciones");
     const esAdmin = perfilActual?.rol === "admin";
+
+    actualizarAvisoEdadInscripciones(participantes);
 
     if (participantes.length === 0) {
         cuerpo.innerHTML = `<tr><td colspan="8">No hay inscripciones que coincidan con el filtro.</td></tr>`;
@@ -2716,7 +2744,7 @@ function renderizarTablaInscripciones(participantes) {
 
     cuerpo.innerHTML = participantes.map((p) => `
         <tr data-fila-inscripcion="${p.id}">
-            <td>${p.nombre}${p.esMenorDeEdad ? ' <span class="badge neutro">Menor</span>' : ""}</td>
+            <td>${p.nombre}${p.esMenorDeEdad ? ' <span class="badge neutro">Menor</span>' : ""}${edadFueraDeRango(p.edad) ? ' <span class="badge rojo">⚠ Edad fuera de rango</span>' : ""}</td>
             <td>${p.documento}</td>
             <td>${p.municipio}${p.municipio === "Otro" && p.municipio_otro ? ` (${p.municipio_otro})` : ""}</td>
             <td>${p.edad ?? "—"}</td>
