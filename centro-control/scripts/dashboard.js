@@ -2738,12 +2738,13 @@ function renderizarTablaInscripciones(participantes) {
     actualizarAvisoEdadInscripciones(participantes);
 
     if (participantes.length === 0) {
-        cuerpo.innerHTML = `<tr><td colspan="8">No hay inscripciones que coincidan con el filtro.</td></tr>`;
+        cuerpo.innerHTML = `<tr><td colspan="9">No hay inscripciones que coincidan con el filtro.</td></tr>`;
         return;
     }
 
     cuerpo.innerHTML = participantes.map((p) => `
         <tr data-fila-inscripcion="${p.id}">
+            <td style="white-space:nowrap;">${p.creado_en ? new Date(p.creado_en).toLocaleString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}</td>
             <td>${p.nombre}${p.esMenorDeEdad ? ' <span class="badge neutro">Menor</span>' : ""}${edadFueraDeRango(p.edad) ? ' <span class="badge rojo">⚠ Edad fuera de rango</span>' : ""}</td>
             <td>${p.documento}</td>
             <td>${p.municipio}${p.municipio === "Otro" && p.municipio_otro ? ` (${p.municipio_otro})` : ""}</td>
@@ -2772,7 +2773,7 @@ function renderizarTablaInscripciones(participantes) {
                     : (esAdmin ? `<button class="boton pequeno secundario" data-eliminar="${p.id}" style="width:auto; padding:6px 10px; font-size:11px;">Eliminar</button>` : "")}
             </td>
         </tr>
-        <tr class="oculto" id="filaDetalleInscripcion-${p.id}"><td colspan="8"><div id="detalleInscripcion-${p.id}"></div></td></tr>
+        <tr class="oculto" id="filaDetalleInscripcion-${p.id}"><td colspan="9"><div id="detalleInscripcion-${p.id}"></div></td></tr>
     `).join("");
 
     cuerpo.querySelectorAll(".select-admision-inscripcion").forEach((select) => {
