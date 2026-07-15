@@ -54,6 +54,8 @@ const fichaNombre = document.getElementById("fichaNombre");
 const fichaDocumento = document.getElementById("fichaDocumento");
 const gridInfo = document.getElementById("gridInfo");
 const bloqueIngreso = document.getElementById("bloqueIngreso");
+const seccionSalidaLibre = document.getElementById("seccionSalidaLibre");
+const bloqueSalidaLibre = document.getElementById("bloqueSalidaLibre");
 const formAsignacion = document.getElementById("formAsignacion");
 const gridCarpas = document.getElementById("gridCarpas");
 const checkboxLider = document.getElementById("checkboxLider");
@@ -402,7 +404,7 @@ async function seleccionarParticipante(id) {
 
 function renderizarFicha(datos) {
 
-    const { participante, servicios, entregas, totalServicios, entregasRealizadas, historial: eventos } = datos;
+    const { participante, servicios, entregas, totalServicios, entregasRealizadas, historial: eventos, elegibleSalidaLibre, salidaLibreActiva } = datos;
 
     fichaNombre.textContent = participante.nombre;
     fichaDocumento.textContent = `Documento: ${participante.documento}`;
@@ -410,6 +412,7 @@ function renderizarFicha(datos) {
     renderizarBadges(participante, entregasRealizadas, totalServicios);
     renderizarInfo(participante);
     renderizarIngreso(participante);
+    renderizarSalidaLibre(elegibleSalidaLibre, salidaLibreActiva);
 
     carpaSeleccionada = participante.carpa_asignada || null;
     renderizarGridCarpas();
@@ -520,6 +523,71 @@ function renderizarIngreso(participante) {
             mostrarMensaje(mensajeFicha, error.message, "fallo");
         }
 
+    });
+
+}
+
+const MOTIVOS_SALIDA_LIBRE = [
+    { valor: "comer", etiqueta: "Salió a comer" },
+    { valor: "dormir", etiqueta: "Salió a dormir" },
+    { valor: "trabajar", etiqueta: "Salió a trabajar" }
+];
+
+function renderizarSalidaLibre(elegible, salidaActiva) {
+
+    if (!elegible) {
+        seccionSalidaLibre.classList.add("oculto");
+        return;
+    }
+
+    seccionSalidaLibre.classList.remove("oculto");
+
+    if (salidaActiva) {
+
+        bloqueSalidaLibre.innerHTML = `
+            <span class="badge neutro">En salida libre desde ${formatearHora(salidaActiva.salida_en)} (motivo: ${salidaActiva.motivo})</span>
+            <button class="boton pequeno" id="btnRegresoSalidaLibre" style="margin-top:8px;">Registrar regreso</button>
+        `;
+
+        document.getElementById("btnRegresoSalidaLibre").addEventListener("click", async () => {
+
+            if (!confirm("¿Confirmas el regreso de este participante de su salida libre?")) return;
+
+            try {
+                await peticionApi(`/api/logistica/participante/${participanteActualId}/salida-libre/regreso`, { method: "POST" });
+                mostrarMensaje(mensajeFicha, "Regreso registrado correctamente", "ok");
+                await seleccionarParticipante(participanteActualId);
+            } catch (error) {
+                mostrarMensaje(mensajeFicha, error.message, "fallo");
+            }
+
+        });
+
+        return;
+
+    }
+
+    bloqueSalidaLibre.innerHTML = MOTIVOS_SALIDA_LIBRE.map(({ valor, etiqueta }) =>
+        `<button class="boton pequeno secundario" data-motivo-salida="${valor}" style="margin-right:8px;">${etiqueta}</button>`
+    ).join("");
+
+    bloqueSalidaLibre.querySelectorAll("[data-motivo-salida]").forEach((boton) => {
+        boton.addEventListener("click", async () => {
+
+            if (!confirm(`¿Confirmas registrar la salida libre (${boton.textContent.trim()})?`)) return;
+
+            try {
+                await peticionApi(`/api/logistica/participante/${participanteActualId}/salida-libre`, {
+                    method: "POST",
+                    body: JSON.stringify({ motivo: boton.dataset.motivoSalida })
+                });
+                mostrarMensaje(mensajeFicha, "Salida libre registrada correctamente", "ok");
+                await seleccionarParticipante(participanteActualId);
+            } catch (error) {
+                mostrarMensaje(mensajeFicha, error.message, "fallo");
+            }
+
+        });
     });
 
 }

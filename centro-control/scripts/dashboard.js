@@ -986,14 +986,17 @@ function renderizarTablaParticipantes(lista) {
 
     cuerpo.innerHTML = lista.map((p) => `
         <tr data-id="${p.id}">
-            <td>${p.nombre}${p.retirado ? ' <span class="badge rojo">Retirado</span>' : ""}</td>
+            <td>${p.nombre}${p.retirado ? ' <span class="badge rojo">Retirado</span>' : ""}${p.salidaLibreActiva ? ` <span class="badge neutro">🚶 Salida libre (${p.salidaLibreActiva.motivo})</span>` : ""}</td>
             <td>${p.municipio || "—"}</td>
             <td>${p.carpa_asignada || "—"}</td>
             <td>${p.es_lider_carpa ? "Sí" : "No"}</td>
             <td>${p.ingreso_registrado ? "🟢 Ingresó" : "🔴 Pendiente"}</td>
             <td>${p.entregas_alimentacion} entregas</td>
             <td>${p.incidentes_activos}</td>
-            <td>${p.retirado ? "" : `<button class="boton pequeno" data-retirar="${p.id}">Marcar retirado</button>`}</td>
+            <td>
+                ${p.retirado ? "" : `<button class="boton pequeno" data-retirar="${p.id}">Marcar retirado</button>`}
+                ${p.salidaLibreActiva ? `<button class="boton pequeno secundario" data-regreso-salida="${p.id}" style="margin-top:4px;">Registrar regreso</button>` : ""}
+            </td>
         </tr>
     `).join("");
 
@@ -1003,6 +1006,26 @@ function renderizarTablaParticipantes(lista) {
             marcarRetirado(boton.dataset.retirar);
         });
     });
+
+    cuerpo.querySelectorAll("[data-regreso-salida]").forEach((boton) => {
+        boton.addEventListener("click", (evento) => {
+            evento.stopPropagation();
+            registrarRegresoSalidaLibre(boton.dataset.regresoSalida);
+        });
+    });
+
+}
+
+async function registrarRegresoSalidaLibre(id) {
+
+    if (!confirm("¿Confirmas registrar el regreso de este participante de su salida libre?")) return;
+
+    try {
+        await peticionApi(`/api/centro-control/participantes/${id}/salida-libre/regreso`, { method: "POST" });
+        await cargarParticipantes();
+    } catch (error) {
+        alert(error.message);
+    }
 
 }
 
