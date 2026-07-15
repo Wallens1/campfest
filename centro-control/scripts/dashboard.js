@@ -2921,13 +2921,26 @@ function renderizarTilesInscripciones(estadisticas) {
     const contenedor = document.getElementById("tilesInscripciones");
     const estado = estadisticas.estadoAdmision || {};
     const menor = estadisticas.esMenorDeEdad || {};
+    const total = (estado.pendiente || 0) + (estado.admitido || 0) + (estado.no_admitido || 0);
 
     contenedor.innerHTML = `
+        <div class="stat-tile" data-tile-total="true" style="cursor:pointer;"><div class="stat-numero">${total}</div><span class="stat-etiqueta">Total inscritos</span></div>
         <div class="stat-tile" data-tile-estado="pendiente" style="cursor:pointer;"><div class="stat-numero">${estado.pendiente || 0}</div><span class="stat-etiqueta">Pendientes</span></div>
         <div class="stat-tile" data-tile-estado="admitido" style="cursor:pointer;"><div class="stat-numero">${estado.admitido || 0}</div><span class="stat-etiqueta">Admitidos</span></div>
         <div class="stat-tile" data-tile-estado="no_admitido" style="cursor:pointer;"><div class="stat-numero">${estado.no_admitido || 0}</div><span class="stat-etiqueta">No admitidos</span></div>
         <div class="stat-tile" data-tile-menor="true" style="cursor:pointer;"><div class="stat-numero">${menor["Sí"] || 0}</div><span class="stat-etiqueta">Menores de edad</span></div>
     `;
+
+    const tileTotal = contenedor.querySelector("[data-tile-total]");
+    if (tileTotal) {
+        tileTotal.addEventListener("click", () => {
+            mostrandoEliminadosInscripcion = false;
+            document.getElementById("btnVerEliminadosInscripcion").textContent = "Ver eliminados";
+            document.getElementById("filtroEstadoInscripcion").value = "";
+            document.getElementById("filtroMenorInscripcion").value = "";
+            cargarInscripciones();
+        });
+    }
 
     contenedor.querySelectorAll("[data-tile-estado]").forEach((tile) => {
         tile.addEventListener("click", () => {
