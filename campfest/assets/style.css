@@ -47,17 +47,6 @@ img { max-width: 100%; display: block; }
 }
 .cf-nav a:hover { border-color: var(--yellow); transform: translateY(-1px); }
 .cf-nav a.cf-active { background: var(--pink); color: var(--white); }
-@media (max-width: 680px) {
-  .cf-nav {
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .cf-nav::-webkit-scrollbar { display: none; }
-  .cf-nav a { flex: 0 0 auto; white-space: nowrap; }
-}
 
 /* ---------- confetti bg layer ---------- */
 .cf-confetti { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
