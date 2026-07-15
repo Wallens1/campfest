@@ -2834,7 +2834,10 @@ function renderizarTablaInscripciones(participantes) {
     });
 
     cuerpo.querySelectorAll("[data-enviar-correo]").forEach((boton) => {
-        boton.addEventListener("click", () => enviarCorreoPruebaInscripcion(boton.dataset.enviarCorreo));
+        boton.addEventListener("click", () => {
+            if (!confirm("¿Seguro que quieres enviar el correo de confirmación a este participante?")) return;
+            enviarCorreoPruebaInscripcion(boton.dataset.enviarCorreo);
+        });
     });
 
     cuerpo.querySelectorAll("[data-editar-correo]").forEach((boton) => {
