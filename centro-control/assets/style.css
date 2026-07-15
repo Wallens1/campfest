@@ -505,6 +505,15 @@ tr.fila-vencido td:first-child{ border-left:6px solid var(--rojo); }
 
 .grafico-tarjeta canvas{ max-height:180px; }
 
+@media (max-width:680px){
+    #dashboard{ padding:14px 12px 40px; }
+    .stats-fila{ grid-template-columns:1fr; }
+    .stats-grid{ grid-template-columns:1fr 1fr; }
+    .graficos-fila{ grid-template-columns:1fr; }
+    .grid-info{ grid-template-columns:1fr; }
+    .grafico-tarjeta canvas{ max-height:220px; }
+}
+
 /* ===== TABLA DE PARTICIPANTES ===== */
 
 table.tabla-participantes{
