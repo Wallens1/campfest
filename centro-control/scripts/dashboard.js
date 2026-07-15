@@ -1327,6 +1327,48 @@ document.getElementById("formImportarParticipantes").addEventListener("submit", 
 });
 
 // ==========================
+// Completar datos faltantes desde Excel (admin) — no inserta, solo rellena
+// huecos de participantes que ya existen.
+// ==========================
+
+document.getElementById("formCompletarDatosParticipantes").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+
+    const mensaje = document.getElementById("mensajeCompletarDatosParticipantes");
+    const input = document.getElementById("inputArchivoCompletarDatos");
+    const boton = document.getElementById("btnCompletarDatosParticipantes");
+
+    if (!input.files[0]) return;
+
+    const formData = new FormData();
+    formData.append("archivo", input.files[0]);
+
+    boton.disabled = true;
+    ocultarMensaje(mensaje);
+
+    try {
+
+        const resultado = await subirArchivo("/api/centro-control/participantes/completar-datos", formData);
+
+        mostrarMensaje(
+            mensaje,
+            `${resultado.actualizados} actualizados · ${resultado.sinCambios} sin cambios · ${resultado.noEncontrados} no encontrados`,
+            "ok"
+        );
+
+        document.getElementById("formCompletarDatosParticipantes").reset();
+        await Promise.all([cargarInscripciones(), cargarEstadisticasInscripciones()]);
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    } finally {
+        boton.disabled = false;
+    }
+
+});
+
+// ==========================
 // Zonas (admin)
 // ==========================
 
@@ -2761,11 +2803,14 @@ function renderizarTablaInscripciones(participantes) {
                    </select>`}
             </td>
             <td>
-                <span class="badge ${p.correo_confirmacion_estado === "enviado" ? "verde" : p.correo_confirmacion_estado === "fallo" ? "rojo" : "neutro"}">
+                <span class="badge ${p.correo_confirmacion_estado === "enviado" ? "verde" : p.correo_confirmacion_estado === "fallo" ? "rojo" : "neutro"}" ${p.correo_confirmacion_estado === "fallo" && p.correo_confirmacion_error ? `title="${p.correo_confirmacion_error.replace(/"/g, "&quot;")}"` : ""}>
                     ${p.correo_confirmacion_estado === "enviado" ? "✅ Enviado" : p.correo_confirmacion_estado === "fallo" ? "⚠️ Falló" : "No enviado"}
                 </span>
                 ${!mostrandoEliminadosInscripcion && p.correo_confirmacion_estado !== "enviado" && esAdmin
                     ? `<button class="boton pequeno secundario" data-enviar-correo="${p.id}" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;">Enviar prueba</button>`
+                    : ""}
+                ${!mostrandoEliminadosInscripcion && p.correo_confirmacion_estado === "fallo" && esAdmin
+                    ? `<button class="boton pequeno secundario" data-editar-correo="${p.id}" data-correo-actual="${p.correo_personal || ""}" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;">Editar correo</button>`
                     : ""}
             </td>
             <td style="white-space:nowrap;">
@@ -2790,6 +2835,14 @@ function renderizarTablaInscripciones(participantes) {
 
     cuerpo.querySelectorAll("[data-enviar-correo]").forEach((boton) => {
         boton.addEventListener("click", () => enviarCorreoPruebaInscripcion(boton.dataset.enviarCorreo));
+    });
+
+    cuerpo.querySelectorAll("[data-editar-correo]").forEach((boton) => {
+        boton.addEventListener("click", () => {
+            const nuevo = prompt("Corregir correo del participante:", boton.dataset.correoActual || "");
+            if (nuevo === null || nuevo.trim() === "") return;
+            editarCorreoInscripcion(boton.dataset.editarCorreo, nuevo.trim());
+        });
     });
 
     cuerpo.querySelectorAll("[data-eliminar]").forEach((boton) => {
@@ -2891,6 +2944,18 @@ async function enviarCorreoPruebaInscripcion(id) {
     } catch (error) {
         alert(error.message);
         cargarInscripciones();
+    }
+}
+
+async function editarCorreoInscripcion(id, correo) {
+    try {
+        await peticionApi(`/api/centro-control/inscripciones/${id}/correo`, {
+            method: "PATCH",
+            body: JSON.stringify({ correo })
+        });
+        await cargarInscripciones();
+    } catch (error) {
+        alert(error.message);
     }
 }
 

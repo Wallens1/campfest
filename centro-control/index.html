@@ -638,6 +638,23 @@
         </div>
 
         <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Completar datos faltantes desde Excel</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                Esto NO inserta participantes nuevos. Para los documentos que ya existen en el sistema,
+                rellena únicamente los campos que estén vacíos (ej. correo personal) sin tocar el estado
+                de admisión ni ningún dato ya cargado.
+            </p>
+            <form id="formCompletarDatosParticipantes" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                <div class="campo" style="margin-bottom:0; flex:1;">
+                    <label for="inputArchivoCompletarDatos">Archivo .xlsx</label>
+                    <input type="file" id="inputArchivoCompletarDatos" accept=".xlsx" required>
+                </div>
+                <button type="submit" class="boton pequeno" id="btnCompletarDatosParticipantes">Subir</button>
+            </form>
+            <div class="mensaje" id="mensajeCompletarDatosParticipantes"></div>
+        </div>
+
+        <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Configurar capacidad de carpas</h3>
             <form id="formCapacidadCarpa" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
                 <div class="campo" style="margin-bottom:0;">
@@ -798,6 +815,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=16" defer></script>
+<script src="scripts/dashboard.js?v=17" defer></script>
 </body>
 </html>
