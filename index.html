@@ -440,17 +440,18 @@
   if (!root) return;
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* scroll reveal */
+  /* scroll reveal — elements are visible by default (see CSS); only opt them
+     into the hidden pre-animation state once we know we can observe them,
+     so content never depends on this script running to be seen. */
   var items = root.querySelectorAll('.cf-reveal');
   if ('IntersectionObserver' in window) {
+    items.forEach(function (el) { el.classList.add('cf-pending'); });
     var obs = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add('cf-in'); obs.unobserve(e.target); }
+        if (e.isIntersecting) { e.target.classList.remove('cf-pending'); e.target.classList.add('cf-in'); obs.unobserve(e.target); }
       });
     }, { threshold: 0.15 });
     items.forEach(function (el) { obs.observe(el); });
-  } else {
-    items.forEach(function (el) { el.classList.add('cf-in'); });
   }
 
   /* mouse parallax on hero shapes */

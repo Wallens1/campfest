@@ -580,8 +580,13 @@ img { max-width: 100%; display: block; }
 .cf-footer .cf-social a:hover { transform: scale(1.12) rotate(-6deg); }
 .cf-footer p { font-size: 11px; opacity: 0.55; font-weight: 500; max-width: 520px; margin: 0 auto; letter-spacing: 0.2px; }
 
-/* ---------- REVEAL ---------- */
-.cf-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+/* ---------- REVEAL ----------
+   Visible by default: content must never depend on JS running to appear.
+   JS opts elements into the hidden pre-animation state (.cf-pending) right
+   before observing them, then swaps to .cf-in once they scroll into view.
+   If JS fails/never runs, elements simply stay at their default visible state. */
+.cf-reveal { transition: opacity 0.6s ease, transform 0.6s ease; }
+.cf-reveal.cf-pending { opacity: 0; transform: translateY(18px); }
 .cf-reveal.cf-in { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 640px) {
