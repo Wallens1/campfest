@@ -2946,6 +2946,7 @@ function renderizarTilesInscripciones(estadisticas) {
     const estado = estadisticas.estadoAdmision || {};
     const menor = estadisticas.esMenorDeEdad || {};
     const total = (estado.pendiente || 0) + (estado.admitido || 0) + (estado.no_admitido || 0);
+    const cupo = estadisticas.cupoBugalagrande || { admitidos: 0, enEspera: 0, maximo: 100 };
 
     contenedor.innerHTML = `
         <div class="stat-tile" data-tile-total="true" style="cursor:pointer;"><div class="stat-numero">${total}</div><span class="stat-etiqueta">Total inscritos</span></div>
@@ -2953,6 +2954,7 @@ function renderizarTilesInscripciones(estadisticas) {
         <div class="stat-tile" data-tile-estado="admitido" style="cursor:pointer;"><div class="stat-numero">${estado.admitido || 0}</div><span class="stat-etiqueta">Admitidos</span></div>
         <div class="stat-tile" data-tile-estado="no_admitido" style="cursor:pointer;"><div class="stat-numero">${estado.no_admitido || 0}</div><span class="stat-etiqueta">No admitidos</span></div>
         <div class="stat-tile" data-tile-menor="true" style="cursor:pointer;"><div class="stat-numero">${menor["Sí"] || 0}</div><span class="stat-etiqueta">Menores de edad</span></div>
+        <div class="stat-tile" data-tile-bugalagrande="true" style="cursor:pointer;"><div class="stat-numero">${cupo.admitidos}/${cupo.maximo}</div><span class="stat-etiqueta">Cupo Bugalagrande${cupo.enEspera > 0 ? ` (${cupo.enEspera} en espera)` : ""}</span></div>
     `;
 
     const tileTotal = contenedor.querySelector("[data-tile-total]");
@@ -2983,6 +2985,18 @@ function renderizarTilesInscripciones(estadisticas) {
             document.getElementById("btnVerEliminadosInscripcion").textContent = "Ver eliminados";
             document.getElementById("filtroEstadoInscripcion").value = "";
             document.getElementById("filtroMenorInscripcion").value = "true";
+            cargarInscripciones();
+        });
+    }
+
+    const tileBugalagrande = contenedor.querySelector("[data-tile-bugalagrande]");
+    if (tileBugalagrande) {
+        tileBugalagrande.addEventListener("click", () => {
+            mostrandoEliminadosInscripcion = false;
+            document.getElementById("btnVerEliminadosInscripcion").textContent = "Ver eliminados";
+            document.getElementById("filtroEstadoInscripcion").value = "";
+            document.getElementById("filtroMenorInscripcion").value = "";
+            document.getElementById("filtroMunicipioInscripcion").value = "Bugalagrande";
             cargarInscripciones();
         });
     }
