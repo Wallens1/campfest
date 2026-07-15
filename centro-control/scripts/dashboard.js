@@ -2753,10 +2753,11 @@ function renderizarTablaInscripciones(participantes) {
             <td>${p.telefono || "—"}</td>
             <td>${mostrandoEliminadosInscripcion
                 ? humanizar(p.estado_admision)
-                : `<select class="select-admision-inscripcion" data-id="${p.id}" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                : `<select class="select-admision-inscripcion" data-id="${p.id}" data-anterior="${p.estado_admision}" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
                         <option value="pendiente" ${p.estado_admision === "pendiente" ? "selected" : ""}>Pendiente</option>
                         <option value="admitido" ${p.estado_admision === "admitido" ? "selected" : ""}>Admitido</option>
                         <option value="no_admitido" ${p.estado_admision === "no_admitido" ? "selected" : ""}>No admitido</option>
+                        <option value="desertor" ${p.estado_admision === "desertor" ? "selected" : ""}>Deserción</option>
                    </select>`}
             </td>
             <td>
@@ -2778,7 +2779,13 @@ function renderizarTablaInscripciones(participantes) {
     `).join("");
 
     cuerpo.querySelectorAll(".select-admision-inscripcion").forEach((select) => {
-        select.addEventListener("change", () => actualizarAdmisionInscripcion(select.dataset.id, select.value));
+        select.addEventListener("change", () => {
+            let motivo = "";
+            if (select.value === "no_admitido" || select.value === "desertor") {
+                motivo = prompt(select.value === "no_admitido" ? "Motivo del rechazo (se incluye en el correo al participante):" : "Motivo de la deserción (opcional, solo uso interno):") || "";
+            }
+            actualizarAdmisionInscripcion(select.dataset.id, select.value, motivo);
+        });
     });
 
     cuerpo.querySelectorAll("[data-enviar-correo]").forEach((boton) => {
@@ -2815,6 +2822,7 @@ function alternarDetalleInscripcion(id) {
     contenedor.innerHTML = `
         <div class="grid-info" style="margin:10px 0 0;">
             <div class="dato"><span class="etiqueta">Correo personal</span><span class="valor">${p.correo_personal || "—"}</span></div>
+            ${p.motivo_rechazo ? `<div class="dato"><span class="etiqueta">Motivo (rechazo/deserción)</span><span class="valor">${p.motivo_rechazo}</span></div>` : ""}
             <div class="dato"><span class="etiqueta">Zona</span><span class="valor">${p.zona_rural_urbana || "—"}</span></div>
             <div class="dato"><span class="etiqueta">Contacto de emergencia 1</span><span class="valor">${p.contacto_emergencia_nombre || "—"} · ${p.contacto_emergencia_telefono || "—"}</span></div>
             <div class="dato"><span class="etiqueta">Contacto de emergencia 2</span><span class="valor">${p.contacto_emergencia_2_nombre || "—"} · ${p.contacto_emergencia_2_telefono || "—"}</span></div>
@@ -2844,13 +2852,13 @@ function alternarDetalleInscripcion(id) {
 
 }
 
-async function actualizarAdmisionInscripcion(id, estado) {
+async function actualizarAdmisionInscripcion(id, estado, motivo) {
     try {
         await peticionApi(`/api/centro-control/inscripciones/${id}/admision`, {
             method: "PATCH",
-            body: JSON.stringify({ estado })
+            body: JSON.stringify({ estado, motivo })
         });
-        await cargarEstadisticasInscripciones();
+        await Promise.all([cargarInscripciones(), cargarEstadisticasInscripciones()]);
     } catch (error) {
         alert(error.message);
         cargarInscripciones();
@@ -2897,16 +2905,23 @@ document.getElementById("btnEnviarCorreoPruebaLibre").addEventListener("click", 
         return;
     }
 
+    const estado = document.getElementById("estadoPruebaLibre").value;
+    const motivo = document.getElementById("motivoPruebaLibre").value.trim();
+
     try {
         await peticionApi("/api/centro-control/inscripciones/enviar-correo-prueba-libre", {
             method: "POST",
-            body: JSON.stringify({ correo })
+            body: JSON.stringify({ correo, estado, motivo })
         });
-        mostrarMensaje(mensaje, `Correo de prueba enviado a ${correo}. Esto no afecta ninguna inscripción real.`, "ok");
+        mostrarMensaje(mensaje, `Correo de prueba (${estado}) enviado a ${correo}. Esto no afecta ninguna inscripción real.`, "ok");
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
     }
 
+});
+
+document.getElementById("estadoPruebaLibre").addEventListener("change", (evento) => {
+    document.getElementById("campoMotivoPruebaLibre").classList.toggle("oculto", evento.target.value !== "no_admitido");
 });
 
 document.getElementById("btnEnviarCorreoMasivo").addEventListener("click", async () => {

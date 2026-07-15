@@ -573,6 +573,18 @@
                     <label for="correoPruebaLibre">Probar contenido del correo (a cualquier dirección)</label>
                     <input type="email" id="correoPruebaLibre" placeholder="tu-correo@ejemplo.com">
                 </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="estadoPruebaLibre">Tipo de correo a probar</label>
+                    <select id="estadoPruebaLibre">
+                        <option value="pendiente">Pendiente (en revisión)</option>
+                        <option value="admitido">Admitido</option>
+                        <option value="no_admitido">No admitido</option>
+                    </select>
+                </div>
+                <div class="campo oculto" id="campoMotivoPruebaLibre" style="margin-bottom:0;">
+                    <label for="motivoPruebaLibre">Motivo (solo para previsualizar "No admitido")</label>
+                    <input type="text" id="motivoPruebaLibre" placeholder="Ej: No cumple con el rango de edad">
+                </div>
                 <button class="boton pequeno secundario" id="btnEnviarCorreoPruebaLibre" style="width:auto; height:fit-content;">Enviar correo de prueba</button>
             </div>
 
@@ -786,6 +798,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=15" defer></script>
+<script src="scripts/dashboard.js?v=16" defer></script>
 </body>
 </html>
