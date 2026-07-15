@@ -72,6 +72,7 @@
         <button class="tab-modulo activo" data-vista="panel">Panel</button>
         <button class="tab-modulo" data-vista="cronograma">Cronograma</button>
         <button class="tab-modulo" data-vista="inventario">Inventario</button>
+        <button class="tab-modulo" data-vista="inscripciones">Inscripciones</button>
         <button class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion">Administración</button>
     </div>
 
@@ -518,6 +519,80 @@
 
     </section>
 
+    <!-- ===== VISTA: INSCRIPCIONES ===== -->
+    <section id="vistaInscripciones" class="oculto">
+
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <div class="stats-grid" id="tilesInscripciones" style="margin-bottom:16px;"></div>
+
+            <div class="grid-info" style="margin-bottom:10px;">
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroMunicipioInscripcion">Municipio</label>
+                    <select id="filtroMunicipioInscripcion"></select>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroEstadoInscripcion">Estado de admisión</label>
+                    <select id="filtroEstadoInscripcion">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="admitido">Admitido</option>
+                        <option value="no_admitido">No admitido</option>
+                    </select>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroZonaInscripcion">Zona</label>
+                    <select id="filtroZonaInscripcion">
+                        <option value="">Todas</option>
+                        <option value="Urbana">Urbana</option>
+                        <option value="Rural">Rural</option>
+                    </select>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroMenorInscripcion">Menor de edad</label>
+                    <select id="filtroMenorInscripcion">
+                        <option value="">Todos</option>
+                        <option value="true">Sí</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroBusquedaInscripcion">Buscar (nombre o documento)</label>
+                    <input type="text" id="filtroBusquedaInscripcion" placeholder="Ej: Juan Pérez">
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <button class="boton pequeno secundario" id="btnVerEliminadosInscripcion" style="width:auto;">Ver eliminados</button>
+                <button class="boton pequeno oculto" id="btnEnviarCorreoMasivo" style="width:auto;">Enviar correo a todos los pendientes</button>
+            </div>
+            <div class="mensaje" id="mensajeInscripciones"></div>
+
+            <div class="tabla-wrap" style="margin-top:14px;">
+                <table class="tabla-participantes">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Municipio</th>
+                            <th>Edad</th>
+                            <th>Teléfono</th>
+                            <th>Admisión</th>
+                            <th>Correo confirmación</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="filasInscripciones"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Estadísticas de inscripción</h3>
+            <div class="graficos-fila" id="graficosInscripciones"></div>
+        </div>
+
+    </section>
+
     <!-- ===== VISTA: ADMINISTRACIÓN (solo administrador) ===== -->
     <section class="oculto" id="vistaAdministracion">
 
@@ -699,6 +774,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=10" defer></script>
+<script src="scripts/dashboard.js?v=11" defer></script>
 </body>
 </html>

@@ -69,8 +69,244 @@
       <p style="margin-top:12px;">La autorización otorgada por el acudiente no implica que el menor pueda abandonar el campamento, retirarse de las actividades o salir de las instalaciones sin la autorización expresa de la organización y del representante legal, conforme a los procedimientos establecidos para estos casos.</p>
     </div>
 
-    <div style="text-align:center; margin-top: 36px;">
-      <a class="cf-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSeo2CTVVyW-wvsoLJJjya8g_W7L5QE9cTxxxfhABaE1gRMuew/viewform?usp=header">Inscribirme ahora</a>
+  </section>
+
+  <section class="cf-section cf-reveal">
+
+    <div class="cf-panel cf-oculto" id="exitoInscripcion">
+      <div class="cf-exito">
+        <h3><span class="cf-dot"></span>¡Inscripción recibida!</h3>
+        <p>Guarda tu código de participante:</p>
+        <div class="cf-codigo" id="codigoGenerado"></div>
+        <p>Revisa tu correo para más información. Tu inscripción quedó en revisión — te avisaremos cuando se confirme tu admisión.</p>
+      </div>
+    </div>
+
+    <div class="cf-panel">
+      <h3><span class="cf-dot"></span>Formulario de inscripción</h3>
+      <p style="margin-bottom:14px;">Diligencia todos los campos con tus datos reales. La inscripción no garantiza un cupo — está sujeta al proceso de selección.</p>
+
+      <form id="formInscripcion" novalidate>
+
+        <h4 style="font-family:'Fredoka', sans-serif; color:var(--purple); margin:24px 0 4px;">1. Datos personales</h4>
+
+        <div class="cf-fila-doble">
+          <div class="cf-campo">
+            <label for="nombres">Nombres</label>
+            <input type="text" id="nombres" required>
+          </div>
+          <div class="cf-campo">
+            <label for="apellidos">Apellidos</label>
+            <input type="text" id="apellidos" required>
+          </div>
+        </div>
+
+        <div class="cf-fila-doble">
+          <div class="cf-campo">
+            <label for="tipoDocumento">Tipo de documento</label>
+            <select id="tipoDocumento" required>
+              <option value="">Selecciona</option>
+              <option value="Tarjeta de identidad">Tarjeta de identidad</option>
+              <option value="Cédula de ciudadanía">Cédula de ciudadanía</option>
+              <option value="Registro civil">Registro civil</option>
+              <option value="Cédula de extranjería">Cédula de extranjería</option>
+            </select>
+          </div>
+          <div class="cf-campo">
+            <label for="documento">Número de documento</label>
+            <input type="text" id="documento" inputmode="numeric" required>
+          </div>
+        </div>
+
+        <div class="cf-fila-doble">
+          <div class="cf-campo">
+            <label for="fechaNacimiento">Fecha de nacimiento</label>
+            <input type="date" id="fechaNacimiento" required>
+          </div>
+          <div class="cf-campo">
+            <label for="telefono">Teléfono de contacto personal</label>
+            <input type="tel" id="telefono" required>
+          </div>
+        </div>
+
+        <div class="cf-aviso cf-oculto" id="avisoMenorEdad">
+          Eres menor de edad: se exige el permiso físico firmado por tu acudiente (no virtual) —
+          <a href="https://drive.google.com/file/d/1iASWR_Jh7YkFXnuTOHdCpl6byYtWyLvD/view?usp=sharing" target="_blank" rel="noopener">descárgalo aquí</a>
+          y entrégalo el día del evento. Además, nos pondremos en contacto con tus padres o acudiente antes del evento para confirmar tu asistencia.
+        </div>
+
+        <div class="cf-fila-doble">
+          <div class="cf-campo">
+            <label for="municipio">Municipio</label>
+            <select id="municipio" required></select>
+          </div>
+          <div class="cf-campo">
+            <label for="zonaRuralUrbana">Zona rural o urbana</label>
+            <select id="zonaRuralUrbana" required>
+              <option value="">Selecciona</option>
+              <option value="Urbana">Urbana</option>
+              <option value="Rural">Rural</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cf-campo cf-oculto" id="campoMunicipioOtro">
+          <label for="municipioOtro">¿De qué municipio vienes?</label>
+          <input type="text" id="municipioOtro" placeholder="Escribe tu municipio">
+        </div>
+
+        <h4 style="font-family:'Fredoka', sans-serif; color:var(--purple); margin:24px 0 4px;">2. Contacto de emergencia</h4>
+
+        <div class="cf-fila-doble">
+          <div class="cf-campo">
+            <label for="contactoEmergenciaNombre">Nombre completo (contacto 1)</label>
+            <input type="text" id="contactoEmergenciaNombre" required>
+          </div>
+          <div class="cf-campo">
+            <label for="contactoEmergenciaTelefono">Teléfono (contacto 1)</label>
+            <input type="tel" id="contactoEmergenciaTelefono" required>
+          </div>
+        </div>
+
+        <div class="cf-fila-doble">
+          <div class="cf-campo">
+            <label for="contactoEmergencia2Nombre">Nombre completo (contacto 2, opcional)</label>
+            <input type="text" id="contactoEmergencia2Nombre">
+          </div>
+          <div class="cf-campo">
+            <label for="contactoEmergencia2Telefono">Teléfono (contacto 2, opcional)</label>
+            <input type="tel" id="contactoEmergencia2Telefono">
+          </div>
+        </div>
+
+        <h4 style="font-family:'Fredoka', sans-serif; color:var(--purple); margin:24px 0 4px;">3. Salud</h4>
+
+        <div class="cf-fila-doble">
+          <div class="cf-campo">
+            <label for="correoPersonal">Correo electrónico personal</label>
+            <input type="email" id="correoPersonal" required>
+          </div>
+          <div class="cf-campo">
+            <label for="rh">RH (tipo de sangre)</label>
+            <select id="rh">
+              <option value="">Selecciona</option>
+              <option>O+</option><option>O-</option>
+              <option>A+</option><option>A-</option>
+              <option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="cf-campo-check"><input type="checkbox" id="tieneCondicionMedica"> ¿Tienes alguna condición médica o discapacidad?</label>
+        <div class="cf-campo cf-oculto" id="detalleCondicionMedica">
+          <label for="condicionMedicaDetalle">Especifica</label>
+          <textarea id="condicionMedicaDetalle"></textarea>
+        </div>
+
+        <label class="cf-campo-check"><input type="checkbox" id="tieneRestriccionesAlimentarias"> ¿Tienes restricciones alimentarias?</label>
+        <div class="cf-campo cf-oculto" id="detalleRestricciones">
+          <label for="restriccionesAlimentariasDetalle">Especifica</label>
+          <textarea id="restriccionesAlimentariasDetalle"></textarea>
+        </div>
+
+        <label class="cf-campo-check"><input type="checkbox" id="alergiaMedicamento"> ¿Eres alérgico(a) a algún medicamento?</label>
+        <div class="cf-campo cf-oculto" id="detalleAlergiaMedicamento">
+          <label for="alergiaMedicamentoDetalle">¿A cuál?</label>
+          <input type="text" id="alergiaMedicamentoDetalle">
+        </div>
+
+        <label class="cf-campo-check"><input type="checkbox" id="alergiaAlimento"> ¿Eres alérgico(a) a algún alimento?</label>
+        <div class="cf-campo cf-oculto" id="detalleAlergiaAlimento">
+          <label for="alergiaAlimentoDetalle">¿A cuál?</label>
+          <input type="text" id="alergiaAlimentoDetalle">
+        </div>
+
+        <div class="cf-campo">
+          <label for="eps">EPS</label>
+          <input type="text" id="eps" required>
+        </div>
+
+        <p class="cf-aviso">No es necesario subir tu documento de identidad ni el certificado de EPS aquí — <strong>llévalos físicos el día del evento</strong>.</p>
+
+        <h4 style="font-family:'Fredoka', sans-serif; color:var(--purple); margin:24px 0 4px;">4. Logística</h4>
+
+        <label class="cf-campo-check"><input type="checkbox" id="carpaPropia"> Cuento con carpa propia y quiero usarla en los espacios permitidos.</label>
+
+        <h4 style="font-family:'Fredoka', sans-serif; color:var(--purple); margin:24px 0 4px;">5. Consentimientos</h4>
+
+        <div class="cf-clausula">
+          Autorizo el tratamiento de mis datos personales por parte del Subsistema de Participación Juvenil de Bugalagrande y las entidades organizadoras de Camp Fest, conforme a la Ley 1581 de 2012 y demás normas de protección de datos, exclusivamente para fines relacionados con la organización, logística y seguimiento del campamento.
+        </div>
+        <label class="cf-campo-check"><input type="checkbox" id="aceptaTratamientoDatos" required> Autorizo el tratamiento de mis datos.</label>
+
+        <div class="cf-clausula">
+          Declaro que he leído y comprendido el presente documento, y acepto voluntariamente los términos aquí estipulados. Asimismo, autorizo el uso de mi imagen en fotografías y videos tomados durante el evento para fines de divulgación institucional y sin ánimo de lucro.
+        </div>
+        <label class="cf-campo-check"><input type="checkbox" id="aceptaUsoImagen" required> Acepto la cláusula de aceptación y autorizo el uso de mi imagen.</label>
+
+        <div class="cf-clausula">
+          El Campamento Juvenil "CAMP FEST" y las entidades organizadoras (Subsistema de Participación Juvenil, Fundación CGRC, Riopaila Castilla, Indervalle, Ruta Joven del Valle y demás aliados institucionales) no se hacen responsables por: pérdida o daño de objetos personales no custodiados por el equipo organizador; actos voluntarios que contravengan las normas del campamento (salidas no autorizadas, desobediencia deliberada, consumo de sustancias prohibidas, actividades de riesgo no contempladas); lesiones ocasionadas por imprudencia del participante o incumplimiento de recomendaciones de seguridad; emergencias médicas derivadas de condiciones de salud preexistentes no informadas con antelación; daños causados por el participante a las instalaciones o bienes de terceros; robo o extravío de pertenencias en zonas comunes o desplazamientos individuales sin supervisión. Estas situaciones serán asumidas bajo entera responsabilidad del participante y/o su acudiente legal en caso de ser menor de edad.
+        </div>
+        <label class="cf-campo-check"><input type="checkbox" id="aceptaExencionResponsabilidad" required> Acepto la cláusula de exención de responsabilidad.</label>
+
+        <div id="seccionLiderazgo">
+
+          <h4 style="font-family:'Fredoka', sans-serif; color:var(--purple); margin:24px 0 4px;">6. Liderazgo y motivación</h4>
+          <p style="font-size:12.5px; opacity:.7; margin-top:-6px; margin-bottom:14px;">Esta información es el insumo principal del proceso de selección para municipios distintos a Bugalagrande.</p>
+
+          <div class="cf-campo">
+            <label for="experienciaLiderazgo">Cuéntanos tu experiencia en procesos de liderazgo (proyectos, gestiones, parches, eventos, etc.). Si no tienes, cuéntanos cómo piensas adquirir experiencia en el campamento.</label>
+            <textarea id="experienciaLiderazgo"></textarea>
+          </div>
+
+          <div class="cf-campo">
+            <label for="incidenciaLiderSocial">¿Has tenido incidencia como líder social en tu municipio?</label>
+            <textarea id="incidenciaLiderSocial"></textarea>
+          </div>
+
+          <div class="cf-campo">
+            <label for="beneficioPersonalLiderazgo">¿Cómo te beneficiaría como persona y líder el asistir a Camp Fest?</label>
+            <textarea id="beneficioPersonalLiderazgo"></textarea>
+          </div>
+
+          <div class="cf-campo">
+            <label for="expectativaPostCampamento">¿Qué esperas lograr una vez salgas del campamento?</label>
+            <textarea id="expectativaPostCampamento"></textarea>
+          </div>
+
+        </div>
+
+        <div class="cf-campo">
+          <label for="subsistemaInstancia">Si haces parte del Subsistema de tu municipio, ¿a qué instancia perteneces? (opcional)</label>
+          <input type="text" id="subsistemaInstancia">
+        </div>
+
+        <div class="cf-campo">
+          <label>¿Cómo te enteraste del campamento? (elige una o más)</label>
+          <div class="cf-checkbox-grupo">
+            <label><input type="checkbox" name="comoSeEntero" value="Instagram"> Instagram</label>
+            <label><input type="checkbox" name="comoSeEntero" value="Facebook"> Facebook</label>
+            <label><input type="checkbox" name="comoSeEntero" value="WhatsApp"> WhatsApp</label>
+            <label><input type="checkbox" name="comoSeEntero" value="Un amigo o conocido"> Un amigo o conocido</label>
+            <label><input type="checkbox" name="comoSeEntero" value="Colegio"> Colegio</label>
+            <label><input type="checkbox" name="comoSeEntero" value="Subsistema de Participación Juvenil"> Subsistema de Participación Juvenil</label>
+            <label><input type="checkbox" name="comoSeEntero" value="Otro"> Otro</label>
+          </div>
+        </div>
+
+        <div class="cf-campo">
+          <label for="invitadoPor">Si fuiste invitado por alguien más, agrega aquí su nombre (opcional)</label>
+          <input type="text" id="invitadoPor">
+        </div>
+
+        <button type="submit" class="cf-btn cf-btn-generar" id="botonInscripcion" style="width:100%; justify-content:center;">
+          Enviar inscripción
+        </button>
+
+        <div class="cf-estado" id="estadoInscripcion"></div>
+
+      </form>
     </div>
 
   </section>
@@ -86,5 +322,6 @@
   </footer>
 
 <script src="../assets/main.js" defer></script>
+<script src="../assets/inscripcion.js" defer></script>
 </body>
 </html>

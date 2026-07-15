@@ -27,6 +27,16 @@ const ESTADOS = [
 
 const OBJETIVOS_MATERIAL = ["logistica", "entretenimiento", "auxilios", "decoracion", "emergencias", "utilidades"];
 
+const MUNICIPIOS_VALLE = [
+    "Alcalá", "Andalucía", "Ansermanuevo", "Argelia", "Bolívar", "Buenaventura",
+    "Guadalajara de Buga", "Bugalagrande", "Caicedonia", "Cali", "Calima (El Darién)",
+    "Candelaria", "Cartago", "Dagua", "El Águila", "El Cairo", "El Cerrito", "El Dovio",
+    "Florida", "Ginebra", "Guacarí", "Jamundí", "La Cumbre", "La Unión", "La Victoria",
+    "Obando", "Palmira", "Pradera", "Restrepo", "Riofrío", "Roldanillo", "San Pedro",
+    "Sevilla", "Toro", "Trujillo", "Tuluá", "Ulloa", "Versalles", "Vijes", "Yotoco",
+    "Yumbo", "Zarzal"
+];
+
 // ==========================
 // Utilidades
 // ==========================
@@ -279,6 +289,7 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
         document.getElementById("vistaPanel").classList.toggle("oculto", vista !== "panel");
         document.getElementById("vistaCronograma").classList.toggle("oculto", vista !== "cronograma");
         document.getElementById("vistaInventario").classList.toggle("oculto", vista !== "inventario");
+        document.getElementById("vistaInscripciones").classList.toggle("oculto", vista !== "inscripciones");
         document.getElementById("vistaAdministracion").classList.toggle("oculto", vista !== "administracion");
 
         if (vista === "cronograma") {
@@ -299,6 +310,13 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
                 cargarActividadesParaLote();
                 cargarSolicitudesMaterialAdmin();
             }
+        }
+
+        if (vista === "inscripciones") {
+            mostrandoEliminadosInscripcion = false;
+            document.getElementById("btnVerEliminadosInscripcion").textContent = "Ver eliminados";
+            cargarInscripciones();
+            cargarEstadisticasInscripciones();
         }
 
     });
@@ -323,6 +341,9 @@ async function iniciarDashboard() {
     document.getElementById("bloqueCrearLoteAdmin").classList.toggle("oculto", usuario.rol !== "admin");
     document.getElementById("bloqueSolicitudesMaterialAdmin").classList.toggle("oculto", usuario.rol !== "admin");
     document.getElementById("bloqueExportarInventarioAdmin").classList.toggle("oculto", usuario.rol !== "admin");
+
+    document.getElementById("btnEnviarCorreoMasivo").classList.toggle("oculto", usuario.rol !== "admin");
+    llenarSelect(document.getElementById("filtroMunicipioInscripcion"), MUNICIPIOS_VALLE, "Todos los municipios");
 
     llenarSelect(document.getElementById("filtroObjetivoMaterial"), OBJETIVOS_MATERIAL, "Todos los objetivos");
     document.getElementById("inputObjetivoMaterial").innerHTML = OBJETIVOS_MATERIAL
@@ -2608,6 +2629,329 @@ document.getElementById("btnExportarInventarioPdf").addEventListener("click", ()
 document.getElementById("btnExportarHistorialMaterial").addEventListener("click", () => {
     descargarArchivo("/api/materiales/exportar/historial", "historial-materiales-campfest.xlsx");
 });
+
+// ==========================
+// Inscripciones (formulario nativo de registro)
+// ==========================
+
+let mostrandoEliminadosInscripcion = false;
+let ultimasInscripciones = [];
+
+const GRAFICOS_INSCRIPCION = [
+    { campo: "municipio", tipo: "bar", titulo: "Municipio" },
+    { campo: "edad", tipo: "bar", titulo: "Edad" },
+    { campo: "esMenorDeEdad", tipo: "pastel", titulo: "Menor de edad" },
+    { campo: "zonaRuralUrbana", tipo: "pastel", titulo: "Zona" },
+    { campo: "estadoAdmision", tipo: "pastel", titulo: "Estado de admisión" },
+    { campo: "tipoDocumento", tipo: "bar", titulo: "Tipo de documento" },
+    { campo: "rh", tipo: "bar", titulo: "RH" },
+    { campo: "eps", tipo: "bar", titulo: "EPS" },
+    { campo: "tieneCondicionMedica", tipo: "pastel", titulo: "Condición médica" },
+    { campo: "tieneRestriccionesAlimentarias", tipo: "pastel", titulo: "Restricciones alimentarias" },
+    { campo: "alergiaMedicamento", tipo: "pastel", titulo: "Alergia a medicamento" },
+    { campo: "alergiaAlimento", tipo: "pastel", titulo: "Alergia a alimento" },
+    { campo: "carpaPropia", tipo: "pastel", titulo: "Carpa propia" },
+    { campo: "comoSeEntero", tipo: "bar", titulo: "Cómo se enteraron" },
+    { campo: "subsistemaInstancia", tipo: "bar", titulo: "Instancia del subsistema" },
+    { campo: "aceptaTratamientoDatos", tipo: "pastel", titulo: "Acepta tratamiento de datos" },
+    { campo: "aceptaUsoImagen", tipo: "pastel", titulo: "Acepta uso de imagen" },
+    { campo: "aceptaExencionResponsabilidad", tipo: "pastel", titulo: "Acepta exención de responsabilidad" }
+];
+
+document.getElementById("btnVerEliminadosInscripcion").addEventListener("click", () => {
+    mostrandoEliminadosInscripcion = !mostrandoEliminadosInscripcion;
+    document.getElementById("btnVerEliminadosInscripcion").textContent = mostrandoEliminadosInscripcion
+        ? "Ver activas" : "Ver eliminados";
+    cargarInscripciones();
+});
+
+["filtroEstadoInscripcion", "filtroMunicipioInscripcion", "filtroZonaInscripcion", "filtroMenorInscripcion"].forEach((id) => {
+    document.getElementById(id).addEventListener("change", cargarInscripciones);
+});
+
+document.getElementById("filtroBusquedaInscripcion").addEventListener("input", () => {
+    clearTimeout(window._filtroInscripcionTimeout);
+    window._filtroInscripcionTimeout = setTimeout(cargarInscripciones, 350);
+});
+
+async function cargarInscripciones() {
+
+    try {
+
+        const params = new URLSearchParams();
+
+        const estado = document.getElementById("filtroEstadoInscripcion").value;
+        const municipio = document.getElementById("filtroMunicipioInscripcion").value;
+        const zona = document.getElementById("filtroZonaInscripcion").value;
+        const menor = document.getElementById("filtroMenorInscripcion").value;
+        const q = document.getElementById("filtroBusquedaInscripcion").value.trim();
+
+        if (estado) params.set("estado", estado);
+        if (municipio) params.set("municipio", municipio);
+        if (zona) params.set("zonaRuralUrbana", zona);
+        if (menor) params.set("esMenorDeEdad", menor);
+        if (q) params.set("q", q);
+        if (mostrandoEliminadosInscripcion) params.set("soloEliminados", "true");
+
+        const { participantes } = await peticionApi(`/api/centro-control/inscripciones?${params.toString()}`);
+
+        ultimasInscripciones = participantes;
+        renderizarTablaInscripciones(participantes);
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+function renderizarTablaInscripciones(participantes) {
+
+    const cuerpo = document.getElementById("filasInscripciones");
+    const esAdmin = perfilActual?.rol === "admin";
+
+    if (participantes.length === 0) {
+        cuerpo.innerHTML = `<tr><td colspan="8">No hay inscripciones que coincidan con el filtro.</td></tr>`;
+        return;
+    }
+
+    cuerpo.innerHTML = participantes.map((p) => `
+        <tr data-fila-inscripcion="${p.id}">
+            <td>${p.nombre}${p.esMenorDeEdad ? ' <span class="badge neutro">Menor</span>' : ""}</td>
+            <td>${p.documento}</td>
+            <td>${p.municipio}${p.municipio === "Otro" && p.municipio_otro ? ` (${p.municipio_otro})` : ""}</td>
+            <td>${p.edad ?? "—"}</td>
+            <td>${p.telefono || "—"}</td>
+            <td>${mostrandoEliminadosInscripcion
+                ? humanizar(p.estado_admision)
+                : `<select class="select-admision-inscripcion" data-id="${p.id}" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                        <option value="pendiente" ${p.estado_admision === "pendiente" ? "selected" : ""}>Pendiente</option>
+                        <option value="admitido" ${p.estado_admision === "admitido" ? "selected" : ""}>Admitido</option>
+                        <option value="no_admitido" ${p.estado_admision === "no_admitido" ? "selected" : ""}>No admitido</option>
+                   </select>`}
+            </td>
+            <td>
+                <span class="badge ${p.correo_confirmacion_estado === "enviado" ? "verde" : p.correo_confirmacion_estado === "fallo" ? "rojo" : "neutro"}">
+                    ${p.correo_confirmacion_estado === "enviado" ? "✅ Enviado" : p.correo_confirmacion_estado === "fallo" ? "⚠️ Falló" : "No enviado"}
+                </span>
+                ${!mostrandoEliminadosInscripcion && p.correo_confirmacion_estado !== "enviado" && esAdmin
+                    ? `<button class="boton pequeno secundario" data-enviar-correo="${p.id}" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;">Enviar prueba</button>`
+                    : ""}
+            </td>
+            <td style="white-space:nowrap;">
+                <button class="boton pequeno secundario" data-detalle-inscripcion="${p.id}" style="width:auto; padding:6px 10px; font-size:11px;">Ver</button>
+                ${mostrandoEliminadosInscripcion
+                    ? `<button class="boton pequeno" data-restaurar="${p.id}" style="width:auto; padding:6px 10px; font-size:11px;">Restaurar</button>`
+                    : (esAdmin ? `<button class="boton pequeno secundario" data-eliminar="${p.id}" style="width:auto; padding:6px 10px; font-size:11px;">Eliminar</button>` : "")}
+            </td>
+        </tr>
+        <tr class="oculto" id="filaDetalleInscripcion-${p.id}"><td colspan="8"><div id="detalleInscripcion-${p.id}"></div></td></tr>
+    `).join("");
+
+    cuerpo.querySelectorAll(".select-admision-inscripcion").forEach((select) => {
+        select.addEventListener("change", () => actualizarAdmisionInscripcion(select.dataset.id, select.value));
+    });
+
+    cuerpo.querySelectorAll("[data-enviar-correo]").forEach((boton) => {
+        boton.addEventListener("click", () => enviarCorreoPruebaInscripcion(boton.dataset.enviarCorreo));
+    });
+
+    cuerpo.querySelectorAll("[data-eliminar]").forEach((boton) => {
+        boton.addEventListener("click", () => eliminarInscripcion(boton.dataset.eliminar));
+    });
+
+    cuerpo.querySelectorAll("[data-restaurar]").forEach((boton) => {
+        boton.addEventListener("click", () => restaurarInscripcion(boton.dataset.restaurar));
+    });
+
+    cuerpo.querySelectorAll("[data-detalle-inscripcion]").forEach((boton) => {
+        boton.addEventListener("click", () => alternarDetalleInscripcion(boton.dataset.detalleInscripcion));
+    });
+
+}
+
+function alternarDetalleInscripcion(id) {
+
+    const fila = document.getElementById(`filaDetalleInscripcion-${id}`);
+    const contenedor = document.getElementById(`detalleInscripcion-${id}`);
+
+    if (!fila.classList.contains("oculto")) {
+        fila.classList.add("oculto");
+        return;
+    }
+
+    const p = ultimasInscripciones.find((x) => x.id === id);
+    if (!p) return;
+
+    contenedor.innerHTML = `
+        <div class="grid-info" style="margin:10px 0 0;">
+            <div class="dato"><span class="etiqueta">Correo personal</span><span class="valor">${p.correo_personal || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Zona</span><span class="valor">${p.zona_rural_urbana || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Contacto de emergencia 1</span><span class="valor">${p.contacto_emergencia_nombre || "—"} · ${p.contacto_emergencia_telefono || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Contacto de emergencia 2</span><span class="valor">${p.contacto_emergencia_2_nombre || "—"} · ${p.contacto_emergencia_2_telefono || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">RH</span><span class="valor">${p.rh || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">EPS</span><span class="valor">${p.eps || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Condición médica</span><span class="valor">${p.tiene_condicion_medica ? (p.condicion_medica_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Restricciones alimentarias</span><span class="valor">${p.tiene_restricciones_alimentarias ? (p.restricciones_alimentarias_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Alergia a medicamento</span><span class="valor">${p.alergia_medicamento ? (p.alergia_medicamento_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Alergia a alimento</span><span class="valor">${p.alergia_alimento ? (p.alergia_alimento_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Carpa propia</span><span class="valor">${p.carpa_propia ? "Sí" : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Subsistema — instancia</span><span class="valor">${p.subsistema_instancia || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Cómo se enteró</span><span class="valor">${(p.como_se_entero || []).join(", ") || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Invitado por</span><span class="valor">${p.invitado_por || "—"}</span></div>
+        </div>
+        ${p.municipio !== "Bugalagrande" ? `
+        <div style="margin-top:14px; padding-top:10px; border-top:1px solid #eee;">
+            <strong style="font-size:12px;">Liderazgo y motivación</strong>
+            <p class="detalle" style="margin-top:6px;"><strong>Experiencia en liderazgo:</strong> ${p.experiencia_liderazgo || "—"}</p>
+            <p class="detalle"><strong>Incidencia como líder social:</strong> ${p.incidencia_lider_social || "—"}</p>
+            <p class="detalle"><strong>Beneficio personal:</strong> ${p.beneficio_personal_liderazgo || "—"}</p>
+            <p class="detalle"><strong>Expectativa post-campamento:</strong> ${p.expectativa_post_campamento || "—"}</p>
+        </div>
+        ` : `<p class="detalle" style="margin-top:10px;">Es de Bugalagrande — no aplica el bloque de liderazgo.</p>`}
+    `;
+
+    fila.classList.remove("oculto");
+
+}
+
+async function actualizarAdmisionInscripcion(id, estado) {
+    try {
+        await peticionApi(`/api/centro-control/inscripciones/${id}/admision`, {
+            method: "PATCH",
+            body: JSON.stringify({ estado })
+        });
+        await cargarEstadisticasInscripciones();
+    } catch (error) {
+        alert(error.message);
+        cargarInscripciones();
+    }
+}
+
+async function eliminarInscripcion(id) {
+    if (!confirm("¿Eliminar esta inscripción? Se puede restaurar después desde \"Ver eliminados\".")) return;
+    try {
+        await peticionApi(`/api/centro-control/inscripciones/${id}`, { method: "DELETE" });
+        await Promise.all([cargarInscripciones(), cargarEstadisticasInscripciones()]);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function restaurarInscripcion(id) {
+    try {
+        await peticionApi(`/api/centro-control/inscripciones/${id}/restaurar`, { method: "POST" });
+        await Promise.all([cargarInscripciones(), cargarEstadisticasInscripciones()]);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function enviarCorreoPruebaInscripcion(id) {
+    try {
+        await peticionApi(`/api/centro-control/inscripciones/${id}/enviar-correo`, { method: "POST" });
+        await cargarInscripciones();
+    } catch (error) {
+        alert(error.message);
+        cargarInscripciones();
+    }
+}
+
+document.getElementById("btnEnviarCorreoMasivo").addEventListener("click", async () => {
+
+    if (!confirm("Esto envía el correo de confirmación a TODOS los que todavía no lo han recibido. ¿Ya probaste el envío individual y funcionó? ¿Continuar?")) return;
+
+    const mensaje = document.getElementById("mensajeInscripciones");
+
+    try {
+        const resultado = await peticionApi("/api/centro-control/inscripciones/enviar-correo-masivo", { method: "POST" });
+        mostrarMensaje(mensaje, `Envío masivo terminado: ${resultado.enviados} enviados, ${resultado.fallidos} fallidos.`, resultado.fallidos > 0 ? "fallo" : "ok");
+        await cargarInscripciones();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+async function cargarEstadisticasInscripciones() {
+
+    try {
+
+        const estadisticas = await peticionApi("/api/centro-control/inscripciones/estadisticas");
+
+        renderizarTilesInscripciones(estadisticas);
+        renderizarGraficosInscripciones(estadisticas);
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+function renderizarTilesInscripciones(estadisticas) {
+
+    const contenedor = document.getElementById("tilesInscripciones");
+    const estado = estadisticas.estadoAdmision || {};
+    const menor = estadisticas.esMenorDeEdad || {};
+
+    contenedor.innerHTML = `
+        <div class="stat-tile" data-tile-estado="pendiente" style="cursor:pointer;"><div class="stat-numero">${estado.pendiente || 0}</div><span class="stat-etiqueta">Pendientes</span></div>
+        <div class="stat-tile" data-tile-estado="admitido" style="cursor:pointer;"><div class="stat-numero">${estado.admitido || 0}</div><span class="stat-etiqueta">Admitidos</span></div>
+        <div class="stat-tile" data-tile-estado="no_admitido" style="cursor:pointer;"><div class="stat-numero">${estado.no_admitido || 0}</div><span class="stat-etiqueta">No admitidos</span></div>
+        <div class="stat-tile" data-tile-menor="true" style="cursor:pointer;"><div class="stat-numero">${menor["Sí"] || 0}</div><span class="stat-etiqueta">Menores de edad</span></div>
+    `;
+
+    contenedor.querySelectorAll("[data-tile-estado]").forEach((tile) => {
+        tile.addEventListener("click", () => {
+            mostrandoEliminadosInscripcion = false;
+            document.getElementById("btnVerEliminadosInscripcion").textContent = "Ver eliminados";
+            document.getElementById("filtroEstadoInscripcion").value = tile.dataset.tileEstado;
+            document.getElementById("filtroMenorInscripcion").value = "";
+            cargarInscripciones();
+        });
+    });
+
+    const tileMenor = contenedor.querySelector("[data-tile-menor]");
+    if (tileMenor) {
+        tileMenor.addEventListener("click", () => {
+            mostrandoEliminadosInscripcion = false;
+            document.getElementById("btnVerEliminadosInscripcion").textContent = "Ver eliminados";
+            document.getElementById("filtroEstadoInscripcion").value = "";
+            document.getElementById("filtroMenorInscripcion").value = "true";
+            cargarInscripciones();
+        });
+    }
+
+}
+
+function renderizarGraficosInscripciones(estadisticas) {
+
+    const contenedor = document.getElementById("graficosInscripciones");
+
+    contenedor.innerHTML = GRAFICOS_INSCRIPCION.map((g) => `
+        <div class="grafico-tarjeta">
+            <h3>${g.titulo}</h3>
+            <canvas id="graficoInscripcion_${g.campo}"></canvas>
+        </div>
+    `).join("");
+
+    GRAFICOS_INSCRIPCION.forEach((g) => {
+
+        const idCanvas = `graficoInscripcion_${g.campo}`;
+        delete graficos[idCanvas];
+
+        const datos = estadisticas[g.campo] || {};
+        const labels = Object.keys(datos);
+        const valores = Object.values(datos);
+
+        if (g.tipo === "pastel") {
+            crearOActualizarGraficoPastel(idCanvas, labels, valores);
+        } else {
+            crearOActualizarGrafico(idCanvas, "bar", labels, valores, "#5B4B8A");
+        }
+
+    });
+
+}
 
 // ==========================
 // Arranque
