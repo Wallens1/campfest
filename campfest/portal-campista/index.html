@@ -383,6 +383,17 @@
 
       window._cfPerfilActual = p;
 
+      // Los logros ahora viven en la base de datos (ligados al participante),
+      // pero localStorage sigue siendo una cache local — necesaria porque las
+      // otras páginas del sitio escriben secretos ahí sin tener siempre el
+      // token a la mano. Al cargar el perfil, el servidor manda: se unen los
+      // dos conjuntos y lo que el servidor no conocía se sincroniza con él.
+      var logrosServidor = p.logros || [];
+      var logrosLocales = obtenerLogrosDesbloqueados();
+      var pendientesDeSync = logrosLocales.filter(function (id) { return logrosServidor.indexOf(id) === -1; });
+      localStorage.setItem("cf_logros", JSON.stringify(logrosServidor.concat(pendientesDeSync)));
+      if (pendientesDeSync.length > 0) sincronizarLogrosConServidor(pendientesDeSync);
+
       cargarItinerario();
       cargarAnuncios();
       actualizarRacha();
@@ -729,9 +740,11 @@
     var desbloqueados = obtenerLogrosDesbloqueados();
     var cambiado = false;
 
+    var nuevosEnEstaPasada = [];
+
     function tiene(x) { return desbloqueados.indexOf(x) !== -1; }
     function otorgarSiFalta(x, condicion) {
-      if (condicion && !tiene(x)) { desbloqueados.push(x); cambiado = true; }
+      if (condicion && !tiene(x)) { desbloqueados.push(x); cambiado = true; nuevosEnEstaPasada.push(x); }
     }
 
     otorgarSiFalta("detective", tiene("secreto_codigo") && tiene("secreto_palabra") && tiene("secreto_dias"));
@@ -750,7 +763,10 @@
     otorgarSiFalta("veterano", desbloqueadosVinculantes.length >= 40);
     otorgarSiFalta("perfeccionista", desbloqueadosVinculantes.length >= LOGROS_VINCULANTES.length - 1);
 
-    if (cambiado) localStorage.setItem("cf_logros", JSON.stringify(desbloqueados));
+    if (cambiado) {
+      localStorage.setItem("cf_logros", JSON.stringify(desbloqueados));
+      sincronizarLogrosConServidor(nuevosEnEstaPasada);
+    }
     renderizarLogros();
 
   }
@@ -760,8 +776,24 @@
     if (desbloqueados.indexOf(id) === -1) {
       desbloqueados.push(id);
       localStorage.setItem("cf_logros", JSON.stringify(desbloqueados));
+      sincronizarLogrosConServidor([id]);
     }
     revisarLogrosCompuestos();
+  }
+
+  function sincronizarLogrosConServidor(ids) {
+    if (!ids || ids.length === 0) return;
+    peticion("/api/campista/logros", { method: "POST", body: JSON.stringify({ ids: ids }) })
+      .then(function (resultado) {
+        if (resultado && resultado.logros) {
+          localStorage.setItem("cf_logros", JSON.stringify(resultado.logros));
+          renderizarLogros();
+        }
+      })
+      .catch(function () {
+        // Sin conexión o el servidor no respondió — el logro sigue guardado
+        // localmente y se reintentará sincronizar en el próximo login.
+      });
   }
 
   function evaluarLogrosAutomaticos(p) {
@@ -1394,15 +1426,11 @@
     var contenedor = document.getElementById(contenedorId);
     var config = { facil: { tamano: 8, numPalabras: 3 }, medio: { tamano: 10, numPalabras: 4 }, dificil: { tamano: 12, numPalabras: 6 } }[dificultad] || { tamano: 10, numPalabras: 4 };
     var tamano = config.tamano;
-    var palabrasReto = PALABRAS_SOPA.filter(function (p) { return p.length <= tamano; }).slice(0, config.numPalabras);
-    var grilla = [];
-    for (var f = 0; f < tamano; f++) {
-      grilla.push([]);
-      for (var c = 0; c < tamano; c++) grilla[f].push(null);
-    }
+    var candidatas = PALABRAS_SOPA.filter(function (p) { return p.length <= tamano; }).slice(0, config.numPalabras);
+    var grilla, ubicaciones;
 
     function colocarPalabra(palabra) {
-      for (var intento = 0; intento < 40; intento++) {
+      for (var intento = 0; intento < 200; intento++) {
         var horizontal = Math.random() < 0.5;
         var fila = Math.floor(Math.random() * tamano);
         var col = Math.floor(Math.random() * tamano);
@@ -1420,7 +1448,24 @@
       return null;
     }
 
-    var ubicaciones = palabrasReto.map(function (p) { return { palabra: p, ubicacion: colocarPalabra(p) }; }).filter(function (u) { return u.ubicacion; });
+    // Genera la grilla completa; si por mala suerte quedan muy pocas palabras
+    // colocadas, reintenta desde cero. Las palabras a encontrar SIEMPRE se
+    // derivan de lo que realmente quedó en la grilla (ubicaciones), nunca de
+    // la lista original — así el reto nunca pide encontrar algo que no está.
+    for (var intentoGrilla = 0; intentoGrilla < 5; intentoGrilla++) {
+      grilla = [];
+      for (var f = 0; f < tamano; f++) {
+        grilla.push([]);
+        for (var c = 0; c < tamano; c++) grilla[f].push(null);
+      }
+      ubicaciones = candidatas
+        .slice().sort(function (a, b) { return b.length - a.length; })
+        .map(function (p) { return { palabra: p, ubicacion: colocarPalabra(p) }; })
+        .filter(function (u) { return u.ubicacion; });
+      if (ubicaciones.length >= Math.min(2, candidatas.length)) break;
+    }
+
+    var palabrasObjetivo = ubicaciones.map(function (u) { return u.palabra; });
 
     var LETRAS_RELLENO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     for (var f2 = 0; f2 < tamano; f2++) {
@@ -1429,13 +1474,24 @@
       }
     }
 
-    var seleccionInicio = null;
+    var anclaje = null;
+    var finTemporal = null;
     var encontradas = [];
+    var celdasEncontradas = {};
 
     function celdaEnLinea(inicio, fin) {
       if (inicio.f === fin.f) return { tipo: "h", desde: Math.min(inicio.c, fin.c), hasta: Math.max(inicio.c, fin.c), fila: inicio.f };
       if (inicio.c === fin.c) return { tipo: "v", desde: Math.min(inicio.f, fin.f), hasta: Math.max(inicio.f, fin.f), col: inicio.c };
       return null;
+    }
+
+    function celdaEnSeleccionActual(f, c) {
+      if (!anclaje) return false;
+      if (!finTemporal) return anclaje.f === f && anclaje.c === c;
+      var linea = celdaEnLinea(anclaje, finTemporal);
+      if (!linea) return anclaje.f === f && anclaje.c === c;
+      if (linea.tipo === "h") return f === linea.fila && c >= linea.desde && c <= linea.hasta;
+      return c === linea.col && f >= linea.desde && f <= linea.hasta;
     }
 
     function textoDeSeleccion(linea) {
@@ -1445,36 +1501,75 @@
       return letras.join("");
     }
 
+    function marcarCeldasEncontradas(palabra) {
+      var u = ubicaciones.find(function (u) { return u.palabra === palabra; }).ubicacion;
+      for (var i = 0; i < u.largo; i++) {
+        var f = u.horizontal ? u.fila : u.fila + i;
+        var c = u.horizontal ? u.col + i : u.col;
+        celdasEncontradas[f + "," + c] = true;
+      }
+    }
+
     function render() {
-      contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:8px;">Encuentra: ' + palabrasReto.filter(function(p){ return palabrasReto.indexOf(p) !== -1; }).map(function (p) { return encontradas.indexOf(p) !== -1 ? "<s>" + p + "</s>" : p; }).join(", ") + '</p>' +
+      contenedor.innerHTML =
+        '<p style="font-size:12.5px; opacity:.75; margin-bottom:6px;">Toca la primera letra de una palabra y luego ve tocando en línea recta hasta la última letra.</p>' +
+        '<p style="font-weight:700; margin-bottom:8px;">Encuentra: ' + palabrasObjetivo.map(function (p) { return encontradas.indexOf(p) !== -1 ? "<s>" + p + "</s>" : p; }).join(", ") + '</p>' +
         '<div style="display:grid; grid-template-columns:repeat(' + tamano + ',1fr); gap:2px; max-width:' + (tamano * 26) + 'px;">' +
         grilla.map(function (fila, f) {
           return fila.map(function (letra, c) {
-            return '<button class="cf-celda-sopa" data-f="' + f + '" data-c="' + c + '" style="aspect-ratio:1; font-size:11px; border:1px solid var(--ink); background:var(--cream); padding:0;">' + letra + "</button>";
+            var clave = f + "," + c;
+            var enSeleccion = celdaEnSeleccionActual(f, c);
+            var fondo = celdasEncontradas[clave] ? "var(--cyan)" : enSeleccion ? "var(--yellow)" : "var(--cream)";
+            return '<button class="cf-celda-sopa" data-f="' + f + '" data-c="' + c + '" style="aspect-ratio:1; font-size:11px; border:1px solid var(--ink); background:' + fondo + '; padding:0;">' + letra + "</button>";
           }).join("");
         }).join("") +
-        '</div><p id="cf-sopa-estado" style="margin-top:10px; font-weight:700;"></p>';
+        '</div><button type="button" class="cf-btn cf-btn-alt" id="cf-sopa-limpiar" style="margin-top:10px; font-size:12px; padding:6px 12px;">Limpiar selección</button><p id="cf-sopa-estado" style="margin-top:10px; font-weight:700;"></p>';
+
+      document.getElementById("cf-sopa-limpiar").addEventListener("click", function () { anclaje = null; finTemporal = null; render(); });
 
       contenedor.querySelectorAll(".cf-celda-sopa").forEach(function (boton) {
         boton.addEventListener("click", function () {
           var f = parseInt(boton.dataset.f, 10), c = parseInt(boton.dataset.c, 10);
-          if (!seleccionInicio) {
-            seleccionInicio = { f: f, c: c };
-            boton.style.background = "var(--yellow)";
+
+          if (!anclaje) {
+            anclaje = { f: f, c: c };
+            finTemporal = null;
+            render();
             return;
           }
-          var linea = celdaEnLinea(seleccionInicio, { f: f, c: c });
-          seleccionInicio = null;
-          if (!linea) { render(); return; }
+
+          if (anclaje.f === f && anclaje.c === c) return;
+
+          var linea = celdaEnLinea(anclaje, { f: f, c: c });
+          if (!linea) {
+            // La celda no sigue la línea del ancla: se convierte en el nuevo ancla,
+            // en vez de perder la selección sin dar ninguna opción de continuar.
+            anclaje = { f: f, c: c };
+            finTemporal = null;
+            render();
+            return;
+          }
+
           var texto = textoDeSeleccion(linea);
           var textoInvertido = texto.split("").reverse().join("");
-          var encontrada = palabrasReto.find(function (p) { return (p === texto || p === textoInvertido) && encontradas.indexOf(p) === -1; });
-          if (encontrada) encontradas.push(encontrada);
-          render();
-          if (encontradas.length === palabrasReto.length) {
-            document.getElementById("cf-sopa-estado").textContent = "¡Encontraste todas las palabras! 🎉";
-            desbloquearLogro("act_sopa");
-            registrarActividadDificil("sopa", dificultad);
+          var encontrada = palabrasObjetivo.find(function (p) { return (p === texto || p === textoInvertido) && encontradas.indexOf(p) === -1; });
+
+          if (encontrada) {
+            encontradas.push(encontrada);
+            marcarCeldasEncontradas(encontrada);
+            anclaje = null;
+            finTemporal = null;
+            render();
+            if (encontradas.length === palabrasObjetivo.length) {
+              document.getElementById("cf-sopa-estado").textContent = "¡Encontraste todas las palabras! 🎉";
+              desbloquearLogro("act_sopa");
+              registrarActividadDificil("sopa", dificultad);
+            }
+          } else {
+            // Todavía no forma una palabra completa: seguimos extendiendo la
+            // selección visible desde el mismo ancla, para poder tocar letra por letra.
+            finTemporal = { f: f, c: c };
+            render();
           }
         });
       });
