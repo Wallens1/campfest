@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi portal · Camp Fest 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+
+<body id="cf26">
+
+<nav class="cf-nav">
+  <a href="../../index.html">Inicio</a>
+  <a href="../itinerario/">Itinerario</a>
+  <a href="../cartilla-del-campista/">Cartilla del campista</a>
+  <a href="../i-mayores-de-18-anos/">Mayores de edad</a>
+  <a href="../i-menores-de-edad/">Menores de edad</a>
+  <a href="../proceso-de-seleccion/">Proceso de selección</a>
+  <a href="../generar-constancias/">Generar Invitación</a>
+  <a href="../organizadores/">Organizadores</a>
+  <a href="./" class="cf-active">Mi portal</a>
+</nav>
+
+<section class="cf-section" style="max-width:640px;">
+
+  <div id="cf-campista-login">
+    <div class="cf-panel">
+      <h3><span class="cf-dot"></span>¡Bienvenido a tu portal, campista!</h3>
+      <p style="margin-bottom:16px;">Ingresa tu código de participante y tu número de documento para ver tu perfil, tu cuenta regresiva, tu insignia y el itinerario en tiempo real.</p>
+      <form id="cf-form-login-campista" novalidate>
+        <div class="cf-campo-campista">
+          <label for="cf-input-codigo">Código de participante</label>
+          <input type="text" id="cf-input-codigo" placeholder="CF-0001" autocomplete="username" required>
+        </div>
+        <div class="cf-campo-campista">
+          <label for="cf-input-documento">Número de documento</label>
+          <input type="text" id="cf-input-documento" placeholder="Tu cédula" inputmode="numeric" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="cf-btn cf-primary" style="width:100%; justify-content:center;">Ingresar</button>
+        <div class="cf-estado-campista" id="cf-estado-login"></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="cf-campista-portal" class="cf-oculto">
+
+    <div id="cf-campista-alerta" class="cf-oculto" style="margin-bottom:16px;"></div>
+
+    <div class="cf-panel" id="cf-campista-anuncios">
+      <h3><span class="cf-dot"></span>Avisos</h3>
+      <div id="cf-lista-anuncios"><p>No hay avisos por ahora.</p></div>
+    </div>
+
+    <div class="cf-portal-tabs" role="tablist">
+      <button class="cf-portal-tab is-active" data-portal-tab="perfil">👤 Perfil</button>
+      <button class="cf-portal-tab" data-portal-tab="historia">📜 Historia</button>
+      <button class="cf-portal-tab" data-portal-tab="actividades">🎮 Actividades</button>
+      <button class="cf-portal-tab" data-portal-tab="itinerario">🗓️ Itinerario</button>
+    </div>
+
+    <!-- ===== PESTAÑA: PERFIL ===== -->
+    <div class="cf-portal-panel is-active" data-portal-panel="perfil">
+
+      <div class="cf-panel" id="cf-campista-perfil-panel">
+        <h3><span class="cf-dot"></span>Hola, <span id="cf-perfil-nombre">campista</span> 👋</h3>
+        <div class="cf-perfil-grid">
+          <div><small>Código</small><strong id="cf-perfil-codigo" class="cf-easter-egg-trigger">—</strong></div>
+          <div><small>Municipio</small><strong id="cf-perfil-municipio">—</strong></div>
+          <div><small>Estado</small><strong id="cf-perfil-estado">—</strong></div>
+          <div><small>Carpa</small><strong id="cf-perfil-carpa">—</strong></div>
+        </div>
+        <div id="cf-easter-egg" class="cf-oculto">✨ Encontraste el secreto de Camp Fest — nos vemos en noviembre. ¡Gracias por tu paciencia! 💜</div>
+        <button type="button" class="cf-btn cf-btn-alt" id="cf-btn-editar-perfil" style="margin-top:14px;">Editar mis datos</button>
+        <button type="button" class="cf-btn cf-btn-alt" id="cf-btn-descargar-insignia" style="margin-top:14px;">Descargar mi insignia</button>
+        <button type="button" class="cf-btn cf-btn-alt" id="cf-btn-salir-portal" style="margin-top:14px;">Cerrar sesión</button>
+      </div>
+
+      <div class="cf-panel cf-oculto" id="cf-campista-editar">
+        <h3><span class="cf-dot"></span>Actualizar mis datos</h3>
+        <form id="cf-form-editar-perfil">
+          <div class="cf-campo-campista"><label>Teléfono</label><input type="text" name="telefono" inputmode="numeric"></div>
+          <div class="cf-campo-campista"><label>Correo personal</label><input type="email" name="correo_personal"></div>
+          <div class="cf-campo-campista"><label>Contacto de emergencia — nombre</label><input type="text" name="contacto_emergencia_nombre"></div>
+          <div class="cf-campo-campista"><label>Contacto de emergencia — teléfono</label><input type="text" name="contacto_emergencia_telefono" inputmode="numeric"></div>
+          <button type="submit" class="cf-btn cf-primary" style="width:100%; justify-content:center;">Guardar cambios</button>
+          <div class="cf-estado-campista" id="cf-estado-editar"></div>
+        </form>
+      </div>
+
+      <div class="cf-panel">
+        <h3><span class="cf-dot"></span>Faltan <span id="cf-dias-restantes" class="cf-clic-dias" title="Haz clic para ver algo curioso">—</span> días para Camp Fest</h3>
+        <div class="cf-barra-progreso"><div class="cf-barra-progreso-relleno" id="cf-barra-progreso"></div></div>
+        <p style="margin-top:10px;">🎉 Has invitado a <strong id="cf-referidos">0</strong> amigos y amigas de Bugalagrande — ¡sigue invitando para el premio especial!</p>
+      </div>
+
+      <div class="cf-panel">
+        <h3><span class="cf-dot"></span>Tu racha</h3>
+        <p id="cf-racha-texto" style="font-size:16px; font-weight:700;">—</p>
+        <div class="cf-dato-curioso">
+          <strong>💡 Dato curioso de hoy</strong>
+          <p id="cf-dato-curioso-texto">—</p>
+        </div>
+      </div>
+
+      <div class="cf-panel">
+        <button type="button" class="cf-historia-toggle" id="cf-btn-pistas">🔍 ¿Buscas secretos?</button>
+        <div class="cf-oculto" id="cf-bloque-pistas" style="margin-top:10px;">
+          <p>Hay 3 secretos escondidos en este portal. Aquí van las pistas (sin arruinar la sorpresa):</p>
+          <ul style="line-height:1.6;">
+            <li>Tu código de participante podría abrir algo... si le prestas atención varias veces seguidas.</li>
+            <li>El nombre del municipio anfitrión tiene poder — si te atreves a escribirlo en cualquier parte de la página.</li>
+            <li>Los números también esconden cosas. ¿Qué pasa si le haces clic a tu cuenta regresiva?</li>
+          </ul>
+          <p style="margin-top:10px;">También hay más secretos escondidos en el resto del sitio — no están en botones ni imágenes, están en el propio texto. Lee con calma cada página. 🤫</p>
+        </div>
+      </div>
+
+      <div class="cf-panel">
+        <h3><span class="cf-dot"></span>Tus logros</h3>
+        <p style="font-size:12.5px; opacity:.7; margin-top:-6px;">Cada logro bloqueado te dice cómo conseguirlo — excepto los 3 secretos, ¡esos hay que descubrirlos!</p>
+        <div id="cf-logros-grid"></div>
+      </div>
+
+    </div>
+
+    <!-- ===== PESTAÑA: HISTORIA ===== -->
+    <div class="cf-portal-panel" data-portal-panel="historia" hidden>
+      <div class="cf-panel">
+        <h3><span class="cf-dot"></span>Historia de Bugalagrande</h3>
+
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="linea">🕰️ Línea de tiempo</button>
+        <div class="cf-oculto cf-historia-contenido" data-historia-contenido="linea">
+          <div class="cf-hito" data-hito="1662"><strong>1662</strong> — Fundación por Diego Rengifo Salazar, quien trajo población indígena a su encomienda.</div>
+          <div class="cf-hito" data-hito="1854"><strong>1854</strong> — La Cámara de Provincia de Buga le cambia el nombre a "Nariño", en honor a Antonio Nariño.</div>
+          <div class="cf-hito" data-hito="1865"><strong>1865</strong> — La Corporación Legislativa de Tuluá le restituye el nombre Bugalagrande y la categoría de Distrito Municipal.</div>
+          <div class="cf-hito" data-hito="1886"><strong>1886</strong> — Bugalagrande es declarado municipio oficialmente.</div>
+        </div>
+
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="actualidad">📰 Bugalagrande hoy</button>
+        <div class="cf-oculto cf-historia-contenido" data-historia-contenido="actualidad">
+          <p>Hoy Bugalagrande tiene cerca de <strong>21.600 habitantes</strong>, repartidos entre el casco urbano y sus 9 corregimientos.</p>
+          <p>Su economía actual gira alrededor de la caña de azúcar, el café, el banano y la ganadería — además de una de las fábricas de Nestlé más grandes del país.</p>
+          <p>Cada agosto se celebran las Fiestas de Retorno: reinado, carnaval y música que reúnen a la comunidad y a quienes regresan al municipio.</p>
+          <p>Su juventud está organizada en el Subsistema de Participación Juvenil, el mismo que impulsa Camp Fest 2026.</p>
+        </div>
+
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="curiosidades">💡 Curiosidades</button>
+        <div class="cf-oculto cf-historia-contenido" data-historia-contenido="curiosidades">
+          <p>El nombre "Bugalagrande" viene de que el río que pasa por el pueblo es más grande que el que pasa por la vecina Buga — literalmente "Buga la grande".</p>
+          <p>Es uno de los municipios con el nombre más largo del Valle del Cauca.</p>
+          <p>Una de las fábricas de Nestlé más grandes del país tiene sede en Bugalagrande.</p>
+          <p>Está en la confluencia del río Bugalagrande y el río Cauca — tierra muy fértil para caña de azúcar, café, banano, piña y más.</p>
+          <p>Cuenta con 9 corregimientos: Galicia, Uribe, Overo, Paila Arriba, Ceilán, Chorreras, Mestizal, El Guayabo y Raiceros.</p>
+          <p>Tiene dos colegios emblemáticos: I.E. Diego Rengifo Salazar e I.E. Antonio Nariño, con los nombres de dos figuras clave de su historia.</p>
+        </div>
+
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="lugares">📍 Lugares para conocer</button>
+        <div class="cf-oculto cf-historia-contenido" data-historia-contenido="lugares">
+          <p>Capilla Nuestra Señora de la Concepción de El Overo — patrimonio cultural del Valle.</p>
+          <p>Parroquia San Bernabé y la antigua estación del tren.</p>
+          <p>El río Bugalagrande, ideal para paseos y caminatas.</p>
+          <p>El parque principal, de arquitectura colonial.</p>
+          <p>Las Fiestas de Retorno, en agosto — reinado, carnaval y música.</p>
+          <p>Dulces típicos: manjar blanco, dulce de vidanca y desamargao.</p>
+          <p>Los corregimientos de El Overo y El Guayabo, conocidos por sus artesanías.</p>
+        </div>
+
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="fuentes">🔗 Fuentes</button>
+        <div class="cf-oculto cf-historia-contenido" data-historia-contenido="fuentes">
+          <p style="font-size:13px; opacity:.8;">Información investigada de: Wikipedia, ESAP (repositorio institucional), El Tiempo, El País, INCIVA, Mi Bugalagrande y Turismo Valle del Cauca.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== PESTAÑA: ACTIVIDADES ===== -->
+    <div class="cf-portal-panel" data-portal-panel="actividades" hidden>
+      <div class="cf-panel">
+        <h3><span class="cf-dot"></span>Actividades</h3>
+        <p style="font-size:13px; opacity:.8; margin-top:-6px;">Puedes jugar todas las veces que quieras.</p>
+        <div class="cf-juegos-grid">
+          <button class="cf-juego-card" data-juego="trivia">🧠<br>Trivia</button>
+          <button class="cf-juego-card" data-juego="vof">✅<br>V o F</button>
+          <button class="cf-juego-card" data-juego="linea">🕰️<br>Ordena la línea</button>
+          <button class="cf-juego-card" data-juego="memorama">🧩<br>Memorama</button>
+          <button class="cf-juego-card" data-juego="ruleta">🎡<br>Ruleta</button>
+          <button class="cf-juego-card" data-juego="ahorcado">🔤<br>Adivina la palabra</button>
+          <button class="cf-juego-card" data-juego="relampago">⚡<br>Quiz relámpago</button>
+          <button class="cf-juego-card" data-juego="iconos">🔍<br>Encuentra el ícono</button>
+          <button class="cf-juego-card" data-juego="personalidad">🎭<br>¿Qué campista eres?</button>
+          <button class="cf-juego-card" data-juego="reaccion">⏱️<br>Reto de reacción</button>
+          <button class="cf-juego-card" data-juego="simon">🎨<br>Simón dice</button>
+          <button class="cf-juego-card" data-juego="sopa">🔠<br>Sopa de letras</button>
+          <button class="cf-juego-card" data-juego="atrapa">🎯<br>Atrapa los objetivos</button>
+        </div>
+        <div id="cf-juego-contenedor" style="margin-top:16px;"></div>
+      </div>
+    </div>
+
+    <!-- ===== PESTAÑA: ITINERARIO ===== -->
+    <div class="cf-portal-panel" data-portal-panel="itinerario" hidden>
+      <div class="cf-panel" id="cf-campista-itinerario">
+        <h3><span class="cf-dot"></span>Itinerario</h3>
+        <div id="cf-lista-itinerario"><p>Cargando…</p></div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+<canvas id="cf-canvas-insignia" width="720" height="1280" style="display:none;"></canvas>
+
+<div id="cf-mensaje-secreto"></div>
+
+<footer class="cf-footer">
+  <div class="cf-social">
+    <a href="https://www.instagram.com/campfest_2026/?hl=es-la" target="_blank" rel="noopener">ig</a>
+  </div>
+  <p>© 2026 SUBSISTEMA DE PARTICIPACION JUVENIL DE BUGALAGRANDE. TODOS LOS DERECHOS RESERVADOS.</p>
+</footer>
+
+<style>
+.cf-oculto { display: none !important; }
+.cf-campo-campista { margin-bottom: 16px; }
+.cf-campo-campista label { display: block; font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.cf-campo-campista input { width: 100%; padding: 12px 14px; font-size: 15px; border: 2px solid var(--ink); border-radius: 10px; background: var(--cream); font-family: inherit; }
+.cf-estado-campista { margin-top: 12px; padding: 10px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 600; display: none; }
+.cf-estado-campista.cf-mostrar { display: block; }
+.cf-estado-campista.cf-ok { background: #e4fbf9; color: #0f7a67; border: 2px solid var(--cyan); }
+.cf-estado-campista.cf-fallo { background: #ffe6f1; color: #b4225f; border: 2px solid var(--pink); }
+.cf-perfil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+.cf-perfil-grid small { display: block; opacity: .6; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+.cf-perfil-grid strong { font-size: 16px; }
+.cf-easter-egg-trigger { cursor: pointer; user-select: none; }
+#cf-easter-egg { margin-top: 12px; padding: 12px 14px; background: var(--yellow); border: 2px solid var(--ink); border-radius: 10px; font-weight: 700; }
+.cf-barra-progreso { width: 100%; height: 18px; background: var(--cream); border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
+.cf-barra-progreso-relleno { height: 100%; width: 0%; background: var(--pink); transition: width 1s ease; }
+.cf-item-itinerario { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,.08); }
+.cf-item-itinerario:last-child { border-bottom: none; }
+.cf-item-aviso { padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,.08); font-size: 14px; }
+.cf-clic-dias { cursor: pointer; text-decoration: underline dotted; }
+.cf-dato-curioso { margin-top: 10px; padding: 12px 14px; background: var(--cream); border-radius: 8px; }
+.cf-dato-curioso strong { font-size: 13px; display: block; margin-bottom: 4px; }
+.cf-dato-curioso p { margin: 0; font-size: 14px; line-height: 1.4; }
+#cf-mensaje-secreto { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--purple); color: white; padding: 14px 22px; border-radius: 12px; border: 3px solid var(--ink); font-weight: 700; z-index: 999; text-align: center; }
+#cf-mensaje-secreto.cf-mostrar { display: block; }
+
+/* Pestañas del portal */
+.cf-portal-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.cf-portal-tab { padding: 10px 14px; border-radius: 999px; border: 2px solid var(--ink); background: var(--white); font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; }
+.cf-portal-tab.is-active { background: var(--pink); color: var(--white); }
+.cf-portal-panel { display: none; }
+.cf-portal-panel.is-active { display: block; }
+
+/* Historia */
+.cf-historia-toggle { display: block; width: 100%; text-align: left; padding: 12px 14px; margin-top: 10px; border-radius: 10px; border: 2px solid var(--ink); background: var(--cream); font-weight: 700; font-size: 14px; cursor: pointer; font-family: inherit; }
+.cf-historia-contenido { margin-top: 8px; padding: 12px 14px; background: #fff; border-radius: 8px; border: 1px solid rgba(0,0,0,.1); }
+.cf-hito { padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,.08); font-size: 14px; line-height: 1.4; cursor: pointer; }
+.cf-hito:last-child { border-bottom: none; }
+.cf-hito.cf-hito-visto { opacity: .5; }
+
+/* Juegos */
+.cf-juegos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 12px; }
+.cf-juego-card { padding: 14px 6px; border-radius: 12px; border: 2px solid var(--ink); background: var(--white); font-weight: 700; font-size: 12px; cursor: pointer; font-family: inherit; line-height: 1.5; }
+.cf-juego-card:hover { background: var(--yellow); }
+
+/* Logros por categoría */
+.cf-logro-categoria { margin-top: 14px; }
+.cf-logro-categoria h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; margin: 0 0 8px; opacity: .7; }
+.cf-nota-no-vinculante { font-size: 11.5px; opacity: .65; margin: -4px 0 8px; font-style: italic; }
+.cf-logros-grid-interna { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+.cf-logro-item { text-align: center; padding: 8px 4px; border-radius: 10px; border: 2px solid var(--ink); font-size: 10px; font-weight: 700; line-height: 1.2; }
+.cf-logro-item .cf-logro-icono { font-size: 22px; display: block; margin-bottom: 3px; }
+.cf-logro-item.cf-desbloqueado { background: var(--yellow); }
+.cf-logro-item.cf-bloqueado { background: #eee; opacity: .6; }
+</style>
+
+<script>
+(function () {
+
+  var API_BASE = "https://campfest-api-production.up.railway.app";
+  var TOKEN_KEY = "cf_token_campista";
+
+  function mostrarEstado(el, tipo, texto) {
+    el.className = "cf-estado-campista cf-mostrar cf-" + tipo;
+    el.textContent = texto;
+  }
+
+  function ocultarEstado(el) {
+    el.className = "cf-estado-campista";
+    el.textContent = "";
+  }
+
+  async function peticion(ruta, opciones) {
+    opciones = opciones || {};
+    var headers = { "Content-Type": "application/json" };
+    var token = localStorage.getItem(TOKEN_KEY);
+    if (token) headers.Authorization = "Bearer " + token;
+    var respuesta = await fetch(API_BASE + ruta, {
+      method: opciones.method || "GET",
+      headers: headers,
+      body: opciones.body
+    });
+    var cuerpo = await respuesta.json();
+    if (!respuesta.ok) throw new Error(cuerpo.mensaje || "Ocurrió un error");
+    return cuerpo;
+  }
+
+  // ==========================
+  // Utilidades de localStorage compartidas por racha/logros/contadores.
+  // ==========================
+  function obtenerSet(clave) {
+    try { return JSON.parse(localStorage.getItem(clave) || "[]"); } catch (e) { return []; }
+  }
+  function agregarASet(clave, valor) {
+    var set = obtenerSet(clave);
+    if (set.indexOf(valor) === -1) {
+      set.push(valor);
+      localStorage.setItem(clave, JSON.stringify(set));
+    }
+    return set;
+  }
+  function incrementarContador(clave) {
+    var valor = parseInt(localStorage.getItem(clave) || "0", 10) + 1;
+    localStorage.setItem(clave, String(valor));
+    return valor;
+  }
+
+  async function iniciar() {
+
+    try {
+      var respuesta = await fetch(API_BASE + "/api/estado-evento");
+      var estado = await respuesta.json();
+      if (estado.alertaActiva) {
+        var alertaBox = document.getElementById("cf-campista-alerta");
+        alertaBox.className = "cf-alert";
+        alertaBox.innerHTML = '<div class="cf-alert-inner"><strong>⚠ Alerta</strong><span>' + estado.alertaMensaje + "</span></div>";
+      }
+    } catch (e) {
+      // si el backend no responde, el login sigue disponible igual
+    }
+
+    var token = localStorage.getItem(TOKEN_KEY);
+    if (token) cargarPerfil();
+
+  }
+
+  document.getElementById("cf-form-login-campista").addEventListener("submit", async function (evento) {
+    evento.preventDefault();
+    var el = document.getElementById("cf-estado-login");
+    ocultarEstado(el);
+    var codigo = document.getElementById("cf-input-codigo").value.trim();
+    var documento = document.getElementById("cf-input-documento").value.trim();
+    try {
+      var resultado = await peticion("/api/campista/login", {
+        method: "POST",
+        body: JSON.stringify({ codigo: codigo, documento: documento })
+      });
+      localStorage.setItem(TOKEN_KEY, resultado.token);
+      await cargarPerfil();
+    } catch (error) {
+      mostrarEstado(el, "fallo", error.message);
+    }
+  });
+
+  async function cargarPerfil() {
+    try {
+      var resultado = await peticion("/api/campista/perfil");
+      var p = resultado.perfil;
+
+      document.getElementById("cf-campista-login").classList.add("cf-oculto");
+      document.getElementById("cf-campista-portal").classList.remove("cf-oculto");
+
+      document.getElementById("cf-perfil-nombre").textContent = p.nombre.split(" ")[0];
+      document.getElementById("cf-perfil-codigo").textContent = p.codigo;
+      document.getElementById("cf-perfil-municipio").textContent = p.municipio;
+      document.getElementById("cf-perfil-estado").textContent = p.estadoAdmisionEtiqueta;
+      document.getElementById("cf-perfil-carpa").textContent = p.carpaAsignada || "Aún sin asignar";
+      document.getElementById("cf-dias-restantes").textContent = p.diasRestantes;
+      document.getElementById("cf-barra-progreso").style.width = p.progresoEspera + "%";
+      document.getElementById("cf-referidos").textContent = p.referidos;
+
+      window._cfPerfilActual = p;
+
+      cargarItinerario();
+      cargarAnuncios();
+      actualizarRacha();
+      mostrarDatoCurioso();
+      incrementarContador("cf_visitas_totales");
+      agregarASet("cf_tabs_vistas", "perfil");
+      renderizarLogros();
+      evaluarLogrosAutomaticos(p);
+      desbloquearLogro("login");
+
+    } catch (error) {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+  }
+
+  async function cargarItinerario() {
+    var contenedor = document.getElementById("cf-lista-itinerario");
+    try {
+      var resultado = await peticion("/api/campista/itinerario");
+      if (!resultado.actividades.length) {
+        contenedor.innerHTML = "<p>El itinerario se publicará pronto.</p>";
+      } else {
+        contenedor.innerHTML = resultado.actividades.map(function (a) {
+          var hora = new Date(a.hora_inicio).toLocaleString("es-CO", { day: "2-digit", month: "short", hour: "numeric", minute: "2-digit" });
+          return '<div class="cf-item-itinerario"><strong>' + hora + "</strong> — " + a.titulo + (a.espacio_usado ? " (" + a.espacio_usado + ")" : "") + "</div>";
+        }).join("");
+      }
+      desbloquearLogro("vio_itinerario_real");
+    } catch (error) {
+      contenedor.innerHTML = "<p>No se pudo cargar el itinerario.</p>";
+    }
+  }
+
+  async function cargarAnuncios() {
+    var contenedor = document.getElementById("cf-lista-anuncios");
+    try {
+      var resultado = await peticion("/api/campista/anuncios");
+      if (!resultado.anuncios.length) {
+        contenedor.innerHTML = "<p>No hay avisos por ahora.</p>";
+      } else {
+        contenedor.innerHTML = resultado.anuncios.map(function (a) {
+          var fechaHora = new Date(a.creado_en).toLocaleString("es-CO", { day: "2-digit", month: "short", hour: "numeric", minute: "2-digit" });
+          return '<div class="cf-item-aviso"><strong>' + fechaHora + ":</strong> " + a.mensaje + "</div>";
+        }).join("");
+      }
+      desbloquearLogro("vio_avisos");
+    } catch (error) {
+      contenedor.innerHTML = "<p>No se pudieron cargar los avisos.</p>";
+    }
+  }
+
+  document.getElementById("cf-btn-editar-perfil").addEventListener("click", function () {
+    document.getElementById("cf-campista-editar").classList.toggle("cf-oculto");
+  });
+
+  document.getElementById("cf-btn-salir-portal").addEventListener("click", function () {
+    localStorage.removeItem(TOKEN_KEY);
+    window.location.reload();
+  });
+
+  document.getElementById("cf-form-editar-perfil").addEventListener("submit", async function (evento) {
+    evento.preventDefault();
+    var el = document.getElementById("cf-estado-editar");
+    ocultarEstado(el);
+    var datos = {};
+    Array.prototype.forEach.call(evento.target.elements, function (campo) {
+      if (campo.name && campo.value.trim() !== "") datos[campo.name] = campo.value.trim();
+    });
+    try {
+      await peticion("/api/campista/perfil", { method: "PATCH", body: JSON.stringify(datos) });
+      mostrarEstado(el, "ok", "¡Datos actualizados!");
+    } catch (error) {
+      mostrarEstado(el, "fallo", error.message);
+    }
+  });
+
+  // ==========================
+  // Pestañas del portal.
+  // ==========================
+  document.querySelectorAll(".cf-portal-tab").forEach(function (boton) {
+    boton.addEventListener("click", function () {
+
+      var tab = boton.dataset.portalTab;
+
+      document.querySelectorAll(".cf-portal-tab").forEach(function (b) { b.classList.toggle("is-active", b === boton); });
+      document.querySelectorAll(".cf-portal-panel").forEach(function (panel) {
+        var activo = panel.dataset.portalPanel === tab;
+        panel.classList.toggle("is-active", activo);
+        panel.hidden = !activo;
+      });
+
+      agregarASet("cf_tabs_vistas", tab);
+      if (tab === "historia") desbloquearLogro("historia");
+      if (tab === "actividades") desbloquearLogro("tab_actividades");
+      if (tab === "itinerario") desbloquearLogro("tab_itinerario");
+
+    });
+  });
+
+  // ==========================
+  // Historia: cada bloque se abre/cierra, y cada hito se puede marcar visto.
+  // ==========================
+  document.querySelectorAll("[data-historia-toggle]").forEach(function (boton) {
+    boton.addEventListener("click", function () {
+      var clave = boton.dataset.historiaToggle;
+      var bloque = document.querySelector('[data-historia-contenido="' + clave + '"]');
+      bloque.classList.toggle("cf-oculto");
+      if (clave === "actualidad") desbloquearLogro("vio_actualidad");
+      if (clave === "curiosidades") desbloquearLogro("vio_curiosidades");
+      if (clave === "lugares") desbloquearLogro("vio_lugares");
+      if (clave === "fuentes") desbloquearLogro("vio_fuentes");
+    });
+  });
+
+  document.querySelectorAll(".cf-hito").forEach(function (hito) {
+    hito.addEventListener("click", function () {
+      var anio = hito.dataset.hito;
+      hito.classList.add("cf-hito-visto");
+      agregarASet("cf_hitos_vistos", anio);
+      desbloquearLogro("hito_" + anio);
+    });
+  });
+
+  document.getElementById("cf-btn-pistas").addEventListener("click", function () {
+    document.getElementById("cf-bloque-pistas").classList.toggle("cf-oculto");
+    desbloquearLogro("vio_pistas");
+  });
+
+  // Easter egg: 5 clics seguidos sobre el código de participante.
+  var clicsSeguidos = 0;
+  var ultimoClic = 0;
+  document.getElementById("cf-perfil-codigo").addEventListener("click", function () {
+    var ahora = Date.now();
+    clicsSeguidos = (ahora - ultimoClic < 800) ? clicsSeguidos + 1 : 1;
+    ultimoClic = ahora;
+    if (clicsSeguidos >= 5) {
+      document.getElementById("cf-easter-egg").classList.remove("cf-oculto");
+      clicsSeguidos = 0;
+      desbloquearLogro("secreto_codigo");
+    }
+  });
+
+  // ==========================
+  // Racha de visitas — todo en localStorage, sin backend.
+  // ==========================
+  function actualizarRacha() {
+
+    var hoy = new Date().toISOString().slice(0, 10);
+    var ultima = localStorage.getItem("cf_racha_ultima");
+    var racha = parseInt(localStorage.getItem("cf_racha_actual") || "0", 10);
+
+    if (ultima !== hoy) {
+      var ayer = new Date();
+      ayer.setDate(ayer.getDate() - 1);
+      var ayerTexto = ayer.toISOString().slice(0, 10);
+      racha = (ultima === ayerTexto) ? racha + 1 : 1;
+      localStorage.setItem("cf_racha_ultima", hoy);
+      localStorage.setItem("cf_racha_actual", String(racha));
+    }
+
+    var texto = racha <= 1
+      ? "Primer día por aquí — vuelve mañana para empezar tu racha 🔥"
+      : "🔥 Llevas " + racha + " días seguidos visitando tu portal";
+    document.getElementById("cf-racha-texto").textContent = texto;
+
+    if (racha >= 3) desbloquearLogro("racha3");
+    if (racha >= 7) desbloquearLogro("racha7");
+    if (racha >= 14) desbloquearLogro("racha14");
+    if (racha >= 30) desbloquearLogro("racha30");
+    if (racha >= 60) desbloquearLogro("racha60");
+
+  }
+
+  // ==========================
+  // Dato curioso del día.
+  // ==========================
+  var DATOS_CURIOSOS = [
+    "Bugalagrande está en el centro del Valle del Cauca, a orillas del río Cauca.",
+    "El nombre 'Bugalagrande' viene de que su río es más grande que el de la vecina Buga.",
+    "Más de la mitad de los cupos de Camp Fest están reservados para jóvenes de Bugalagrande.",
+    "Invitar amigos de tu municipio a inscribirse te da puntos extra para un premio especial.",
+    "El Valle del Cauca tiene 42 municipios — Camp Fest recibe jóvenes de todos ellos.",
+    "Llevar tu propia carpa es opcional: el campamento también tiene carpas disponibles.",
+    "Camp Fest incluye espacios de liderazgo, recreación, cultura y bienestar.",
+    "El código de participante (CF-XXXX) es único — guárdalo, lo necesitas el día del evento.",
+    "La cartilla del campista tiene todo lo que necesitas saber antes de llegar.",
+    "Camp Fest 2026 se aplazó a noviembre para elegir la mejor sede y cuidar tu seguridad.",
+    "El proceso de selección no exige experiencia previa en liderazgo juvenil.",
+    "Los menores de edad necesitan permiso físico (no solo virtual) para asistir.",
+    "Tip de campamento: empaca ropa cómoda, protector solar y una linterna.",
+    "Tip de campamento: lleva tus medicamentos personales rotulados con tu nombre.",
+    "Una de las fábricas de Nestlé más grandes del país tiene sede en Bugalagrande.",
+    "Bugalagrande es uno de los municipios con el nombre más largo del Valle del Cauca.",
+    "Las Fiestas de Retorno de Bugalagrande se celebran en agosto.",
+    "Camp Fest busca que cada joven se convierta en agente de cambio en su comunidad."
+  ];
+
+  function mostrarDatoCurioso() {
+    var inicioAno = new Date(new Date().getFullYear(), 0, 0);
+    var diferencia = new Date() - inicioAno;
+    var diaDelAno = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+    var dato = DATOS_CURIOSOS[diaDelAno % DATOS_CURIOSOS.length];
+    document.getElementById("cf-dato-curioso-texto").textContent = dato;
+  }
+
+  // ==========================
+  // Logros — 70, agrupados por categoría. Todo alcanzable por cualquiera.
+  // ==========================
+  var CATEGORIAS_LOGROS = [
+    { nombre: "Sesión y contenido", logros: [
+      { id: "login", icono: "🔑", nombre: "Iniciaste sesión", desc: "Inicia sesión en tu portal" },
+      { id: "insignia", icono: "🏅", nombre: "Tu insignia", desc: "Descarga tu insignia" },
+      { id: "historia", icono: "📜", nombre: "Historia conocida", desc: "Abre la pestaña Historia" }
+    ]},
+    { nombre: "Secretos", logros: [
+      { id: "secreto_codigo", icono: "🔢", nombre: "5 clics en tu código", secreto: true },
+      { id: "secreto_palabra", icono: "🗝️", nombre: "La palabra secreta", secreto: true },
+      { id: "secreto_dias", icono: "⏱️", nombre: "Descifraste la cuenta regresiva", secreto: true },
+      { id: "detective", icono: "🕵️", nombre: "Encontraste los 3 secretos", secreto: true }
+    ]},
+    { nombre: "Actividades completadas", logros: [
+      { id: "act_trivia", icono: "🧠", nombre: "Trivia", desc: "Completa la trivia de Bugalagrande" },
+      { id: "act_vof", icono: "✅", nombre: "Verdadero o Falso", desc: "Completa el Verdadero o Falso" },
+      { id: "act_linea_tiempo", icono: "🕰️", nombre: "Línea de tiempo", desc: "Ordena la línea de tiempo" },
+      { id: "act_memorama", icono: "🧩", nombre: "Memorama", desc: "Completa el memorama" },
+      { id: "act_ruleta", icono: "🎡", nombre: "Ruleta", desc: "Gira la ruleta de la suerte" },
+      { id: "act_palabra", icono: "🔤", nombre: "Adivina la palabra", desc: "Adivina la palabra del ahorcado" },
+      { id: "act_relampago", icono: "⚡", nombre: "Quiz relámpago", desc: "Completa el quiz relámpago" },
+      { id: "act_iconos", icono: "🔍", nombre: "Encuentra el ícono", desc: "Encuentra el ícono distinto" },
+      { id: "act_personalidad", icono: "🎭", nombre: "Tipo de campista", desc: "Completa el test de personalidad" },
+      { id: "act_reaccion", icono: "⏱️", nombre: "Reto de reacción", desc: "Juega el reto de reacción" },
+      { id: "act_simon", icono: "🎨", nombre: "Simón dice", desc: "Completa una ronda de Simón dice" },
+      { id: "act_sopa", icono: "🔠", nombre: "Sopa de letras", desc: "Encuentra todas las palabras de la sopa de letras" },
+      { id: "act_atrapa", icono: "🎯", nombre: "Atrapa los objetivos", desc: "Completa una sesión de Atrapa los objetivos" }
+    ]},
+    { nombre: "Desempeño destacado", logros: [
+      { id: "trivia_perfecta", icono: "🏆", nombre: "Trivia perfecta", desc: "Saca puntaje perfecto en la trivia" },
+      { id: "vof_perfecto", icono: "🏆", nombre: "V o F perfecto", desc: "Saca puntaje perfecto en Verdadero o Falso" },
+      { id: "relampago_perfecto", icono: "🏆", nombre: "Relámpago perfecto", desc: "Saca el puntaje perfecto en el quiz relámpago" },
+      { id: "reaccion_rapida", icono: "⚡", nombre: "Rápido como un rayo", desc: "Reacciona más rápido que el umbral de tu dificultad" },
+      { id: "simon_experto", icono: "🎨", nombre: "Memoria de experto", desc: "Llega a una secuencia de 8 o más en Simón dice" },
+      { id: "atrapa_certero", icono: "🎯", nombre: "Puntería certera", desc: "Atrapa el 90% o más de los objetivos (con al menos 8 aparecidos)" }
+    ]},
+    { nombre: "Meta-actividad", logros: [
+      { id: "todas_actividades", icono: "🎯", nombre: "Todas las actividades", desc: "Completa las 13 actividades al menos una vez" }
+    ]},
+    { nombre: "Dificultad", logros: [
+      { id: "un_dificil", icono: "🔴", nombre: "Primer reto difícil", desc: "Completa cualquier actividad en dificultad Difícil" },
+      { id: "cinco_dificiles", icono: "🔴", nombre: "Cinco retos difíciles", desc: "Completa 5 actividades distintas en dificultad Difícil" },
+      { id: "maestro_dificultad", icono: "👑", nombre: "Maestro de la dificultad", desc: "Completa las 12 actividades con dificultad, en Difícil" }
+    ]},
+    { nombre: "Racha de visitas", logros: [
+      { id: "racha3", icono: "🔥", nombre: "3 días de racha", desc: "Visita el portal 3 días seguidos" },
+      { id: "racha7", icono: "🔥", nombre: "7 días de racha", desc: "Visita el portal 7 días seguidos" },
+      { id: "racha14", icono: "🔥", nombre: "14 días de racha", desc: "Visita el portal 14 días seguidos" },
+      { id: "racha30", icono: "🔥", nombre: "30 días de racha", desc: "Visita el portal 30 días seguidos" },
+      { id: "racha60", icono: "🔥", nombre: "60 días de racha", desc: "Visita el portal 60 días seguidos" }
+    ]},
+    { nombre: "Amigos invitados", logros: [
+      { id: "referido1", icono: "🤝", nombre: "Tu primer amigo", desc: "Invita a tu primer amigo" },
+      { id: "referido3", icono: "👥", nombre: "3 amigos", desc: "Invita a 3 amigos" },
+      { id: "referido5", icono: "🎉", nombre: "5 amigos", desc: "Invita a 5 amigos" },
+      { id: "referido10", icono: "🌟", nombre: "10 amigos", desc: "Invita a 10 amigos" },
+      { id: "referido20", icono: "👑", nombre: "20 amigos", desc: "Invita a 20 amigos" }
+    ]},
+    { nombre: "Cuenta regresiva", logros: [
+      { id: "cuenta100", icono: "📅", nombre: "100 días o menos", desc: "Espera a que falten 100 días o menos" },
+      { id: "cuenta50", icono: "📅", nombre: "50 días o menos", desc: "Espera a que falten 50 días o menos" },
+      { id: "cuenta30", icono: "📆", nombre: "30 días o menos", desc: "Espera a que falten 30 días o menos" },
+      { id: "cuenta14", icono: "📆", nombre: "14 días o menos", desc: "Espera a que falten 14 días o menos" },
+      { id: "cuenta7", icono: "⏳", nombre: "¡Falta una semana!", desc: "Espera a que falte una semana" },
+      { id: "cuenta3", icono: "⏳", nombre: "¡Faltan 3 días!", desc: "Espera a que falten 3 días" },
+      { id: "cuenta1", icono: "⏳", nombre: "¡Es casi mañana!", desc: "Espera a que falte 1 día" },
+      { id: "diadelevento", icono: "🎊", nombre: "¡Es el día!", desc: "Entra el día del evento" }
+    ]},
+    { nombre: "Visitas totales", logros: [
+      { id: "visitas5", icono: "🎯", nombre: "5 visitas", desc: "Visita tu portal 5 veces" },
+      { id: "visitas10", icono: "🎯", nombre: "10 visitas", desc: "Visita tu portal 10 veces" },
+      { id: "visitas25", icono: "🌟", nombre: "25 visitas", desc: "Visita tu portal 25 veces" },
+      { id: "visitas50", icono: "👑", nombre: "50 visitas", desc: "Visita tu portal 50 veces" }
+    ]},
+    { nombre: "Horario de visita", logros: [
+      { id: "nocturno", icono: "🌙", nombre: "Visitante nocturno", desc: "Visita el portal entre 11pm y 5am" },
+      { id: "madrugador", icono: "☀️", nombre: "Madrugador", desc: "Visita el portal entre 5am y 7am" }
+    ]},
+    { nombre: "Exploración", logros: [
+      { id: "tab_actividades", icono: "🎮", nombre: "Pestaña Actividades", desc: "Abre la pestaña Actividades" },
+      { id: "tab_itinerario", icono: "🗓️", nombre: "Pestaña Itinerario", desc: "Abre la pestaña Itinerario" },
+      { id: "hito_1662", icono: "🕰️", nombre: "Hito 1662", desc: "Abre el hito de 1662 en Historia" },
+      { id: "hito_1854", icono: "🕰️", nombre: "Hito 1854", desc: "Abre el hito de 1854 en Historia" },
+      { id: "hito_1865", icono: "🕰️", nombre: "Hito 1865", desc: "Abre el hito de 1865 en Historia" },
+      { id: "hito_1886", icono: "🕰️", nombre: "Hito 1886", desc: "Abre el hito de 1886 en Historia" },
+      { id: "linea_completa", icono: "📜", nombre: "Línea de tiempo completa", desc: "Revisa los 4 hitos de la historia" },
+      { id: "vio_actualidad", icono: "📰", nombre: "Bugalagrande hoy", desc: "Abre el bloque 'Bugalagrande hoy' en Historia" },
+      { id: "vio_curiosidades", icono: "💡", nombre: "Curiosidades", desc: "Abre el bloque de curiosidades en Historia" },
+      { id: "vio_lugares", icono: "📍", nombre: "Lugares para conocer", desc: "Abre el bloque de lugares en Historia" },
+      { id: "vio_fuentes", icono: "🔗", nombre: "Fuentes", desc: "Revisa las fuentes de la investigación" },
+      { id: "historia_completa", icono: "🎓", nombre: "Historia completa", desc: "Revisa todos los bloques de Historia" },
+      { id: "vio_pistas", icono: "🔍", nombre: "Cazador de pistas", desc: "Abre el bloque de pistas de secretos" },
+      { id: "vio_itinerario_real", icono: "🗓️", nombre: "Itinerario revisado", desc: "Revisa el itinerario del evento" },
+      { id: "vio_avisos", icono: "📢", nombre: "Avisos revisados", desc: "Revisa los avisos del portal" },
+      { id: "repitio_trivia", icono: "🔁", nombre: "Repitió la trivia", desc: "Juega la trivia más de una vez" },
+      { id: "repitio_reaccion", icono: "🔁", nombre: "Repitió el reto de reacción", desc: "Juega el reto de reacción 4 veces o más" },
+      { id: "insignia_2veces", icono: "🏅", nombre: "Coleccionista de insignias", desc: "Descarga tu insignia 2 veces o más" },
+      { id: "explorador", icono: "🧭", nombre: "Explorador", desc: "Abre las 4 pestañas del portal" },
+      { id: "sabelotodo", icono: "🎓", nombre: "Sabelotodo", desc: "Completa Historia, todas las actividades, explora todo el portal y encuentra los secretos del sitio" }
+    ]},
+    { nombre: "Secretos del sitio", logros: [
+      { id: "secreto_sitio_inicio", icono: "🏠", nombre: "Secreto del inicio", secreto: true },
+      { id: "secreto_sitio_itinerario", icono: "🗓️", nombre: "Secreto del itinerario", secreto: true },
+      { id: "secreto_sitio_cartilla", icono: "📘", nombre: "Secreto de la cartilla", secreto: true },
+      { id: "secreto_sitio_mayores", icono: "🔐", nombre: "Secreto de mayores de edad", secreto: true },
+      { id: "secreto_sitio_menores", icono: "🔐", nombre: "Secreto de menores de edad", secreto: true },
+      { id: "secreto_sitio_proceso", icono: "📋", nombre: "Secreto del proceso de selección", secreto: true },
+      { id: "secreto_sitio_constancias", icono: "📄", nombre: "Secreto de las constancias", secreto: true },
+      { id: "secreto_sitio_organizadores", icono: "🤝", nombre: "Secreto de organizadores", secreto: true },
+      { id: "secreto_sitio_bugalagrande", icono: "🏘️", nombre: "Secreto de Bugalagrande", secreto: true },
+      { id: "detective_sitio", icono: "🕵️", nombre: "Detective del sitio", secreto: true }
+    ]},
+    { nombre: "Logros finales", logros: [
+      { id: "coleccionista", icono: "✨", nombre: "Coleccionista", desc: "Desbloquea 25 logros vinculantes o más" },
+      { id: "veterano", icono: "🎖️", nombre: "Veterano", desc: "Desbloquea 40 logros vinculantes o más" },
+      { id: "perfeccionista", icono: "👑", nombre: "Perfeccionista", desc: "Desbloquea todos los demás logros vinculantes" },
+      { id: "gran_detective", icono: "🕵️", nombre: "Gran detective", secreto: true }
+    ]},
+    { nombre: "Logros especiales (no vinculantes)", notaVinculante: true, logros: [
+      { id: "asistio_evento", icono: "🎪", nombre: "¡Nos vimos en Camp Fest!", desc: "Asiste físicamente al evento", noVinculante: true }
+    ]}
+  ];
+
+  var LOGROS = CATEGORIAS_LOGROS.reduce(function (acc, cat) { return acc.concat(cat.logros); }, []);
+  var LOGROS_VINCULANTES = LOGROS.filter(function (l) { return !l.noVinculante; });
+
+  function obtenerLogrosDesbloqueados() {
+    try {
+      return JSON.parse(localStorage.getItem("cf_logros") || "[]");
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function revisarLogrosCompuestos() {
+
+    var desbloqueados = obtenerLogrosDesbloqueados();
+    var cambiado = false;
+
+    function tiene(x) { return desbloqueados.indexOf(x) !== -1; }
+    function otorgarSiFalta(x, condicion) {
+      if (condicion && !tiene(x)) { desbloqueados.push(x); cambiado = true; }
+    }
+
+    otorgarSiFalta("detective", tiene("secreto_codigo") && tiene("secreto_palabra") && tiene("secreto_dias"));
+    otorgarSiFalta("linea_completa", ["hito_1662", "hito_1854", "hito_1865", "hito_1886"].every(tiene));
+    otorgarSiFalta("historia_completa", tiene("linea_completa") && tiene("vio_actualidad") && tiene("vio_curiosidades") && tiene("vio_lugares") && tiene("vio_fuentes"));
+    otorgarSiFalta("todas_actividades", ["act_trivia", "act_vof", "act_linea_tiempo", "act_memorama", "act_ruleta", "act_palabra", "act_relampago", "act_iconos", "act_personalidad", "act_reaccion", "act_simon", "act_sopa", "act_atrapa"].every(tiene));
+    otorgarSiFalta("explorador", obtenerSet("cf_tabs_vistas").length >= 4);
+    otorgarSiFalta("detective_sitio", ["secreto_sitio_inicio", "secreto_sitio_itinerario", "secreto_sitio_cartilla", "secreto_sitio_mayores", "secreto_sitio_menores", "secreto_sitio_proceso", "secreto_sitio_constancias", "secreto_sitio_organizadores", "secreto_sitio_bugalagrande"].every(tiene));
+    otorgarSiFalta("gran_detective", tiene("detective") && tiene("detective_sitio"));
+    otorgarSiFalta("sabelotodo", tiene("historia_completa") && tiene("todas_actividades") && tiene("explorador") && tiene("detective_sitio"));
+
+    var desbloqueadosVinculantes = desbloqueados.filter(function (id) {
+      return LOGROS_VINCULANTES.some(function (l) { return l.id === id; });
+    });
+    otorgarSiFalta("coleccionista", desbloqueadosVinculantes.length >= 25);
+    otorgarSiFalta("veterano", desbloqueadosVinculantes.length >= 40);
+    otorgarSiFalta("perfeccionista", desbloqueadosVinculantes.length >= LOGROS_VINCULANTES.length - 1);
+
+    if (cambiado) localStorage.setItem("cf_logros", JSON.stringify(desbloqueados));
+    renderizarLogros();
+
+  }
+
+  function desbloquearLogro(id) {
+    var desbloqueados = obtenerLogrosDesbloqueados();
+    if (desbloqueados.indexOf(id) === -1) {
+      desbloqueados.push(id);
+      localStorage.setItem("cf_logros", JSON.stringify(desbloqueados));
+    }
+    revisarLogrosCompuestos();
+  }
+
+  function evaluarLogrosAutomaticos(p) {
+
+    if (p.referidos >= 1) desbloquearLogro("referido1");
+    if (p.referidos >= 3) desbloquearLogro("referido3");
+    if (p.referidos >= 5) desbloquearLogro("referido5");
+    if (p.referidos >= 10) desbloquearLogro("referido10");
+    if (p.referidos >= 20) desbloquearLogro("referido20");
+
+    if (p.diasRestantes <= 100) desbloquearLogro("cuenta100");
+    if (p.diasRestantes <= 50) desbloquearLogro("cuenta50");
+    if (p.diasRestantes <= 30) desbloquearLogro("cuenta30");
+    if (p.diasRestantes <= 14) desbloquearLogro("cuenta14");
+    if (p.diasRestantes <= 7) desbloquearLogro("cuenta7");
+    if (p.diasRestantes <= 3) desbloquearLogro("cuenta3");
+    if (p.diasRestantes <= 1) desbloquearLogro("cuenta1");
+    if (p.diasRestantes <= 0) desbloquearLogro("diadelevento");
+
+    var hora = new Date().getHours();
+    if (hora >= 23 || hora < 5) desbloquearLogro("nocturno");
+    if (hora >= 5 && hora < 7) desbloquearLogro("madrugador");
+
+    var visitas = parseInt(localStorage.getItem("cf_visitas_totales") || "0", 10);
+    if (visitas >= 5) desbloquearLogro("visitas5");
+    if (visitas >= 10) desbloquearLogro("visitas10");
+    if (visitas >= 25) desbloquearLogro("visitas25");
+    if (visitas >= 50) desbloquearLogro("visitas50");
+
+    if (p.ingresoRegistrado) desbloquearLogro("asistio_evento");
+
+  }
+
+  function renderizarLogros() {
+    var contenedor = document.getElementById("cf-logros-grid");
+    if (!contenedor) return;
+    var desbloqueados = obtenerLogrosDesbloqueados();
+    contenedor.innerHTML = CATEGORIAS_LOGROS.map(function (categoria) {
+      return '<div class="cf-logro-categoria"><h4>' + categoria.nombre + " (" + categoria.logros.filter(function (l) { return desbloqueados.indexOf(l.id) !== -1; }).length + "/" + categoria.logros.length + ")</h4>" +
+        (categoria.notaVinculante ? '<p class="cf-nota-no-vinculante">Estos logros no cuentan para Coleccionista, Veterano ni Perfeccionista — no todos los pueden alcanzar.</p>' : "") +
+        '<div class="cf-logros-grid-interna">' +
+        categoria.logros.map(function (logro) {
+          var desbloqueado = desbloqueados.indexOf(logro.id) !== -1;
+          var etiqueta = desbloqueado ? logro.nombre : (logro.secreto ? "???" : logro.desc);
+          return '<div class="cf-logro-item ' + (desbloqueado ? "cf-desbloqueado" : "cf-bloqueado") + '">' +
+            '<span class="cf-logro-icono">' + (desbloqueado ? logro.icono : "🔒") + "</span>" +
+            "<span>" + etiqueta + "</span>" +
+            "</div>";
+        }).join("") +
+        "</div></div>";
+    }).join("");
+  }
+
+  // ==========================
+  // Easter egg: escribir "bugalagrande" en cualquier parte de la página.
+  // ==========================
+  var bufferTeclas = "";
+  document.addEventListener("keypress", function (evento) {
+    bufferTeclas = (bufferTeclas + evento.key).slice(-20).toLowerCase();
+    if (bufferTeclas.indexOf("bugalagrande") !== -1) {
+      mostrarMensajeSecreto("🎉 ¡Descubriste la palabra secreta! Bugalagrande te espera en noviembre.");
+      desbloquearLogro("secreto_palabra");
+      bufferTeclas = "";
+    }
+  });
+
+  function mostrarMensajeSecreto(texto) {
+    var caja = document.getElementById("cf-mensaje-secreto");
+    caja.textContent = texto;
+    caja.classList.add("cf-mostrar");
+    lanzarConfetiDom();
+    setTimeout(function () { caja.classList.remove("cf-mostrar"); }, 3200);
+  }
+
+  function lanzarConfetiDom() {
+    var colores = ["#FF2E8B", "#FFD400", "#00D2C6", "#8B2FF0"];
+    for (var i = 0; i < 24; i++) {
+      var pieza = document.createElement("span");
+      pieza.textContent = "●";
+      pieza.style.position = "fixed";
+      pieza.style.left = (Math.random() * 100) + "vw";
+      pieza.style.top = "-20px";
+      pieza.style.color = colores[i % colores.length];
+      pieza.style.fontSize = (12 + Math.random() * 10) + "px";
+      pieza.style.zIndex = "1000";
+      pieza.style.pointerEvents = "none";
+      document.body.appendChild(pieza);
+      var duracion = 1800 + Math.random() * 1200;
+      pieza.animate([
+        { transform: "translateY(0) rotate(0deg)", opacity: 1 },
+        { transform: "translateY(100vh) rotate(360deg)", opacity: 0.8 }
+      ], { duration: duracion, easing: "ease-in" });
+      (function (el, t) { setTimeout(function () { el.remove(); }, t); })(pieza, duracion);
+    }
+  }
+
+  // Easter egg: clic en los días restantes muestra el equivalente en horas.
+  document.getElementById("cf-dias-restantes").addEventListener("click", function () {
+    var p = window._cfPerfilActual;
+    if (!p) return;
+    var elemento = this;
+    var original = elemento.textContent;
+    elemento.textContent = (p.diasRestantes * 24) + "h";
+    desbloquearLogro("secreto_dias");
+    setTimeout(function () { elemento.textContent = original; }, 1800);
+  });
+
+  // ==========================
+  // Actividades / juegos.
+  // ==========================
+
+  var PREGUNTAS_TRIVIA = [
+    { texto: "¿En qué año se fundó Bugalagrande?", opciones: ["1662", "1754", "1810", "1900"], correctaIndex: 0 },
+    { texto: "¿Por qué se llama 'Bugalagrande'?", opciones: ["Por un rey español", "Porque su río es más grande que el de Buga", "Por un apellido indígena", "Por el tamaño del pueblo"], correctaIndex: 1 },
+    { texto: "¿Qué fábrica reconocida tiene sede en el municipio?", opciones: ["Coca-Cola", "Alpina", "Nestlé", "Postobón"], correctaIndex: 2 },
+    { texto: "¿En qué año recuperó su nombre después de llamarse 'Nariño'?", opciones: ["1854", "1865", "1900", "1950"], correctaIndex: 1 },
+    { texto: "¿En qué río se ubica Bugalagrande?", opciones: ["Río Magdalena", "Río Cauca", "Río Atrato", "Río Meta"], correctaIndex: 1 },
+    { texto: "¿Cuántos corregimientos tiene Bugalagrande?", opciones: ["5", "7", "9", "12"], correctaIndex: 2 },
+    { texto: "¿Aproximadamente cuántos habitantes tiene Bugalagrande hoy?", opciones: ["21.600", "5.000", "100.000", "60.000"], correctaIndex: 0 },
+    { texto: "¿Cuál es uno de los cultivos principales de la región?", opciones: ["Arroz", "Caña de azúcar", "Trigo", "Papa"], correctaIndex: 1 },
+    { texto: "¿Cómo se llaman las fiestas tradicionales del municipio?", opciones: ["Fiestas de Retorno", "Feria de las Flores", "Carnaval de Blancos y Negros", "Fiestas del Río"], correctaIndex: 0 },
+    { texto: "¿En qué mes se celebran las Fiestas de Retorno?", opciones: ["Diciembre", "Junio", "Agosto", "Abril"], correctaIndex: 2 }
+  ];
+
+  var AFIRMACIONES_VOF = [
+    { texto: "Bugalagrande fue declarado municipio en 1886.", esVerdadero: true },
+    { texto: "Bugalagrande está en la costa Caribe de Colombia.", esVerdadero: false },
+    { texto: "Uno de los cultivos principales de la región es la caña de azúcar.", esVerdadero: true },
+    { texto: "El nombre Bugalagrande nunca ha cambiado desde su fundación.", esVerdadero: false },
+    { texto: "Bugalagrande es uno de los municipios con el nombre más largo del Valle del Cauca.", esVerdadero: true },
+    { texto: "Bugalagrande tiene 9 corregimientos.", esVerdadero: true },
+    { texto: "Las Fiestas de Retorno se celebran en diciembre.", esVerdadero: false },
+    { texto: "El municipio vive principalmente de la pesca.", esVerdadero: false },
+    { texto: "El colegio I.E. Antonio Nariño existe en Bugalagrande.", esVerdadero: true },
+    { texto: "Bugalagrande limita con el río Cauca.", esVerdadero: true }
+  ];
+
+  var HITOS_JUEGO = [
+    { anio: 1662, texto: "Fundación" },
+    { anio: 1854, texto: "Cambia a 'Nariño'" },
+    { anio: 1865, texto: "Recupera su nombre" },
+    { anio: 1886, texto: "Declarado municipio" }
+  ];
+
+  var EMOJIS_MEMORAMA = ["🏕️", "🎪", "🎵", "🌽", "🔥", "🎒", "🌟", "⚽", "🎨", "📚"];
+  var PALABRAS_AHORCADO_FACIL = ["OVERO", "NARINO", "RETORNO"];
+  var PALABRAS_AHORCADO_DIFICIL = ["BUGALAGRANDE", "CAMPFEST", "RENGIFO"];
+  var PALABRAS_AHORCADO = PALABRAS_AHORCADO_FACIL.concat(PALABRAS_AHORCADO_DIFICIL);
+
+  var PREGUNTAS_PERSONALIDAD = [
+    { texto: "En un tiempo libre en el campamento, prefieres...", opciones: [
+      { texto: "Explorar algo nuevo", tipo: "aventurero" },
+      { texto: "Organizar una actividad para el grupo", tipo: "lider" },
+      { texto: "Dibujar o escribir", tipo: "artista" },
+      { texto: "Jugar algo físico", tipo: "deportista" }
+    ]},
+    { texto: "Tu amigo tiene un problema — tú...", opciones: [
+      { texto: "Propones un plan para resolverlo ya", tipo: "lider" },
+      { texto: "Lo escuchas y le levantas el ánimo", tipo: "artista" },
+      { texto: "Lo invitas a moverse y despejarse", tipo: "deportista" },
+      { texto: "Le sugieres probar algo distinto", tipo: "aventurero" }
+    ]},
+    { texto: "Tu actividad favorita del itinerario sería...", opciones: [
+      { texto: "Las dinámicas de integración", tipo: "aventurero" },
+      { texto: "Los espacios de liderazgo juvenil", tipo: "lider" },
+      { texto: "El show de talentos", tipo: "artista" },
+      { texto: "La piscina y tiempo libre activo", tipo: "deportista" }
+    ]},
+    { texto: "Si pudieras elegir un superpoder para Camp Fest...", opciones: [
+      { texto: "Teletransportarte a cualquier actividad", tipo: "aventurero" },
+      { texto: "Inspirar a cualquiera con tus palabras", tipo: "lider" },
+      { texto: "Crear música o arte al instante", tipo: "artista" },
+      { texto: "Energía infinita todo el día", tipo: "deportista" }
+    ]},
+    { texto: "Si tuvieras que representar a tu grupo en una actividad sorpresa, elegirías...", opciones: [
+      { texto: "Explorar el lugar antes que todos", tipo: "aventurero" },
+      { texto: "Organizar quién hace qué", tipo: "lider" },
+      { texto: "Proponer algo creativo y distinto", tipo: "artista" },
+      { texto: "Ser el primero en lanzarte a hacerlo", tipo: "deportista" }
+    ]},
+    { texto: "¿Qué te haría más feliz al final de Camp Fest?", opciones: [
+      { texto: "Haber conocido lugares o cosas nuevas", tipo: "aventurero" },
+      { texto: "Haber ayudado a que el grupo funcionara bien", tipo: "lider" },
+      { texto: "Haber creado o compartido algo propio", tipo: "artista" },
+      { texto: "Haber dado el máximo físicamente", tipo: "deportista" }
+    ]},
+    { texto: "En una noche libre en el campamento, ¿qué harías?", opciones: [
+      { texto: "Salir a explorar los alrededores con el grupo", tipo: "aventurero" },
+      { texto: "Reunir a todos para planear el día siguiente", tipo: "lider" },
+      { texto: "Cantar, dibujar o inventar algo con otros", tipo: "artista" },
+      { texto: "Proponer un juego físico o un reto", tipo: "deportista" }
+    ]},
+    { texto: "Tu lema personal se parece más a...", opciones: [
+      { texto: "\"La vida es una aventura\"", tipo: "aventurero" },
+      { texto: "\"Juntos llegamos más lejos\"", tipo: "lider" },
+      { texto: "\"Todo se puede crear\"", tipo: "artista" },
+      { texto: "\"El esfuerzo siempre vale la pena\"", tipo: "deportista" }
+    ]}
+  ];
+
+  var RESULTADOS_PERSONALIDAD = {
+    aventurero: "🧭 ¡Eres el Aventurero! Siempre listo para lo nuevo.",
+    lider: "🌟 ¡Eres el Líder! Inspiras y organizas al grupo.",
+    artista: "🎨 ¡Eres el Artista! Ves el mundo con creatividad.",
+    deportista: "⚡ ¡Eres el Deportista! Energía sin parar."
+  };
+
+  function iniciarQuizGenerico(config) {
+
+    var indice = 0, puntaje = 0;
+    var contenedor = document.getElementById(config.contenedorId);
+    var temporizador = null;
+
+    function mostrarPregunta() {
+
+      if (indice >= config.preguntas.length) {
+        contenedor.innerHTML = "<p style='font-size:18px; font-weight:700;'>Terminaste con " + puntaje + "/" + config.preguntas.length + "</p><button class='cf-btn cf-primary' id='cf-quiz-reiniciar'>Jugar de nuevo</button>";
+        document.getElementById("cf-quiz-reiniciar").addEventListener("click", function () { indice = 0; puntaje = 0; mostrarPregunta(); });
+        config.onTerminar(puntaje, config.preguntas.length);
+        return;
+      }
+
+      var p = config.preguntas[indice];
+      var segundosRestantes = config.tiempoPorPregunta || 0;
+
+      contenedor.innerHTML =
+        '<p style="font-weight:700; margin-bottom:10px;">' + p.texto + "</p>" +
+        (segundosRestantes > 0 ? '<p id="cf-quiz-tiempo" style="font-size:13px; opacity:.7;">⏱️ ' + segundosRestantes + "s</p>" : "") +
+        p.opciones.map(function (op, i) {
+          return '<button class="cf-btn cf-btn-alt cf-quiz-opcion" data-i="' + i + '" style="display:block; width:100%; margin-bottom:8px; text-align:left;">' + op + "</button>";
+        }).join("") +
+        '<div id="cf-quiz-feedback"></div>';
+
+      function responder(i) {
+        if (temporizador) clearInterval(temporizador);
+        var correcto = i === p.correctaIndex;
+        if (correcto) puntaje++;
+        document.getElementById("cf-quiz-feedback").innerHTML = '<p style="margin-top:8px; font-weight:700; color:' + (correcto ? "#0f7a67" : "#b4225f") + ';">' + (correcto ? "¡Correcto! ✅" : "No era esa 😅") + "</p>";
+        contenedor.querySelectorAll(".cf-quiz-opcion").forEach(function (b) { b.disabled = true; });
+        setTimeout(function () { indice++; mostrarPregunta(); }, 1100);
+      }
+
+      contenedor.querySelectorAll(".cf-quiz-opcion").forEach(function (boton) {
+        boton.addEventListener("click", function () { responder(parseInt(boton.dataset.i, 10)); });
+      });
+
+      if (segundosRestantes > 0) {
+        temporizador = setInterval(function () {
+          segundosRestantes--;
+          var elTiempo = document.getElementById("cf-quiz-tiempo");
+          if (elTiempo) elTiempo.textContent = "⏱️ " + segundosRestantes + "s";
+          if (segundosRestantes <= 0) { clearInterval(temporizador); responder(-1); }
+        }, 1000);
+      }
+
+    }
+
+    mostrarPregunta();
+
+  }
+
+  // ==========================
+  // Selector de dificultad, compartido por casi todas las actividades (excepto Ruleta).
+  // ==========================
+  var IDS_ACTIVIDADES_CON_DIFICULTAD = ["trivia", "vof", "linea", "memorama", "ahorcado", "relampago", "iconos", "personalidad", "reaccion", "simon", "sopa", "atrapa"];
+
+  function mostrarSelectorDificultad(nombreJuego, callback) {
+    var contenedor = document.getElementById("cf-juego-contenedor");
+    contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:10px;">Elige la dificultad para ' + nombreJuego + ':</p>' +
+      '<div style="display:flex; gap:10px; flex-wrap:wrap;">' +
+      '<button class="cf-btn cf-btn-alt cf-dificultad-opcion" data-dificultad="facil">🟢 Fácil</button>' +
+      '<button class="cf-btn cf-btn-alt cf-dificultad-opcion" data-dificultad="medio">🟡 Medio</button>' +
+      '<button class="cf-btn cf-btn-alt cf-dificultad-opcion" data-dificultad="dificil">🔴 Difícil</button>' +
+      "</div>";
+    contenedor.querySelectorAll(".cf-dificultad-opcion").forEach(function (boton) {
+      boton.addEventListener("click", function () { callback(boton.dataset.dificultad); });
+    });
+  }
+
+  function registrarActividadDificil(idJuego, dificultad) {
+    if (dificultad !== "dificil") return;
+    var set = agregarASet("cf_dificil_actividades", idJuego);
+    desbloquearLogro("un_dificil");
+    if (set.length >= 5) desbloquearLogro("cinco_dificiles");
+    if (set.length >= IDS_ACTIVIDADES_CON_DIFICULTAD.length) desbloquearLogro("maestro_dificultad");
+  }
+
+  function iniciarJuegoLinea(contenedorId, dificultad) {
+    var contenedor = document.getElementById(contenedorId);
+    var orden = HITOS_JUEGO.slice().sort(function () { return Math.random() - 0.5; });
+    var ordenados = HITOS_JUEGO.slice().sort(function (a, b) { return a.anio - b.anio; });
+    var siguienteEsperado = 0;
+    var mostrarAnio = dificultad !== "dificil";
+
+    contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:10px;">Haz clic en los hitos del más antiguo al más reciente:</p>' +
+      orden.map(function (h) {
+        return '<button class="cf-btn cf-btn-alt cf-linea-opcion" data-anio="' + h.anio + '" style="display:block; width:100%; margin-bottom:8px;">' + (mostrarAnio ? h.anio + " — " + h.texto : h.texto) + "</button>";
+      }).join("") + '<div id="cf-linea-feedback"></div>';
+
+    contenedor.querySelectorAll(".cf-linea-opcion").forEach(function (boton) {
+      boton.addEventListener("click", function () {
+        if (parseInt(boton.dataset.anio, 10) === ordenados[siguienteEsperado].anio) {
+          boton.disabled = true;
+          boton.style.opacity = 0.4;
+          siguienteEsperado++;
+          if (siguienteEsperado === ordenados.length) {
+            document.getElementById("cf-linea-feedback").innerHTML = '<p style="color:#0f7a67; font-weight:700; margin-top:10px;">¡Perfecto orden! 🎉</p>';
+            desbloquearLogro("act_linea_tiempo");
+            registrarActividadDificil("linea", dificultad);
+          }
+        } else {
+          document.getElementById("cf-linea-feedback").innerHTML = '<p style="color:#b4225f; font-weight:700; margin-top:10px;">Ese no va ahí — ¡sigue intentando!</p>';
+        }
+      });
+    });
+  }
+
+  function iniciarJuegoMemorama(contenedorId, dificultad) {
+
+    var contenedor = document.getElementById(contenedorId);
+    var numPares = { facil: 6, medio: 8, dificil: 10 }[dificultad] || 6;
+    var emojisElegidos = EMOJIS_MEMORAMA.slice(0, numPares);
+    var cartas = emojisElegidos.concat(emojisElegidos).sort(function () { return Math.random() - 0.5; });
+    var reveladas = [];
+    var emparejadas = [];
+    var bloqueado = false;
+
+    function render() {
+      contenedor.innerHTML = '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">' +
+        cartas.map(function (emoji, i) {
+          var visible = reveladas.indexOf(i) !== -1 || emparejadas.indexOf(i) !== -1;
+          return '<button class="cf-carta-memoria" data-i="' + i + '" style="aspect-ratio:1; font-size:22px; border-radius:10px; border:2px solid var(--ink); background:' + (visible ? "var(--yellow)" : "var(--cream)") + ';">' + (visible ? emoji : "❓") + "</button>";
+        }).join("") + '</div><p id="cf-memoria-estado" style="margin-top:10px; font-weight:700;"></p>';
+
+      contenedor.querySelectorAll(".cf-carta-memoria").forEach(function (boton) {
+        boton.addEventListener("click", function () {
+          var i = parseInt(boton.dataset.i, 10);
+          if (bloqueado || reveladas.indexOf(i) !== -1 || emparejadas.indexOf(i) !== -1) return;
+          reveladas.push(i);
+          render();
+          if (reveladas.length === 2) {
+            bloqueado = true;
+            if (cartas[reveladas[0]] === cartas[reveladas[1]]) {
+              emparejadas = emparejadas.concat(reveladas);
+              reveladas = [];
+              bloqueado = false;
+              render();
+              if (emparejadas.length === cartas.length) {
+                document.getElementById("cf-memoria-estado").textContent = "¡Encontraste todas las parejas! 🎉";
+                desbloquearLogro("act_memorama");
+                registrarActividadDificil("memorama", dificultad);
+              }
+            } else {
+              setTimeout(function () { reveladas = []; bloqueado = false; render(); }, 700);
+            }
+          }
+        });
+      });
+    }
+
+    render();
+
+  }
+
+  function iniciarJuegoRuleta(contenedorId) {
+    var contenedor = document.getElementById(contenedorId);
+    contenedor.innerHTML = '<button class="cf-btn cf-primary" id="cf-btn-girar">🎡 Girar la ruleta</button><p id="cf-ruleta-resultado" style="margin-top:14px; font-weight:700;"></p>';
+    document.getElementById("cf-btn-girar").addEventListener("click", function () {
+      var resultadoEl = document.getElementById("cf-ruleta-resultado");
+      resultadoEl.textContent = "Girando... 🎡";
+      setTimeout(function () {
+        var mensaje = DATOS_CURIOSOS[Math.floor(Math.random() * DATOS_CURIOSOS.length)];
+        resultadoEl.textContent = "🎉 " + mensaje;
+        desbloquearLogro("act_ruleta");
+      }, 900);
+    });
+  }
+
+  function iniciarJuegoAhorcado(contenedorId, dificultad) {
+
+    var contenedor = document.getElementById(contenedorId);
+    var bancoPalabras = dificultad === "facil" ? PALABRAS_AHORCADO_FACIL : dificultad === "dificil" ? PALABRAS_AHORCADO_DIFICIL : PALABRAS_AHORCADO;
+    var palabra = bancoPalabras[Math.floor(Math.random() * bancoPalabras.length)];
+    var adivinadas = [];
+    var erroresRestantes = dificultad === "dificil" ? 5 : 6;
+
+    function render() {
+      var visible = palabra.split("").map(function (letra) { return adivinadas.indexOf(letra) !== -1 ? letra : "_"; }).join(" ");
+      var letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      contenedor.innerHTML =
+        '<p style="font-size:22px; font-weight:700; letter-spacing:4px;">' + visible + "</p>" +
+        "<p>Errores restantes: " + erroresRestantes + "</p>" +
+        '<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;">' +
+        letras.map(function (letra) {
+          var usada = adivinadas.indexOf(letra) !== -1;
+          return '<button class="cf-letra-ahorcado" data-letra="' + letra + '" ' + (usada ? "disabled" : "") + ' style="width:30px; height:30px; border-radius:6px; border:2px solid var(--ink); background:' + (usada ? "#ddd" : "var(--cream)") + ';">' + letra + "</button>";
+        }).join("") +
+        '</div><p id="cf-ahorcado-estado" style="margin-top:10px; font-weight:700;"></p>';
+
+      contenedor.querySelectorAll(".cf-letra-ahorcado").forEach(function (boton) {
+        boton.addEventListener("click", function () {
+          var letra = boton.dataset.letra;
+          adivinadas.push(letra);
+          if (palabra.indexOf(letra) === -1) erroresRestantes--;
+          render();
+          if (palabra.split("").every(function (l) { return adivinadas.indexOf(l) !== -1; })) {
+            document.getElementById("cf-ahorcado-estado").textContent = "¡Ganaste! Era " + palabra + " 🎉";
+            desbloquearLogro("act_palabra");
+            registrarActividadDificil("ahorcado", dificultad);
+          } else if (erroresRestantes <= 0) {
+            document.getElementById("cf-ahorcado-estado").textContent = "Se acabaron los intentos. Era " + palabra + " — ¡inténtalo de nuevo!";
+          }
+        });
+      });
+    }
+
+    render();
+
+  }
+
+  function iniciarJuegoIconos(contenedorId, dificultad) {
+    var contenedor = document.getElementById(contenedorId);
+    var total = { facil: 16, medio: 24, dificil: 36 }[dificultad] || 24;
+    var columnas = dificultad === "dificil" ? 6 : dificultad === "facil" ? 4 : 6;
+    var tamanoFuente = dificultad === "dificil" ? "14px" : "20px";
+    var distinto = Math.floor(Math.random() * total);
+    contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:10px;">Encuentra el ícono diferente:</p><div style="display:grid; grid-template-columns:repeat(' + columnas + ',1fr); gap:6px;">' +
+      Array.from({ length: total }).map(function (_, i) {
+        return '<button class="cf-icono-boton" data-i="' + i + '" style="font-size:' + tamanoFuente + '; padding:8px; border-radius:8px; border:2px solid var(--ink); background:var(--cream);">' + (i === distinto ? "🌠" : "🌟") + "</button>";
+      }).join("") + '</div><p id="cf-iconos-estado" style="margin-top:10px; font-weight:700;"></p>';
+
+    contenedor.querySelectorAll(".cf-icono-boton").forEach(function (boton) {
+      boton.addEventListener("click", function () {
+        if (parseInt(boton.dataset.i, 10) === distinto) {
+          document.getElementById("cf-iconos-estado").textContent = "¡Lo encontraste! 🎉";
+          desbloquearLogro("act_iconos");
+          registrarActividadDificil("iconos", dificultad);
+        } else {
+          boton.style.opacity = 0.25;
+        }
+      });
+    });
+  }
+
+  function iniciarJuegoPersonalidad(contenedorId, dificultad) {
+
+    var contenedor = document.getElementById(contenedorId);
+    var preguntas = dificultad === "dificil" ? PREGUNTAS_PERSONALIDAD : PREGUNTAS_PERSONALIDAD.slice(0, 4);
+    var indice = 0;
+    var puntajes = { aventurero: 0, lider: 0, artista: 0, deportista: 0 };
+
+    function render() {
+
+      if (indice >= preguntas.length) {
+        var mejor = Object.keys(puntajes).reduce(function (a, b) { return puntajes[a] >= puntajes[b] ? a : b; });
+        var resultadoHtml = '<p style="font-size:18px; font-weight:700;">' + RESULTADOS_PERSONALIDAD[mejor] + "</p>";
+        if (dificultad === "dificil") {
+          resultadoHtml += Object.keys(puntajes).map(function (tipo) {
+            var porcentaje = Math.round((puntajes[tipo] / preguntas.length) * 100);
+            return '<p style="font-size:13px;">' + tipo + ": " + porcentaje + "%</p>";
+          }).join("");
+        }
+        contenedor.innerHTML = resultadoHtml + '<button class="cf-btn cf-primary" id="cf-personalidad-reiniciar">Volver a intentar</button>';
+        document.getElementById("cf-personalidad-reiniciar").addEventListener("click", function () { indice = 0; puntajes = { aventurero: 0, lider: 0, artista: 0, deportista: 0 }; render(); });
+        desbloquearLogro("act_personalidad");
+        registrarActividadDificil("personalidad", dificultad);
+        return;
+      }
+
+      var p = preguntas[indice];
+      contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:10px;">' + p.texto + "</p>" +
+        p.opciones.map(function (op, i) {
+          return '<button class="cf-btn cf-btn-alt cf-personalidad-opcion" data-i="' + i + '" style="display:block; width:100%; margin-bottom:8px; text-align:left;">' + op.texto + "</button>";
+        }).join("");
+
+      contenedor.querySelectorAll(".cf-personalidad-opcion").forEach(function (boton) {
+        boton.addEventListener("click", function () {
+          var tipo = p.opciones[parseInt(boton.dataset.i, 10)].tipo;
+          puntajes[tipo]++;
+          indice++;
+          render();
+        });
+      });
+
+    }
+
+    render();
+
+  }
+
+  function iniciarJuegoReaccion(contenedorId, dificultad) {
+
+    var contenedor = document.getElementById(contenedorId);
+    var ventana = { facil: [2000, 5000], medio: [1000, 4000], dificil: [500, 3000] }[dificultad] || [1000, 4000];
+    var umbralRapido = { facil: 600, medio: 450, dificil: 400 }[dificultad] || 450;
+
+    contenedor.innerHTML = '<p>Espera a que aparezca el botón y haz clic lo más rápido posible.' + (dificultad === "dificil" ? " Cuidado: a veces aparece una trampa." : "") + '</p><div id="cf-reaccion-zona" style="position:relative; height:200px; background:var(--cream); border-radius:10px; margin-top:10px;"><p style="text-align:center; padding-top:80px;">Prepárate...</p></div>';
+
+    var zona = document.getElementById("cf-reaccion-zona");
+    var espera = ventana[0] + Math.random() * (ventana[1] - ventana[0]);
+    var haySenuelo = dificultad === "dificil" && Math.random() < 0.4;
+
+    function mostrarBotonReal() {
+      zona.innerHTML = "";
+      var boton = document.createElement("button");
+      boton.textContent = "¡CLIC!";
+      boton.className = "cf-btn cf-primary";
+      boton.style.position = "absolute";
+      boton.style.left = (Math.random() * 70) + "%";
+      boton.style.top = (Math.random() * 70) + "%";
+      zona.appendChild(boton);
+      var apareceEn = Date.now();
+      boton.addEventListener("click", function () {
+        var tiempoMs = Date.now() - apareceEn;
+        zona.innerHTML = '<p style="text-align:center; padding-top:70px; font-weight:700;">⏱️ ' + tiempoMs + " ms" + (tiempoMs < umbralRapido ? " — ¡rápido como un rayo! ⚡" : "") + "</p>";
+        var veces = incrementarContador("cf_veces_reaccion");
+        desbloquearLogro("act_reaccion");
+        registrarActividadDificil("reaccion", dificultad);
+        if (tiempoMs < umbralRapido) desbloquearLogro("reaccion_rapida");
+        if (veces >= 4) desbloquearLogro("repitio_reaccion");
+      });
+    }
+
+    if (haySenuelo) {
+      setTimeout(function () {
+        var senuelo = document.createElement("button");
+        senuelo.textContent = "¡CLIC!";
+        senuelo.className = "cf-btn";
+        senuelo.style.background = "var(--pink)";
+        senuelo.style.position = "absolute";
+        senuelo.style.left = (Math.random() * 70) + "%";
+        senuelo.style.top = (Math.random() * 70) + "%";
+        zona.appendChild(senuelo);
+        senuelo.addEventListener("click", function () {
+          zona.innerHTML = '<p style="text-align:center; padding-top:70px; font-weight:700; color:#b4225f;">¡Era una trampa! 🙈 Intenta de nuevo.</p>';
+        });
+        setTimeout(function () {
+          if (zona.contains(senuelo)) { senuelo.remove(); mostrarBotonReal(); }
+        }, espera / 2);
+      }, espera / 4);
+    } else {
+      setTimeout(mostrarBotonReal, espera);
+    }
+
+  }
+
+  // ==========================
+  // Juego nuevo: Simón dice (memoria de secuencia de colores).
+  // ==========================
+  var COLORES_SIMON = [
+    { id: "morado", color: "var(--purple)" },
+    { id: "rosado", color: "var(--pink)" },
+    { id: "amarillo", color: "var(--yellow)" },
+    { id: "cian", color: "var(--cyan)" }
+  ];
+
+  function iniciarJuegoSimon(contenedorId, dificultad) {
+
+    var contenedor = document.getElementById(contenedorId);
+    var config = { facil: { largoInicial: 3, velocidad: 700 }, medio: { largoInicial: 4, velocidad: 500 }, dificil: { largoInicial: 5, velocidad: 350 } }[dificultad] || { largoInicial: 3, velocidad: 700 };
+    var secuencia = [];
+    var entradaJugador = [];
+    var rondaSuperada = false;
+
+    function agregarPaso() {
+      secuencia.push(Math.floor(Math.random() * COLORES_SIMON.length));
+    }
+
+    function render(bloqueado) {
+      contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:10px;">Secuencia actual: ' + secuencia.length + '</p><div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; max-width:260px;">' +
+        COLORES_SIMON.map(function (c, i) {
+          return '<button class="cf-simon-boton" data-i="' + i + '" ' + (bloqueado ? "disabled" : "") + ' style="height:70px; border-radius:12px; border:3px solid var(--ink); background:' + c.color + ';"></button>';
+        }).join("") + '</div><p id="cf-simon-estado" style="margin-top:10px; font-weight:700;"></p>';
+    }
+
+    function reproducirSecuencia() {
+      render(true);
+      var i = 0;
+      var intervalo = setInterval(function () {
+        var botones = contenedor.querySelectorAll(".cf-simon-boton");
+        botones.forEach(function (b) { b.style.opacity = 1; });
+        var actual = botones[secuencia[i]];
+        if (actual) actual.style.opacity = 0.4;
+        setTimeout(function () { if (actual) actual.style.opacity = 1; }, config.velocidad / 2);
+        i++;
+        if (i >= secuencia.length) {
+          clearInterval(intervalo);
+          setTimeout(function () { entradaJugador = []; render(false); habilitarClicks(); }, config.velocidad);
+        }
+      }, config.velocidad);
+    }
+
+    function habilitarClicks() {
+      contenedor.querySelectorAll(".cf-simon-boton").forEach(function (boton) {
+        boton.addEventListener("click", function () {
+          var i = parseInt(boton.dataset.i, 10);
+          entradaJugador.push(i);
+          var posicion = entradaJugador.length - 1;
+          if (entradaJugador[posicion] !== secuencia[posicion]) {
+            document.getElementById("cf-simon-estado").textContent = "Fallaste en la secuencia " + secuencia.length + ". ¡Inténtalo de nuevo!";
+            contenedor.querySelectorAll(".cf-simon-boton").forEach(function (b) { b.disabled = true; });
+            return;
+          }
+          if (entradaJugador.length === secuencia.length) {
+            if (!rondaSuperada) {
+              rondaSuperada = true;
+              desbloquearLogro("act_simon");
+              registrarActividadDificil("simon", dificultad);
+            }
+            if (secuencia.length >= 8) desbloquearLogro("simon_experto");
+            document.getElementById("cf-simon-estado").textContent = "¡Bien! Sigue a la siguiente ronda...";
+            setTimeout(function () { agregarPaso(); reproducirSecuencia(); }, 900);
+          }
+        });
+      });
+    }
+
+    for (var i = 0; i < config.largoInicial; i++) agregarPaso();
+    reproducirSecuencia();
+
+  }
+
+  // ==========================
+  // Juego nuevo: Sopa de letras.
+  // ==========================
+  var PALABRAS_SOPA = ["BUGALAGRANDE", "CAMPFEST", "RENGIFO", "RETORNO", "OVERO", "NARINO"];
+
+  function iniciarJuegoSopa(contenedorId, dificultad) {
+
+    var contenedor = document.getElementById(contenedorId);
+    var config = { facil: { tamano: 8, numPalabras: 3 }, medio: { tamano: 10, numPalabras: 4 }, dificil: { tamano: 12, numPalabras: 6 } }[dificultad] || { tamano: 10, numPalabras: 4 };
+    var tamano = config.tamano;
+    var palabrasReto = PALABRAS_SOPA.filter(function (p) { return p.length <= tamano; }).slice(0, config.numPalabras);
+    var grilla = [];
+    for (var f = 0; f < tamano; f++) {
+      grilla.push([]);
+      for (var c = 0; c < tamano; c++) grilla[f].push(null);
+    }
+
+    function colocarPalabra(palabra) {
+      for (var intento = 0; intento < 40; intento++) {
+        var horizontal = Math.random() < 0.5;
+        var fila = Math.floor(Math.random() * tamano);
+        var col = Math.floor(Math.random() * tamano);
+        var largo = palabra.length;
+        if (horizontal && col + largo <= tamano) {
+          var cabe = true;
+          for (var i = 0; i < largo; i++) { if (grilla[fila][col + i] && grilla[fila][col + i] !== palabra[i]) cabe = false; }
+          if (cabe) { for (var i = 0; i < largo; i++) grilla[fila][col + i] = palabra[i]; return { fila: fila, col: col, horizontal: true, largo: largo }; }
+        } else if (!horizontal && fila + largo <= tamano) {
+          var cabeV = true;
+          for (var i = 0; i < largo; i++) { if (grilla[fila + i][col] && grilla[fila + i][col] !== palabra[i]) cabeV = false; }
+          if (cabeV) { for (var i = 0; i < largo; i++) grilla[fila + i][col] = palabra[i]; return { fila: fila, col: col, horizontal: false, largo: largo }; }
+        }
+      }
+      return null;
+    }
+
+    var ubicaciones = palabrasReto.map(function (p) { return { palabra: p, ubicacion: colocarPalabra(p) }; }).filter(function (u) { return u.ubicacion; });
+
+    var LETRAS_RELLENO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (var f2 = 0; f2 < tamano; f2++) {
+      for (var c2 = 0; c2 < tamano; c2++) {
+        if (!grilla[f2][c2]) grilla[f2][c2] = LETRAS_RELLENO[Math.floor(Math.random() * LETRAS_RELLENO.length)];
+      }
+    }
+
+    var seleccionInicio = null;
+    var encontradas = [];
+
+    function celdaEnLinea(inicio, fin) {
+      if (inicio.f === fin.f) return { tipo: "h", desde: Math.min(inicio.c, fin.c), hasta: Math.max(inicio.c, fin.c), fila: inicio.f };
+      if (inicio.c === fin.c) return { tipo: "v", desde: Math.min(inicio.f, fin.f), hasta: Math.max(inicio.f, fin.f), col: inicio.c };
+      return null;
+    }
+
+    function textoDeSeleccion(linea) {
+      var letras = [];
+      if (linea.tipo === "h") { for (var c = linea.desde; c <= linea.hasta; c++) letras.push(grilla[linea.fila][c]); }
+      else { for (var f = linea.desde; f <= linea.hasta; f++) letras.push(grilla[f][linea.col]); }
+      return letras.join("");
+    }
+
+    function render() {
+      contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:8px;">Encuentra: ' + palabrasReto.filter(function(p){ return palabrasReto.indexOf(p) !== -1; }).map(function (p) { return encontradas.indexOf(p) !== -1 ? "<s>" + p + "</s>" : p; }).join(", ") + '</p>' +
+        '<div style="display:grid; grid-template-columns:repeat(' + tamano + ',1fr); gap:2px; max-width:' + (tamano * 26) + 'px;">' +
+        grilla.map(function (fila, f) {
+          return fila.map(function (letra, c) {
+            return '<button class="cf-celda-sopa" data-f="' + f + '" data-c="' + c + '" style="aspect-ratio:1; font-size:11px; border:1px solid var(--ink); background:var(--cream); padding:0;">' + letra + "</button>";
+          }).join("");
+        }).join("") +
+        '</div><p id="cf-sopa-estado" style="margin-top:10px; font-weight:700;"></p>';
+
+      contenedor.querySelectorAll(".cf-celda-sopa").forEach(function (boton) {
+        boton.addEventListener("click", function () {
+          var f = parseInt(boton.dataset.f, 10), c = parseInt(boton.dataset.c, 10);
+          if (!seleccionInicio) {
+            seleccionInicio = { f: f, c: c };
+            boton.style.background = "var(--yellow)";
+            return;
+          }
+          var linea = celdaEnLinea(seleccionInicio, { f: f, c: c });
+          seleccionInicio = null;
+          if (!linea) { render(); return; }
+          var texto = textoDeSeleccion(linea);
+          var textoInvertido = texto.split("").reverse().join("");
+          var encontrada = palabrasReto.find(function (p) { return (p === texto || p === textoInvertido) && encontradas.indexOf(p) === -1; });
+          if (encontrada) encontradas.push(encontrada);
+          render();
+          if (encontradas.length === palabrasReto.length) {
+            document.getElementById("cf-sopa-estado").textContent = "¡Encontraste todas las palabras! 🎉";
+            desbloquearLogro("act_sopa");
+            registrarActividadDificil("sopa", dificultad);
+          }
+        });
+      });
+    }
+
+    render();
+
+  }
+
+  // ==========================
+  // Juego nuevo: Atrapa los objetivos.
+  // ==========================
+  function iniciarJuegoAtrapa(contenedorId, dificultad) {
+
+    var contenedor = document.getElementById(contenedorId);
+    var config = { facil: { duracionMs: 15000, vidaMs: 1600 }, medio: { duracionMs: 12000, vidaMs: 1200 }, dificil: { duracionMs: 8000, vidaMs: 800 } }[dificultad] || { duracionMs: 12000, vidaMs: 1200 };
+
+    contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:8px;">Haz clic en los objetivos antes de que desaparezcan.</p><div id="cf-atrapa-zona" style="position:relative; height:220px; background:var(--cream); border-radius:10px;"></div><p id="cf-atrapa-estado" style="margin-top:10px; font-weight:700;"></p>';
+
+    var zona = document.getElementById("cf-atrapa-zona");
+    var aciertos = 0, aparecidos = 0, activo = true;
+
+    function generarObjetivo() {
+      if (!activo) return;
+      aparecidos++;
+      var objetivo = document.createElement("button");
+      objetivo.textContent = "🎯";
+      objetivo.style.position = "absolute";
+      objetivo.style.left = (Math.random() * 85) + "%";
+      objetivo.style.top = (Math.random() * 75) + "%";
+      objetivo.style.fontSize = "26px";
+      objetivo.style.background = "transparent";
+      objetivo.style.border = "none";
+      objetivo.style.cursor = "pointer";
+      zona.appendChild(objetivo);
+      var vencido = false;
+      var quitar = setTimeout(function () { vencido = true; if (zona.contains(objetivo)) objetivo.remove(); }, config.vidaMs);
+      objetivo.addEventListener("click", function () {
+        if (vencido) return;
+        clearTimeout(quitar);
+        aciertos++;
+        objetivo.remove();
+      });
+      setTimeout(generarObjetivo, config.vidaMs * (0.6 + Math.random() * 0.5));
+    }
+
+    generarObjetivo();
+
+    setTimeout(function () {
+      activo = false;
+      zona.innerHTML = "";
+      var porcentaje = aparecidos > 0 ? Math.round((aciertos / aparecidos) * 100) : 0;
+      document.getElementById("cf-atrapa-estado").textContent = "Atrapaste " + aciertos + " de " + aparecidos + " (" + porcentaje + "%).";
+      desbloquearLogro("act_atrapa");
+      registrarActividadDificil("atrapa", dificultad);
+      if (porcentaje >= 90 && aparecidos >= 8) desbloquearLogro("atrapa_certero");
+    }, config.duracionMs);
+
+  }
+
+  var NOMBRES_JUEGOS = {
+    trivia: "Trivia", vof: "Verdadero o Falso", linea: "Ordena la línea", memorama: "Memorama",
+    ahorcado: "Adivina la palabra", relampago: "Quiz relámpago", iconos: "Encuentra el ícono",
+    personalidad: "Test de personalidad", reaccion: "Reto de reacción",
+    simon: "Simón dice", sopa: "Sopa de letras", atrapa: "Atrapa los objetivos"
+  };
+
+  function iniciarJuego(id) {
+
+    var contenedorId = "cf-juego-contenedor";
+
+    if (id === "ruleta") {
+      iniciarJuegoRuleta(contenedorId);
+      return;
+    }
+
+    mostrarSelectorDificultad(NOMBRES_JUEGOS[id] || id, function (dificultad) {
+      arrancarJuegoConDificultad(id, contenedorId, dificultad);
+    });
+
+  }
+
+  function arrancarJuegoConDificultad(id, contenedorId, dificultad) {
+
+    var NUM_PREGUNTAS = { facil: 5, medio: 8, dificil: 10 };
+    var SEGUNDOS_RELAMPAGO = { facil: 15, medio: 10, dificil: 6 };
+
+    if (id === "trivia") {
+      var vecesTrivia = incrementarContador("cf_veces_trivia");
+      if (vecesTrivia >= 2) desbloquearLogro("repitio_trivia");
+      var preguntasTrivia = PREGUNTAS_TRIVIA.slice().sort(function () { return Math.random() - 0.5; }).slice(0, NUM_PREGUNTAS[dificultad]);
+      iniciarQuizGenerico({ preguntas: preguntasTrivia, contenedorId: contenedorId, tiempoPorPregunta: dificultad === "dificil" ? 12 : 0, onTerminar: function (puntaje, total) {
+        desbloquearLogro("act_trivia");
+        if (puntaje === total) desbloquearLogro("trivia_perfecta");
+        registrarActividadDificil("trivia", dificultad);
+      }});
+    } else if (id === "vof") {
+      var preguntasVoF = AFIRMACIONES_VOF.map(function (a) { return { texto: a.texto, opciones: ["Verdadero", "Falso"], correctaIndex: a.esVerdadero ? 0 : 1 }; })
+        .sort(function () { return Math.random() - 0.5; }).slice(0, NUM_PREGUNTAS[dificultad]);
+      iniciarQuizGenerico({ preguntas: preguntasVoF, contenedorId: contenedorId, tiempoPorPregunta: dificultad === "dificil" ? 12 : 0, onTerminar: function (puntaje, total) {
+        desbloquearLogro("act_vof");
+        if (puntaje === total) desbloquearLogro("vof_perfecto");
+        registrarActividadDificil("vof", dificultad);
+      }});
+    } else if (id === "linea") {
+      iniciarJuegoLinea(contenedorId, dificultad);
+    } else if (id === "memorama") {
+      iniciarJuegoMemorama(contenedorId, dificultad);
+    } else if (id === "ahorcado") {
+      iniciarJuegoAhorcado(contenedorId, dificultad);
+    } else if (id === "relampago") {
+      var preguntasRelampago = PREGUNTAS_TRIVIA.slice().reverse().slice(0, NUM_PREGUNTAS[dificultad]);
+      iniciarQuizGenerico({ preguntas: preguntasRelampago, contenedorId: contenedorId, tiempoPorPregunta: SEGUNDOS_RELAMPAGO[dificultad], onTerminar: function (puntaje, total) {
+        desbloquearLogro("act_relampago");
+        if (puntaje === total) desbloquearLogro("relampago_perfecto");
+        registrarActividadDificil("relampago", dificultad);
+      }});
+    } else if (id === "iconos") {
+      iniciarJuegoIconos(contenedorId, dificultad);
+    } else if (id === "personalidad") {
+      iniciarJuegoPersonalidad(contenedorId, dificultad);
+    } else if (id === "reaccion") {
+      iniciarJuegoReaccion(contenedorId, dificultad);
+    } else if (id === "simon") {
+      iniciarJuegoSimon(contenedorId, dificultad);
+    } else if (id === "sopa") {
+      iniciarJuegoSopa(contenedorId, dificultad);
+    } else if (id === "atrapa") {
+      iniciarJuegoAtrapa(contenedorId, dificultad);
+    }
+
+  }
+
+  document.querySelectorAll(".cf-juego-card").forEach(function (boton) {
+    boton.addEventListener("click", function () { iniciarJuego(boton.dataset.juego); });
+  });
+
+  // ==========================
+  // Insignia digital descargable — generada en el navegador con <canvas>.
+  // ==========================
+  function trazarRectRedondeado(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function dibujarTriangulo(ctx, x, y, tam) {
+    ctx.beginPath();
+    ctx.moveTo(x, y - tam);
+    ctx.lineTo(x + tam, y + tam);
+    ctx.lineTo(x - tam, y + tam);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function fuenteQueEntra(ctx, texto, maxAncho, tamanoInicial, peso) {
+    var tamano = tamanoInicial;
+    ctx.font = peso + " " + tamano + "px 'Poppins', Arial, sans-serif";
+    while (ctx.measureText(texto).width > maxAncho && tamano > 16) {
+      tamano -= 2;
+      ctx.font = peso + " " + tamano + "px 'Poppins', Arial, sans-serif";
+    }
+    return tamano;
+  }
+
+  var CONFIG_ESTADO_INSIGNIA = {
+    admitido: { color: "#2ECC71", texto: "✅ ¡ADMITIDO!", frase: "¡Voy a Camp Fest 2026! 🏕️", textoClaro: true },
+    pendiente: { color: "#FFD400", texto: "⏳ EN REVISIÓN", frase: "Estoy en el proceso de Camp Fest 2026", textoClaro: false },
+    no_admitido: { color: "#8A8A93", texto: "RESULTADO: NO ADMITIDO", frase: "Participé en el proceso de Camp Fest 2026", textoClaro: true },
+    desertor: { color: "#8A8A93", texto: "DESERCIÓN REGISTRADA", frase: "Camp Fest 2026", textoClaro: true }
+  };
+
+  document.getElementById("cf-btn-descargar-insignia").addEventListener("click", function () {
+
+    var p = window._cfPerfilActual;
+    if (!p) return;
+
+    var INK = "#1A1A1E", PURPLE = "#8B2FF0", PINK = "#FF2E8B", YELLOW = "#FFD400", CYAN = "#00D2C6", WHITE = "#FFFFFF";
+    var estado = CONFIG_ESTADO_INSIGNIA[p.estadoAdmision] || CONFIG_ESTADO_INSIGNIA.pendiente;
+
+    var canvas = document.getElementById("cf-canvas-insignia");
+    var ctx = canvas.getContext("2d");
+    var W = canvas.width, H = canvas.height;
+
+    var degradado = ctx.createLinearGradient(0, 0, W, H);
+    degradado.addColorStop(0, PURPLE);
+    degradado.addColorStop(1, PINK);
+    ctx.fillStyle = degradado;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = YELLOW;
+    ctx.beginPath(); ctx.arc(50, 90, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(W - 60, 340, 10, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = CYAN;
+    ctx.beginPath(); ctx.arc(W - 50, 95, 16, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(45, 620, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = WHITE;
+    dibujarTriangulo(ctx, W - 45, 640, 16);
+    dibujarTriangulo(ctx, 40, 990, 14);
+    ctx.beginPath(); ctx.arc(W - 55, 1050, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.textAlign = "center";
+
+    ctx.fillStyle = WHITE;
+    ctx.font = "bold 40px 'Poppins', Arial, sans-serif";
+    ctx.fillText("🏕 CAMP FEST 2026", W / 2, 110);
+    ctx.font = "600 20px 'Poppins', Arial, sans-serif";
+    ctx.fillText("15 – 17 de noviembre · Bugalagrande, Valle", W / 2, 145);
+
+    ctx.font = "bold 28px 'Poppins', Arial, sans-serif";
+    var anchoSticker = ctx.measureText(estado.texto).width + 60;
+    ctx.save();
+    ctx.translate(W / 2, 230);
+    ctx.rotate(-0.03);
+    trazarRectRedondeado(ctx, -anchoSticker / 2, -32, anchoSticker, 64, 32);
+    ctx.fillStyle = estado.color;
+    ctx.fill();
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+    ctx.fillStyle = estado.textoClaro ? WHITE : INK;
+    ctx.fillText(estado.texto, 0, 10);
+    ctx.restore();
+
+    ctx.fillStyle = WHITE;
+    fuenteQueEntra(ctx, p.nombre, W - 100, 48, "bold");
+    ctx.fillText(p.nombre, W / 2, 380);
+
+    ctx.font = "600 22px 'Poppins', Arial, sans-serif";
+    ctx.fillText(estado.frase, W / 2, 425);
+
+    ctx.font = "600 18px 'Poppins', Arial, sans-serif";
+    var anchoPill = ctx.measureText(p.municipio).width + 46;
+    trazarRectRedondeado(ctx, W / 2 - anchoPill / 2, 465, anchoPill, 42, 21);
+    ctx.fillStyle = CYAN;
+    ctx.fill();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.fillText(p.municipio, W / 2, 492);
+
+    var boletaY = 560, boletaAlto = 150;
+    trazarRectRedondeado(ctx, 70, boletaY, W - 140, boletaAlto, 20);
+    ctx.fillStyle = YELLOW;
+    ctx.fill();
+    ctx.setLineDash([10, 8]);
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = "700 18px 'Poppins', Arial, sans-serif";
+    ctx.fillStyle = INK;
+    ctx.fillText("CÓDIGO DE PARTICIPANTE", W / 2, boletaY + 45);
+    ctx.font = "bold 62px 'Poppins', Arial, sans-serif";
+    ctx.fillText(p.codigo, W / 2, boletaY + 110);
+
+    var cardY = 770, cardAlto = 130;
+    trazarRectRedondeado(ctx, 70, cardY, W - 140, cardAlto, 20);
+    ctx.fillStyle = WHITE;
+    ctx.fill();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.font = "700 18px 'Poppins', Arial, sans-serif";
+    ctx.fillStyle = INK;
+    ctx.fillText("FALTAN", W / 2, cardY + 38);
+    ctx.font = "bold 56px 'Poppins', Arial, sans-serif";
+    ctx.fillStyle = PINK;
+    ctx.fillText(String(p.diasRestantes), W / 2, cardY + 95);
+    ctx.font = "700 18px 'Poppins', Arial, sans-serif";
+    ctx.fillStyle = INK;
+    ctx.fillText("DÍAS", W / 2 + 90, cardY + 95);
+
+    ctx.font = "600 20px 'Poppins', Arial, sans-serif";
+    ctx.fillStyle = WHITE;
+    ctx.fillText("#CampFest2026 · campfest.online", W / 2, H - 60);
+    ctx.font = "500 15px 'Poppins', Arial, sans-serif";
+    ctx.fillText("Subsistema de Participación Juvenil de Bugalagrande", W / 2, H - 30);
+
+    ctx.textAlign = "left";
+
+    var enlace = document.createElement("a");
+    enlace.href = canvas.toDataURL("image/png");
+    enlace.download = "insignia-campfest-" + p.codigo + ".png";
+    enlace.click();
+
+    var vecesInsignia = incrementarContador("cf_veces_insignia");
+    desbloquearLogro("insignia");
+    if (vecesInsignia >= 2) desbloquearLogro("insignia_2veces");
+
+  });
+
+  iniciar();
+
+})();
+</script>
+
+</body>
+</html>

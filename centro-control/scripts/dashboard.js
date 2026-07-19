@@ -290,6 +290,7 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
         document.getElementById("vistaCronograma").classList.toggle("oculto", vista !== "cronograma");
         document.getElementById("vistaInventario").classList.toggle("oculto", vista !== "inventario");
         document.getElementById("vistaInscripciones").classList.toggle("oculto", vista !== "inscripciones");
+        document.getElementById("vistaNotificaciones").classList.toggle("oculto", vista !== "notificaciones");
         document.getElementById("vistaAdministracion").classList.toggle("oculto", vista !== "administracion");
 
         if (vista === "cronograma") {
@@ -310,6 +311,10 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
                 cargarActividadesParaLote();
                 cargarSolicitudesMaterialAdmin();
             }
+        }
+
+        if (vista === "notificaciones") {
+            cargarAnunciosAdmin();
         }
 
         if (vista === "inscripciones") {
@@ -390,8 +395,29 @@ async function actualizarTodo() {
         cargarParticipantes(),
         cargarSolicitudesInternas(),
         panelDetalleAbierto ? Promise.resolve() : cargarIncidentes(),
-        panelDetalleAbierto ? Promise.resolve() : cargarColaSeguimiento()
+        panelDetalleAbierto ? Promise.resolve() : cargarColaSeguimiento(),
+        cargarEstadoEvento()
     ]);
+
+}
+
+async function cargarEstadoEvento() {
+
+    try {
+
+        const estado = await peticionApi("/api/estado-evento");
+        const banner = document.getElementById("bannerAlertaExtrema");
+
+        if (estado.alertaActiva) {
+            document.getElementById("textoBannerAlertaExtrema").textContent = `🚨 ALERTA EXTREMA: ${estado.alertaMensaje}`;
+            banner.classList.remove("oculto");
+        } else {
+            banner.classList.add("oculto");
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
 
 }
 
@@ -508,6 +534,146 @@ function revisarIncidentesCriticosNuevos(alertasCriticasYAltas) {
     banner.classList.remove("oculto");
 
 }
+
+// ==========================
+// Modo evento y alerta extrema (admin) — protegidos por una clave adicional
+// a la del rol, conocida solo por quien administra el sistema.
+// ==========================
+
+document.getElementById("btnActivarModoEvento").addEventListener("click", async () => {
+
+    const clave = prompt("Clave de administrador extremo:");
+    if (!clave) return;
+
+    if (!confirm("¿Confirmas activar el modo evento? El sitio público mostrará el portal de inicio de sesión del campista en vez de la página normal.")) return;
+
+    const mensaje = document.getElementById("mensajeModoEvento");
+
+    try {
+        const resultado = await peticionApi("/api/centro-control/modo-evento/activar", { method: "POST", body: JSON.stringify({ clave }) });
+        mostrarMensaje(mensaje, resultado.mensaje, "ok");
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+document.getElementById("btnDesactivarModoEvento").addEventListener("click", async () => {
+
+    const clave = prompt("Clave de administrador extremo:");
+    if (!clave) return;
+
+    const mensaje = document.getElementById("mensajeModoEvento");
+
+    try {
+        const resultado = await peticionApi("/api/centro-control/modo-evento/desactivar", { method: "POST", body: JSON.stringify({ clave }) });
+        mostrarMensaje(mensaje, resultado.mensaje, "ok");
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+document.getElementById("btnActivarAlertaExtrema").addEventListener("click", async () => {
+
+    const clave = prompt("Clave de administrador extremo:");
+    if (!clave) return;
+
+    const textoAlerta = prompt("Mensaje de la alerta (lo verán logística, centro de control y los campistas):");
+    if (!textoAlerta || !textoAlerta.trim()) return;
+
+    const mensaje = document.getElementById("mensajeModoEvento");
+
+    try {
+        const resultado = await peticionApi("/api/centro-control/alerta-extrema/activar", { method: "POST", body: JSON.stringify({ clave, mensaje: textoAlerta }) });
+        mostrarMensaje(mensaje, resultado.mensaje, "ok");
+        await cargarEstadoEvento();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+document.getElementById("btnDesactivarAlertaExtrema").addEventListener("click", async () => {
+
+    const clave = prompt("Clave de administrador extremo:");
+    if (!clave) return;
+
+    const mensaje = document.getElementById("mensajeModoEvento");
+
+    try {
+        const resultado = await peticionApi("/api/centro-control/alerta-extrema/desactivar", { method: "POST", body: JSON.stringify({ clave }) });
+        mostrarMensaje(mensaje, resultado.mensaje, "ok");
+        await cargarEstadoEvento();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+async function cargarAnunciosAdmin() {
+
+    try {
+
+        const { anuncios } = await peticionApi("/api/centro-control/anuncios-evento");
+        const contenedor = document.getElementById("listaAnunciosAdmin");
+        const esAdmin = perfilActual?.rol === "admin";
+
+        contenedor.innerHTML = anuncios.length === 0
+            ? `<p class="detalle">Sin avisos publicados.</p>`
+            : anuncios.map((a) => `
+                <div class="feed-item">
+                    <span class="hora">${new Date(a.creado_en).toLocaleString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric", hour: "numeric", minute: "2-digit" })}</span>
+                    ${a.mensaje}
+                    ${esAdmin ? `<button class="boton pequeno secundario" data-eliminar-anuncio="${a.id}" style="width:auto; padding:4px 10px; font-size:11px; margin-left:8px;">Eliminar</button>` : ""}
+                </div>
+            `).join("");
+
+        contenedor.querySelectorAll("[data-eliminar-anuncio]").forEach((boton) => {
+            boton.addEventListener("click", () => eliminarAnuncio(boton.dataset.eliminarAnuncio));
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function eliminarAnuncio(id) {
+
+    if (!confirm("¿Eliminar este aviso? Ya no se mostrará en el portal del campista.")) return;
+
+    const mensaje = document.getElementById("mensajeAnuncios");
+
+    try {
+        await peticionApi(`/api/centro-control/anuncios-evento/${id}`, { method: "DELETE" });
+        mostrarMensaje(mensaje, "Aviso eliminado", "ok");
+        await cargarAnunciosAdmin();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+}
+
+document.getElementById("formNuevoAnuncio").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+
+    const input = document.getElementById("inputNuevoAnuncio");
+    const mensaje = document.getElementById("mensajeAnuncios");
+
+    if (!input.value.trim()) return;
+
+    try {
+        await peticionApi("/api/centro-control/anuncios-evento", { method: "POST", body: JSON.stringify({ mensaje: input.value.trim() }) });
+        input.value = "";
+        mostrarMensaje(mensaje, "Aviso publicado", "ok");
+        await cargarAnunciosAdmin();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
 
 document.getElementById("btnCerrarBannerCritico").addEventListener("click", () => {
     document.getElementById("bannerCritico").classList.add("oculto");

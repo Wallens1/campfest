@@ -11,14 +11,15 @@
 
 <nav class="cf-nav">
   <a href="./" class="cf-active">Inicio</a>
-  <a href="./campfest/itinerario/index.html">Itinerario</a>
-  <a href="./campfest/cartilla-del-campista/index.html">Cartilla del campista</a>
-  <a href="./campfest/i-mayores-de-18-anos/index.html">Mayores de edad</a>
-  <a href="./campfest/i-menores-de-edad/index.html">Menores de edad</a>
-  <a href="./campfest/proceso-de-seleccion/index.html">Proceso de selección</a>
-  <a href="./campfest/generar-constancias/index.html">Generar Invitación</a>
-  <a href="./campfest/organizadores/index.html">Organizadores</a>
-  <a href="./campfest/bugalagrande/index.html">Bugalagrande</a>
+  <a href="./campfest/itinerario/index.html" class="cf-nav-subpagina">Itinerario</a>
+  <a href="./campfest/cartilla-del-campista/index.html" class="cf-nav-subpagina">Cartilla del campista</a>
+  <a href="./campfest/i-mayores-de-18-anos/index.html" class="cf-nav-subpagina">Mayores de edad</a>
+  <a href="./campfest/i-menores-de-edad/index.html" class="cf-nav-subpagina">Menores de edad</a>
+  <a href="./campfest/proceso-de-seleccion/index.html" class="cf-nav-subpagina">Proceso de selección</a>
+  <a href="./campfest/generar-constancias/index.html" class="cf-nav-subpagina">Generar Invitación</a>
+  <a href="./campfest/organizadores/index.html" class="cf-nav-subpagina">Organizadores</a>
+  <a href="./campfest/bugalagrande/index.html" class="cf-nav-subpagina">Bugalagrande</a>
+  <a href="./campfest/portal-campista/index.html" id="cf-nav-portal">🎁 Mi portal</a>
 </nav>
 
 
@@ -59,8 +60,8 @@
     <div class="cf-badge-date" id="cf-badge">
       <div class="cf-badge-circle">NOV</div>
       <div class="cf-badge-text">
-        <strong>Noviembre 2026</strong>
-        <small>DETALLES FINALES EN CAMINO</small>
+        <strong>15 – 17 de noviembre</strong>
+        <small>FECHA TENTATIVA 2026</small>
       </div>
     </div>
 
@@ -74,7 +75,7 @@
 <div class="cf-alert">
   <div class="cf-alert-inner">
     <strong>💜 ¡Camp Fest se mueve a noviembre!</strong>
-    <span>Para darte el mejor lugar posible y cuidar tu seguridad, pasamos el campamento a Noviembre 2026 (fecha por confirmar). Todo sigue en pie: mismo Bugalagrande, mismo equipo, misma experiencia que esperas — y ampliamos las inscripciones hasta finales de octubre de 2026 para que tengas más tiempo. ✨</span>
+    <span>Para darte el mejor lugar posible y cuidar tu seguridad, pasamos el campamento al <strong>15, 16 y 17 de noviembre de 2026</strong> (fecha tentativa). Todo sigue en pie: mismo Bugalagrande, mismo equipo, misma experiencia que esperas — y ampliamos las inscripciones hasta finales de octubre de 2026 para que tengas más tiempo. ✨</span>
   </div>
 </div>
 
@@ -91,8 +92,8 @@
 <div class="cf-info-strip">
   <div class="cf-info-item">
     <div class="cf-icon">🎉</div>
-    <h3>Noviembre 2026</h3>
-    <p>Muy pronto confirmamos la fecha</p>
+    <h3>15 – 17 de noviembre</h3>
+    <p>Fecha tentativa 2026</p>
   </div>
   <div class="cf-info-item">
     <div class="cf-icon">📍</div>
@@ -441,6 +442,12 @@
         <p>Equipo y comité detrás de Camp Fest 2026.</p>
         <span class="cf-card-go">Conocer al equipo →</span>
       </a>
+      <a class="cf-card" href="./campfest/portal-campista/index.html">
+        <div class="cf-card-icon">🎁</div>
+        <h3>Mi portal</h3>
+        <p>Tu regalo por la espera: tu perfil, cuenta regresiva, insignia y más.</p>
+        <span class="cf-card-go">Entrar a mi portal →</span>
+      </a>
     </div>
   </div>
 </section>
@@ -456,6 +463,7 @@
       <h3><span class="cf-dot"></span>Elegimos con cuidado tu nueva sede</h3>
       <p>Estamos escogiendo con calma el mejor lugar dentro de Bugalagrande, pensando siempre en tu comodidad y tu seguridad. En cuanto esté listo, lo publicamos aquí y en nuestras redes. 💜</p>
       <span class="cf-placeholder-tag">Muy pronto lo conocerás</span>
+      <p style="margin-top:12px; font-size:13.5px; opacity:.75;">Si llegaste leyendo hasta aquí: <span class="cf-secreto-sitio" data-secreto="inicio" style="cursor:pointer; text-decoration:underline dotted;">toca esta palabra</span> 🤫</p>
     </div>
   </div>
 </section>
@@ -485,6 +493,10 @@
   </div>
   <p>© 2026 SUBSISTEMA DE PARTICIPACION JUVENIL DE BUGALAGRANDE. TODOS LOS DERECHOS RESERVADOS.</p>
 </footer>
+
+<style>
+.cf-oculto { display: none !important; }
+</style>
 
 <style>
 /* Alerta de interés reutilizada para Bugalagrandeños: forzamos que se vea siempre */
@@ -586,6 +598,75 @@
     });
   });
 })();
+</script>
+
+<script>
+(function () {
+
+  // "Modo evento": el día del evento, el admin lo activa (con clave) desde
+  // Centro de Control. Mientras está apagado (siempre, hasta entonces), esta
+  // página no cambia en nada — el acceso al portal del campista ya es
+  // permanente vía el link "🎁 Mi portal" del menú, sin depender de esto.
+  var API_BASE = "https://campfest-api-production.up.railway.app";
+
+  async function iniciar() {
+
+    var estado;
+    try {
+      var respuesta = await fetch(API_BASE + "/api/estado-evento");
+      estado = await respuesta.json();
+    } catch (e) {
+      return;
+    }
+
+    if (!estado.modoEventoActivo) return;
+
+    document.querySelectorAll(".cf-nav-subpagina").forEach(function (a) { a.classList.add("cf-oculto"); });
+
+    var seccionesAOcultar = document.querySelectorAll(".cf-cards, #inscripcion");
+    seccionesAOcultar.forEach(function (el) { el.closest("section").classList.add("cf-oculto"); });
+
+    var contenedorInfo = document.createElement("section");
+    contenedorInfo.className = "cf-section";
+    contenedorInfo.innerHTML =
+      '<div class="cf-panel"><h3><span class="cf-dot"></span>Información del evento</h3>' +
+      '<div id="cf-info-evento-lista"><p>Cargando información...</p></div></div>';
+    document.querySelector(".cf-footer-wave").before(contenedorInfo);
+
+    try {
+      var respuestaAnuncios = await fetch(API_BASE + "/api/estado-evento/anuncios");
+      var datosAnuncios = await respuestaAnuncios.json();
+      var lista = document.getElementById("cf-info-evento-lista");
+      lista.innerHTML = datosAnuncios.anuncios.length
+        ? datosAnuncios.anuncios.map(function (a) { return "<p>" + a.mensaje + "</p>"; }).join("")
+        : "<p>No hay información publicada todavía.</p>";
+    } catch (e) {
+      // el bloque se queda con "Cargando información..." si falla
+    }
+
+  }
+
+  iniciar();
+
+})();
+</script>
+
+<script>
+// Secretos escondidos en el contenido real de la página — premian a quien
+// lee hasta el final. El logro se guarda en localStorage y se ve en el
+// portal del campista (mismo origen, mismo localStorage).
+document.querySelectorAll(".cf-secreto-sitio").forEach(function (el) {
+  el.addEventListener("click", function () {
+    var id = "secreto_sitio_" + el.dataset.secreto;
+    var logros = [];
+    try { logros = JSON.parse(localStorage.getItem("cf_logros") || "[]"); } catch (e) {}
+    if (logros.indexOf(id) === -1) {
+      logros.push(id);
+      localStorage.setItem("cf_logros", JSON.stringify(logros));
+      el.textContent = "✨ ¡Encontrado! Ve a tu portal.";
+    }
+  });
+});
 </script>
 
 </body>

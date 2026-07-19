@@ -40,6 +40,10 @@
         <button class="boton pequeno" id="btnCerrarBannerCritico" style="width:auto;">Visto</button>
     </div>
 
+    <div class="banner-critico oculto" id="bannerAlertaExtrema" style="background:#c0392b;">
+        <span id="textoBannerAlertaExtrema"></span>
+    </div>
+
     <div class="barra-superior">
         <span class="marca">🛰️ Camp Fest · Centro de Control</span>
         <div class="acciones-rapidas">
@@ -73,6 +77,7 @@
         <button class="tab-modulo" data-vista="cronograma">Cronograma</button>
         <button class="tab-modulo" data-vista="inventario">Inventario</button>
         <button class="tab-modulo" data-vista="inscripciones">Inscripciones</button>
+        <button class="tab-modulo" data-vista="notificaciones">Notificaciones</button>
         <button class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion">Administración</button>
     </div>
 
@@ -617,8 +622,48 @@
 
     </section>
 
+    <!-- ===== VISTA: NOTIFICACIONES ===== -->
+    <section class="oculto" id="vistaNotificaciones">
+
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Notificaciones del portal del campista</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                Los avisos publicados aquí aparecen en el perfil de cada campista (portal-campista), con fecha
+                y hora. Cualquier rol puede publicar; solo un administrador puede eliminar un aviso.
+            </p>
+            <form id="formNuevoAnuncio" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                <div class="campo" style="margin-bottom:0; flex:1;">
+                    <label for="inputNuevoAnuncio">Mensaje</label>
+                    <input type="text" id="inputNuevoAnuncio" placeholder="Ej: El desayuno del día 2 se sirve desde las 7:00 am">
+                </div>
+                <button type="submit" class="boton pequeno" id="btnPublicarAnuncio">Publicar</button>
+            </form>
+            <div class="mensaje" id="mensajeAnuncios"></div>
+            <div id="listaAnunciosAdmin" style="margin-top:12px;"></div>
+        </div>
+
+    </section>
+
     <!-- ===== VISTA: ADMINISTRACIÓN (solo administrador) ===== -->
     <section class="oculto" id="vistaAdministracion">
+
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Portal del campista — Modo evento y alerta extrema</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                Ambas acciones piden la clave de administrador extremo (no es la contraseña de tu cuenta).
+                Al activar el modo evento, el sitio público (campfest.online) deja de mostrar la página normal
+                y muestra el portal de inicio de sesión del campista.
+            </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+                <button class="boton pequeno" id="btnActivarModoEvento" style="width:auto;">Activar modo evento</button>
+                <button class="boton pequeno secundario" id="btnDesactivarModoEvento" style="width:auto;">Desactivar modo evento</button>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="boton pequeno" id="btnActivarAlertaExtrema" style="width:auto; background:#c0392b;">Activar alerta extrema</button>
+                <button class="boton pequeno secundario" id="btnDesactivarAlertaExtrema" style="width:auto;">Desactivar alerta extrema</button>
+            </div>
+            <div class="mensaje" id="mensajeModoEvento"></div>
+        </div>
 
         <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Importar participantes desde Excel</h3>
@@ -815,6 +860,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=19" defer></script>
+<script src="scripts/dashboard.js?v=21" defer></script>
 </body>
 </html>

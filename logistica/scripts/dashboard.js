@@ -215,6 +215,29 @@ function actualizarTodoPolling() {
     cargarSolicitudes();
     cargarTareas();
     cargarObservaciones();
+    cargarEstadoEvento();
+}
+
+// Solo lectura — activar/desactivar la alerta extrema es exclusivo de admin
+// desde el panel de Centro de Control.
+async function cargarEstadoEvento() {
+
+    try {
+
+        const estado = await peticionApi("/api/estado-evento");
+        const banner = document.getElementById("bannerAlertaExtrema");
+
+        if (estado.alertaActiva) {
+            document.getElementById("textoBannerAlertaExtrema").textContent = `🚨 ALERTA EXTREMA: ${estado.alertaMensaje}`;
+            banner.classList.remove("oculto");
+        } else {
+            banner.classList.add("oculto");
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+
 }
 
 async function cargarRamas() {

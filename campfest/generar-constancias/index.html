@@ -18,6 +18,7 @@
         <a href="./" class="cf-active">Generar Invitación</a>
         <a href="../organizadores/">Organizadores</a>
         <a href="../bugalagrande/">Bugalagrande</a>
+        <a href="../portal-campista/">🎁 Mi portal</a>
     </nav>
 
     <div class="cf-alert">
@@ -60,6 +61,7 @@
       Si tu entidad te pide un documento más específico o con un formato distinto al que generamos
       aquí, escríbenos directamente al <strong>317 298 0262</strong> y con gusto te colaboramos.
     </p>
+    <p style="margin-top:12px; font-size:13.5px; opacity:.75;">Si llegaste leyendo hasta aquí: <span class="cf-secreto-sitio" data-secreto="constancias" style="cursor:pointer; text-decoration:underline dotted;">toca esta palabra</span> 🤫</p>
   </div>
 
   <div class="cf-panel">
@@ -278,6 +280,34 @@ campos.forEach((campo) => {
     });
 });
 
+</script>
+
+<script>
+// Modo evento (activado por el admin el día del evento) elimina el acceso a
+// esta subpágina — redirige a la home, que en ese modo solo muestra el
+// portal del campista y la información útil.
+fetch("https://campfest-api-production.up.railway.app/api/estado-evento")
+  .then(function (r) { return r.json(); })
+  .then(function (estado) { if (estado.modoEventoActivo) window.location.href = "../../index.html"; })
+  .catch(function () {});
+</script>
+
+<script>
+// Secretos escondidos en el contenido real de la página — premian a quien
+// lee hasta el final. El logro se guarda en localStorage y se ve en el
+// portal del campista (mismo origen, mismo localStorage).
+document.querySelectorAll(".cf-secreto-sitio").forEach(function (el) {
+  el.addEventListener("click", function () {
+    var id = "secreto_sitio_" + el.dataset.secreto;
+    var logros = [];
+    try { logros = JSON.parse(localStorage.getItem("cf_logros") || "[]"); } catch (e) {}
+    if (logros.indexOf(id) === -1) {
+      logros.push(id);
+      localStorage.setItem("cf_logros", JSON.stringify(logros));
+      el.textContent = "✨ ¡Encontrado! Ve a tu portal.";
+    }
+  });
+});
 </script>
 
 </body>
