@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Manual de uso · Centro de Control y Panel Logístico · Camp Fest 2026</title>
+</head>
+<body>
+<style>
+
+@font-face {
+  font-family: "SysRounded";
+  src: local("SF Pro Rounded"), local("Segoe UI");
+}
+
+:root {
+  --ink: #1a1a1e;
+  --ink-soft: #55505f;
+  --paper: #fbf8f2;
+  --surface: #ffffff;
+  --line: #e6dfd2;
+  --admin: #7c3aed;
+  --admin-soft: #efe6fd;
+  --logistica: #0e8f82;
+  --logistica-soft: #dff4f1;
+  --lider: #c30063;
+  --lider-soft: #fbe3ee;
+  --warn: #9a5b00;
+  --warn-soft: #fdf1de;
+  --danger: #b42318;
+  --danger-soft: #fdeae8;
+  --good: #157f5a;
+  --good-soft: #e4f5ee;
+  --shadow: 0 1px 2px rgba(26,26,30,.04), 0 8px 20px rgba(26,26,30,.06);
+  --radius: 14px;
+  font-size: 16px;
+}
+
+:root[data-theme="dark"] {
+  --ink: #f0ebe0;
+  --ink-soft: #b8b0c4;
+  --paper: #16141b;
+  --surface: #201c29;
+  --line: #35303f;
+  --admin: #bd97f8;
+  --admin-soft: #2c2340;
+  --logistica: #59e0d1;
+  --logistica-soft: #133733;
+  --lider: #ff77ac;
+  --lider-soft: #3a1a2b;
+  --warn: #e0a94a;
+  --warn-soft: #3a2f16;
+  --danger: #ff8378;
+  --danger-soft: #3a1c19;
+  --good: #5fd8a8;
+  --good-soft: #16332a;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #f0ebe0;
+    --ink-soft: #b8b0c4;
+    --paper: #16141b;
+    --surface: #201c29;
+    --line: #35303f;
+    --admin: #bd97f8;
+    --admin-soft: #2c2340;
+    --logistica: #59e0d1;
+    --logistica-soft: #133733;
+    --lider: #ff77ac;
+    --lider-soft: #3a1a2b;
+    --warn: #e0a94a;
+    --warn-soft: #3a2f16;
+    --danger: #ff8378;
+    --danger-soft: #3a1c19;
+    --good: #5fd8a8;
+    --good-soft: #16332a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.45);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body { display: flex; min-height: 100vh; }
+
+h1, h2, h3, h4 {
+  font-family: ui-rounded, "SF Pro Rounded", "Segoe UI", -apple-system, sans-serif;
+  font-weight: 800;
+  line-height: 1.15;
+  text-wrap: balance;
+  margin: 0;
+}
+
+code, .ui {
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-size: .86em;
+}
+
+.ui {
+  display: inline-block;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: .08em .45em;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+a { color: var(--admin); text-decoration-thickness: 1.5px; }
+:root[data-theme="dark"] a, @media (prefers-color-scheme: dark) { a { color: var(--admin); } }
+
+/* ---------- layout ---------- */
+
+.sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 296px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  padding: 22px 18px 40px;
+  z-index: 10;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.sidebar-brand .mark { font-size: 22px; }
+.sidebar-brand h1 { font-size: 17px; }
+.sidebar-sub { font-size: 12.5px; color: var(--ink-soft); margin: 2px 0 22px; line-height: 1.5; }
+
+.nav-group { margin-bottom: 4px; }
+.nav-role {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
+  font-weight: 800; color: var(--ink-soft);
+  margin: 22px 0 8px;
+}
+.nav-role .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.nav-role.admin .dot { background: var(--admin); }
+.nav-role.logistica .dot { background: var(--logistica); }
+.nav-role.lider .dot { background: var(--lider); }
+
+.sidebar nav a {
+  display: block;
+  padding: 6px 10px;
+  margin: 1px 0;
+  border-radius: 8px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.sidebar nav a:hover { background: var(--paper); color: var(--ink); }
+.sidebar nav a.active { background: var(--admin-soft); color: var(--admin); }
+
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 14px; left: 14px;
+  z-index: 20;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+main {
+  margin-left: 296px;
+  flex: 1;
+  min-width: 0;
+  padding: 48px 56px 120px;
+  max-width: 980px;
+}
+
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); transition: transform .2s ease; box-shadow: var(--shadow); }
+  .sidebar.open { transform: translateX(0); }
+  .menu-toggle { display: block; }
+  main { margin-left: 0; padding: 84px 22px 100px; }
+}
+
+/* ---------- content elements ---------- */
+
+.hero {
+  margin-bottom: 40px;
+}
+.hero .eyebrow {
+  font-size: 12.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-soft); margin-bottom: 10px;
+}
+.hero h1 { font-size: clamp(28px, 4vw, 40px); margin-bottom: 14px; }
+.hero p { font-size: 16.5px; color: var(--ink-soft); max-width: 62ch; line-height: 1.6; }
+
+.role-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+.role-chip {
+  display: flex; align-items: center; gap: 8px;
+  border: 1.5px solid var(--line); border-radius: 999px;
+  padding: 8px 16px; font-weight: 700; font-size: 13.5px;
+  text-decoration: none; color: var(--ink);
+  background: var(--surface);
+}
+.role-chip .dot { width: 9px; height: 9px; border-radius: 50%; }
+.role-chip.admin .dot { background: var(--admin); }
+.role-chip.logistica .dot { background: var(--logistica); }
+.role-chip.lider .dot { background: var(--lider); }
+
+section.part { margin-top: 72px; }
+section.part:first-of-type { margin-top: 0; }
+
+.part-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 22px;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  border: 1.5px solid var(--line);
+}
+.part-header.admin { background: var(--admin-soft); border-color: color-mix(in srgb, var(--admin) 35%, var(--line)); }
+.part-header.logistica { background: var(--logistica-soft); border-color: color-mix(in srgb, var(--logistica) 35%, var(--line)); }
+.part-header.lider { background: var(--lider-soft); border-color: color-mix(in srgb, var(--lider) 35%, var(--line)); }
+.part-header .role-icon { font-size: 26px; }
+.part-header h2 { font-size: 22px; }
+.part-header p { margin: 3px 0 0; font-size: 13.5px; color: var(--ink-soft); }
+
+.part-intro { font-size: 15.5px; color: var(--ink-soft); line-height: 1.65; max-width: 68ch; margin: 18px 0 0; }
+
+h3.feature {
+  font-size: 20px;
+  margin-top: 52px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 24px;
+}
+h3.feature .tag {
+  display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .05em; padding: 2px 8px; border-radius: 6px; margin-right: 10px;
+  vertical-align: middle; position: relative; top: -2px;
+}
+h3.feature .tag.admin { background: var(--admin-soft); color: var(--admin); }
+h3.feature .tag.logistica { background: var(--logistica-soft); color: var(--logistica); }
+h3.feature .tag.lider { background: var(--lider-soft); color: var(--lider); }
+
+h4.sub { font-size: 15.5px; margin-top: 30px; margin-bottom: 10px; }
+
+p, li { font-size: 15px; line-height: 1.65; color: var(--ink); max-width: 68ch; }
+p.lead { color: var(--ink-soft); }
+
+ol.steps { margin: 14px 0 0; padding-left: 0; list-style: none; counter-reset: step; max-width: 68ch; }
+ol.steps > li {
+  counter-increment: step;
+  position: relative;
+  padding: 2px 0 14px 40px;
+  border-left: 2px solid var(--line);
+  margin-left: 14px;
+}
+ol.steps > li:last-child { border-left-color: transparent; padding-bottom: 0; }
+ol.steps > li::before {
+  content: counter(step);
+  position: absolute;
+  left: -14px; top: -1px;
+  width: 26px; height: 26px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+
+ul.plain { margin: 12px 0; padding-left: 22px; max-width: 68ch; }
+ul.plain li { margin-bottom: 6px; }
+
+figure.screen {
+  margin: 22px 0 26px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 10px;
+  max-width: 640px;
+}
+figure.screen img {
+  width: 100%; display: block;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+figure.screen figcaption {
+  font-size: 12.5px; color: var(--ink-soft); padding: 10px 6px 2px; line-height: 1.5;
+}
+figure.screen.wide { max-width: 100%; }
+
+.note {
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  border-left: 4px solid var(--ink);
+  padding: 12px 16px;
+  margin: 18px 0;
+  font-size: 14px;
+  max-width: 66ch;
+  line-height: 1.55;
+}
+.note strong.label { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+.note.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.note.danger { border-left-color: var(--danger); background: var(--danger-soft); }
+.note.good { border-left-color: var(--good); background: var(--good-soft); }
+.note.admin { border-left-color: var(--admin); background: var(--admin-soft); }
+
+table.fields {
+  width: 100%; max-width: 68ch; border-collapse: collapse; margin: 14px 0; font-size: 13.5px;
+}
+table.fields th, table.fields td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.fields th { color: var(--ink-soft); font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; }
+
+.scroll-x { overflow-x: auto; max-width: 100%; }
+
+footer.manual-footer {
+  margin-top: 90px; padding-top: 24px; border-top: 1px solid var(--line);
+  font-size: 12.5px; color: var(--ink-soft);
+}
+
+::selection { background: var(--admin-soft); }
+
+</style>
+
+<button class="menu-toggle" id="menuToggle">☰ Índice</button>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand"><span class="mark">🏕️</span><h1>Camp Fest 2026</h1></div>
+  <p class="sidebar-sub">Manual de uso del Centro de Control y el Panel Logístico — paso a paso, con capturas reales.</p>
+
+  <nav>
+    <a href="#introduccion">Introducción</a>
+    <a href="#accesos">Cómo entrar</a>
+
+    <div class="nav-role admin"><span class="dot"></span>Administrador</div>
+    <a href="#admin-panel">Panel</a>
+    <a href="#admin-cronograma">Cronograma</a>
+    <a href="#admin-inventario">Inventario</a>
+    <a href="#admin-inscripciones">Inscripciones</a>
+    <a href="#admin-notificaciones">Notificaciones</a>
+    <a href="#admin-administracion">Administración</a>
+
+    <div class="nav-role logistica"><span class="dot"></span>Logística</div>
+    <a href="#log-registro">Registro</a>
+    <a href="#log-comunicacion">Comunicación</a>
+    <a href="#log-tareas">Tareas</a>
+    <a href="#log-cronograma">Mi cronograma</a>
+    <a href="#log-materiales">Materiales</a>
+
+    <div class="nav-role lider"><span class="dot"></span>Líder de rama</div>
+    <a href="#lider-intro">Qué cambia si eres líder</a>
+    <a href="#lider-ayuda">Pedir ayuda a otra rama</a>
+    <a href="#lider-tareas">Crear tareas y observaciones</a>
+    <a href="#lider-gestion">Gestionar participaciones</a>
+    <a href="#lider-materiales">Recibir y devolver materiales</a>
+    <a href="#lider-actividades">Montaje y cierre de actividades</a>
+    <a href="#lider-cumplimiento">Mi cumplimiento</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="introduccion" class="hero">
+  <p class="eyebrow">Manual de uso · Julio 2026</p>
+  <h1>Centro de Control y Panel Logístico, explicados paso a paso</h1>
+  <p>Este manual cubre todo lo que puedes hacer en las dos herramientas internas de Camp Fest 2026, según tu rol: <strong>administrador</strong>, <strong>miembro de logística</strong> o <strong>líder de rama</strong>. Cada sección explica qué vas a ver en la pantalla, qué hace cada botón, y qué pasa después de tocarlo — con capturas reales de la propia herramienta, no dibujos ni maquetas.</p>
+  <div class="role-chips">
+    <a class="role-chip admin" href="#admin-panel"><span class="dot"></span>Soy administrador</a>
+    <a class="role-chip logistica" href="#log-registro"><span class="dot"></span>Soy de logística</a>
+    <a class="role-chip lider" href="#lider-intro"><span class="dot"></span>Soy líder de rama</a>
+  </div>
+</section>
+
+<section id="accesos">
+  <h3 class="feature" style="margin-top:36px; border-top:none; padding-top:0;">Cómo entrar</h3>
+  <p>Hay dos herramientas distintas, pero <strong>el inicio de sesión es igual en las dos</strong>: correo y contraseña. Esas credenciales las crea un administrador desde <span class="ui">Administración → Nuevo usuario</span> (lo vemos más adelante) y te las comparte por fuera del sistema — la herramienta no tiene "olvidé mi contraseña" ni registro abierto.</p>
+  <table class="fields">
+    <tr><th>Herramienta</th><th>Quién la usa normalmente</th><th>Qué encuentras ahí</th></tr>
+    <tr><td><strong>Centro de Control</strong></td><td>Administradores y perfiles de "control"</td><td>Todo el evento: incidentes, cronograma, inventario, inscripciones, notificaciones y administración</td></tr>
+    <tr><td><strong>Panel Logístico</strong></td><td>Equipo de logística (miembros y líderes de rama)</td><td>Registro de participantes, comunicación con Centro de Control, tareas de tu rama, cronograma y materiales</td></tr>
+  </table>
+  <ol class="steps">
+    <li>Abre la dirección de la herramienta que te corresponde.</li>
+    <li>Escribe tu <span class="ui">Correo</span> y tu <span class="ui">Contraseña</span> en el formulario de inicio de sesión.</li>
+    <li>Pulsa <span class="ui">Iniciar sesión</span>. Si los datos son correctos entras directo al panel; si no, verás el mensaje "Correo o contraseña incorrectos" y puedes intentar de nuevo.</li>
+    <li>Arriba a la derecha siempre verás tu nombre y tu rol (por ejemplo "Mariana Rojas · Admin"). Cuando termines, usa el botón <span class="ui">Cerrar sesión</span> — sobre todo si usas un computador compartido.</li>
+  </ol>
+  <div class="note">
+    <strong class="label">Botón "?"</strong>
+    En ambas herramientas hay un botón <span class="ui">?</span> junto a "Cerrar sesión" que abre un recordatorio rápido de qué puede hacer cada rol. Es un resumen — este manual es la versión completa.
+  </div>
+  <div class="note warn">
+    <strong class="label">Si ves una franja roja arriba de todo</strong>
+    Es la <strong>alerta extrema</strong>: un aviso urgente que solo un administrador puede activar o apagar (lo ves en <a href="#admin-administracion">Administración</a>). Si aparece, léela y sigue las instrucciones que indique — nadie más puede quitarla desde su cuenta.
+  </div>
+</section>
+
+<!-- ======================================================================= -->
+<!-- PARTE 1: ADMINISTRADOR                                                  -->
+<!-- ======================================================================= -->
+
+<section class="part" id="parte-admin">
+  <div class="part-header admin">
+    <span class="role-icon">🛠️</span>
+    <div><h2>Administrador — Centro de Control</h2><p>Acceso completo: incidentes, cronograma, inventario, inscripciones, notificaciones y configuración del evento.</p></div>
+  </div>
+  <p class="part-intro">Si tu cuenta tiene el rol <strong>Admin</strong>, ves las seis pestañas de arriba: <span class="ui">Panel</span>, <span class="ui">Cronograma</span>, <span class="ui">Inventario</span>, <span class="ui">Inscripciones</span>, <span class="ui">Notificaciones</span> y <span class="ui">Administración</span>. Si tu cuenta tiene el rol <strong>Control</strong>, ves las mismas pestañas salvo Administración, y algunas herramientas de gestión (crear actividades, gestionar inventario, enviar correos masivos) no te aparecen — son exclusivas de Admin y se marcan así en cada sección.</p>
+
+  <h3 class="feature" id="admin-panel"><span class="tag admin">Pestaña</span>Panel</h3>
+  <p>Es la pantalla de inicio: un resumen de todo el evento en tiempo real, más la herramienta para registrar y dar seguimiento a incidentes. Se actualiza sola cada 7 segundos.</p>
+
+  <figure class="screen wide"><img src="capturas/cc_01_panel.png" alt="Vista general de la pestaña Panel"><figcaption>Vista completa de la pestaña Panel: alertas, tarjetas de estadísticas, tabla de incidentes, cola de seguimiento, gráficos y tabla de participantes.</figcaption></figure>
+
+  <h4 class="sub">Chips de alerta</h4>
+  <p>Justo debajo de las pestañas aparecen chips como <span class="ui">1 incidentes críticos</span> o <span class="ui">9 participantes sin ingresar</span>. Son clicables: al tocar uno, la tabla de incidentes se filtra automáticamente para mostrarte solo esos casos. Si no hay nada urgente, verás simplemente "Sin alertas activas".</p>
+
+  <h4 class="sub">Las 4 tarjetas de estadísticas</h4>
+  <table class="fields">
+    <tr><th>Tarjeta</th><th>Qué muestra</th></tr>
+    <tr><td>Participantes</td><td>Admitidos, Ingresaron, Pendientes, Retirados, Actualmente en el camp</td></tr>
+    <tr><td>Alimentación</td><td>Desayunos, Almuerzos, Cenas, Refrigerios entregados en total</td></tr>
+    <tr><td>Incidentes</td><td>Activos, En seguimiento, Críticos, Minutos promedio de resolución</td></tr>
+    <tr><td>Carpas</td><td>Total de carpas, Ocupación, Cupos libres, Líderes asignados</td></tr>
+  </table>
+
+  <h4 class="sub">Buscar por nombre, documento, código, teléfono, carpa o incidente</h4>
+  <ol class="steps">
+    <li>Escribe lo que buscas en el campo grande <span class="ui">Buscar por nombre, documento, código, teléfono, carpa o código de incidente…</span> (o pulsa el botón rojo <span class="ui">Buscar</span> de la barra superior para saltar directo ahí).</li>
+    <li>Pulsa <span class="ui">Buscar</span>.</li>
+    <li>Aparece una lista de resultados debajo. Si es un participante, al hacer clic se resalta su fila en la tabla de abajo; si es un incidente, se abre su panel de detalle.</li>
+  </ol>
+
+  <h4 class="sub">Registrar un incidente</h4>
+  <p>Este es el formulario que usa todo el equipo (Admin, Control y Logística) para dejar constancia de cualquier situación durante el evento.</p>
+  <ol class="steps">
+    <li>Pulsa el botón rojo <span class="ui">Registrar incidente</span> de la barra superior. Se despliega el formulario.</li>
+    <li>Elige la <span class="ui">Categoría</span> (por ejemplo "Emergencia médica" o "Alimentación"). Apenas la eliges, aparece automáticamente la lista de <strong>responsables de esa categoría</strong> — quién de logística la atiende, con teléfono y zona.</li>
+    <li>Elige la <span class="ui">Prioridad</span>: baja, media, alta o crítica.</li>
+    <li>Opcional: elige la <span class="ui">Zona</span> y escribe el <span class="ui">Lugar específico</span> (ej. "Carpa 4").</li>
+    <li>Opcional: escribe quién lo <span class="ui">Reportó por (logística)</span>.</li>
+    <li>Opcional: si el incidente involucra a un participante, escribe su <span class="ui">Código de participante</span> y sal del campo (tab o clic afuera) — el sistema busca ese código y te confirma "Vinculado a: [nombre]" o te avisa si no lo encuentra.</li>
+    <li>Escribe la <span class="ui">Descripción</span> (obligatoria).</li>
+    <li>Pulsa <span class="ui">Guardar incidente</span>. El incidente queda creado, la tabla se actualiza sola y el formulario se cierra.</li>
+  </ol>
+  <figure class="screen wide"><img src="capturas/cc_02_registrar_incidente.png" alt="Formulario para registrar un incidente, con categoría emergencia médica y prioridad crítica seleccionadas"><figcaption>Formulario de registro de incidente ya diligenciado, mostrando los responsables de la categoría elegida.</figcaption></figure>
+
+  <h4 class="sub">Filtrar y leer la tabla de incidentes</h4>
+  <p>Encima de la tabla hay 6 filtros: <span class="ui">Todos los estados</span>, <span class="ui">Todas las prioridades</span>, <span class="ui">Todas las categorías</span>, <span class="ui">Todas las zonas</span>, <span class="ui">Todos los responsables</span> y una fecha. Cualquier combinación se aplica sola en cuanto la cambias — no hay que pulsar nada más. El botón <span class="ui">Limpiar</span> borra todos los filtros de una vez.</p>
+  <p>Columnas de la tabla: <strong>Código, Hora, Lugar, Categoría, Prioridad, Estado, Responsable, Transcurrido</strong> (cuánto tiempo lleva abierto) y <strong>Próx. seguimiento</strong> (cuánto falta, o "Vencido hace X min" si ya se pasó el plazo). Haz clic en cualquier fila para abrir su detalle completo.</p>
+
+  <h4 class="sub">Seguir un incidente hasta cerrarlo</h4>
+  <p>Al hacer clic en una fila se abre un panel a la derecha con todo el caso.</p>
+  <figure class="screen wide"><img src="capturas/cc_03_detalle_incidente.png" alt="Panel de detalle de un incidente crítico, con bitácora y acciones de seguimiento"><figcaption>Detalle de un incidente: descripción, responsables de la categoría, bitácora completa y acciones disponibles según el estado.</figcaption></figure>
+  <p>Ahí encuentras la descripción completa, los datos (categoría, zona, lugar, quién lo reportó, responsable, cuándo se registró y cuándo se cerró), la lista de <strong>responsables de esa categoría</strong> y la <strong>bitácora</strong> con todo el historial de seguimientos. Debajo hay un cuadro de texto para <span class="ui">Observaciones del seguimiento</span> y, según el estado del caso, distintos botones:</p>
+  <table class="fields">
+    <tr><th>Estado del caso</th><th>Botones que ves</th><th>Qué hacen</th></tr>
+    <tr><td>En atención / Pendiente de seguimiento / Escalado</td><td><span class="ui">Registrar seguimiento</span>, <span class="ui">Escalar caso</span>, <span class="ui">Marcar solucionado</span></td><td>Guardan tus observaciones y cambian el estado del caso. Ninguno pide confirmación adicional.</td></tr>
+    <tr><td>Solucionado</td><td><span class="ui">Cerrar caso</span></td><td>Cierra el caso definitivamente con tus observaciones finales.</td></tr>
+    <tr><td>Cerrado</td><td><span class="ui">Reabrir (solo administrador)</span></td><td>Vuelve a abrir un caso ya cerrado — solo disponible para el rol Admin.</td></tr>
+  </table>
+  <p>El botón <span class="ui">Imprimir</span> abre el diálogo de impresión del navegador con el detalle del incidente. Para cerrar el panel sin hacer nada, pulsa la <span class="ui">✕</span> de la esquina o haz clic fuera del panel.</p>
+
+  <h4 class="sub">Cola de seguimiento, actividad reciente y solicitudes internas</h4>
+  <p>A la derecha de la tabla, tres bloques que también se actualizan solos:</p>
+  <ul class="plain">
+    <li><strong>Cola de seguimiento</strong>: los casos abiertos ordenados por urgencia — cuánto falta o "Vencido hace X min". Clic para abrir el caso.</li>
+    <li><strong>Actividad reciente</strong>: un registro de lo último que pasó en el sistema (quién hizo qué y a qué hora).</li>
+    <li><strong>Solicitudes internas entre ramas</strong>: cuando un líder de logística pide ayuda a otra rama (lo ves en <a href="#lider-ayuda">Pedir ayuda a otra rama</a>), aparece aquí para que sepas qué se está coordinando.</li>
+  </ul>
+
+  <h4 class="sub">Gráficos de incidentes</h4>
+  <p>Cuatro gráficos de barras que se recalculan solos: <strong>Por categoría</strong>, <strong>Por prioridad</strong>, <strong>Por zona</strong> y <strong>Por hora del día</strong> — útiles para ver de un vistazo dónde se están concentrando los problemas.</p>
+
+  <h4 class="sub">Tabla de participantes: retirar y salidas libres</h4>
+  <p>Al final de la pestaña Panel, la tabla completa de participantes con columnas <strong>Nombre, Municipio, Carpa, Líder, Ingreso, Alimentación</strong> (cuántas entregas lleva) e <strong>Incidentes activos</strong>.</p>
+  <ol class="steps">
+    <li>Para marcar que alguien se retiró del evento, pulsa <span class="ui">Marcar retirado</span> en su fila. Aparece una confirmación: "¿Confirmas que este participante se retira del evento?". Al aceptar, queda marcado con la etiqueta roja "Retirado".</li>
+    <li>Si un participante está en salida libre (solo aplica a quienes viven en Bugalagrande, zona urbana), verás la etiqueta "🚶 Salida libre (motivo)" junto a su nombre y el botón <span class="ui">Registrar regreso</span>. Al pulsarlo y confirmar, se cierra su salida libre.</li>
+  </ol>
+  <div class="note warn"><strong class="label">Marcar retirado no se puede deshacer desde aquí</strong>Piénsalo dos veces antes de confirmar — es una acción pensada para cuando alguien deja el campamento definitivamente.</div>
+
+  <h3 class="feature" id="admin-cronograma"><span class="tag admin">Pestaña</span>Cronograma</h3>
+  <p>Aquí se administra el itinerario del evento: qué actividades hay, qué debe hacer cada rama de logística para que salgan bien, y qué tan bien se está cumpliendo.</p>
+  <figure class="screen wide"><img src="capturas/cc_04_cronograma.png" alt="Pestaña Cronograma con el formulario de nueva actividad y la lista de actividades"><figcaption>Parte superior de Cronograma: formulario para crear una actividad nueva y la lista de actividades programadas.</figcaption></figure>
+
+  <div class="note admin"><strong class="label">Solo administrador</strong>Crear actividades, asignarles tareas y materiales, ver la analítica de cumplimiento y cancelar o cerrar actividades son funciones exclusivas del rol Admin. El rol Control ve el cronograma en modo lectura con un resumen simplificado.</div>
+
+  <h4 class="sub">Crear una actividad nueva</h4>
+  <ol class="steps">
+    <li>Completa <span class="ui">Título</span>, <span class="ui">Fecha</span>, <span class="ui">Hora inicio</span> y <span class="ui">Hora fin</span> (obligatorios).</li>
+    <li>Opcional: <span class="ui">Espacio usado</span> y <span class="ui">Asistentes estimados</span>.</li>
+    <li>Si esta actividad necesita materiales del inventario, marca el checkbox de cada material y escribe la <span class="ui">Cant.</span> a la derecha. Si marcas al menos uno, tienes que elegir también quién los recibe en <span class="ui">Responsable que recibe los materiales</span> — si no lo haces, el sistema te lo pide antes de guardar.</li>
+    <li>Opcional: <span class="ui">Encargados metodológicos (informativo)</span> y <span class="ui">Descripción</span>.</li>
+    <li>Pulsa <span class="ui">Crear actividad</span>. La actividad aparece de inmediato en la lista de abajo.</li>
+  </ol>
+
+  <h4 class="sub">Abrir, cancelar y cerrar una actividad</h4>
+  <p>Cada tarjeta de la lista muestra el título, si está <strong>Cancelada</strong>, si el <strong>Montaje</strong> está listo o pendiente, y si ya quedó <strong>Finalizada</strong>. Haz clic en cualquiera para ver el detalle completo.</p>
+  <figure class="screen wide"><img src="capturas/cc_05_detalle_actividad.png" alt="Detalle de una actividad con tareas por rama, materiales asignados y analítica de cumplimiento"><figcaption>Detalle completo de una actividad: información, cierre (montaje/finalización), tareas por rama, materiales y, más abajo, la analítica de cumplimiento del cronograma completo.</figcaption></figure>
+  <ul class="plain">
+    <li><span class="ui">Cancelar actividad</span> (arriba a la derecha del detalle): pide confirmación — "Los materiales ya asignados para ella se liberarán automáticamente". Úsalo si la actividad no va a suceder.</li>
+    <li><span class="ui">Marcar montaje listo</span>: aparece cuando el montaje todavía está pendiente.</li>
+    <li><span class="ui">Marcar actividad terminada</span>: solo aparece después de que el montaje ya quedó listo.</li>
+  </ul>
+
+  <h4 class="sub">Asignar una tarea a una o varias ramas</h4>
+  <ol class="steps">
+    <li>Dentro del detalle de la actividad, marca las <span class="ui">Ramas responsables</span> que deban encargarse (puedes marcar varias).</li>
+    <li>Escribe qué deben hacer en <span class="ui">¿Qué debe hacer?</span> (obligatorio).</li>
+    <li>Opcional: la hora en que <span class="ui">Debe estar listo a las</span>.</li>
+    <li>Pulsa <span class="ui">Asignar</span>. La tarea aparece en "Tareas por rama"; el líder de cada rama marcada queda automáticamente como responsable de una subtarea de seguimiento.</li>
+  </ol>
+  <p>Cada tarea de la lista se puede abrir con clic para ver quién ya participó, sus subtareas, y reasignar las ramas responsables con el botón <span class="ui">Guardar ramas</span> (debe quedar al menos una marcada).</p>
+
+  <h4 class="sub">Asignar materiales a una actividad</h4>
+  <ol class="steps">
+    <li>Elige el <span class="ui">Líder que recibe</span> los materiales.</li>
+    <li>Marca los materiales necesarios y escribe la cantidad de cada uno.</li>
+    <li>Pulsa <span class="ui">Asignar materiales</span>.</li>
+  </ol>
+  <p>Debajo verás, por líder, qué materiales tiene pendientes de devolver y cuáles ya devolvió.</p>
+
+  <h4 class="sub">Analítica de cumplimiento</h4>
+  <p>Al final de Cronograma (solo Admin): un gráfico de <strong>% cumplimiento por rama</strong>, otro de <strong>cuánto ha hecho cada rama</strong> (proporción de tareas completadas), un histograma de <strong>tareas por hora programada</strong>, la lista detallada por rama, y dos listas de personas — <strong>Destacados 🌟</strong> (mejor desempeño a tiempo) y <strong>Necesitan seguimiento ⚠️</strong> (más atrasos).</p>
+
+  <h3 class="feature" id="admin-inventario"><span class="tag admin">Pestaña</span>Inventario</h3>
+  <p>El catálogo completo de materiales del evento: qué hay, cuánto queda disponible, quién tiene qué, y las solicitudes que hace el equipo de logística.</p>
+  <figure class="screen wide"><img src="capturas/cc_06_inventario.png" alt="Pestaña Inventario con el catálogo de materiales"><figcaption>Catálogo de materiales — cada tarjeta muestra disponibilidad, ubicación y quién lo tiene actualmente.</figcaption></figure>
+  <div class="note admin"><strong class="label">Solo administrador</strong>Crear o eliminar materiales, armar lotes para un líder, resolver solicitudes y exportar el inventario son funciones exclusivas de Admin. El rol Control solo ve el catálogo.</div>
+
+  <h4 class="sub">Filtrar el catálogo</h4>
+  <p>Usa el selector <span class="ui">Objetivo</span> (logística, entretenimiento, auxilios, decoración, emergencias, utilidades) y el campo <span class="ui">Ubicación</span> para acotar la lista. Se filtra sola mientras escribes.</p>
+
+  <h4 class="sub">Crear un material nuevo</h4>
+  <ol class="steps">
+    <li>Completa <span class="ui">Nombre</span>, <span class="ui">Objetivo</span> y <span class="ui">Cantidad total</span> (obligatorios).</li>
+    <li>Opcional: <span class="ui">Ubicación</span> y <span class="ui">Descripción</span>.</li>
+    <li>Pulsa <span class="ui">Crear material</span>.</li>
+  </ol>
+  <p>Para quitar un material del inventario, pulsa <span class="ui">Eliminar</span> en su tarjeta y confirma.</p>
+
+  <h4 class="sub">Asignar un lote de materiales a un líder</h4>
+  <ol class="steps">
+    <li>Elige el <span class="ui">Líder</span> que va a recibirlos.</li>
+    <li>Opcional: vincula el lote a una <span class="ui">Actividad</span>.</li>
+    <li>Marca los materiales y sus cantidades.</li>
+    <li>Pulsa <span class="ui">Asignar lote</span>.</li>
+  </ol>
+
+  <h4 class="sub">Resolver solicitudes de materiales</h4>
+  <p>Cuando alguien de logística solicita materiales (ver <a href="#log-materiales">Materiales</a> en la sección de Logística), la solicitud aparece aquí con solicitante, ítems y notas.</p>
+  <ul class="plain">
+    <li><span class="ui">Aprobar</span>: cuando la solicitud está pendiente.</li>
+    <li><span class="ui">Entregar</span>: cuando ya está aprobada — el lote queda a nombre del líder de la rama de quien solicitó.</li>
+    <li><span class="ui">Rechazar</span>: te pide un motivo (opcional) que queda registrado.</li>
+  </ul>
+
+  <h4 class="sub">Exportar</h4>
+  <p>Tres botones de descarga: <span class="ui">Inventario (Excel)</span>, <span class="ui">Inventario (PDF)</span> e <span class="ui">Historial (Excel)</span> — este último con todos los movimientos de materiales del evento.</p>
+
+  <h3 class="feature" id="admin-inscripciones"><span class="tag admin">Pestaña</span>Inscripciones</h3>
+  <p>Toda la gestión de quién se inscribió, quién queda admitido, y el estado de los correos de confirmación.</p>
+  <figure class="screen wide"><img src="capturas/cc_07_inscripciones.png" alt="Pestaña Inscripciones con tiles de estadísticas, filtros y tabla"><figcaption>Vista general de Inscripciones: indicadores clicables, filtros y la tabla completa de inscritos.</figcaption></figure>
+
+  <h4 class="sub">Indicadores rápidos (arriba)</h4>
+  <p>Son clicables — tocar uno filtra la tabla automáticamente: <strong>Total inscritos, Pendientes, Admitidos, No admitidos, Menores de edad</strong> y <strong>Cupo Bugalagrande</strong> (admitidos/máximo, con los que están en espera).</p>
+  <div class="note warn"><strong class="label">Aviso de edad fuera de rango</strong>Si hay inscripciones de personas menores de 14 o mayores de 28 años, aparece un aviso amarillo automático listando quiénes son — revísalas con atención.</div>
+
+  <h4 class="sub">Filtrar y buscar</h4>
+  <p><span class="ui">Municipio</span>, <span class="ui">Estado de admisión</span>, <span class="ui">Zona</span>, <span class="ui">Menor de edad</span> y un campo de <span class="ui">Buscar por nombre o documento</span>. El botón <span class="ui">Ver eliminados</span> alterna entre las inscripciones activas y las que se eliminaron (pero se pueden restaurar).</p>
+
+  <h4 class="sub">Cambiar el estado de admisión</h4>
+  <ol class="steps">
+    <li>En la columna <span class="ui">Admisión</span>, elige el nuevo estado en el desplegable de la fila: Pendiente, Admitido, No admitido o Deserción.</li>
+    <li>Si elegiste "No admitido" o "Deserción", el sistema te pide escribir un motivo — para "No admitido" ese motivo se incluye en el correo que recibe la persona; para "Deserción" es solo uso interno.</li>
+    <li>El cambio se guarda solo, sin botón adicional.</li>
+  </ol>
+
+  <h4 class="sub">Ver el detalle completo de una inscripción</h4>
+  <p>Pulsa <span class="ui">Ver</span> en cualquier fila para desplegar todos los datos: correo personal, contactos de emergencia, RH, EPS, condiciones médicas y alergias, carpa propia, cómo se enteró del evento, quién la invitó, y — si no es de Bugalagrande — sus respuestas sobre liderazgo y motivación.</p>
+  <figure class="screen wide"><img src="capturas/cc_08_inscripcion_detalle.png" alt="Detalle expandido de una inscripción"><figcaption>Detalle expandido de una inscripción, con todos los datos del formulario original.</figcaption></figure>
+
+  <h4 class="sub">Correos de confirmación</h4>
+  <p>La columna <span class="ui">Correo confirmación</span> muestra si ya se envió ("✅ Enviado"), si falló ("⚠️ Falló", con el motivo al pasar el cursor) o si no se ha enviado. Solo Admin ve los botones <span class="ui">Enviar prueba</span> (reenvía el correo real a esa persona, con confirmación previa) y <span class="ui">Editar correo</span> (para corregir una dirección mal escrita).</p>
+  <div class="note admin">
+    <strong class="label">Solo administrador — envío masivo y prueba libre</strong>
+    El botón <span class="ui">Enviar correo a todos los pendientes</span> manda el correo de confirmación a todos los que aún no lo han recibido — pide confirmación explícita antes de ejecutarse. Más abajo, el bloque <span class="ui">Probar contenido del correo</span> te deja enviar una versión de prueba (Pendiente / Admitido / No admitido) a cualquier dirección, sin afectar ninguna inscripción real — útil para revisar cómo se ve el correo antes de un envío masivo.
+  </div>
+
+  <h4 class="sub">Eliminar y restaurar</h4>
+  <p><span class="ui">Eliminar</span> (solo Admin) pide confirmación y explica que se puede restaurar después. En la vista "Ver eliminados", cada fila tiene un botón <span class="ui">Restaurar</span>.</p>
+
+  <h4 class="sub">Gráficos de inscripciones</h4>
+  <p>Al final de la pestaña, 18 gráficos que se recalculan solos con el total de inscritos: municipio, edad, menor de edad, zona, estado de admisión, tipo de documento, RH, EPS, condición médica, restricciones alimentarias, alergias, carpa propia, cómo se enteraron, instancia del subsistema, y las tres aceptaciones (tratamiento de datos, uso de imagen, exención de responsabilidad).</p>
+
+  <h3 class="feature" id="admin-notificaciones"><span class="tag admin">Pestaña</span>Notificaciones</h3>
+  <p>Los avisos que se publican aquí aparecen directamente en el portal del campista — es la forma de comunicarte con todos los participantes a la vez.</p>
+  <figure class="screen wide"><img src="capturas/cc_09_notificaciones.png" alt="Pestaña Notificaciones con el formulario para publicar un aviso"><figcaption>Pestaña Notificaciones: cualquier rol puede publicar un aviso, solo un administrador puede eliminarlo.</figcaption></figure>
+  <ol class="steps">
+    <li>Escribe el <span class="ui">Mensaje</span> en el campo de arriba.</li>
+    <li>Pulsa <span class="ui">Publicar</span>. Aparece de inmediato en la lista, con fecha y hora, y ya es visible en el portal del campista.</li>
+  </ol>
+  <p>Cualquier rol (Admin, Control o Logística) puede publicar avisos. Solo Admin ve el botón <span class="ui">Eliminar</span> junto a cada aviso — al confirmarlo, el aviso deja de mostrarse en el portal del campista.</p>
+
+  <h3 class="feature" id="admin-administracion"><span class="tag admin">Pestaña</span>Administración</h3>
+  <p>Configuración general del evento y del propio sistema. Esta pestaña solo existe para el rol Admin.</p>
+  <figure class="screen wide"><img src="capturas/cc_10_administracion.png" alt="Pestaña Administración completa"><figcaption>Pestaña Administración: modo evento, importar participantes, capacidad de carpas, zonas, ramas, usuarios y respaldo.</figcaption></figure>
+
+  <h4 class="sub">Modo evento y alerta extrema</h4>
+  <div class="note danger">
+    <strong class="label">Pide una clave especial</strong>
+    Estas dos acciones no usan la contraseña de tu cuenta, sino una <strong>clave de administrador extremo</strong> aparte, que solo debe conocer quien administra el sistema a fondo. Al activar el <strong>modo evento</strong>, el sitio público de Camp Fest deja de mostrarse normal y en su lugar aparece el portal de inicio de sesión del campista — pensado para el día del evento.
+  </div>
+  <ul class="plain">
+    <li><span class="ui">Activar modo evento</span> / <span class="ui">Desactivar modo evento</span>: pide la clave y, para activarlo, una confirmación adicional.</li>
+    <li><span class="ui">Activar alerta extrema</span>: pide la clave y el mensaje de la alerta (la franja roja que ven todos). <span class="ui">Desactivar alerta extrema</span> solo pide la clave.</li>
+  </ul>
+
+  <h4 class="sub">Importar participantes desde Excel</h4>
+  <p>Sube el archivo <code>.xlsx</code> exportado directamente del formulario de inscripción. Los documentos que ya existen en el sistema se omiten (no se sobrescriben); a los nuevos se les asigna automáticamente su código CF. Al terminar, verás cuántos se importaron, cuántos ya existían y cuántos tuvieron error (con el número de fila).</p>
+
+  <h4 class="sub">Completar datos faltantes desde Excel</h4>
+  <p>A diferencia de la anterior, esta <strong>no crea participantes nuevos</strong>: solo rellena los campos vacíos de personas que ya están en el sistema (por ejemplo un correo personal que faltaba), sin tocar el estado de admisión ni ningún dato ya cargado. El resultado te dice cuántos se actualizaron, cuántos quedaron sin cambios y cuántos no se encontraron.</p>
+
+  <h4 class="sub">Configurar capacidad de carpas</h4>
+  <ol class="steps">
+    <li>Escribe el nombre de la <span class="ui">Carpa</span> y su <span class="ui">Capacidad</span>.</li>
+    <li>Pulsa <span class="ui">Guardar</span>.</li>
+  </ol>
+  <p>Estas son las carpas que después ve el equipo de logística al asignar participantes (ver <a href="#log-registro">Registro</a>). Cada una se puede <span class="ui">Eliminar</span> con confirmación previa.</p>
+
+  <h4 class="sub">Zonas de incidentes</h4>
+  <p>Escribe el nombre de una <span class="ui">Nueva zona</span> y pulsa <span class="ui">Agregar</span> — queda disponible en los selectores de zona de todo el sistema. Cada zona se puede <span class="ui">Eliminar</span> con confirmación.</p>
+
+  <h4 class="sub">Ramas de logística</h4>
+  <p>Una <strong>rama</strong> es un equipo funcional (por ejemplo Alimentación, Carpas, Emergencias). Cada rama queda asociada a las categorías de incidente que atiende, para que el sistema sepa a quién avisar cuando llegue ese tipo de caso.</p>
+  <ol class="steps">
+    <li>Escribe el <span class="ui">Nombre de la rama</span>.</li>
+    <li>Marca las <span class="ui">Categorías que atiende</span> (puede ser más de una).</li>
+    <li>Pulsa <span class="ui">Guardar rama</span>.</li>
+  </ol>
+  <p>Cada rama ya creada se puede editar (cambiar sus categorías y pulsar <span class="ui">Guardar</span>) o <span class="ui">Eliminar</span> — si la eliminas, los usuarios que estaban asignados a ella quedan sin rama.</p>
+
+  <h4 class="sub">Crear y editar usuarios de Centro de Control / Logística</h4>
+  <ol class="steps">
+    <li>Completa <span class="ui">Nombre</span>, <span class="ui">Correo</span> y una <span class="ui">Contraseña temporal</span> (mínimo 6 caracteres).</li>
+    <li>Elige el <span class="ui">Rol</span>: admin, control o logística.</li>
+    <li>Opcional: <span class="ui">Teléfono</span>, <span class="ui">Rama</span> y <span class="ui">Rol en la rama</span> (Miembro o Líder) — esto solo importa para el rol logística.</li>
+    <li>Pulsa <span class="ui">Crear usuario</span>. El mensaje te recuerda comunicar la contraseña por fuera del sistema (no queda visible en ningún lado después de creada).</li>
+  </ol>
+  <p>Para editar a alguien ya existente, cambia lo que necesites directamente en su fila de la tabla <strong>Usuarios (control y logística)</strong> — nombre, rol, teléfono, rama, rol en la rama o zona — y pulsa <span class="ui">Guardar</span> en esa misma fila.</p>
+  <div class="note">
+    <strong class="label">Rol en la rama: Miembro vs. Líder</strong>
+    Un <strong>líder de rama</strong> desbloquea herramientas extra en el Panel Logístico (pedir ayuda a otras ramas, crear tareas, escribir observaciones, recibir y devolver materiales). Ver la <a href="#lider-intro">sección de líder de rama</a> más abajo para el detalle completo.
+  </div>
+
+  <h4 class="sub">Respaldo</h4>
+  <p>El botón <span class="ui">Exportar todo el evento</span> descarga un solo Excel con participantes, incidentes, materiales y actividades — pensado para archivo, no reemplaza los exports específicos de cada módulo.</p>
+</section>
+
+<!-- ======================================================================= -->
+<!-- PARTE 2: LOGISTICA                                                      -->
+<!-- ======================================================================= -->
+
+<section class="part" id="parte-logistica">
+  <div class="part-header logistica">
+    <span class="role-icon">🎪</span>
+    <div><h2>Logística — Panel Logístico</h2><p>Registro de participantes en el evento, comunicación con Centro de Control, tareas de tu rama y materiales.</p></div>
+  </div>
+  <p class="part-intro">Todo el equipo de logística — seas <strong>miembro</strong> o <strong>líder</strong> de tu rama — entra por esta misma herramienta y ve las cinco pestañas: <span class="ui">Registro</span>, <span class="ui">Comunicación</span>, <span class="ui">Tareas</span>, <span class="ui">Mi cronograma</span> y <span class="ui">Materiales</span>. Esta parte del manual describe lo que ve <strong>cualquier miembro</strong>; todo lo que además desbloquea ser líder está en la <a href="#lider-intro">sección de líder de rama</a> más abajo.</p>
+
+  <h3 class="feature" id="log-registro"><span class="tag logistica">Pestaña</span>Registro</h3>
+  <p>Aquí se busca a un participante y se registran las cosas del día a día: si ya ingresó al camp, en qué carpa está, qué comidas ha recibido, y sus salidas libres si aplica.</p>
+  <figure class="screen" style="max-width:420px;"><img src="capturas/log_00_registro_buscador.png" alt="Buscador de participantes en la pestaña Registro"><figcaption>Buscador de la pestaña Registro, con las tres formas de buscar: código, documento o nombre.</figcaption></figure>
+
+  <h4 class="sub">Buscar a un participante</h4>
+  <ol class="steps">
+    <li>Elige cómo vas a buscar: <span class="ui">Código</span>, <span class="ui">Documento</span> o <span class="ui">Nombre</span>.</li>
+    <li>Escribe el dato y pulsa <span class="ui">Buscar</span>.</li>
+    <li>Toca el resultado correcto en la lista para abrir su ficha completa.</li>
+  </ol>
+
+  <h4 class="sub">La ficha del participante</h4>
+  <figure class="screen wide"><img src="capturas/log_01_ficha_participante.png" alt="Ficha completa de un participante, con ingreso, carpa, alimentación e historial"><figcaption>Ficha completa: badges de estado, todos los datos personales, ingreso, salida libre, asignación de carpa, alimentación e historial.</figcaption></figure>
+  <p>Arriba de todo, cuatro etiquetas rápidas: si ya <strong>ingresó</strong>, cuántas <strong>entregas</strong> de alimentación lleva, en qué <strong>carpa</strong> está y si es <strong>líder de carpa</strong>. Debajo, toda su información: documento, edad, municipio, contactos de emergencia, RH, EPS, condición médica, restricciones alimentarias y alergias (resaltadas si aplican), carpa propia, código, y más.</p>
+
+  <h4 class="sub">Registrar el ingreso</h4>
+  <p>Si el participante todavía no ha llegado, verás el botón <span class="ui">Registrar ingreso</span>. Pulsa una sola vez cuando esa persona efectivamente llegue al camp — no se puede registrar dos veces (el sistema avisa si ya estaba registrado).</p>
+
+  <h4 class="sub">Asignar una carpa</h4>
+  <ol class="steps">
+    <li>En la grilla de carpas, toca la que corresponda. Cada tarjeta muestra su ocupación actual ("8/10"); las que están llenas se ven distintas y no se pueden elegir salvo que sea la carpa que ya tenía asignada esa persona.</li>
+    <li>Marca <span class="ui">Líder de carpa</span> si esa persona es la responsable de esa carpa.</li>
+    <li>Pulsa <span class="ui">Guardar</span>.</li>
+  </ol>
+  <div class="note warn"><strong class="label">Las carpas llenas no dejan seguir</strong>Si intentas asignar a alguien a una carpa que ya llegó a su capacidad, el sistema lo rechaza y te dice cuántos cupos tiene esa carpa. Coordina con el administrador si necesitas más capacidad — se configura en <a href="#admin-administracion">Administración</a>.</div>
+
+  <h4 class="sub">Marcar alimentación entregada</h4>
+  <p>La lista de "Alimentación (X/9)" muestra las 9 comidas del evento (desayunos, almuerzos, cenas y refrigerios de cada día). Pulsa <span class="ui">Marcar</span> junto a la comida que acabas de entregar — queda con la hora exacta y ya no se puede desmarcar por error, así que revisa antes de tocar.</p>
+
+  <h4 class="sub">Salida libre (solo participantes elegibles)</h4>
+  <p>Este bloque solo aparece para quienes viven en Bugalagrande, zona urbana.</p>
+  <ol class="steps">
+    <li>Si la persona va a salir, pulsa el motivo correspondiente: <span class="ui">Salió a comer</span>, <span class="ui">Salió a dormir</span> o <span class="ui">Salió a trabajar</span>. Se pide confirmación antes de registrarlo.</li>
+    <li>Mientras está afuera, verás la etiqueta "En salida libre desde [hora] (motivo: …)" y el botón <span class="ui">Registrar regreso</span> — pulsa cuando vuelva (también pide confirmación).</li>
+  </ol>
+  <p>No se puede abrir una segunda salida libre mientras la anterior siga activa — hay que registrar el regreso primero.</p>
+
+  <h4 class="sub">Historial</h4>
+  <p>Al final de la ficha, el registro cronológico de todo lo que se ha hecho con ese participante: quién lo hizo y a qué hora — ingreso, asignaciones de carpa, entregas de alimentación, salidas libres.</p>
+
+  <h3 class="feature" id="log-comunicacion"><span class="tag logistica">Pestaña</span>Comunicación</h3>
+  <p>El puente entre tu rama y el Centro de Control: reportar incidentes y coordinar ayuda entre ramas.</p>
+  <figure class="screen wide"><img src="capturas/log_02_comunicacion_miembro.png" alt="Pestaña Comunicación vista por un miembro de rama"><figcaption>Pestaña Comunicación — como miembro de rama, ves el formulario de incidentes y tus incidentes reportados. El bloque para pedir ayuda a otra rama es exclusivo de líderes.</figcaption></figure>
+
+  <h4 class="sub">Reportar un incidente</h4>
+  <ol class="steps">
+    <li>Pulsa <span class="ui">Nuevo incidente</span>.</li>
+    <li>Elige <span class="ui">Categoría</span> — verás automáticamente quién en el Centro de Control atiende ese tipo de caso.</li>
+    <li>Elige <span class="ui">Prioridad</span>, y opcionalmente <span class="ui">Zona</span> y <span class="ui">Lugar específico</span>.</li>
+    <li>Si el incidente es sobre un participante puntual, búscalo en el campo <span class="ui">Campista afectado</span> (acepta código, documento o nombre) y tócalo en los resultados para vincularlo. Si ya tenías su ficha abierta en Registro, queda precargado automáticamente — puedes quitarlo con <span class="ui">Quitar</span> si no aplica.</li>
+    <li>Escribe la <span class="ui">Descripción</span>.</li>
+    <li>Pulsa <span class="ui">Guardar incidente</span>. Verás "Incidente enviado al Centro de Control" y el formulario se cierra solo después de un momento.</li>
+  </ol>
+
+  <h4 class="sub">Mis incidentes reportados</h4>
+  <p>La lista de todo lo que tú personalmente has reportado, con su código, descripción, prioridad y estado actual — para que puedas seguirle el pulso sin tener que preguntarle a nadie.</p>
+
+  <h3 class="feature" id="log-tareas"><span class="tag logistica">Pestaña</span>Tareas</h3>
+  <figure class="screen wide"><img src="capturas/log_03_tareas_miembro.png" alt="Pestaña Tareas vista por un miembro de rama"><figcaption>Pestaña Tareas para un miembro: ves las tareas de tu rama y tus observaciones recibidas. Crear tareas y observaciones es función de líder.</figcaption></figure>
+  <p>Como miembro, aquí ves las <strong>tareas de tu rama</strong> — lo que el administrador o tu líder asignó. Haz clic en cualquiera para ver el detalle: quién ya participó, las subtareas y los comentarios. Si tienes una subtarea asignada a tu nombre, puedes marcarla con <span class="ui">Marcar hecha</span> cuando termines. También puedes escribir comentarios en cualquier tarea de tu rama, y ves las <strong>observaciones</strong> que tu líder haya escrito sobre tu desempeño.</p>
+
+  <h3 class="feature" id="log-cronograma"><span class="tag logistica">Pestaña</span>Mi cronograma</h3>
+  <figure class="screen wide"><img src="capturas/log_04_cronograma_miembro.png" alt="Pestaña Mi cronograma vista por un miembro de rama"><figcaption>Mi cronograma: la lista completa de actividades del evento. El indicador "Mi cumplimiento" es exclusivo de líderes.</figcaption></figure>
+  <p>La lista completa de <strong>actividades del evento</strong>, con sus horarios y si el montaje/finalización ya quedaron listos. Al abrir una actividad, ves las tareas que le corresponden a tu propia rama para esa actividad específica — el mismo componente expandible de la pestaña Tareas.</p>
+
+  <h3 class="feature" id="log-materiales"><span class="tag logistica">Pestaña</span>Materiales</h3>
+  <figure class="screen wide"><img src="capturas/log_05_materiales_miembro.png" alt="Pestaña Materiales vista por un miembro de rama"><figcaption>Materiales para un miembro: catálogo, formulario de solicitud y tus propias solicitudes. "Mis lotes asignados" es exclusivo de líderes.</figcaption></figure>
+
+  <h4 class="sub">Ver el catálogo</h4>
+  <p>Filtra por <span class="ui">Objetivo</span> o <span class="ui">Ubicación</span> para ver qué hay disponible, cuánto, y quién lo tiene actualmente.</p>
+
+  <h4 class="sub">Solicitar materiales</h4>
+  <ol class="steps">
+    <li>Opcional: vincula la solicitud a una <span class="ui">Actividad</span>.</li>
+    <li>Marca los materiales que necesitas y la cantidad de cada uno.</li>
+    <li>Opcional: agrega <span class="ui">Notas</span>.</li>
+    <li>Pulsa <span class="ui">Solicitar</span>.</li>
+  </ol>
+  <p>Tu solicitud queda visible en <strong>Mis solicitudes</strong> con su estado: pendiente → aprobada → entregada (o rechazada). Esas transiciones las resuelve un administrador desde Centro de Control — cuando se entrega, el lote queda a nombre del líder de tu rama, sin importar quién de tu equipo la haya pedido.</p>
+</section>
+
+<!-- ======================================================================= -->
+<!-- PARTE 3: LIDER DE RAMA                                                  -->
+<!-- ======================================================================= -->
+
+<section class="part" id="parte-lider">
+  <div class="part-header lider">
+    <span class="role-icon">⭐</span>
+    <div><h2>Líder de rama</h2><p>Todo lo de Logística, más las herramientas para coordinar a tu equipo.</p></div>
+  </div>
+  <p class="part-intro" id="lider-intro">Si tu cuenta tiene <span class="ui">Rol en la rama = Líder</span> (lo configura un administrador en <a href="#admin-administracion">Administración → Usuarios</a>), entras al mismo Panel Logístico que el resto de tu equipo, pero con bloques adicionales que solo tú ves. Esta sección cubre <strong>únicamente esas funciones extra</strong> — todo lo demás ya está explicado en la <a href="#parte-logistica">sección de Logística</a>.</p>
+
+  <h3 class="feature" id="lider-ayuda"><span class="tag lider">Comunicación</span>Pedir ayuda a otra rama</h3>
+  <p>Cuando tu rama necesita apoyo puntual de otro equipo (por ejemplo, manos extra para montar algo), tú — como líder — puedes pedirlo directamente desde el sistema, sin pasar por Centro de Control.</p>
+  <figure class="screen wide"><img src="capturas/log_06_comunicacion_lider.png" alt="Pestaña Comunicación vista por un líder, con el bloque para pedir ayuda a otra rama"><figcaption>Como líder, en Comunicación aparece además el bloque "Pedir ayuda a otra rama".</figcaption></figure>
+  <ol class="steps">
+    <li>Elige la <span class="ui">Rama a la que pides ayuda</span> — o selecciona "🆘 Todas las ramas (urgente)" si de verdad es urgente y no importa quién responda.</li>
+    <li>Escribe <span class="ui">¿Qué necesitas?</span> (obligatorio).</li>
+    <li>Opcional: <span class="ui">¿Cuántas personas necesitas?</span> — si lo dejas vacío, no importa la cantidad, cualquiera que se apunte cuenta.</li>
+    <li>Opcional: agrega <span class="ui">Detalle</span>.</li>
+    <li>Pulsa <span class="ui">Enviar solicitud</span>.</li>
+  </ol>
+  <p>Tu solicitud aparece en <strong>Solicitudes que yo pedí</strong>, y en las pantallas de la rama destinataria como <strong>Solicitudes para mi rama</strong> — con una alerta especial en su barra superior si aún no se cubre el cupo de gente pedido. También queda visible para el Centro de Control en "Solicitudes internas entre ramas" del Panel.</p>
+
+  <h3 class="feature" id="lider-tareas"><span class="tag lider">Tareas</span>Crear tareas y escribir observaciones</h3>
+  <figure class="screen wide"><img src="capturas/log_07_tareas_lider.png" alt="Pestaña Tareas vista por un líder, con los formularios de nueva tarea y observación"><figcaption>Como líder, en Tareas aparecen además "Nueva tarea para mi rama" y "Escribir observación a alguien de mi rama".</figcaption></figure>
+
+  <h4 class="sub">Crear una tarea interna para tu rama</h4>
+  <ol class="steps">
+    <li>Escribe el <span class="ui">Título</span> (obligatorio).</li>
+    <li>Opcional: <span class="ui">Detalle</span> y la <span class="ui">Hora en que debe estar listo</span>.</li>
+    <li>Pulsa <span class="ui">Crear tarea</span>. Aparece en "Tareas de mi rama", visible para todo tu equipo.</li>
+  </ol>
+
+  <h4 class="sub">Escribir una observación sobre alguien de tu equipo</h4>
+  <p>Sirve para dejar registro del desempeño de tu gente — buenas y malas.</p>
+  <ol class="steps">
+    <li>Elige el <span class="ui">Integrante</span> (cualquiera de tu rama, menos tú mismo).</li>
+    <li>Elige el <span class="ui">Tipo</span>: Positiva, Neutral o Negativa.</li>
+    <li>Escribe la <span class="ui">Observación</span>.</li>
+    <li>Pulsa <span class="ui">Guardar</span>. Queda visible para esa persona en su propia pestaña Tareas, y para ti en "Mis observaciones".</li>
+  </ol>
+
+  <h3 class="feature" id="lider-gestion"><span class="tag lider">Tareas / Comunicación</span>Gestionar participaciones en tareas y solicitudes</h3>
+  <p>Al abrir el detalle de cualquier tarea o solicitud de tu rama, como líder tienes control adicional sobre quién participa:</p>
+  <ul class="plain">
+    <li><span class="ui">Quitar</span>: si alguien se marcó como participante por error, puedes quitar su check (pide confirmación).</li>
+    <li><span class="ui">Dar check final</span>: cierra el caso definitivamente. En una <em>tarea</em> de tu propia rama, lo puede dar cualquier líder de las ramas involucradas; en una <em>solicitud de ayuda</em>, lo da quien la pidió originalmente (o un admin).</li>
+    <li>En las tareas (no en las solicitudes), puedes agregar <strong>subtareas</strong> nuevas y asignarlas a un integrante específico de tu rama.</li>
+  </ul>
+
+  <h3 class="feature" id="lider-materiales"><span class="tag lider">Materiales</span>Recibir y devolver materiales — Mis lotes asignados</h3>
+  <figure class="screen wide"><img src="capturas/log_09_materiales_lider.png" alt="Pestaña Materiales vista por un líder, con el bloque Mis lotes asignados"><figcaption>Como líder, en Materiales aparece además "Mis lotes asignados", con el formulario para devolver cada línea.</figcaption></figure>
+  <p>Cuando un administrador te asigna un lote (directamente o al entregar una solicitud de tu rama), aparece aquí con la actividad vinculada y cada material con su cantidad pendiente de devolver.</p>
+  <ol class="steps">
+    <li>Para cada línea pendiente, escribe cuánto vuelve en <span class="ui">Buen estado</span>, cuánto <span class="ui">Dañado</span> y cuánto <span class="ui">Perdido</span> — la suma no puede superar lo que tenías pendiente.</li>
+    <li>Pulsa <span class="ui">Devolver</span>. El inventario general se actualiza al instante (lo dañado/perdido deja de estar disponible para otros).</li>
+  </ol>
+
+  <h3 class="feature" id="lider-actividades"><span class="tag lider">Mi cronograma</span>Montaje y cierre de actividades</h3>
+  <p>Dentro del detalle de una actividad donde tu rama tiene tareas asignadas, si eres líder ves los botones de cierre:</p>
+  <ul class="plain">
+    <li><span class="ui">Marcar montaje listo</span>: cuando tu parte del montaje ya está lista.</li>
+    <li><span class="ui">Marcar actividad terminada</span>: solo disponible después de que el montaje quedó listo.</li>
+  </ul>
+  <p>Estas mismas acciones también las puede hacer un administrador desde Centro de Control — no hace falta duplicar el aviso si ya lo marcaste tú.</p>
+
+  <h3 class="feature" id="lider-cumplimiento"><span class="tag lider">Mi cronograma</span>Ver "Mi cumplimiento"</h3>
+  <figure class="screen wide"><img src="capturas/log_08_cronograma_lider.png" alt="Pestaña Mi cronograma vista por un líder, con el indicador Mi cumplimiento"><figcaption>Como líder, en Mi cronograma aparece además la tarjeta "Mi cumplimiento" con el desempeño de tu rama.</figcaption></figure>
+  <p>Solo para líderes: un resumen de cómo le está yendo a tu rama en el cronograma — cuántas tareas lleva hechas de cuántas en total, el porcentaje que se completó a tiempo (en verde si es 70% o más, en rojo si es menos), y el atraso promedio en minutos si lo hay. Es el mismo indicador que ve el administrador en la analítica de <a href="#admin-cronograma">Cronograma</a>, pero recortado a tu propia rama.</p>
+</section>
+
+<footer class="manual-footer">
+  Manual de uso interno · Camp Fest 2026 · Bugalagrande, Valle del Cauca. Las capturas de este manual usan datos de ejemplo para ilustrar cada pantalla — no corresponden a participantes ni incidentes reales.
+</footer>
+
+</main>
+
+<script>
+(function () {
+  var toggle = document.getElementById("menuToggle");
+  var sidebar = document.getElementById("sidebar");
+  toggle.addEventListener("click", function () { sidebar.classList.toggle("open"); });
+  sidebar.querySelectorAll("a").forEach(function (a) {
+    a.addEventListener("click", function () { sidebar.classList.remove("open"); });
+  });
+
+  var links = Array.prototype.slice.call(sidebar.querySelectorAll("nav a"));
+  var targets = links.map(function (a) { return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+
+  function onScroll() {
+    var y = window.scrollY + 120;
+    var current = null;
+    targets.forEach(function (t) { if (t.offsetTop <= y) current = t; });
+    links.forEach(function (a) { a.classList.remove("active"); });
+    if (current) {
+      var match = links.find(function (a) { return a.getAttribute("href") === "#" + current.id; });
+      if (match) match.classList.add("active");
+    }
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+
+</body>
+</html>
