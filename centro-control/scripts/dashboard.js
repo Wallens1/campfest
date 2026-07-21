@@ -371,6 +371,8 @@ async function iniciarDashboard() {
     document.getElementById("bloqueExportarInventarioAdmin").classList.toggle("oculto", usuario.rol !== "admin");
 
     document.getElementById("btnEnviarCorreoMasivo").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("btnVerCorreosFallidos").classList.toggle("oculto", usuario.rol !== "admin");
+    document.getElementById("btnExportarListaEspera").classList.toggle("oculto", usuario.rol !== "admin");
     document.getElementById("bloqueCorreoPruebaLibre").classList.toggle("oculto", usuario.rol !== "admin");
     llenarSelect(document.getElementById("filtroMunicipioInscripcion"), MUNICIPIOS_VALLE, "Todos los municipios");
 
@@ -1899,9 +1901,18 @@ document.getElementById("formImportarParticipantes").addEventListener("submit", 
             : "";
         const muestraPrevia = previa.muestra.slice(0, 5).map((p) => `· ${p.nombre} (${p.documento})`).join("\n");
 
+        // No bloquea nada — solo avisa si alguien con el mismo nombre y la
+        // misma fecha de nacimiento o teléfono ya existe, para el caso de
+        // que sea la misma persona con el documento mal digitado en algún
+        // lado (no lo detectaría el chequeo por documento exacto).
+        const duplicadosPrevia = (previa.posiblesDuplicados || []).length > 0
+            ? `\n\n⚠️ ${previa.posiblesDuplicados.length} posible(s) duplicado(s) por nombre + fecha de nacimiento/teléfono:\n`
+                + previa.posiblesDuplicados.slice(0, 5).map((d) => `· ${d.nombre} (fila ${d.fila}) — parecido a "${d.posibleDuplicadoDe}" ya registrado`).join("\n")
+            : "";
+
         const confirmado = confirm(
             `Se importarán ${previa.aInsertar} participantes nuevos.\n`
-            + `${previa.omitidos} documentos ya existían y se omiten.${detalleErroresPrevia}\n\n`
+            + `${previa.omitidos} documentos ya existían y se omiten.${detalleErroresPrevia}${duplicadosPrevia}\n\n`
             + (muestraPrevia ? `Algunos de los que se van a crear:\n${muestraPrevia}\n\n` : "")
             + "¿Confirmar la importación?"
         );
@@ -3709,6 +3720,17 @@ function renderizarTablaInscripciones(participantes) {
 
     cuerpo.querySelectorAll(".select-admision-inscripcion").forEach((select) => {
         select.addEventListener("change", () => {
+
+            // Bajar de "Admitido" a cualquier otro estado no tenía ningún
+            // resguardo — un clic de más en el desplegable podía des-admitir
+            // a alguien sin darse cuenta.
+            if (select.dataset.anterior === "admitido" && select.value !== "admitido") {
+                if (!confirm(`Este participante ya estaba admitido. ¿Confirmas cambiarlo a "${humanizar(select.value)}"?`)) {
+                    select.value = select.dataset.anterior;
+                    return;
+                }
+            }
+
             let motivo = "";
             if (select.value === "no_admitido" || select.value === "desertor") {
                 motivo = prompt(select.value === "no_admitido" ? "Motivo del rechazo (se incluye en el correo al participante):" : "Motivo de la deserción (opcional, solo uso interno):") || "";
@@ -3890,6 +3912,55 @@ document.getElementById("btnEnviarCorreoMasivo").addEventListener("click", async
         mostrarMensaje(mensaje, error.message, "fallo");
     }
 
+});
+
+document.getElementById("btnVerCorreosFallidos").addEventListener("click", async () => {
+
+    const bloque = document.getElementById("bloqueCorreosFallidos");
+    bloque.classList.toggle("oculto");
+
+    if (bloque.classList.contains("oculto")) return;
+
+    try {
+
+        const { participantes } = await peticionApi("/api/centro-control/inscripciones/correos-fallidos");
+        const contenedor = document.getElementById("listaCorreosFallidos");
+
+        contenedor.innerHTML = participantes.length === 0
+            ? `<p class="detalle">No hay correos fallidos pendientes de revisar.</p>`
+            : participantes.map((p) => `
+                <div class="fila-conteo">
+                    <span class="etiqueta">${p.nombre} (${p.codigo})</span>
+                    <span class="valor">${p.correo_personal || "sin correo"} — ${p.correo_confirmacion_error || "error desconocido"}</span>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        document.getElementById("listaCorreosFallidos").innerHTML = `<p class="detalle">${error.message}</p>`;
+    }
+
+});
+
+document.getElementById("btnReenviarFallidos").addEventListener("click", async () => {
+
+    if (!confirm("¿Reintentar el envío a todos los que fallaron?")) return;
+
+    const mensaje = document.getElementById("mensajeInscripciones");
+
+    try {
+        const resultado = await peticionApi("/api/centro-control/inscripciones/enviar-correo-masivo?soloFallidos=true", { method: "POST" });
+        mostrarMensaje(mensaje, `Reintento terminado: ${resultado.enviados} enviados, ${resultado.fallidos} siguen fallando.`, resultado.fallidos > 0 ? "fallo" : "ok");
+        document.getElementById("btnVerCorreosFallidos").click();
+        document.getElementById("btnVerCorreosFallidos").click();
+        await cargarInscripciones();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+document.getElementById("btnExportarListaEspera").addEventListener("click", () => {
+    descargarArchivo("/api/centro-control/inscripciones/lista-espera-bugalagrande", "lista-espera-bugalagrande.xlsx");
 });
 
 async function cargarEstadisticasInscripciones() {

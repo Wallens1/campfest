@@ -619,6 +619,14 @@
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                 <button class="boton pequeno secundario" id="btnVerEliminadosInscripcion" style="width:auto;">Ver eliminados</button>
                 <button class="boton pequeno oculto" id="btnEnviarCorreoMasivo" style="width:auto;">Enviar correo a todos los pendientes</button>
+                <button class="boton pequeno secundario oculto" id="btnVerCorreosFallidos" style="width:auto;">Ver correos fallidos</button>
+                <button class="boton pequeno terciario oculto" id="btnExportarListaEspera" style="width:auto;">Exportar lista de espera Bugalagrande</button>
+            </div>
+
+            <div class="tarjeta oculto" id="bloqueCorreosFallidos" style="margin-top:10px;">
+                <h4 style="margin:0 0 8px;">Correos fallidos</h4>
+                <div id="listaCorreosFallidos"></div>
+                <button class="boton pequeno" id="btnReenviarFallidos" style="width:auto; margin-top:10px;">Reintentar todos los fallidos</button>
             </div>
 
             <div class="grid-info oculto" id="bloqueCorreoPruebaLibre" style="margin-top:10px; align-items:flex-end;">
@@ -1072,6 +1080,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=29" defer></script>
+<script src="scripts/dashboard.js?v=30" defer></script>
 </body>
 </html>
