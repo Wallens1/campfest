@@ -229,6 +229,36 @@ function actualizarTodoPolling() {
     cargarTareas();
     cargarObservaciones();
     cargarEstadoEvento();
+    cargarAvisosInternos();
+}
+
+// Avisos dirigidos puntualmente a este usuario (ej. "tu actividad fue
+// cancelada") — separado de la barra de solicitudes de ayuda entre ramas
+// para no pisarse con ella.
+async function cargarAvisosInternos() {
+
+    try {
+
+        const { avisos } = await peticionApi("/api/avisos-internos");
+        const contenedor = document.getElementById("avisosInternosBarra");
+
+        contenedor.innerHTML = avisos.map((a) => `
+            <div class="alerta-chip" data-aviso-interno="${a.id}">
+                <span>🔔 ${a.mensaje}</span>
+            </div>
+        `).join("");
+
+        contenedor.querySelectorAll("[data-aviso-interno]").forEach((chip) => {
+            chip.addEventListener("click", async () => {
+                await peticionApi(`/api/avisos-internos/${chip.dataset.avisoInterno}/leido`, { method: "POST" }).catch(() => {});
+                chip.remove();
+            });
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+
 }
 
 // Solo lectura — activar/desactivar la alerta extrema es exclusivo de admin

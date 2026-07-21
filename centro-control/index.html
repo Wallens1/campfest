@@ -327,11 +327,40 @@
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                 <h2 id="detalleActividadTitulo" style="margin:0;"></h2>
                 <div style="display:flex; gap:8px;">
+                    <button class="boton pequeno secundario oculto" id="btnEditarActividad" style="width:auto;">Editar</button>
                     <button class="boton pequeno secundario oculto" id="btnCancelarActividad" style="width:auto;">Cancelar actividad</button>
                     <button class="boton pequeno secundario" id="btnCerrarDetalleActividad" style="width:auto;">Cerrar</button>
                 </div>
             </div>
             <div class="grid-info" id="detalleActividadInfo" style="margin-top:14px;"></div>
+
+            <form class="seccion oculto" id="formEditarActividad">
+                <div class="grid-info" style="margin-bottom:0;">
+                    <div class="campo">
+                        <label for="inputEditarTituloActividad">Título</label>
+                        <input type="text" id="inputEditarTituloActividad" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputEditarHoraInicioActividad">Hora inicio</label>
+                        <input type="datetime-local" id="inputEditarHoraInicioActividad" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputEditarHoraFinActividad">Hora fin</label>
+                        <input type="datetime-local" id="inputEditarHoraFinActividad" required>
+                    </div>
+                    <div class="campo">
+                        <label for="inputEditarEspacioActividad">Espacio</label>
+                        <input type="text" id="inputEditarEspacioActividad">
+                    </div>
+                </div>
+                <button type="submit" class="boton pequeno">Guardar cambios</button>
+                <div class="mensaje" id="mensajeEditarActividad"></div>
+            </form>
+
+            <div class="seccion oculto" id="seccionHistorialActividad">
+                <h3>Historial de cambios</h3>
+                <div id="detalleHistorialActividad"></div>
+            </div>
 
             <div class="seccion" id="detalleActividadFases" style="margin-top:14px;"></div>
 
@@ -1043,6 +1072,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=28" defer></script>
+<script src="scripts/dashboard.js?v=29" defer></script>
 </body>
 </html>

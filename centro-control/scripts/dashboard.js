@@ -2591,12 +2591,73 @@ document.getElementById("formActividad").addEventListener("submit", async (event
 
 let actividadAbiertaId = null;
 
+// Convierte un ISO string a lo que espera un <input type="datetime-local">
+// (hora LOCAL del navegador, sin zona) — toISOString() da UTC, así que hay
+// que armar el string a mano desde los getters locales para no desfasar la
+// hora que ve el operador.
+function aFechaHoraLocal(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const dosDigitos = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${dosDigitos(d.getMonth() + 1)}-${dosDigitos(d.getDate())}T${dosDigitos(d.getHours())}:${dosDigitos(d.getMinutes())}`;
+}
+
+document.getElementById("btnEditarActividad").addEventListener("click", () => {
+    document.getElementById("formEditarActividad").classList.toggle("oculto");
+});
+
+document.getElementById("formEditarActividad").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeEditarActividad");
+
+    try {
+
+        const horaInicioIso = new Date(document.getElementById("inputEditarHoraInicioActividad").value).toISOString();
+        const horaFinIso = new Date(document.getElementById("inputEditarHoraFinActividad").value).toISOString();
+
+        const { advertenciaConflicto } = await peticionApi(`/api/actividades/${actividadAbiertaId}`, {
+            method: "PATCH",
+            body: JSON.stringify({
+                titulo: document.getElementById("inputEditarTituloActividad").value.trim(),
+                fecha: document.getElementById("inputEditarHoraInicioActividad").value.slice(0, 10),
+                horaInicio: horaInicioIso,
+                horaFin: horaFinIso,
+                espacioUsado: document.getElementById("inputEditarEspacioActividad").value.trim()
+            })
+        });
+
+        mostrarMensaje(
+            mensaje,
+            advertenciaConflicto ? `Guardado — ${advertenciaConflicto}` : "Actividad actualizada correctamente",
+            advertenciaConflicto ? "fallo" : "ok"
+        );
+
+        await abrirDetalleActividad(actividadAbiertaId);
+        await cargarActividades();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
 async function abrirDetalleActividad(id) {
 
     try {
 
-        const { actividad, tareas } = await peticionApi(`/api/actividades/${id}`);
+        const { actividad, tareas, historial } = await peticionApi(`/api/actividades/${id}`);
         actividadAbiertaId = id;
+
+        const seccionHistorial = document.getElementById("seccionHistorialActividad");
+        seccionHistorial.classList.toggle("oculto", !historial || historial.length === 0);
+        document.getElementById("detalleHistorialActividad").innerHTML = (historial || []).map((h) => `
+            <div class="bitacora-item">
+                <span class="hora">${new Date(h.creado_en).toLocaleString("es-CO")}</span>
+                <div>${h.descripcion}</div>
+                <div class="usuario">${h.usuario_nombre || "—"}</div>
+            </div>
+        `).join("");
 
         const contenedor = document.getElementById("tarjetaDetalleActividad");
         contenedor.classList.remove("oculto");
@@ -2619,6 +2680,17 @@ async function abrirDetalleActividad(id) {
             "oculto",
             perfilActual?.rol !== "admin" || actividad.cancelada
         );
+
+        document.getElementById("btnEditarActividad").classList.toggle(
+            "oculto",
+            perfilActual?.rol !== "admin" || actividad.cancelada
+        );
+
+        document.getElementById("formEditarActividad").classList.add("oculto");
+        document.getElementById("inputEditarTituloActividad").value = actividad.titulo;
+        document.getElementById("inputEditarHoraInicioActividad").value = aFechaHoraLocal(actividad.hora_inicio);
+        document.getElementById("inputEditarHoraFinActividad").value = aFechaHoraLocal(actividad.hora_fin);
+        document.getElementById("inputEditarEspacioActividad").value = actividad.espacio_usado || "";
 
         document.getElementById("bloqueCrearTareaActividad").classList.toggle("oculto", perfilActual?.rol !== "admin" || actividad.cancelada);
 
