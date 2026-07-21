@@ -648,22 +648,58 @@ async function cargarAnunciosAdmin() {
         const contenedor = document.getElementById("listaAnunciosAdmin");
         const esAdmin = perfilActual?.rol === "admin";
 
+        const AHORA = Date.now();
+
         contenedor.innerHTML = anuncios.length === 0
             ? `<p class="detalle">Sin avisos publicados.</p>`
-            : anuncios.map((a) => `
+            : anuncios.map((a) => {
+
+                const puedeEliminar = esAdmin || (AHORA - new Date(a.creado_en).getTime() <= 2 * 60 * 1000);
+                const segmentos = [
+                    a.filtro_municipio ? `Solo ${a.filtro_municipio}` : null,
+                    a.filtro_carpa ? `Solo ${a.filtro_carpa}` : null,
+                    (a.edad_min != null || a.edad_max != null) ? `Edad ${a.edad_min ?? "0"}-${a.edad_max ?? "∞"}` : null,
+                    a.publicar_en && new Date(a.publicar_en) > new Date() ? `Programado: ${new Date(a.publicar_en).toLocaleString("es-CO")}` : null
+                ].filter(Boolean);
+
+                return `
                 <div class="feed-item">
                     <span class="hora">${new Date(a.creado_en).toLocaleString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric", hour: "numeric", minute: "2-digit" })}</span>
-                    ${a.mensaje}
-                    ${esAdmin ? `<button class="boton pequeno secundario" data-eliminar-anuncio="${a.id}" style="width:auto; padding:4px 10px; font-size:11px; margin-left:8px;">Eliminar</button>` : ""}
+                    ${a.mensaje}${a.editado ? ` <span class="detalle">(editado)</span>` : ""}
+                    ${segmentos.length > 0 ? `<div class="detalle">${segmentos.join(" · ")}</div>` : ""}
+                    <button class="boton pequeno secundario" data-editar-anuncio="${a.id}" data-mensaje-actual="${a.mensaje.replace(/"/g, "&quot;")}" style="width:auto; padding:4px 10px; font-size:11px; margin-left:8px;">Editar</button>
+                    ${puedeEliminar ? `<button class="boton pequeno secundario" data-eliminar-anuncio="${a.id}" style="width:auto; padding:4px 10px; font-size:11px;">Eliminar</button>` : ""}
                 </div>
-            `).join("");
+            `;
+            }).join("");
 
         contenedor.querySelectorAll("[data-eliminar-anuncio]").forEach((boton) => {
             boton.addEventListener("click", () => eliminarAnuncio(boton.dataset.eliminarAnuncio));
         });
 
+        contenedor.querySelectorAll("[data-editar-anuncio]").forEach((boton) => {
+            boton.addEventListener("click", () => editarAnuncio(boton.dataset.editarAnuncio, boton.dataset.mensajeActual));
+        });
+
     } catch (error) {
         console.error(error);
+    }
+
+}
+
+async function editarAnuncio(id, mensajeActual) {
+
+    const nuevo = prompt("Editar el aviso:", mensajeActual);
+    if (nuevo === null || !nuevo.trim()) return;
+
+    const mensaje = document.getElementById("mensajeAnuncios");
+
+    try {
+        await peticionApi(`/api/centro-control/anuncios-evento/${id}`, { method: "PATCH", body: JSON.stringify({ mensaje: nuevo.trim() }) });
+        mostrarMensaje(mensaje, "Aviso actualizado", "ok");
+        await cargarAnunciosAdmin();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
     }
 
 }
@@ -694,10 +730,25 @@ document.getElementById("formNuevoAnuncio").addEventListener("submit", async (ev
     if (!input.value.trim()) return;
 
     try {
-        await peticionApi("/api/centro-control/anuncios-evento", { method: "POST", body: JSON.stringify({ mensaje: input.value.trim() }) });
-        input.value = "";
-        mostrarMensaje(mensaje, "Aviso publicado", "ok");
+
+        const publicarEnValor = document.getElementById("inputPublicarEnAnuncio").value;
+
+        await peticionApi("/api/centro-control/anuncios-evento", {
+            method: "POST",
+            body: JSON.stringify({
+                mensaje: input.value.trim(),
+                publicarEn: publicarEnValor ? new Date(publicarEnValor).toISOString() : null,
+                filtroMunicipio: document.getElementById("inputFiltroMunicipioAnuncio").value.trim() || null,
+                filtroCarpa: document.getElementById("inputFiltroCarpaAnuncio").value.trim() || null,
+                edadMin: document.getElementById("inputEdadMinAnuncio").value || null,
+                edadMax: document.getElementById("inputEdadMaxAnuncio").value || null
+            })
+        });
+
+        document.getElementById("formNuevoAnuncio").reset();
+        mostrarMensaje(mensaje, publicarEnValor ? "Aviso programado" : "Aviso publicado", "ok");
         await cargarAnunciosAdmin();
+
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
     }
