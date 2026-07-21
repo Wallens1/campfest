@@ -285,11 +285,11 @@ btnCerrarSesion.addEventListener("click", async () => {
 // Navegación entre pestañas
 // ==========================
 
-document.querySelectorAll(".tab-modulo").forEach((tab) => {
+document.querySelectorAll(".tab-modulo:not([data-subpestana-admin])").forEach((tab) => {
 
     tab.addEventListener("click", () => {
 
-        document.querySelectorAll(".tab-modulo").forEach((t) => t.classList.remove("activo"));
+        document.querySelectorAll(".tab-modulo:not([data-subpestana-admin])").forEach((t) => t.classList.remove("activo"));
         tab.classList.add("activo");
 
         const vista = tab.dataset.vista;
@@ -301,6 +301,11 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
         document.getElementById("vistaNotificaciones").classList.toggle("oculto", vista !== "notificaciones");
         document.getElementById("vistaPerfiles").classList.toggle("oculto", vista !== "perfiles");
         document.getElementById("vistaAdministracion").classList.toggle("oculto", vista !== "administracion");
+
+        if (vista === "administracion") {
+            const tabActivaAdmin = document.querySelector("[data-subpestana-admin].activo");
+            mostrarSubpestanaAdmin(tabActivaAdmin ? tabActivaAdmin.dataset.subpestanaAdmin : "evento");
+        }
 
         if (vista === "cronograma") {
             cargarActividades();
@@ -338,6 +343,26 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
 
     });
 
+});
+
+// ==========================
+// Sub-pestañas de Administración
+// ==========================
+
+function mostrarSubpestanaAdmin(grupo) {
+
+    document.querySelectorAll("[data-subpestana-admin]").forEach((t) => {
+        t.classList.toggle("activo", t.dataset.subpestanaAdmin === grupo);
+    });
+
+    document.querySelectorAll("[data-grupo-admin]").forEach((div) => {
+        div.classList.toggle("oculto", div.dataset.grupoAdmin !== grupo);
+    });
+
+}
+
+document.querySelectorAll("[data-subpestana-admin]").forEach((tab) => {
+    tab.addEventListener("click", () => mostrarSubpestanaAdmin(tab.dataset.subpestanaAdmin));
 });
 
 async function iniciarDashboard() {

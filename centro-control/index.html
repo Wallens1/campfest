@@ -774,6 +774,17 @@
     <!-- ===== VISTA: ADMINISTRACIÓN (solo administrador) ===== -->
     <section class="oculto" id="vistaAdministracion">
 
+        <div class="tabs-modulo" id="subTabsAdministracion" style="margin-bottom:14px;">
+            <button type="button" class="tab-modulo activo" data-subpestana-admin="evento">Configuración del evento</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="importacion">Importación</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="carpas">Carpas y zonas</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="ramas">Ramas y usuarios</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="auditoria">Auditoría</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="respaldo">Respaldo</button>
+        </div>
+
+        <div data-grupo-admin="evento">
+
         <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Portal del campista — Modo evento y alerta extrema</h3>
             <p style="font-size:12.5px; color:#777; margin-top:-4px;">
@@ -793,6 +804,10 @@
             <button type="button" class="boton pequeno terciario" id="btnVerUsosClaveExtrema" style="width:auto; margin-top:10px;">Ver quién ha usado estas claves</button>
             <div id="listaUsosClaveExtrema" class="oculto" style="margin-top:10px; font-size:12px;"></div>
         </div>
+
+        </div>
+
+        <div data-grupo-admin="importacion" class="oculto">
 
         <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Importar participantes desde Excel</h3>
@@ -828,6 +843,10 @@
             <div class="mensaje" id="mensajeCompletarDatosParticipantes"></div>
         </div>
 
+        </div>
+
+        <div data-grupo-admin="carpas" class="oculto">
+
         <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Configurar capacidad de carpas</h3>
             <form id="formCapacidadCarpa" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
@@ -857,6 +876,10 @@
             <div class="mensaje" id="mensajeZona"></div>
             <div class="lista-conteo" id="listaZonas" style="margin-top:12px;"></div>
         </div>
+
+        </div>
+
+        <div data-grupo-admin="ramas" class="oculto">
 
         <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Ramas de logística</h3>
@@ -949,6 +972,10 @@
             <div class="mensaje" id="mensajeUsuarios"></div>
         </div>
 
+        </div>
+
+        <div data-grupo-admin="auditoria" class="oculto">
+
         <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Bitácora de auditoría</h3>
             <p style="font-size:12.5px; color:#777; margin-top:-4px;">
@@ -1024,10 +1051,16 @@
             </div>
         </div>
 
+        </div>
+
+        <div data-grupo-admin="respaldo" class="oculto">
+
         <div class="tarjeta">
             <h3>Respaldo</h3>
             <p class="detalle" style="margin-top:-6px;">Un solo Excel con participantes, incidentes, materiales y actividades — para archivo, no reemplaza los exports de cada módulo. Además de esta descarga manual, el servidor sube automáticamente el mismo respaldo a Supabase Storage una vez al día.</p>
             <button class="boton pequeno terciario" id="btnExportarTodo" style="width:auto;">Exportar todo el evento</button>
+        </div>
+
         </div>
 
     </section>
@@ -1105,6 +1138,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=32" defer></script>
+<script src="scripts/dashboard.js?v=33" defer></script>
 </body>
 </html>
