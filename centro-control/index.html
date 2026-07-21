@@ -649,6 +649,34 @@
     <section class="oculto" id="vistaPerfiles">
 
         <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Actividad reciente de campistas</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                Se actualiza sola mientras esta pestaña está abierta: cada logro que alguien desbloquea
+                en su portal o cada dato de perfil que actualiza aparece aquí apenas pasa.
+            </p>
+            <div class="campo" style="max-width:300px; margin-bottom:10px;">
+                <label for="filtroTipoCronologiaCampistas">Filtrar por tipo</label>
+                <select id="filtroTipoCronologiaCampistas">
+                    <option value="">Todo (logros y cambios de perfil)</option>
+                    <option value="logro">🏆 Solo logros</option>
+                    <option value="perfil_actualizado">✏️ Solo cambios de perfil</option>
+                </select>
+            </div>
+            <div class="tabla-wrap">
+                <table class="tabla-participantes">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Participante</th>
+                            <th>Evento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filasCronologiaCampistas"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tarjeta" style="margin-bottom:14px;">
             <h3>Buscar participante</h3>
             <p style="font-size:12.5px; color:#777; margin-top:-4px;">
                 Busca por código (CF-XXXX), documento o nombre para ver el perfil completo: sus logros
@@ -960,6 +988,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=23" defer></script>
+<script src="scripts/dashboard.js?v=24" defer></script>
 </body>
 </html>

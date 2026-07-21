@@ -188,6 +188,7 @@ const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 let perfilActual = null;
 let intervaloPolling = null;
 let panelDetalleAbierto = false;
+let vistaPerfilesActiva = false;
 let mapaOperadores = {};
 let ramasDisponibles = [];
 let mapaRamas = {};
@@ -325,6 +326,9 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
             cargarEstadisticasInscripciones();
         }
 
+        vistaPerfilesActiva = (vista === "perfiles");
+        if (vistaPerfilesActiva) cargarCronologiaCampistas();
+
     });
 
 });
@@ -399,7 +403,8 @@ async function actualizarTodo() {
         cargarSolicitudesInternas(),
         panelDetalleAbierto ? Promise.resolve() : cargarIncidentes(),
         panelDetalleAbierto ? Promise.resolve() : cargarColaSeguimiento(),
-        cargarEstadoEvento()
+        cargarEstadoEvento(),
+        vistaPerfilesActiva ? cargarCronologiaCampistas() : Promise.resolve()
     ]);
 
 }
@@ -1235,6 +1240,42 @@ function resaltarParticipante(id) {
     }
 
 }
+
+// ==========================
+// Actividad reciente de campistas (logros + cambios de perfil) — panel en
+// vivo, se refresca dentro del mismo ciclo de polling que el resto del
+// dashboard (cada POLLING_MS) mientras la pestaña Perfiles esté abierta.
+// ==========================
+
+const ICONOS_CRONOLOGIA_CAMPISTAS = { logro: "🏆", perfil_actualizado: "✏️" };
+
+async function cargarCronologiaCampistas() {
+
+    const cuerpo = document.getElementById("filasCronologiaCampistas");
+    const tipo = document.getElementById("filtroTipoCronologiaCampistas").value;
+
+    try {
+
+        const parametros = new URLSearchParams({ limit: 30 });
+        if (tipo) parametros.set("tipo", tipo);
+
+        const { eventos } = await peticionApi(`/api/centro-control/cronologia-campistas?${parametros.toString()}`);
+
+        cuerpo.innerHTML = eventos.map((e) => `
+            <tr>
+                <td>${new Date(e.creadoEn).toLocaleString("es-CO")}</td>
+                <td>${e.participante ? `${e.participante.nombre} (${e.participante.codigo})` : "—"}</td>
+                <td>${ICONOS_CRONOLOGIA_CAMPISTAS[e.tipo] || "•"} ${e.descripcion}</td>
+            </tr>
+        `).join("") || `<tr><td colspan="3">Todavía no hay actividad de campistas registrada.</td></tr>`;
+
+    } catch (error) {
+        cuerpo.innerHTML = `<tr><td colspan="3">Error al cargar: ${error.message}</td></tr>`;
+    }
+
+}
+
+document.getElementById("filtroTipoCronologiaCampistas").addEventListener("change", cargarCronologiaCampistas);
 
 // ==========================
 // Búsqueda y perfil de un participante (logros + cronología) — reutiliza
