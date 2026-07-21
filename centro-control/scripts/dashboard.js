@@ -262,6 +262,11 @@ formLogin.addEventListener("submit", async (evento) => {
 
     if (error) {
         mostrarMensaje(mensajeLogin, "Correo o contraseña incorrectos", "fallo");
+        fetch(`${API_BASE}/api/intentos-login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        }).catch(() => {});
         return;
     }
 
@@ -335,10 +340,21 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
 
 async function iniciarDashboard() {
 
+    const { usuario } = await peticionApi("/api/centro-control/perfil");
+
+    // Antes cualquier cuenta válida podía entrar a cualquiera de los dos
+    // paneles: un miembro de logística veía las pestañas de Centro de
+    // Control con casi todos los botones devolviendo 403 en silencio, sin
+    // ningún aviso de "esta cuenta no usa este panel".
+    if (usuario.rol === "logistica") {
+        alert("Tu cuenta es de logística — te llevamos al Panel Logístico.");
+        window.location.href = "../logistica/panel-logistico/";
+        return;
+    }
+
     pantallaLogin.classList.add("oculto");
     dashboard.classList.remove("oculto");
 
-    const { usuario } = await peticionApi("/api/centro-control/perfil");
     perfilActual = usuario;
     usuarioActual.textContent = `${usuario.nombre} · ${humanizar(usuario.rol)}`;
 
@@ -385,6 +401,7 @@ async function iniciarDashboard() {
             Object.entries(mapaRamas).map(([id, nombre]) => `<option value="${id}">${nombre}</option>`).join("");
         cargarFiltroUsuariosAuditoria();
         cargarAuditoria();
+        cargarIntentosLogin();
     }
 
     await actualizarTodo();
@@ -2012,7 +2029,8 @@ document.getElementById("formNuevoUsuario").addEventListener("submit", async (ev
                     rol: document.getElementById("inputRolNuevoUsuario").value,
                     telefono: document.getElementById("inputTelefonoNuevoUsuario").value.trim(),
                     ramaId: document.getElementById("inputRamaNuevoUsuario").value || null,
-                    rolEnRama: document.getElementById("inputRolEnRamaNuevoUsuario").value
+                    rolEnRama: document.getElementById("inputRolEnRamaNuevoUsuario").value,
+                    expiraEn: document.getElementById("inputExpiraNuevoUsuario").value || null
                 })
             });
 
@@ -2065,7 +2083,11 @@ async function cargarUsuariosAdmin() {
                         ${zonasDisponibles.map((z) => `<option value="${z.nombre}" ${z.nombre === u.zona ? "selected" : ""}>${humanizar(z.nombre)}</option>`).join("")}
                     </select>
                 </td>
-                <td><button class="boton pequeno" data-guardar-usuario="${u.id}">Guardar</button></td>
+                <td><input type="date" class="input-expira-usuario" value="${u.expira_en ? u.expira_en.slice(0, 10) : ""}" style="${estiloCampo}"></td>
+                <td>
+                    <button class="boton pequeno" data-guardar-usuario="${u.id}" style="margin-bottom:6px;">Guardar</button>
+                    <button class="boton pequeno secundario" data-restablecer-clave="${u.id}">Restablecer clave</button>
+                </td>
             </tr>
         `).join("");
 
@@ -2081,15 +2103,33 @@ async function cargarUsuariosAdmin() {
                     telefono: fila.querySelector(".input-telefono-usuario").value.trim(),
                     ramaId: fila.querySelector(".select-rama-usuario").value,
                     rolEnRama: fila.querySelector(".select-rol-rama-usuario").value,
-                    zona: fila.querySelector(".select-zona-usuario").value
+                    zona: fila.querySelector(".select-zona-usuario").value,
+                    expiraEn: fila.querySelector(".input-expira-usuario").value || null
                 });
 
             });
 
         });
 
+        cuerpo.querySelectorAll("[data-restablecer-clave]").forEach((boton) => {
+            boton.addEventListener("click", () => restablecerClaveUsuario(boton.dataset.restablecerClave));
+        });
+
     } catch (error) {
         console.error(error);
+    }
+
+}
+
+async function restablecerClaveUsuario(id) {
+
+    if (!confirm("¿Generar una contraseña temporal nueva para este usuario? La actual dejará de funcionar de inmediato.")) return;
+
+    try {
+        const { claveTemporal } = await peticionApi(`/api/centro-control/usuarios/${id}/restablecer-clave`, { method: "POST" });
+        alert(`Nueva contraseña temporal (cópiala ahora, no se vuelve a mostrar):\n\n${claveTemporal}\n\nComunícasela a esa persona por fuera del sistema.`);
+    } catch (error) {
+        alert(error.message);
     }
 
 }
@@ -2176,6 +2216,38 @@ document.getElementById("btnAuditoriaAnterior").addEventListener("click", () => 
 document.getElementById("btnAuditoriaSiguiente").addEventListener("click", () => {
     offsetAuditoria += LIMITE_AUDITORIA;
     cargarAuditoria();
+});
+
+async function cargarIntentosLogin() {
+
+    const cuerpo = document.getElementById("filasIntentosLogin");
+    const email = document.getElementById("filtroIntentosLoginEmail").value.trim();
+
+    try {
+
+        const parametros = new URLSearchParams();
+        parametros.set("limit", "50");
+        if (email) parametros.set("email", email);
+
+        const { registros } = await peticionApi(`/api/intentos-login?${parametros.toString()}`);
+
+        cuerpo.innerHTML = registros.map((r) => `
+            <tr>
+                <td>${new Date(r.creado_en).toLocaleString("es-CO")}</td>
+                <td>${r.email || "—"}</td>
+                <td>${r.ip || "—"}</td>
+            </tr>
+        `).join("") || `<tr><td colspan="3">Sin intentos fallidos registrados.</td></tr>`;
+
+    } catch (error) {
+        cuerpo.innerHTML = `<tr><td colspan="3">Error al cargar: ${error.message}</td></tr>`;
+    }
+
+}
+
+document.getElementById("filtroIntentosLoginEmail").addEventListener("input", () => {
+    clearTimeout(window._debounceIntentosLogin);
+    window._debounceIntentosLogin = setTimeout(cargarIntentosLogin, 400);
 });
 
 async function guardarUsuario(id, datos) {

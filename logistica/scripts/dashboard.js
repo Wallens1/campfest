@@ -158,17 +158,30 @@ function mostrarLogin() {
 
 async function mostrarPanel(sesion) {
 
-    pantallaLogin.classList.add("oculto");
-    pantallaPanel.classList.remove("oculto");
     usuarioActual.textContent = sesion.user.email;
 
     try {
+
         const { usuario } = await peticionApi("/api/centro-control/perfil");
+
+        // Antes cualquier cuenta válida podía entrar aquí: un admin/control
+        // entraba al Panel Logístico y no veía casi nada útil por no tener
+        // rama_id, sin ningún aviso de que este no es su panel.
+        if (usuario.rol !== "logistica") {
+            alert("Tu cuenta es de administración/control — te llevamos al Centro de Control.");
+            window.location.href = "../../centro-control/";
+            return;
+        }
+
         perfilActual = usuario;
         usuarioActual.textContent = `${usuario.nombre} · ${humanizar(usuario.rol)}`;
+
     } catch (error) {
         console.error(error);
     }
+
+    pantallaLogin.classList.add("oculto");
+    pantallaPanel.classList.remove("oculto");
 
     llenarSelect(document.getElementById("inputCategoria"), CATEGORIAS, "Selecciona categoría");
     llenarSelect(document.getElementById("inputPrioridad"), PRIORIDADES, "Selecciona prioridad");
@@ -278,6 +291,11 @@ formLogin.addEventListener("submit", async (evento) => {
 
     if (error) {
         mostrarMensaje(mensajeLogin, "Correo o contraseña incorrectos", "fallo");
+        fetch(`${API_BASE}/api/intentos-login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        }).catch(() => {});
         return;
     }
 

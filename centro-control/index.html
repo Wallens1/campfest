@@ -835,7 +835,12 @@
                             <option value="lider">Líder</option>
                         </select>
                     </div>
+                    <div class="campo">
+                        <label for="inputExpiraNuevoUsuario">Expira el (opcional)</label>
+                        <input type="date" id="inputExpiraNuevoUsuario">
+                    </div>
                 </div>
+                <p style="font-size:12px; color:#777; margin:-2px 0 10px;">Déjalo vacío para una cuenta permanente. Útil para apoyo puntual (ej. voluntarios de un solo día) — pasada esa fecha, la cuenta deja de poder entrar sola.</p>
                 <button type="submit" class="boton pequeno">Crear usuario</button>
             </form>
             <div class="mensaje" id="mensajeNuevoUsuario"></div>
@@ -854,6 +859,7 @@
                             <th>Rama</th>
                             <th>Rol en la rama</th>
                             <th>Zona</th>
+                            <th>Expira</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -915,6 +921,26 @@
                     <button class="boton pequeno secundario" id="btnAuditoriaAnterior" style="width:auto;" disabled>← Anterior</button>
                     <button class="boton pequeno secundario" id="btnAuditoriaSiguiente" style="width:auto;">Siguiente →</button>
                 </div>
+            </div>
+        </div>
+
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Intentos de login fallidos</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                El login de staff pasa directo por Supabase Auth; esto registra cada intento que falló
+                (correo escrito y desde qué IP), para detectar un intento de adivinar la contraseña de una cuenta.
+            </p>
+            <div class="campo" style="max-width:300px; margin-bottom:10px;">
+                <label for="filtroIntentosLoginEmail">Correo contiene</label>
+                <input type="text" id="filtroIntentosLoginEmail" placeholder="Ej: nombre@correo.com">
+            </div>
+            <div class="tabla-wrap">
+                <table class="tabla-participantes">
+                    <thead>
+                        <tr><th>Fecha</th><th>Correo intentado</th><th>IP</th></tr>
+                    </thead>
+                    <tbody id="filasIntentosLogin"></tbody>
+                </table>
             </div>
         </div>
 
@@ -988,6 +1014,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=25" defer></script>
+<script src="scripts/dashboard.js?v=26" defer></script>
 </body>
 </html>
