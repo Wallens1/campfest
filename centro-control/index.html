@@ -120,6 +120,13 @@
     <!-- Formulario de registro de incidente -->
     <div class="tarjeta oculto" id="tarjetaFormIncidente" style="margin-bottom:14px;">
         <h3>Registrar incidente</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;" id="plantillasIncidente">
+            <button type="button" class="boton pequeno terciario" data-plantilla="medico" style="width:auto;">🏥 Malestar leve</button>
+            <button type="button" class="boton pequeno terciario" data-plantilla="objeto" style="width:auto;">🎒 Objeto perdido</button>
+            <button type="button" class="boton pequeno terciario" data-plantilla="alimentacion" style="width:auto;">🍽️ Problema de alimentación</button>
+            <button type="button" class="boton pequeno terciario" data-plantilla="convivencia" style="width:auto;">⚠️ Convivencia</button>
+            <button type="button" class="boton pequeno terciario" data-plantilla="consulta" style="width:auto;">❓ Consulta general</button>
+        </div>
         <form id="formIncidente">
             <div class="grid-info" style="margin-bottom:0;">
                 <div class="campo">
@@ -148,6 +155,7 @@
                 </div>
             </div>
             <div class="mensaje" id="mensajeParticipanteIncidente"></div>
+            <div class="mensaje" id="notaProtocoloIncidente"></div>
             <div class="lista-conteo oculto" id="responsablesCategoria" style="margin-bottom:14px;"></div>
             <div class="campo">
                 <label for="inputDescripcion">Descripción</label>
@@ -963,6 +971,8 @@
     <h2 id="detalleIncidenteCodigo"></h2>
     <p id="detalleIncidenteDescripcion"></p>
 
+    <div class="note warn oculto" id="avisoOtrosViendoIncidente" style="margin-top:0;"></div>
+
     <div class="grid-info" id="detalleIncidenteInfo"></div>
 
     <div class="seccion">
@@ -983,6 +993,15 @@
     <div class="acciones-incidente" id="accionesIncidente"></div>
     <div class="acciones-incidente">
         <button class="boton pequeno secundario" id="btnImprimirIncidente">Imprimir</button>
+        <button class="boton pequeno secundario" id="btnExportarPdfIndividual">Exportar PDF</button>
+    </div>
+
+    <div class="campo" style="margin-top:14px;">
+        <label for="inputCodigoDuplicado">Marcar como duplicado de (código del incidente original)</label>
+        <div style="display:flex; gap:8px;">
+            <input type="text" id="inputCodigoDuplicado" placeholder="Ej: INC-0099" style="flex:1;">
+            <button type="button" class="boton pequeno terciario" id="btnMarcarDuplicado" style="width:auto;">Marcar duplicado</button>
+        </div>
     </div>
 
     <div class="mensaje" id="mensajeDetalleIncidente"></div>
@@ -1014,6 +1033,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=26" defer></script>
+<script src="scripts/dashboard.js?v=27" defer></script>
 </body>
 </html>

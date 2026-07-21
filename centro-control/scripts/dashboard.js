@@ -188,6 +188,8 @@ const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 let perfilActual = null;
 let intervaloPolling = null;
 let panelDetalleAbierto = false;
+let incidenteAbiertoId = null;
+let intervaloVistaIncidente = null;
 let vistaPerfilesActiva = false;
 let mapaOperadores = {};
 let ramasDisponibles = [];
@@ -1033,8 +1035,65 @@ btnAbrirFormIncidente.addEventListener("click", () => {
     }
 });
 
+// Distinción de protocolo por gravedad real, no solo por la prioridad que
+// elige el operador — un accidente y un objeto perdido "crítico" mal
+// clasificado no deberían tratarse igual solo porque alguien marcó la misma
+// etiqueta de prioridad.
+const PROTOCOLOS_POR_CATEGORIA = {
+    emergencia_medica: "🏥 Protocolo médico: notifica de inmediato al responsable de Emergencias. No muevas a la persona si hay sospecha de lesión grave — quédate con ella hasta que llegue el apoyo.",
+    accidente: "⚠️ Protocolo de accidente: verifica el estado de la persona antes que nada. No la muevas si hay dolor intenso o sospecha de fractura — notifica a Emergencias.",
+    seguridad: "🚨 Protocolo de seguridad: separa a las personas involucradas sin confrontarlas directamente. Avisa al responsable de Seguridad de inmediato, no intentes resolverlo solo.",
+    convivencia: "🗣️ Escucha a ambas partes por separado antes de escalar. No tomes partido frente al grupo en el momento.",
+    disciplina: "🗣️ Escucha a ambas partes por separado antes de escalar. No tomes partido frente al grupo en el momento."
+};
+
+function actualizarNotaProtocolo(categoria) {
+
+    const nota = document.getElementById("notaProtocoloIncidente");
+    const protocolo = PROTOCOLOS_POR_CATEGORIA[categoria];
+
+    if (protocolo) {
+        mostrarMensaje(nota, protocolo, "fallo");
+    } else {
+        ocultarMensaje(nota);
+    }
+
+}
+
 document.getElementById("inputCategoria").addEventListener("change", (evento) => {
     cargarResponsablesPorCategoria(evento.target.value, document.getElementById("responsablesCategoria"));
+    actualizarNotaProtocolo(evento.target.value);
+});
+
+// Plantillas de reporte rápido — para los casos más frecuentes, reduce el
+// formulario de "elegir todo a mano" a "un clic + ajustar el detalle".
+const PLANTILLAS_INCIDENTE = {
+    medico: { categoria: "emergencia_medica", prioridad: "media", descripcion: "Participante reporta malestar leve: " },
+    objeto: { categoria: "objetos_perdidos", prioridad: "baja", descripcion: "Objeto perdido: " },
+    alimentacion: { categoria: "alimentacion", prioridad: "media", descripcion: "Problema con la alimentación: " },
+    convivencia: { categoria: "convivencia", prioridad: "media", descripcion: "Conflicto de convivencia entre: " },
+    consulta: { categoria: "inconveniente", prioridad: "baja", descripcion: "" }
+};
+
+document.getElementById("plantillasIncidente").addEventListener("click", (evento) => {
+
+    const boton = evento.target.closest("[data-plantilla]");
+    if (!boton) return;
+
+    const plantilla = PLANTILLAS_INCIDENTE[boton.dataset.plantilla];
+    if (!plantilla) return;
+
+    document.getElementById("inputCategoria").value = plantilla.categoria;
+    document.getElementById("inputPrioridad").value = plantilla.prioridad;
+
+    const inputDescripcion = document.getElementById("inputDescripcion");
+    inputDescripcion.value = plantilla.descripcion;
+    inputDescripcion.focus();
+    inputDescripcion.setSelectionRange(inputDescripcion.value.length, inputDescripcion.value.length);
+
+    cargarResponsablesPorCategoria(plantilla.categoria, document.getElementById("responsablesCategoria"));
+    actualizarNotaProtocolo(plantilla.categoria);
+
 });
 
 document.getElementById("inputCodigoParticipante").addEventListener("blur", async (evento) => {
@@ -1448,12 +1507,74 @@ document.getElementById("btnCerrarDetalle").addEventListener("click", cerrarPane
 overlayDetalle.addEventListener("click", cerrarPanelDetalle);
 
 function cerrarPanelDetalle() {
+
     panelDetalle.classList.remove("abierto");
     overlayDetalle.classList.add("oculto");
     panelDetalleAbierto = false;
+
+    if (intervaloVistaIncidente) {
+        clearInterval(intervaloVistaIncidente);
+        intervaloVistaIncidente = null;
+    }
+
+    if (incidenteAbiertoId) {
+        peticionApi(`/api/incidentes/${incidenteAbiertoId}/deje-de-ver`, { method: "POST" }).catch(() => {});
+    }
+
+    incidenteAbiertoId = null;
+
+}
+
+async function actualizarAvisoOtrosViendo(id) {
+
+    try {
+
+        const { otrosViendo } = await peticionApi(`/api/incidentes/${id}/viendo`, { method: "POST" });
+        const aviso = document.getElementById("avisoOtrosViendoIncidente");
+
+        if (otrosViendo.length > 0) {
+            aviso.textContent = `👀 ${otrosViendo.join(", ")} también ${otrosViendo.length > 1 ? "están viendo" : "está viendo"} este caso ahora.`;
+            aviso.classList.remove("oculto");
+        } else {
+            aviso.classList.add("oculto");
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+
 }
 
 document.getElementById("btnImprimirIncidente").addEventListener("click", () => window.print());
+
+document.getElementById("btnExportarPdfIndividual").addEventListener("click", () => {
+    if (!incidenteAbiertoId) return;
+    const codigo = document.getElementById("detalleIncidenteCodigo").textContent || "incidente";
+    descargarArchivo(`/api/incidentes/${incidenteAbiertoId}/exportar/pdf`, `${codigo}.pdf`);
+});
+
+document.getElementById("btnMarcarDuplicado").addEventListener("click", async () => {
+
+    const codigo = document.getElementById("inputCodigoDuplicado").value.trim();
+    const mensaje = document.getElementById("mensajeDetalleIncidente");
+
+    if (!codigo || !incidenteAbiertoId) return;
+
+    if (!confirm(`¿Marcar este incidente como duplicado de ${codigo}? Se cerrará y quedará vinculado a ese código.`)) return;
+
+    try {
+        await peticionApi(`/api/incidentes/${incidenteAbiertoId}/marcar-duplicado`, {
+            method: "POST",
+            body: JSON.stringify({ duplicadoDeCodigo: codigo })
+        });
+        await abrirIncidente(incidenteAbiertoId);
+        await Promise.all([cargarIncidentes(), cargarColaSeguimiento(), cargarPanel(), cargarGraficos()]);
+        mostrarMensaje(document.getElementById("mensajeDetalleIncidente"), "Marcado como duplicado correctamente", "ok");
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
 
 async function abrirIncidente(id) {
 
@@ -1464,6 +1585,11 @@ async function abrirIncidente(id) {
         panelDetalle.classList.add("abierto");
         overlayDetalle.classList.remove("oculto");
         panelDetalleAbierto = true;
+        incidenteAbiertoId = id;
+
+        if (intervaloVistaIncidente) clearInterval(intervaloVistaIncidente);
+        actualizarAvisoOtrosViendo(id);
+        intervaloVistaIncidente = setInterval(() => actualizarAvisoOtrosViendo(id), 5000);
 
         document.getElementById("detalleIncidenteBadges").innerHTML = `
             <span class="prioridad-badge ${incidente.prioridad}">${humanizar(incidente.prioridad)}</span>
@@ -1507,14 +1633,20 @@ function renderizarAccionesIncidente(incidente) {
     const abierto = ["en_atencion", "pendiente_seguimiento", "escalado"].includes(incidente.estado);
 
     if (abierto) {
+        // Antes eran 3 botones separados que llamaban al mismo endpoint con
+        // distinto "resultado" — un solo selector + un botón hace lo mismo
+        // con menos ruido visual.
         contenedor.innerHTML = `
-            <button class="boton pequeno terciario" data-resultado="pendiente">Registrar seguimiento</button>
-            <button class="boton pequeno secundario" data-resultado="escalado">Escalar caso</button>
-            <button class="boton pequeno" data-resultado="solucionado">Marcar solucionado</button>
+            <select id="selectResultadoSeguimiento" style="margin-bottom:8px; width:100%;">
+                <option value="pendiente">Registrar seguimiento (sigue igual)</option>
+                <option value="escalado">Escalar caso</option>
+                <option value="solucionado">Marcar solucionado</option>
+            </select>
+            <button class="boton pequeno" id="btnGuardarSeguimiento">Guardar</button>
         `;
 
-        contenedor.querySelectorAll("button").forEach((boton) => {
-            boton.addEventListener("click", () => registrarSeguimientoIncidente(incidente.id, boton.dataset.resultado));
+        document.getElementById("btnGuardarSeguimiento").addEventListener("click", () => {
+            registrarSeguimientoIncidente(incidente.id, document.getElementById("selectResultadoSeguimiento").value);
         });
 
         return;
@@ -1531,6 +1663,41 @@ function renderizarAccionesIncidente(incidente) {
 
 }
 
+// Muestra el mensaje de éxito con un botón "Deshacer" durante 30 segundos —
+// después de eso el backend ya no acepta deshacer esa acción específica.
+function mostrarMensajeConDeshacer(mensajeEl, texto, id, deshacer, alTerminar) {
+
+    if (!deshacer) {
+        mostrarMensaje(mensajeEl, texto, "ok");
+        return;
+    }
+
+    mensajeEl.className = "mensaje mostrar ok";
+    mensajeEl.innerHTML = `${texto} · <button type="button" class="boton pequeno secundario" id="btnDeshacerAccion" style="width:auto; padding:4px 10px; font-size:12px;">Deshacer</button>`;
+
+    const boton = document.getElementById("btnDeshacerAccion");
+    const expirar = setTimeout(() => { boton.disabled = true; boton.textContent = "Ya no se puede deshacer"; }, 30000);
+
+    boton.addEventListener("click", async () => {
+
+        clearTimeout(expirar);
+        boton.disabled = true;
+
+        try {
+            await peticionApi(`/api/incidentes/${id}/deshacer`, {
+                method: "POST",
+                body: JSON.stringify(deshacer)
+            });
+            mostrarMensaje(mensajeEl, "Acción deshecha", "ok");
+            await alTerminar();
+        } catch (error) {
+            mostrarMensaje(mensajeEl, error.message, "fallo");
+        }
+
+    });
+
+}
+
 async function registrarSeguimientoIncidente(id, resultado) {
 
     const observaciones = document.getElementById("inputObservacionesSeguimiento").value.trim();
@@ -1538,15 +1705,22 @@ async function registrarSeguimientoIncidente(id, resultado) {
 
     try {
 
-        await peticionApi(`/api/incidentes/${id}/seguimiento`, {
+        const respuesta = await peticionApi(`/api/incidentes/${id}/seguimiento`, {
             method: "POST",
             body: JSON.stringify({ resultado, observaciones })
         });
 
-        mostrarMensaje(mensaje, "Seguimiento registrado correctamente", "ok");
         document.getElementById("inputObservacionesSeguimiento").value = "";
         await abrirIncidente(id);
         await Promise.all([cargarIncidentes(), cargarColaSeguimiento(), cargarPanel(), cargarGraficos()]);
+
+        mostrarMensajeConDeshacer(
+            document.getElementById("mensajeDetalleIncidente"),
+            "Seguimiento registrado correctamente",
+            id,
+            respuesta.deshacer,
+            async () => { await abrirIncidente(id); await Promise.all([cargarIncidentes(), cargarColaSeguimiento(), cargarPanel(), cargarGraficos()]); }
+        );
 
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
@@ -1561,14 +1735,21 @@ async function cerrarIncidente(id) {
 
     try {
 
-        await peticionApi(`/api/incidentes/${id}/cerrar`, {
+        const respuesta = await peticionApi(`/api/incidentes/${id}/cerrar`, {
             method: "POST",
             body: JSON.stringify({ observaciones })
         });
 
-        mostrarMensaje(mensaje, "Incidente cerrado correctamente", "ok");
         await abrirIncidente(id);
         await Promise.all([cargarIncidentes(), cargarColaSeguimiento(), cargarPanel(), cargarGraficos()]);
+
+        mostrarMensajeConDeshacer(
+            document.getElementById("mensajeDetalleIncidente"),
+            "Incidente cerrado correctamente",
+            id,
+            respuesta.deshacer,
+            async () => { await abrirIncidente(id); await Promise.all([cargarIncidentes(), cargarColaSeguimiento(), cargarPanel(), cargarGraficos()]); }
+        );
 
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
