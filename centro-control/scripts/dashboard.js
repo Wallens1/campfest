@@ -2784,7 +2784,6 @@ async function abrirDetalleActividad(id) {
             <div class="dato"><span class="etiqueta">Espacio</span><span class="valor">${actividad.espacio_usado || "—"}</span></div>
             <div class="dato"><span class="etiqueta">Asistentes estimados</span><span class="valor">${actividad.cantidad_asistentes_estimada ?? "—"}</span></div>
             <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${actividad.encargados_metodologicos || "—"}</span></div>
-            ${actividad.materiales_usados ? `<div class="dato"><span class="etiqueta">Materiales (nota antigua)</span><span class="valor">${actividad.materiales_usados}</span></div>` : ""}
         `;
 
         renderizarFasesActividad(actividad);
