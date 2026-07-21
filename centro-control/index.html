@@ -790,6 +790,8 @@
                 <button class="boton pequeno secundario" id="btnDesactivarAlertaExtrema" style="width:auto;">Desactivar alerta extrema</button>
             </div>
             <div class="mensaje" id="mensajeModoEvento"></div>
+            <button type="button" class="boton pequeno terciario" id="btnVerUsosClaveExtrema" style="width:auto; margin-top:10px;">Ver quién ha usado estas claves</button>
+            <div id="listaUsosClaveExtrema" class="oculto" style="margin-top:10px; font-size:12px;"></div>
         </div>
 
         <div class="tarjeta" style="margin-bottom:14px;">
@@ -1024,7 +1026,7 @@
 
         <div class="tarjeta">
             <h3>Respaldo</h3>
-            <p class="detalle" style="margin-top:-6px;">Un solo Excel con participantes, incidentes, materiales y actividades — para archivo, no reemplaza los exports de cada módulo.</p>
+            <p class="detalle" style="margin-top:-6px;">Un solo Excel con participantes, incidentes, materiales y actividades — para archivo, no reemplaza los exports de cada módulo. Además de esta descarga manual, el servidor sube automáticamente el mismo respaldo a Supabase Storage una vez al día.</p>
             <button class="boton pequeno terciario" id="btnExportarTodo" style="width:auto;">Exportar todo el evento</button>
         </div>
 
@@ -1103,6 +1105,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=31" defer></script>
+<script src="scripts/dashboard.js?v=32" defer></script>
 </body>
 </html>

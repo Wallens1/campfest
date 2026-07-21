@@ -569,6 +569,32 @@ function revisarIncidentesCriticosNuevos(alertasCriticasYAltas) {
 // a la del rol, conocida solo por quien administra el sistema.
 // ==========================
 
+document.getElementById("btnVerUsosClaveExtrema").addEventListener("click", async () => {
+
+    const contenedor = document.getElementById("listaUsosClaveExtrema");
+    contenedor.classList.toggle("oculto");
+
+    if (contenedor.classList.contains("oculto")) return;
+
+    try {
+
+        const { usos } = await peticionApi("/api/centro-control/usos-clave-extrema");
+
+        contenedor.innerHTML = usos.length === 0
+            ? `<p class="detalle">Sin usos registrados todavía.</p>`
+            : usos.map((u) => `
+                <div class="fila-conteo">
+                    <span class="etiqueta">${new Date(u.creado_en).toLocaleString("es-CO")} · ${u.usuario_nombre || "—"}</span>
+                    <span class="valor">${humanizar(u.accion)} — ${u.exito ? "✅ correcto" : "❌ clave incorrecta"} (${u.ip || "—"})</span>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">${error.message}</p>`;
+    }
+
+});
+
 document.getElementById("btnActivarModoEvento").addEventListener("click", async () => {
 
     const clave = prompt("Clave de administrador extremo:");
