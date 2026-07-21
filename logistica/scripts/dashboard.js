@@ -1636,10 +1636,43 @@ async function cargarObservaciones() {
                 <div class="historial-item">
                     <span class="hora">${formatearHora(o.creado_en)}</span>
                     <span class="badge ${o.tipo === "positiva" ? "verde" : o.tipo === "negativa" ? "rojo" : "neutro"}" style="margin-left:6px;">${humanizar(o.tipo)}</span>
+                    ${!o.leido && o.usuario_id === perfilActual?.id ? `<span class="badge neutro">Sin leer</span>` : ""}
                     <div class="descripcion">${o.texto}</div>
                     <div class="usuario">${o.destinatario_nombre ? `Para: ${o.destinatario_nombre} · ` : ""}Escrita por: ${o.autor_nombre || "—"}</div>
+                    ${(o.respuestas || []).map((r) => `
+                        <div class="usuario" style="margin-left:12px; margin-top:4px; padding-left:8px; border-left:2px solid #ddd;">
+                            <strong>${r.usuario_nombre}:</strong> ${r.texto}
+                        </div>
+                    `).join("")}
+                    <div style="display:flex; gap:8px; margin-top:6px;">
+                        ${!o.leido && o.usuario_id === perfilActual?.id ? `<button class="boton pequeno secundario" data-marcar-leida="${o.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar como leída</button>` : ""}
+                        <button class="boton pequeno secundario" data-responder-observacion="${o.id}" style="width:auto; padding:4px 10px; font-size:11px;">Responder</button>
+                    </div>
                 </div>
             `).join("");
+
+        contenedor.querySelectorAll("[data-marcar-leida]").forEach((boton) => {
+            boton.addEventListener("click", async () => {
+                await peticionApi(`/api/observaciones/${boton.dataset.marcarLeida}/leido`, { method: "POST" }).catch(() => {});
+                await cargarObservaciones();
+            });
+        });
+
+        contenedor.querySelectorAll("[data-responder-observacion]").forEach((boton) => {
+            boton.addEventListener("click", async () => {
+                const texto = prompt("Tu respuesta:");
+                if (!texto || !texto.trim()) return;
+                try {
+                    await peticionApi(`/api/observaciones/${boton.dataset.responderObservacion}/respuestas`, {
+                        method: "POST",
+                        body: JSON.stringify({ texto: texto.trim() })
+                    });
+                    await cargarObservaciones();
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        });
 
     } catch (error) {
         console.error(error);
