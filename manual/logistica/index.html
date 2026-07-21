@@ -356,6 +356,7 @@ footer.manual-footer {
     <a href="#admin-inventario">Inventario</a>
     <a href="#admin-inscripciones">Inscripciones</a>
     <a href="#admin-notificaciones">Notificaciones</a>
+    <a href="#admin-perfiles">Perfiles</a>
     <a href="#admin-administracion">Administración</a>
 
     <div class="nav-role logistica"><span class="dot"></span>Logística</div>
@@ -422,7 +423,7 @@ footer.manual-footer {
     <span class="role-icon">🛠️</span>
     <div><h2>Administrador — Centro de Control</h2><p>Acceso completo: incidentes, cronograma, inventario, inscripciones, notificaciones y configuración del evento.</p></div>
   </div>
-  <p class="part-intro">Si tu cuenta tiene el rol <strong>Admin</strong>, ves las seis pestañas de arriba: <span class="ui">Panel</span>, <span class="ui">Cronograma</span>, <span class="ui">Inventario</span>, <span class="ui">Inscripciones</span>, <span class="ui">Notificaciones</span> y <span class="ui">Administración</span>. Si tu cuenta tiene el rol <strong>Control</strong>, ves las mismas pestañas salvo Administración, y algunas herramientas de gestión (crear actividades, gestionar inventario, enviar correos masivos) no te aparecen — son exclusivas de Admin y se marcan así en cada sección.</p>
+  <p class="part-intro">Si tu cuenta tiene el rol <strong>Admin</strong>, ves las siete pestañas de arriba: <span class="ui">Panel</span>, <span class="ui">Cronograma</span>, <span class="ui">Inventario</span>, <span class="ui">Inscripciones</span>, <span class="ui">Notificaciones</span>, <span class="ui">Perfiles</span> y <span class="ui">Administración</span>. Si tu cuenta tiene el rol <strong>Control</strong>, ves las mismas pestañas salvo Administración (incluyendo Perfiles, que también es suya), y algunas herramientas de gestión (crear actividades, gestionar inventario, enviar correos masivos) no te aparecen — son exclusivas de Admin y se marcan así en cada sección.</p>
 
   <h3 class="feature" id="admin-panel"><span class="tag admin">Pestaña</span>Panel</h3>
   <p>Es la pantalla de inicio: un resumen de todo el evento en tiempo real, más la herramienta para registrar y dar seguimiento a incidentes. Se actualiza sola cada 7 segundos.</p>
@@ -455,16 +456,24 @@ footer.manual-footer {
     <li>Elige la <span class="ui">Categoría</span> (por ejemplo "Emergencia médica" o "Alimentación"). Apenas la eliges, aparece automáticamente la lista de <strong>responsables de esa categoría</strong> — quién de logística la atiende, con teléfono y zona.</li>
     <li>Elige la <span class="ui">Prioridad</span>: baja, media, alta o crítica.</li>
     <li>Opcional: elige la <span class="ui">Zona</span> y escribe el <span class="ui">Lugar específico</span> (ej. "Carpa 4").</li>
-    <li>Opcional: escribe quién lo <span class="ui">Reportó por (logística)</span>.</li>
+    <li>El campo <span class="ui">Reportó por (logística)</span> ya viene con tu nombre — déjalo así si estás registrando algo que viste tú mismo, o cámbialo si estás anotando lo que alguien de campo te reportó por teléfono o radio.</li>
     <li>Opcional: si el incidente involucra a un participante, escribe su <span class="ui">Código de participante</span> y sal del campo (tab o clic afuera) — el sistema busca ese código y te confirma "Vinculado a: [nombre]" o te avisa si no lo encuentra.</li>
     <li>Escribe la <span class="ui">Descripción</span> (obligatoria).</li>
     <li>Pulsa <span class="ui">Guardar incidente</span>. El incidente queda creado, la tabla se actualiza sola y el formulario se cierra.</li>
   </ol>
+  <div class="note">
+    <strong class="label">Un incidente siempre queda con alguien asignado</strong>
+    Si eres de logística y no elegiste un responsable a mano, el sistema le asigna automáticamente a alguien de la rama que atiende esa categoría. Si ninguna rama la tiene configurada, cae en un responsable de respaldo definido por el administrador — un incidente nunca se queda sin nadie a cargo.
+  </div>
   <figure class="screen wide"><img src="capturas/cc_02_registrar_incidente.png" alt="Formulario para registrar un incidente, con categoría emergencia médica y prioridad crítica seleccionadas"><figcaption>Formulario de registro de incidente ya diligenciado, mostrando los responsables de la categoría elegida.</figcaption></figure>
 
   <h4 class="sub">Filtrar y leer la tabla de incidentes</h4>
   <p>Encima de la tabla hay 6 filtros: <span class="ui">Todos los estados</span>, <span class="ui">Todas las prioridades</span>, <span class="ui">Todas las categorías</span>, <span class="ui">Todas las zonas</span>, <span class="ui">Todos los responsables</span> y una fecha. Cualquier combinación se aplica sola en cuanto la cambias — no hay que pulsar nada más. El botón <span class="ui">Limpiar</span> borra todos los filtros de una vez.</p>
   <p>Columnas de la tabla: <strong>Código, Hora, Lugar, Categoría, Prioridad, Estado, Responsable, Transcurrido</strong> (cuánto tiempo lleva abierto) y <strong>Próx. seguimiento</strong> (cuánto falta, o "Vencido hace X min" si ya se pasó el plazo). Haz clic en cualquier fila para abrir su detalle completo.</p>
+  <div class="note warn">
+    <strong class="label">Un caso vencido se escala solo</strong>
+    Si un incidente se pasa de su plazo de seguimiento sin que nadie lo actualice, el sistema revisa esto cada par de minutos: le sube la prioridad un nivel automáticamente, le calcula un nuevo plazo y, si no tenía responsable, le asigna uno. Queda una nota en la bitácora firmada "Sistema (escalamiento automático)" — no depende de que alguien esté mirando la pantalla en ese momento.
+  </div>
 
   <h4 class="sub">Seguir un incidente hasta cerrarlo</h4>
   <p>Al hacer clic en una fila se abre un panel a la derecha con todo el caso.</p>
@@ -620,6 +629,36 @@ footer.manual-footer {
   </ol>
   <p>Cualquier rol (Admin, Control o Logística) puede publicar avisos. Solo Admin ve el botón <span class="ui">Eliminar</span> junto a cada aviso — al confirmarlo, el aviso deja de mostrarse en el portal del campista.</p>
 
+  <h3 class="feature" id="admin-perfiles"><span class="tag admin">Pestaña</span>Perfiles</h3>
+  <p>Aquí puedes buscar a un participante puntual y ver todo lo que le ha pasado en el evento y en su propio portal: sus logros, sus cambios de perfil, su ingreso, sus asignaciones de carpa, su alimentación, sus salidas libres y los incidentes que le atañen — todo junto y ordenado por fecha. Disponible tanto para Admin como para Control.</p>
+
+  <h4 class="sub">Actividad reciente de campistas</h4>
+  <p>Arriba de todo, una tabla que <strong>se actualiza sola</strong> mientras tengas esta pestaña abierta: cada vez que alguien desbloquea un logro en su portal o cambia un dato de su perfil (por ejemplo su teléfono o un contacto de emergencia), aparece aquí con su nombre, código y la hora exacta. Úsalo el <span class="ui">Filtrar por tipo</span> para ver solo logros o solo cambios de perfil.</p>
+  <div class="note">
+    <strong class="label">Solo lo que hace el propio campista</strong>
+    Este panel no repite el ingreso, las carpas ni la alimentación que registra logística — eso ya está en "Actividad reciente" del Panel. Aquí solo ves lo que la persona hace desde su celular, sin que nadie de staff intervenga.
+  </div>
+
+  <h4 class="sub">Buscar un participante</h4>
+  <ol class="steps">
+    <li>Escribe su código (por ejemplo <code>CF-1234</code>), su documento o su nombre en el buscador.</li>
+    <li>Pulsa <span class="ui">Buscar</span>. Aparece la lista de coincidencias, cada una con cuántos logros tiene desbloqueados.</li>
+    <li>Toca el resultado correcto para abrir su perfil completo.</li>
+  </ol>
+
+  <h4 class="sub">El perfil completo: logros y cronología</h4>
+  <p>Se abre un panel a la derecha con:</p>
+  <ul class="plain">
+    <li><strong>Badges de estado</strong>: admisión, si ya ingresó, su carpa, y si está retirado.</li>
+    <li><strong>Datos básicos</strong>: municipio, teléfono, correo, contacto de emergencia, condición médica y restricciones alimentarias.</li>
+    <li><strong>Logros desbloqueados</strong>: todas las insignias que ha ganado en su portal, como badges.</li>
+    <li><strong>Cronología</strong>: la línea de tiempo completa de esa persona, de lo más reciente a lo más antiguo — ingreso, carpa, alimentación, salidas libres, logros, cambios de perfil e incidentes, cada uno con su fecha y quién lo hizo (o "Automático / el propio campista" cuando no fue una acción de staff).</li>
+  </ul>
+  <div class="note warn">
+    <strong class="label">Los logros de antes de esta función no tienen fecha</strong>
+    Si alguien desbloqueó un logro antes de que este panel existiera, sigue apareciendo en su lista de logros, pero no en la cronología — esa vista solo tiene fecha para lo que pasa de aquí en adelante.
+  </div>
+
   <h3 class="feature" id="admin-administracion"><span class="tag admin">Pestaña</span>Administración</h3>
   <p>Configuración general del evento y del propio sistema. Esta pestaña solo existe para el rol Admin.</p>
   <figure class="screen wide"><img src="capturas/cc_10_administracion.png" alt="Pestaña Administración completa"><figcaption>Pestaña Administración: modo evento, importar participantes, capacidad de carpas, zonas, ramas, usuarios y respaldo.</figcaption></figure>
@@ -635,10 +674,15 @@ footer.manual-footer {
   </ul>
 
   <h4 class="sub">Importar participantes desde Excel</h4>
-  <p>Sube el archivo <code>.xlsx</code> exportado directamente del formulario de inscripción. Los documentos que ya existen en el sistema se omiten (no se sobrescriben); a los nuevos se les asigna automáticamente su código CF. Al terminar, verás cuántos se importaron, cuántos ya existían y cuántos tuvieron error (con el número de fila).</p>
+  <p>Sube el archivo <code>.xlsx</code> exportado directamente del formulario de inscripción. Los documentos que ya existen en el sistema se omiten (no se sobrescriben); a los nuevos se les asigna automáticamente su código CF.</p>
+  <div class="note good">
+    <strong class="label">Ahora te muestra una previsualización antes de tocar nada</strong>
+    Al pulsar <span class="ui">Subir</span>, el sistema primero revisa el archivo (sin guardar nada todavía) y te pregunta: cuántos participantes nuevos va a crear, cuántos documentos ya existían y se van a omitir, cuántas filas tienen error, y una muestra de algunos nombres que va a crear. Solo si confirmas ese resumen se hace la importación real. Así puedes darte cuenta a tiempo si subiste el Excel equivocado, antes de que inserte nada.
+  </div>
+  <p>Al terminar, verás cuántos se importaron, cuántos ya existían y cuántos tuvieron error (con el número de fila).</p>
 
   <h4 class="sub">Completar datos faltantes desde Excel</h4>
-  <p>A diferencia de la anterior, esta <strong>no crea participantes nuevos</strong>: solo rellena los campos vacíos de personas que ya están en el sistema (por ejemplo un correo personal que faltaba), sin tocar el estado de admisión ni ningún dato ya cargado. El resultado te dice cuántos se actualizaron, cuántos quedaron sin cambios y cuántos no se encontraron.</p>
+  <p>A diferencia de la anterior, esta <strong>no crea participantes nuevos</strong>: solo rellena los campos vacíos de personas que ya están en el sistema (por ejemplo un correo personal que faltaba), sin tocar el estado de admisión ni ningún dato ya cargado. Igual que en la importación, primero te muestra una previsualización — cuántos se actualizarían, cuántos ya tenían todo lleno, cuántos documentos no se encontraron, y algunos ejemplos concretos de qué campo cambiaría de qué valor a cuál — y solo actualiza de verdad si confirmas. El resultado final te dice cuántos se actualizaron, cuántos quedaron sin cambios y cuántos no se encontraron.</p>
 
   <h4 class="sub">Configurar capacidad de carpas</h4>
   <ol class="steps">
@@ -672,6 +716,14 @@ footer.manual-footer {
     Un <strong>líder de rama</strong> desbloquea herramientas extra en el Panel Logístico (pedir ayuda a otras ramas, crear tareas, escribir observaciones, recibir y devolver materiales). Ver la <a href="#lider-intro">sección de líder de rama</a> más abajo para el detalle completo.
   </div>
 
+  <h4 class="sub">Bitácora de auditoría</h4>
+  <p>Un registro de toda acción que crea, cambia o borra algo en el sistema (no las simples consultas): quién la hizo, desde qué dirección y en qué momento exacto. Sirve para investigar algo inesperado — "¿quién cambió esto?", "¿desde dónde se intentó entrar varias veces?".</p>
+  <ol class="steps">
+    <li>Filtra por <span class="ui">Usuario</span>, <span class="ui">Método</span> (POST, PATCH, PUT o DELETE), <span class="ui">Ruta contiene</span> o una <span class="ui">Fecha</span> puntual — cualquier combinación.</li>
+    <li>Pulsa <span class="ui">Filtrar</span>.</li>
+    <li>Usa <span class="ui">← Anterior</span> / <span class="ui">Siguiente →</span> para moverte por los resultados; arriba de los botones se ve cuántos registros hay en total.</li>
+  </ol>
+
   <h4 class="sub">Respaldo</h4>
   <p>El botón <span class="ui">Exportar todo el evento</span> descarga un solo Excel con participantes, incidentes, materiales y actividades — pensado para archivo, no reemplaza los exports específicos de cada módulo.</p>
 </section>
@@ -697,6 +749,17 @@ footer.manual-footer {
     <li>Escribe el dato y pulsa <span class="ui">Buscar</span>.</li>
     <li>Toca el resultado correcto en la lista para abrir su ficha completa.</li>
   </ol>
+  <h4 class="sub">Escanear el QR de la insignia (más rápido en la llegada masiva)</h4>
+  <p>Cada campista tiene, en la insignia que descarga desde su portal, un código QR con su código CF. En vez de escribirlo a mano, puedes escanearlo directo:</p>
+  <ol class="steps">
+    <li>Pulsa <span class="ui">📷 Escanear QR de la insignia</span>.</li>
+    <li>El navegador te va a pedir permiso para usar la cámara — acéptalo la primera vez.</li>
+    <li>Apunta la cámara al QR que el campista te muestra en su celular. En cuanto lo reconoce, la cámara se cierra sola y la búsqueda por código se dispara automáticamente — no hace falta tocar nada más.</li>
+  </ol>
+  <div class="note">
+    <strong class="label">Si la cámara no abre</strong>
+    Algunos navegadores muy antiguos no dan acceso a la cámara desde una página web; en ese caso simplemente busca por código, documento o nombre como siempre.
+  </div>
 
   <h4 class="sub">La ficha del participante</h4>
   <figure class="screen wide"><img src="capturas/log_01_ficha_participante.png" alt="Ficha completa de un participante, con ingreso, carpa, alimentación e historial"><figcaption>Ficha completa: badges de estado, todos los datos personales, ingreso, salida libre, asignación de carpa, alimentación e historial.</figcaption></figure>
