@@ -1899,6 +1899,9 @@ async function cargarMisLotesMaterial() {
                                 <label style="font-size:11px;">Perdido
                                     <input type="number" min="0" max="${linea.pendiente}" class="input-perdido" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
                                 </label>
+                                <label style="font-size:11px; flex:1; min-width:120px;">Comentario (opcional)
+                                    <input type="text" class="input-comentario-devolucion" placeholder="Ej: se dañó por la lluvia" style="width:100%; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
+                                </label>
                                 <button type="submit" class="boton pequeno secundario" style="width:auto; padding:6px 12px; font-size:11px;">Devolver</button>
                             </form>
                         ` : ""}
@@ -1914,7 +1917,8 @@ async function cargarMisLotesMaterial() {
                     form.dataset.linea,
                     form.querySelector(".input-buen-estado").value,
                     form.querySelector(".input-danado").value,
-                    form.querySelector(".input-perdido").value
+                    form.querySelector(".input-perdido").value,
+                    form.querySelector(".input-comentario-devolucion").value.trim()
                 );
             });
         });
@@ -1925,7 +1929,7 @@ async function cargarMisLotesMaterial() {
 
 }
 
-async function devolverLineaMaterial(loteId, materialLoteId, buenEstado, danada, perdida) {
+async function devolverLineaMaterial(loteId, materialLoteId, buenEstado, danada, perdida, comentario) {
 
     try {
 
@@ -1936,7 +1940,8 @@ async function devolverLineaMaterial(loteId, materialLoteId, buenEstado, danada,
                     materialLoteId,
                     cantidadBuenEstado: Number(buenEstado || 0),
                     cantidadDanada: Number(danada || 0),
-                    cantidadPerdida: Number(perdida || 0)
+                    cantidadPerdida: Number(perdida || 0),
+                    comentario: comentario || null
                 }]
             })
         });
@@ -2006,6 +2011,9 @@ document.getElementById("formSolicitarMaterial").addEventListener("submit", asyn
                 body: JSON.stringify({
                     actividadId: document.getElementById("inputActividadSolicitudMaterial").value || null,
                     notas: document.getElementById("inputNotasSolicitudMaterial").value.trim(),
+                    necesarioPara: document.getElementById("inputNecesarioParaSolicitudMaterial").value
+                        ? new Date(document.getElementById("inputNecesarioParaSolicitudMaterial").value).toISOString()
+                        : null,
                     items
                 })
             });
@@ -2026,18 +2034,23 @@ async function cargarMisSolicitudesMaterial() {
 
     try {
 
-        const { solicitudes } = await peticionApi("/api/materiales/solicitudes");
+        const soloMias = document.getElementById("checkboxSoloMisSolicitudes").checked;
+        const { solicitudes } = await peticionApi(`/api/materiales/solicitudes?soloMias=${soloMias}`);
         const contenedor = document.getElementById("listaMisSolicitudesMaterial");
 
         contenedor.innerHTML = solicitudes.length === 0
-            ? `<p class="detalle">No has hecho solicitudes todavía.</p>`
+            ? `<p class="detalle">No hay solicitudes todavía.</p>`
             : solicitudes.map((s) => `
                 <div class="incidente-mini columna">
                     <div style="display:flex; justify-content:space-between; gap:8px;">
                         <span class="codigo">${s.items.map((i) => `${i.materialNombre} × ${i.cantidad}`).join(", ")}</span>
                         <span class="estado-badge ${s.estado}">${humanizar(s.estado)}</span>
                     </div>
-                    <div class="descripcion">${new Date(s.creado_en).toLocaleString("es-CO")}${s.notas ? ` · ${s.notas}` : ""}</div>
+                    <div class="descripcion">
+                        Pidió: ${s.solicitante_nombre} · ${new Date(s.creado_en).toLocaleString("es-CO")}
+                        ${s.necesario_para ? ` · Necesario para: ${new Date(s.necesario_para).toLocaleString("es-CO")}` : ""}
+                        ${s.notas ? ` · ${s.notas}` : ""}
+                    </div>
                 </div>
             `).join("");
 
@@ -2046,6 +2059,8 @@ async function cargarMisSolicitudesMaterial() {
     }
 
 }
+
+document.getElementById("checkboxSoloMisSolicitudes").addEventListener("change", cargarMisSolicitudesMaterial);
 
 // ==========================
 // Arranque

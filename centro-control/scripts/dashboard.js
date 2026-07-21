@@ -3114,13 +3114,21 @@ function renderizarListaInventario(materiales) {
             <div class="tarjeta" style="margin-bottom:10px; box-shadow:none; border-width:2px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
                     <strong>${m.nombre}</strong>
-                    <span class="badge ${m.disponible > 0 ? "verde" : "rojo"}">${m.disponible}/${m.cantidad_total} disponibles</span>
+                    <span style="display:flex; gap:6px; flex-wrap:wrap;">
+                        ${m.stockBajo ? `<span class="badge rojo">⚠️ Stock bajo</span>` : ""}
+                        ${m.es_consumible ? `<span class="badge neutro">Consumible</span>` : ""}
+                        <span class="badge ${m.disponible > 0 ? "verde" : "rojo"}">${m.disponible}/${m.cantidad_total} disponibles</span>
+                    </span>
                 </div>
                 <div style="font-size:12px; color:#777; margin-top:4px;">
                     ${humanizar(m.objetivo)}${m.ubicacion ? ` · ${m.ubicacion}` : ""}${m.danadaOPerdida > 0 ? ` · ${m.danadaOPerdida} dañados/perdidos` : ""}
                 </div>
                 ${m.tenedores.length > 0 ? `<div style="font-size:12px; color:#777; margin-top:2px;">Tienen: ${m.tenedores.map((t) => `${t.liderNombre} (${t.cantidad})`).join(", ")}</div>` : ""}
-                ${perfilActual?.rol === "admin" ? `<button class="boton pequeno secundario" data-eliminar-material="${m.id}" style="width:auto; margin-top:8px; padding:6px 12px; font-size:11px;">Eliminar</button>` : ""}
+                <div style="margin-top:8px; display:flex; gap:8px;">
+                    <button class="boton pequeno secundario" data-ver-historial-material="${m.id}" style="width:auto; padding:6px 12px; font-size:11px;">Ver historial</button>
+                    ${perfilActual?.rol === "admin" ? `<button class="boton pequeno secundario" data-eliminar-material="${m.id}" style="width:auto; padding:6px 12px; font-size:11px;">Eliminar</button>` : ""}
+                </div>
+                <div class="oculto" id="historialMaterial-${m.id}" style="margin-top:8px; font-size:12px; max-height:200px; overflow-y:auto;"></div>
             </div>
         `).join("");
 
@@ -3128,6 +3136,41 @@ function renderizarListaInventario(materiales) {
         contenedor.querySelectorAll("[data-eliminar-material]").forEach((boton) => {
             boton.addEventListener("click", () => eliminarMaterial(boton.dataset.eliminarMaterial));
         });
+    }
+
+    contenedor.querySelectorAll("[data-ver-historial-material]").forEach((boton) => {
+        boton.addEventListener("click", () => alternarHistorialMaterial(boton.dataset.verHistorialMaterial));
+    });
+
+}
+
+async function alternarHistorialMaterial(id) {
+
+    const contenedor = document.getElementById(`historialMaterial-${id}`);
+
+    if (!contenedor.classList.contains("oculto")) {
+        contenedor.classList.add("oculto");
+        return;
+    }
+
+    contenedor.classList.remove("oculto");
+    contenedor.innerHTML = `<p class="detalle">Cargando...</p>`;
+
+    try {
+
+        const { historial } = await peticionApi(`/api/materiales/${id}/historial`);
+
+        contenedor.innerHTML = historial.length === 0
+            ? `<p class="detalle">Sin movimientos registrados.</p>`
+            : historial.map((h) => `
+                <div style="padding:4px 0; border-bottom:1px solid #eee;">
+                    <strong>${humanizar(h.tipo)}</strong>${h.cantidad != null ? ` · ${h.cantidad}` : ""} — ${h.usuario_nombre || "—"}
+                    <div class="detalle">${new Date(h.creado_en).toLocaleString("es-CO")}${h.detalle ? ` · ${h.detalle}` : ""}</div>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">Error al cargar: ${error.message}</p>`;
     }
 
 }
@@ -3158,7 +3201,9 @@ document.getElementById("formNuevoMaterial").addEventListener("submit", async (e
                     descripcion: document.getElementById("inputDescripcionMaterial").value.trim(),
                     objetivo: document.getElementById("inputObjetivoMaterial").value,
                     ubicacion: document.getElementById("inputUbicacionMaterial").value.trim(),
-                    cantidadTotal: document.getElementById("inputCantidadMaterial").value
+                    cantidadTotal: document.getElementById("inputCantidadMaterial").value,
+                    esConsumible: document.getElementById("inputEsConsumibleMaterial").checked,
+                    umbralStockBajo: document.getElementById("inputUmbralStockBajoMaterial").value
                 })
             });
 
@@ -3379,10 +3424,11 @@ async function cargarSolicitudesMaterialAdmin() {
                     <div style="font-size:12.5px; margin-top:4px;">
                         ${s.items.map((i) => `${i.materialNombre} × ${i.cantidad}`).join(", ")}
                     </div>
+                    ${s.necesario_para ? `<div style="font-size:12px; color:#c0392b; margin-top:4px; font-weight:700;">Necesario para: ${new Date(s.necesario_para).toLocaleString("es-CO")}</div>` : ""}
                     ${s.notas ? `<div style="font-size:12px; color:#777; margin-top:4px;">${s.notas}</div>` : ""}
                     <div style="display:flex; gap:8px; margin-top:10px;">
-                        ${s.estado === "pendiente" ? `<button class="boton pequeno" data-aprobar-solicitud="${s.id}" style="width:auto;">Aprobar</button>` : ""}
-                        ${s.estado === "aprobada" ? `<button class="boton pequeno" data-entregar-solicitud="${s.id}" style="width:auto;">Entregar</button>` : ""}
+                        ${s.estado === "pendiente" ? `<button class="boton pequeno secundario" data-aprobar-solicitud="${s.id}" style="width:auto;">Solo aprobar</button>` : ""}
+                        <button class="boton pequeno" data-entregar-solicitud="${s.id}" style="width:auto;">${s.estado === "pendiente" ? "Aprobar y entregar" : "Entregar"}</button>
                         <button class="boton pequeno secundario" data-rechazar-solicitud="${s.id}" style="width:auto;">Rechazar</button>
                     </div>
                 </div>

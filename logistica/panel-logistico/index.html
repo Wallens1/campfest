@@ -355,6 +355,10 @@
                     <div id="checklistSolicitudMaterial"></div>
                 </div>
                 <div class="campo">
+                    <label for="inputNecesarioParaSolicitudMaterial">¿Para cuándo lo necesitas? (opcional)</label>
+                    <input type="datetime-local" id="inputNecesarioParaSolicitudMaterial">
+                </div>
+                <div class="campo">
                     <label for="inputNotasSolicitudMaterial">Notas (opcional)</label>
                     <textarea id="inputNotasSolicitudMaterial"></textarea>
                 </div>
@@ -364,7 +368,11 @@
         </div>
 
         <div class="tarjeta-incidente oculto" id="tarjetaMisSolicitudesMaterial">
-            <h3>Mis solicitudes</h3>
+            <h3>Solicitudes de materiales</h3>
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; margin-bottom:10px;">
+                <input type="checkbox" id="checkboxSoloMisSolicitudes" style="width:auto;">
+                Ver solo las mías (en vez de las de toda mi rama)
+            </label>
             <div id="listaMisSolicitudesMaterial"></div>
         </div>
 
@@ -384,6 +392,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../scripts/jsQR.js" defer></script>
-<script src="../scripts/dashboard.js?v=16" defer></script>
+<script src="../scripts/dashboard.js?v=17" defer></script>
 </body>
 </html>
