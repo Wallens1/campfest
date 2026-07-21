@@ -378,6 +378,8 @@ async function iniciarDashboard() {
         llenarSelect(document.getElementById("inputRolNuevoUsuario"), ROLES, "Selecciona rol");
         document.getElementById("inputRamaNuevoUsuario").innerHTML = `<option value="">Sin rama</option>` +
             Object.entries(mapaRamas).map(([id, nombre]) => `<option value="${id}">${nombre}</option>`).join("");
+        cargarFiltroUsuariosAuditoria();
+        cargarAuditoria();
     }
 
     await actualizarTodo();
@@ -996,6 +998,16 @@ let participanteVinculadoId = null;
 btnAbrirFormIncidente.addEventListener("click", () => {
     tarjetaFormIncidente.classList.toggle("oculto");
     tarjetaFormIncidente.scrollIntoView({ behavior: "smooth" });
+    // Antes quedaba vacío y dependía de que el operador lo llenara a mano;
+    // si lo olvidaba, el incidente quedaba con reportado_por = null, sin
+    // ninguna pista de quién lo registró. Se precarga con el nombre de quien
+    // tiene la sesión abierta — sigue siendo editable, porque a veces quien
+    // escribe en el Centro de Control está registrando lo que otra persona
+    // en campo le reportó por teléfono/radio.
+    const inputReportadoPor = document.getElementById("inputReportadoPor");
+    if (!inputReportadoPor.value.trim() && perfilActual?.nombre) {
+        inputReportadoPor.value = perfilActual.nombre;
+    }
 });
 
 document.getElementById("inputCategoria").addEventListener("change", (evento) => {
@@ -1492,6 +1504,30 @@ document.getElementById("formImportarParticipantes").addEventListener("submit", 
 
     try {
 
+        // Antes se insertaba directo al subir el archivo: si el Excel traía
+        // la hoja equivocada o una columna mal mapeada, el error se
+        // descubría después de insertar cientos de filas. Ahora se pide
+        // primero una previsualización (no toca la base de datos) y solo se
+        // confirma si el operador está de acuerdo con lo que va a pasar.
+        const previa = await subirArchivo("/api/centro-control/participantes/importar?previsualizar=true", formData);
+
+        const detalleErroresPrevia = previa.errores.length > 0
+            ? `\n${previa.errores.length} filas con error (fila ${previa.errores.map((e) => e.fila).join(", ")}).`
+            : "";
+        const muestraPrevia = previa.muestra.slice(0, 5).map((p) => `· ${p.nombre} (${p.documento})`).join("\n");
+
+        const confirmado = confirm(
+            `Se importarán ${previa.aInsertar} participantes nuevos.\n`
+            + `${previa.omitidos} documentos ya existían y se omiten.${detalleErroresPrevia}\n\n`
+            + (muestraPrevia ? `Algunos de los que se van a crear:\n${muestraPrevia}\n\n` : "")
+            + "¿Confirmar la importación?"
+        );
+
+        if (!confirmado) {
+            boton.disabled = false;
+            return;
+        }
+
         const resultado = await subirArchivo("/api/centro-control/participantes/importar", formData);
 
         const detalleErrores = resultado.errores.length > 0
@@ -1537,6 +1573,25 @@ document.getElementById("formCompletarDatosParticipantes").addEventListener("sub
     ocultarMensaje(mensaje);
 
     try {
+
+        const previa = await subirArchivo("/api/centro-control/participantes/completar-datos?previsualizar=true", formData);
+
+        const muestraPrevia = previa.muestra.slice(0, 5).map((p) => {
+            const campos = Object.entries(p.cambios).map(([campo, { antes, despues }]) => `${campo}: "${antes ?? ""}" → "${despues}"`).join(", ");
+            return `· ${p.nombre} (${p.documento}) — ${campos}`;
+        }).join("\n");
+
+        const confirmado = confirm(
+            `Se completarán datos de ${previa.actualizados} participantes.\n`
+            + `${previa.sinCambios} ya tenían todo lleno · ${previa.noEncontrados} documentos no encontrados.\n\n`
+            + (muestraPrevia ? `Algunos de los cambios:\n${muestraPrevia}\n\n` : "")
+            + "¿Confirmar la actualización?"
+        );
+
+        if (!confirmado) {
+            boton.disabled = false;
+            return;
+        }
 
         const resultado = await subirArchivo("/api/centro-control/participantes/completar-datos", formData);
 
@@ -1853,6 +1908,88 @@ async function cargarUsuariosAdmin() {
     }
 
 }
+
+// ==========================
+// Bitácora de auditoría (admin) — middleware/auditoria.js registra cada
+// escritura desde hace tiempo, pero hasta ahora esa tabla no se mostraba en
+// ningún panel. Paginado con offset/limit, igual que /api/incidentes.
+// ==========================
+
+const LIMITE_AUDITORIA = 50;
+let offsetAuditoria = 0;
+
+async function cargarFiltroUsuariosAuditoria() {
+
+    try {
+
+        const { usuarios } = await peticionApi("/api/centro-control/usuarios");
+        const select = document.getElementById("filtroAuditoriaUsuario");
+
+        select.innerHTML = `<option value="">Todos</option>` +
+            usuarios.map((u) => `<option value="${u.id}">${u.nombre}</option>`).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function cargarAuditoria() {
+
+    const cuerpo = document.getElementById("filasAuditoria");
+    const usuarioId = document.getElementById("filtroAuditoriaUsuario").value;
+    const metodo = document.getElementById("filtroAuditoriaMetodo").value;
+    const ruta = document.getElementById("filtroAuditoriaRuta").value.trim();
+    const fecha = document.getElementById("filtroAuditoriaFecha").value;
+
+    try {
+
+        const parametros = new URLSearchParams({ limit: LIMITE_AUDITORIA, offset: offsetAuditoria });
+        if (usuarioId) parametros.set("usuarioId", usuarioId);
+        if (metodo) parametros.set("metodo", metodo);
+        if (ruta) parametros.set("ruta", ruta);
+        if (fecha) parametros.set("fecha", fecha);
+
+        const { registros, total } = await peticionApi(`/api/centro-control/auditoria?${parametros.toString()}`);
+
+        cuerpo.innerHTML = registros.map((r) => `
+            <tr>
+                <td>${new Date(r.creado_en).toLocaleString("es-CO")}</td>
+                <td>${r.usuario_nombre || "—"}</td>
+                <td>${r.metodo}</td>
+                <td>${r.ruta}</td>
+                <td>${r.ip || "—"}</td>
+            </tr>
+        `).join("") || `<tr><td colspan="5">Sin registros con estos filtros</td></tr>`;
+
+        document.getElementById("totalAuditoria").textContent =
+            `${Math.min(offsetAuditoria + 1, total)}–${Math.min(offsetAuditoria + LIMITE_AUDITORIA, total)} de ${total}`;
+
+        document.getElementById("btnAuditoriaAnterior").disabled = offsetAuditoria === 0;
+        document.getElementById("btnAuditoriaSiguiente").disabled = offsetAuditoria + LIMITE_AUDITORIA >= total;
+
+    } catch (error) {
+        console.error(error);
+        cuerpo.innerHTML = `<tr><td colspan="5">Error al cargar la bitácora: ${error.message}</td></tr>`;
+    }
+
+}
+
+document.getElementById("formFiltroAuditoria").addEventListener("submit", (evento) => {
+    evento.preventDefault();
+    offsetAuditoria = 0;
+    cargarAuditoria();
+});
+
+document.getElementById("btnAuditoriaAnterior").addEventListener("click", () => {
+    offsetAuditoria = Math.max(0, offsetAuditoria - LIMITE_AUDITORIA);
+    cargarAuditoria();
+});
+
+document.getElementById("btnAuditoriaSiguiente").addEventListener("click", () => {
+    offsetAuditoria += LIMITE_AUDITORIA;
+    cargarAuditoria();
+});
 
 async function guardarUsuario(id, datos) {
 

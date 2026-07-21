@@ -125,6 +125,46 @@ body{
     box-shadow:3px 3px 0 var(--tinta);
 }
 
+/* ===== ESCÁNER DE QR ===== */
+
+.overlay-escaner{
+    position:fixed;
+    inset:0;
+    background:rgba(26,26,46,.92);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:1000;
+}
+
+.caja-escaner{
+    background:var(--crema);
+    border:3px solid var(--tinta);
+    border-radius:16px;
+    box-shadow:6px 6px 0 var(--tinta);
+    padding:20px;
+    max-width:420px;
+    width:100%;
+    text-align:center;
+}
+
+.caja-escaner video{
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    background:#000;
+    border-radius:10px;
+    border:3px solid var(--tinta);
+}
+
+.ayuda-escaner{
+    font-size:13px;
+    color:var(--morado);
+    font-weight:700;
+    margin:12px 0;
+}
+
 .mensaje{
     margin-top:14px;
     padding:10px 14px;

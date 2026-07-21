@@ -86,6 +86,8 @@
             <button type="submit" class="boton pequeno">Buscar</button>
         </form>
 
+        <button type="button" class="boton pequeno secundario" id="btnEscanearQR" style="width:auto; margin-bottom:14px;">📷 Escanear QR de la insignia</button>
+
         <div class="mensaje" id="mensajeBusqueda"></div>
 
         <div class="resultados" id="resultados"></div>
@@ -370,7 +372,18 @@
 
 </div>
 
+<!-- ===== ESCÁNER DE QR (Registro) ===== -->
+<div class="overlay-escaner oculto" id="overlayEscanerQR">
+    <div class="caja-escaner">
+        <video id="videoEscanerQR" playsinline autoplay muted></video>
+        <p class="ayuda-escaner">Apunta la cámara al código QR de la insignia del campista</p>
+        <div class="mensaje" id="mensajeEscanerQR"></div>
+        <button type="button" class="boton pequeno" id="btnCerrarEscanerQR" style="width:auto;">Cancelar</button>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../scripts/dashboard.js?v=14" defer></script>
+<script src="../scripts/jsQR.js" defer></script>
+<script src="../scripts/dashboard.js?v=15" defer></script>
 </body>
 </html>

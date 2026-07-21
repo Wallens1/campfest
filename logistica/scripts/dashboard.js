@@ -331,25 +331,22 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
 // Búsqueda de participantes
 // ==========================
 
+const PLACEHOLDERS_BUSQUEDA = {
+    codigo: "Ingresa el código enviado por WhatsApp",
+    documento: "Ingresa el número de documento",
+    nombre: "Ingresa el nombre del participante"
+};
+
+function activarCampoBusqueda(campo) {
+
+    tabsBusqueda.forEach((t) => t.classList.toggle("activo", t.dataset.campo === campo));
+    campoBusquedaActivo = campo;
+    inputBusqueda.placeholder = PLACEHOLDERS_BUSQUEDA[campoBusquedaActivo];
+
+}
+
 tabsBusqueda.forEach((tab) => {
-
-    tab.addEventListener("click", () => {
-
-        tabsBusqueda.forEach((t) => t.classList.remove("activo"));
-        tab.classList.add("activo");
-
-        campoBusquedaActivo = tab.dataset.campo;
-
-        const placeholders = {
-            codigo: "Ingresa el código enviado por WhatsApp",
-            documento: "Ingresa el número de documento",
-            nombre: "Ingresa el nombre del participante"
-        };
-
-        inputBusqueda.placeholder = placeholders[campoBusquedaActivo];
-
-    });
-
+    tab.addEventListener("click", () => activarCampoBusqueda(tab.dataset.campo));
 });
 
 formBuscar.addEventListener("submit", async (evento) => {
@@ -404,6 +401,103 @@ function renderizarResultados(lista) {
     });
 
 }
+
+// ==========================
+// Escaneo de QR por cámara — antes el registro de ingreso era 100% búsqueda
+// manual de texto (código/documento/nombre escrito a mano), lo más lento de
+// todo el panel justo en el momento de mayor volumen (llegada masiva). La
+// insignia descargable del portal del campista ahora incluye un QR con el
+// código CF-; esto lo lee con la cámara del celular y dispara la misma
+// búsqueda por código automáticamente. Usa jsQR (vendorizado en
+// scripts/jsQR.js, sin CDN) para decodificar cada frame del video.
+// ==========================
+
+const overlayEscanerQR = document.getElementById("overlayEscanerQR");
+const videoEscanerQR = document.getElementById("videoEscanerQR");
+const btnEscanearQR = document.getElementById("btnEscanearQR");
+const btnCerrarEscanerQR = document.getElementById("btnCerrarEscanerQR");
+const mensajeEscanerQR = document.getElementById("mensajeEscanerQR");
+
+const canvasEscanerQR = document.createElement("canvas");
+const ctxEscanerQR = canvasEscanerQR.getContext("2d", { willReadFrequently: true });
+
+let streamEscanerQR = null;
+let escaneando = false;
+
+async function abrirEscanerQR() {
+
+    if (!("mediaDevices" in navigator) || !navigator.mediaDevices.getUserMedia) {
+        mostrarMensaje(mensajeBusqueda, "Este navegador no permite acceso a la cámara. Busca manualmente.", "fallo");
+        return;
+    }
+
+    overlayEscanerQR.classList.remove("oculto");
+    ocultarMensaje(mensajeEscanerQR);
+
+    try {
+
+        streamEscanerQR = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }
+        });
+
+        videoEscanerQR.srcObject = streamEscanerQR;
+        await videoEscanerQR.play();
+
+        escaneando = true;
+        requestAnimationFrame(cicloEscanerQR);
+
+    } catch (error) {
+        mostrarMensaje(mensajeEscanerQR, "No se pudo abrir la cámara: " + error.message, "fallo");
+    }
+
+}
+
+function cerrarEscanerQR() {
+
+    escaneando = false;
+    overlayEscanerQR.classList.add("oculto");
+
+    if (streamEscanerQR) {
+        streamEscanerQR.getTracks().forEach((track) => track.stop());
+        streamEscanerQR = null;
+    }
+
+}
+
+function cicloEscanerQR() {
+
+    if (!escaneando) return;
+
+    if (videoEscanerQR.readyState === videoEscanerQR.HAVE_ENOUGH_DATA) {
+
+        canvasEscanerQR.width = videoEscanerQR.videoWidth;
+        canvasEscanerQR.height = videoEscanerQR.videoHeight;
+        ctxEscanerQR.drawImage(videoEscanerQR, 0, 0, canvasEscanerQR.width, canvasEscanerQR.height);
+
+        const imagen = ctxEscanerQR.getImageData(0, 0, canvasEscanerQR.width, canvasEscanerQR.height);
+        const resultado = jsQR(imagen.data, imagen.width, imagen.height);
+
+        if (resultado && resultado.data) {
+
+            const codigo = resultado.data.trim();
+            cerrarEscanerQR();
+
+            activarCampoBusqueda("codigo");
+            inputBusqueda.value = codigo;
+            formBuscar.requestSubmit();
+
+            return;
+
+        }
+
+    }
+
+    requestAnimationFrame(cicloEscanerQR);
+
+}
+
+btnEscanearQR.addEventListener("click", abrirEscanerQR);
+btnCerrarEscanerQR.addEventListener("click", cerrarEscanerQR);
 
 // ==========================
 // Ficha del participante

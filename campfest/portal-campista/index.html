@@ -277,6 +277,7 @@
 .cf-logro-item.cf-bloqueado { background: #eee; opacity: .6; }
 </style>
 
+<script src="qrcode.min.js"></script>
 <script>
 (function () {
 
@@ -1850,6 +1851,41 @@
     ctx.font = "700 18px 'Poppins', Arial, sans-serif";
     ctx.fillStyle = INK;
     ctx.fillText("DÍAS", W / 2 + 90, cardY + 95);
+
+    // QR con el código CF- para que Logística lo escanee con la cámara en
+    // el ingreso, en vez de buscarlo a mano — mismo código que ya se
+    // muestra en texto arriba, solo que legible por máquina.
+    var qrModulos, qrLado = 210, qrMargen = 14, qrY = 955;
+    try {
+      var qr = qrcode(0, "M");
+      qr.addData(p.codigo);
+      qr.make();
+      qrModulos = qr.getModuleCount();
+
+      trazarRectRedondeado(ctx, W / 2 - qrLado / 2 - qrMargen, qrY - qrMargen, qrLado + qrMargen * 2, qrLado + qrMargen * 2, 16);
+      ctx.fillStyle = WHITE;
+      ctx.fill();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      var qrCelda = qrLado / qrModulos;
+      var qrX = W / 2 - qrLado / 2;
+      ctx.fillStyle = INK;
+      for (var qrFila = 0; qrFila < qrModulos; qrFila++) {
+        for (var qrCol = 0; qrCol < qrModulos; qrCol++) {
+          if (qr.isDark(qrFila, qrCol)) {
+            ctx.fillRect(qrX + qrCol * qrCelda, qrY + qrFila * qrCelda, qrCelda, qrCelda);
+          }
+        }
+      }
+
+      ctx.font = "700 16px 'Poppins', Arial, sans-serif";
+      ctx.fillStyle = WHITE;
+      ctx.fillText("ESCANEA EN EL INGRESO", W / 2, qrY - qrMargen - 14);
+    } catch (errorQR) {
+      console.error("No se pudo generar el QR de la insignia:", errorQR);
+    }
 
     ctx.font = "600 20px 'Poppins', Arial, sans-serif";
     ctx.fillStyle = WHITE;

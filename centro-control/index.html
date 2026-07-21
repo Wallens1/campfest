@@ -814,6 +814,61 @@
             <div class="mensaje" id="mensajeUsuarios"></div>
         </div>
 
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Bitácora de auditoría</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                Cada acción que crea, actualiza o borra algo queda registrada aquí con quién la hizo,
+                desde qué IP y en qué momento — útil para investigar un cambio inesperado o un intento
+                de acceso sospechoso. Las simples consultas (GET) no se registran.
+            </p>
+            <form id="formFiltroAuditoria" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroAuditoriaUsuario">Usuario</label>
+                    <select id="filtroAuditoriaUsuario"><option value="">Todos</option></select>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroAuditoriaMetodo">Método</label>
+                    <select id="filtroAuditoriaMetodo">
+                        <option value="">Todos</option>
+                        <option value="POST">POST</option>
+                        <option value="PATCH">PATCH</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroAuditoriaRuta">Ruta contiene</label>
+                    <input type="text" id="filtroAuditoriaRuta" placeholder="Ej: /incidentes">
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="filtroAuditoriaFecha">Fecha</label>
+                    <input type="date" id="filtroAuditoriaFecha">
+                </div>
+                <button type="submit" class="boton pequeno" style="width:auto;">Filtrar</button>
+            </form>
+            <div class="tabla-wrap">
+                <table class="tabla-participantes">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Usuario</th>
+                            <th>Método</th>
+                            <th>Ruta</th>
+                            <th>IP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filasAuditoria"></tbody>
+                </table>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; flex-wrap:wrap; gap:10px;">
+                <span class="detalle" id="totalAuditoria"></span>
+                <div style="display:flex; gap:8px;">
+                    <button class="boton pequeno secundario" id="btnAuditoriaAnterior" style="width:auto;" disabled>← Anterior</button>
+                    <button class="boton pequeno secundario" id="btnAuditoriaSiguiente" style="width:auto;">Siguiente →</button>
+                </div>
+            </div>
+        </div>
+
         <div class="tarjeta">
             <h3>Respaldo</h3>
             <p class="detalle" style="margin-top:-6px;">Un solo Excel con participantes, incidentes, materiales y actividades — para archivo, no reemplaza los exports de cada módulo.</p>
@@ -860,6 +915,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=21" defer></script>
+<script src="scripts/dashboard.js?v=22" defer></script>
 </body>
 </html>
