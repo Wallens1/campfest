@@ -291,6 +291,7 @@ document.querySelectorAll(".tab-modulo").forEach((tab) => {
         document.getElementById("vistaInventario").classList.toggle("oculto", vista !== "inventario");
         document.getElementById("vistaInscripciones").classList.toggle("oculto", vista !== "inscripciones");
         document.getElementById("vistaNotificaciones").classList.toggle("oculto", vista !== "notificaciones");
+        document.getElementById("vistaPerfiles").classList.toggle("oculto", vista !== "perfiles");
         document.getElementById("vistaAdministracion").classList.toggle("oculto", vista !== "administracion");
 
         if (vista === "cronograma") {
@@ -1231,6 +1232,148 @@ function resaltarParticipante(id) {
     if (fila) {
         fila.style.outline = "3px solid var(--teal)";
         setTimeout(() => { fila.style.outline = "none"; }, 2500);
+    }
+
+}
+
+// ==========================
+// Búsqueda y perfil de un participante (logros + cronología) — reutiliza
+// /api/centro-control/buscar-global (ya buscaba por código/documento/
+// nombre/teléfono/carpa en una sola consulta) y /api/centro-control/
+// participantes/:id (ya devolvía historial_eventos e incidentes, pero
+// ningún frontend lo consumía todavía).
+// ==========================
+
+document.getElementById("formBuscarPerfil").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+
+    const q = document.getElementById("inputBuscarPerfil").value.trim();
+    const contenedor = document.getElementById("resultadosBuscarPerfil");
+    const mensaje = document.getElementById("mensajeBuscarPerfil");
+
+    if (!q) return;
+
+    ocultarMensaje(mensaje);
+
+    try {
+
+        const { participantes } = await peticionApi(`/api/centro-control/buscar-global?q=${encodeURIComponent(q)}`);
+
+        contenedor.classList.remove("oculto");
+
+        if (participantes.length === 0) {
+            contenedor.innerHTML = `<p class="detalle">Sin resultados.</p>`;
+            return;
+        }
+
+        contenedor.innerHTML = participantes.map((p) => `
+            <div class="resultado-item" data-id="${p.id}">
+                <div><div class="nombre">${p.nombre}</div><div class="detalle">${p.codigo} · ${p.documento} · ${p.municipio || ""}</div></div>
+                <span class="badge neutro">🏆 ${(p.logros_desbloqueados || []).length}</span>
+            </div>
+        `).join("");
+
+        contenedor.querySelectorAll(".resultado-item").forEach((item) => {
+            item.addEventListener("click", () => abrirPerfil(item.dataset.id));
+        });
+
+    } catch (error) {
+        contenedor.classList.remove("oculto");
+        contenedor.innerHTML = `<p class="detalle">${error.message}</p>`;
+    }
+
+});
+
+const panelPerfil = document.getElementById("panelPerfil");
+const overlayPerfil = document.getElementById("overlayPerfil");
+
+document.getElementById("btnCerrarPerfil").addEventListener("click", cerrarPanelPerfil);
+overlayPerfil.addEventListener("click", cerrarPanelPerfil);
+
+function cerrarPanelPerfil() {
+    panelPerfil.classList.remove("abierto");
+    overlayPerfil.classList.add("oculto");
+}
+
+// tipo (historial_eventos) → ícono de la cronología. "incidente" no es un
+// tipo real de historial_eventos, se usa solo para los eventos armados a
+// partir de la lista de incidentes del participante (ver abrirPerfil).
+const ICONOS_CRONOLOGIA = {
+    ingreso: "🟢",
+    asignacion_carpa: "⛺",
+    alimentacion: "🍽️",
+    salida_libre: "🚶",
+    retiro: "🔴",
+    logro: "🏆",
+    perfil_actualizado: "✏️",
+    incidente: "🚨"
+};
+
+async function abrirPerfil(id) {
+
+    const mensaje = document.getElementById("mensajePerfil");
+    ocultarMensaje(mensaje);
+
+    try {
+
+        const { participante: p, historial, incidentes } = await peticionApi(`/api/centro-control/participantes/${id}`);
+
+        document.getElementById("perfilNombre").textContent = p.nombre;
+        document.getElementById("perfilDocumento").textContent = `${p.codigo} · Documento: ${p.documento}`;
+
+        document.getElementById("perfilBadges").innerHTML = [
+            `<span class="badge ${p.estado_admision === "admitido" ? "verde" : "neutro"}">${humanizar(p.estado_admision)}</span>`,
+            p.ingreso_registrado ? `<span class="badge verde">🟢 Ingresó</span>` : `<span class="badge neutro">Sin ingreso</span>`,
+            p.carpa_asignada ? `<span class="badge neutro">⛺ ${p.carpa_asignada}</span>` : "",
+            p.retirado ? `<span class="badge rojo">Retirado</span>` : ""
+        ].join("");
+
+        document.getElementById("perfilInfo").innerHTML = `
+            <div class="dato"><span class="etiqueta">Municipio</span><span class="valor">${p.municipio || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Teléfono</span><span class="valor">${p.telefono || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Correo</span><span class="valor">${p.correo_personal || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Contacto de emergencia</span><span class="valor">${p.contacto_emergencia_nombre || "—"} · ${p.contacto_emergencia_telefono || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Condición médica</span><span class="valor">${p.tiene_condicion_medica ? (p.condicion_medica_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Restricciones alimentarias</span><span class="valor">${p.tiene_restricciones_alimentarias ? (p.restricciones_alimentarias_detalle || "Sí") : "No"}</span></div>
+        `;
+
+        const logros = p.logros_desbloqueados || [];
+        document.getElementById("perfilLogros").innerHTML = logros.length > 0
+            ? logros.map((idLogro) => `<span class="badge neutro">🏆 ${humanizar(idLogro)}</span>`).join("")
+            : `<p class="detalle">Todavía no ha desbloqueado ningún logro.</p>`;
+
+        const eventos = [
+            ...historial.map((h) => ({
+                fecha: h.creado_en,
+                icono: ICONOS_CRONOLOGIA[h.tipo] || "•",
+                texto: h.descripcion,
+                autor: h.usuario_nombre
+            })),
+            ...incidentes.map((i) => ({
+                fecha: i.creado_en,
+                icono: ICONOS_CRONOLOGIA.incidente,
+                texto: `Incidente ${i.codigo} (${humanizar(i.categoria)}): ${i.descripcion}`,
+                autor: i.reportado_por
+            }))
+        ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        document.getElementById("perfilCronologia").innerHTML = eventos.length > 0
+            ? eventos.map((e) => `
+                <div class="bitacora-item">
+                    <span class="hora">${new Date(e.fecha).toLocaleString("es-CO")}</span>
+                    <div>${e.icono} ${e.texto}</div>
+                    <div class="usuario">${e.autor ? "Por: " + e.autor : "Automático / el propio campista"}</div>
+                </div>
+            `).join("")
+            : `<p class="detalle">Sin eventos registrados todavía.</p>`;
+
+        document.getElementById("resultadosBuscarPerfil").classList.add("oculto");
+        panelPerfil.classList.add("abierto");
+        overlayPerfil.classList.remove("oculto");
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
     }
 
 }

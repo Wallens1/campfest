@@ -78,6 +78,7 @@
         <button class="tab-modulo" data-vista="inventario">Inventario</button>
         <button class="tab-modulo" data-vista="inscripciones">Inscripciones</button>
         <button class="tab-modulo" data-vista="notificaciones">Notificaciones</button>
+        <button class="tab-modulo" data-vista="perfiles">Perfiles</button>
         <button class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion">Administración</button>
     </div>
 
@@ -644,6 +645,26 @@
 
     </section>
 
+    <!-- ===== VISTA: PERFILES ===== -->
+    <section class="oculto" id="vistaPerfiles">
+
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Buscar participante</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                Busca por código (CF-XXXX), documento o nombre para ver el perfil completo: sus logros
+                desbloqueados en el portal, los cambios que ha hecho a sus datos, y la cronología de todo
+                lo que le ha pasado en el evento (ingreso, carpa, alimentación, salidas libres, incidentes).
+            </p>
+            <form class="busqueda-global" id="formBuscarPerfil">
+                <input type="text" id="inputBuscarPerfil" placeholder="Ej: CF-1234, un documento o un nombre" required>
+                <button type="submit" class="boton pequeno">Buscar</button>
+            </form>
+            <div class="mensaje" id="mensajeBuscarPerfil"></div>
+            <div class="resultados-globales oculto" id="resultadosBuscarPerfil"></div>
+        </div>
+
+    </section>
+
     <!-- ===== VISTA: ADMINISTRACIÓN (solo administrador) ===== -->
     <section class="oculto" id="vistaAdministracion">
 
@@ -913,8 +934,32 @@
     <div class="mensaje" id="mensajeDetalleIncidente"></div>
 </div>
 
+<!-- ===== PANEL DE DETALLE DEL PERFIL DE UN PARTICIPANTE ===== -->
+<div class="overlay-detalle oculto" id="overlayPerfil"></div>
+<div class="panel-detalle" id="panelPerfil">
+    <button class="cerrar-panel" id="btnCerrarPerfil">✕</button>
+
+    <div class="badges" id="perfilBadges"></div>
+    <h2 id="perfilNombre"></h2>
+    <p id="perfilDocumento" class="detalle"></p>
+
+    <div class="grid-info" id="perfilInfo"></div>
+
+    <div class="seccion">
+        <h3>Logros desbloqueados</h3>
+        <div class="badges" id="perfilLogros"></div>
+    </div>
+
+    <div class="seccion">
+        <h3>Cronología</h3>
+        <div id="perfilCronologia"></div>
+    </div>
+
+    <div class="mensaje" id="mensajePerfil"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=22" defer></script>
+<script src="scripts/dashboard.js?v=23" defer></script>
 </body>
 </html>
