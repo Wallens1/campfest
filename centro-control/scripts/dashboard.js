@@ -1256,7 +1256,8 @@ async function cargarCronologiaCampistas() {
 
     try {
 
-        const parametros = new URLSearchParams({ limit: 30 });
+        const parametros = new URLSearchParams();
+        parametros.set("limit", "30");
         if (tipo) parametros.set("tipo", tipo);
 
         const { eventos } = await peticionApi(`/api/centro-control/cronologia-campistas?${parametros.toString()}`);
@@ -2128,7 +2129,9 @@ async function cargarAuditoria() {
 
     try {
 
-        const parametros = new URLSearchParams({ limit: LIMITE_AUDITORIA, offset: offsetAuditoria });
+        const parametros = new URLSearchParams();
+        parametros.set("limit", String(LIMITE_AUDITORIA));
+        parametros.set("offset", String(offsetAuditoria));
         if (usuarioId) parametros.set("usuarioId", usuarioId);
         if (metodo) parametros.set("metodo", metodo);
         if (ruta) parametros.set("ruta", ruta);
