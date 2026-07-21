@@ -118,7 +118,38 @@
                         <input type="checkbox" id="checkboxLider">
                         Líder de carpa
                     </label>
+                    <input type="text" id="inputMotivoCambioCarpa" placeholder="Motivo del cambio (opcional, ej: conflicto con compañero)" style="margin-top:8px;">
                     <button type="submit" class="boton pequeno">Guardar</button>
+                </form>
+            </div>
+
+            <div class="seccion">
+                <h3>Corregir datos de contacto/salud</h3>
+                <p class="detalle" style="margin-top:-6px;">Si detectas un dato mal cargado (teléfono, contacto de emergencia, condición médica), corrígelo aquí mismo — queda registrado en el historial.</p>
+                <form id="formDatosCriticos">
+                    <div class="grid-info" style="margin-bottom:10px;">
+                        <div class="campo">
+                            <label for="inputTelefonoCritico">Teléfono</label>
+                            <input type="text" id="inputTelefonoCritico">
+                        </div>
+                        <div class="campo">
+                            <label for="inputContactoEmergenciaNombreCritico">Contacto de emergencia (nombre)</label>
+                            <input type="text" id="inputContactoEmergenciaNombreCritico">
+                        </div>
+                        <div class="campo">
+                            <label for="inputContactoEmergenciaTelefonoCritico">Contacto de emergencia (teléfono)</label>
+                            <input type="text" id="inputContactoEmergenciaTelefonoCritico">
+                        </div>
+                    </div>
+                    <div class="campo">
+                        <label for="inputCondicionMedicaCritico">Condición médica (detalle)</label>
+                        <input type="text" id="inputCondicionMedicaCritico">
+                    </div>
+                    <div class="campo">
+                        <label for="inputRestriccionAlimentariaCritico">Restricción alimentaria (detalle)</label>
+                        <input type="text" id="inputRestriccionAlimentariaCritico">
+                    </div>
+                    <button type="submit" class="boton pequeno secundario">Guardar corrección</button>
                 </form>
             </div>
 
@@ -392,6 +423,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../scripts/jsQR.js" defer></script>
-<script src="../scripts/dashboard.js?v=17" defer></script>
+<script src="../scripts/dashboard.js?v=18" defer></script>
 </body>
 </html>

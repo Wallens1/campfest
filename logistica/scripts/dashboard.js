@@ -407,7 +407,7 @@ function renderizarResultados(lista) {
         item.className = "resultado-item";
         item.innerHTML = `
             <div>
-                <div class="nombre">${participante.nombre}</div>
+                <div class="nombre">${participante.nombre}${participante.retirado ? ` <span class="estado-badge escalado">Retirado</span>` : ""}</div>
                 <div class="detalle">${participante.documento} · ${participante.municipio || ""}</div>
             </div>
         `;
@@ -546,6 +546,11 @@ function renderizarFicha(datos) {
 
     renderizarBadges(participante, entregasRealizadas, totalServicios);
     renderizarInfo(participante);
+    document.getElementById("inputTelefonoCritico").value = participante.telefono || "";
+    document.getElementById("inputContactoEmergenciaNombreCritico").value = participante.contacto_emergencia_nombre || "";
+    document.getElementById("inputContactoEmergenciaTelefonoCritico").value = participante.contacto_emergencia_telefono || "";
+    document.getElementById("inputCondicionMedicaCritico").value = participante.condicion_medica_detalle || "";
+    document.getElementById("inputRestriccionAlimentariaCritico").value = participante.restricciones_alimentarias_detalle || "";
     renderizarIngreso(participante);
     renderizarSalidaLibre(elegibleSalidaLibre, salidaLibreActiva);
 
@@ -555,7 +560,8 @@ function renderizarFicha(datos) {
 
     actualizarMensajeParticipanteVinculado();
 
-    tituloAlimentacion.textContent = `Alimentación (${entregasRealizadas}/${totalServicios})`;
+    tituloAlimentacion.textContent = `Alimentación (${entregasRealizadas}/${totalServicios})`
+        + (participante.tiene_restricciones_alimentarias ? ` — ⚠️ ${participante.restricciones_alimentarias_detalle || "restricción alimentaria"}` : "");
     renderizarAlimentacion(servicios, entregas);
 
     renderizarHistorial(eventos);
@@ -574,7 +580,10 @@ function renderizarBadges(participante, entregasRealizadas, totalServicios) {
 
     const liderBadge = `<span class="badge neutro">Líder de carpa: ${participante.es_lider_carpa ? "Sí" : "No"}</span>`;
 
-    badges.innerHTML = ingresoBadge + alimentacionBadge + carpaBadge + liderBadge;
+    const retiradoBadge = participante.retirado ? `<span class="badge rojo">⚠️ Retirado</span>` : "";
+    const alimentacionEspecialBadge = participante.tiene_restricciones_alimentarias ? `<span class="badge rojo">🍽️ Alimentación especial</span>` : "";
+
+    badges.innerHTML = retiradoBadge + ingresoBadge + alimentacionBadge + carpaBadge + liderBadge + alimentacionEspecialBadge;
 
 }
 
@@ -740,10 +749,41 @@ formAsignacion.addEventListener("submit", async (evento) => {
 
         await peticionApi(`/api/logistica/participante/${participanteActualId}/asignacion`, {
             method: "POST",
-            body: JSON.stringify({ carpa: carpaSeleccionada, esLiderCarpa: checkboxLider.checked })
+            body: JSON.stringify({
+                carpa: carpaSeleccionada,
+                esLiderCarpa: checkboxLider.checked,
+                motivo: document.getElementById("inputMotivoCambioCarpa").value.trim()
+            })
         });
 
         mostrarMensaje(mensajeFicha, "Asignación guardada correctamente", "ok");
+        document.getElementById("inputMotivoCambioCarpa").value = "";
+        await seleccionarParticipante(participanteActualId);
+
+    } catch (error) {
+        mostrarMensaje(mensajeFicha, error.message, "fallo");
+    }
+
+});
+
+document.getElementById("formDatosCriticos").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+
+    try {
+
+        await peticionApi(`/api/logistica/participante/${participanteActualId}/datos-criticos`, {
+            method: "PATCH",
+            body: JSON.stringify({
+                telefono: document.getElementById("inputTelefonoCritico").value.trim(),
+                contacto_emergencia_nombre: document.getElementById("inputContactoEmergenciaNombreCritico").value.trim(),
+                contacto_emergencia_telefono: document.getElementById("inputContactoEmergenciaTelefonoCritico").value.trim(),
+                condicion_medica_detalle: document.getElementById("inputCondicionMedicaCritico").value.trim(),
+                restricciones_alimentarias_detalle: document.getElementById("inputRestriccionAlimentariaCritico").value.trim()
+            })
+        });
+
+        mostrarMensaje(mensajeFicha, "Datos corregidos correctamente", "ok");
         await seleccionarParticipante(participanteActualId);
 
     } catch (error) {
