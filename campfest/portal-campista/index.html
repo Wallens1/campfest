@@ -68,6 +68,7 @@
         <div id="cf-easter-egg" class="cf-oculto">✨ Encontraste el secreto de Camp Fest — nos vemos en noviembre. ¡Gracias por tu paciencia! 💜</div>
         <button type="button" class="cf-btn cf-btn-alt" id="cf-btn-editar-perfil" style="margin-top:14px;">Editar mis datos</button>
         <button type="button" class="cf-btn cf-btn-alt" id="cf-btn-descargar-insignia" style="margin-top:14px;">Descargar mi insignia</button>
+        <button type="button" class="cf-btn cf-btn-alt cf-oculto" id="cf-btn-descargar-certificado" style="margin-top:14px;">Descargar certificado de participación</button>
         <button type="button" class="cf-btn cf-btn-alt" id="cf-btn-salir-portal" style="margin-top:14px;">Cerrar sesión</button>
       </div>
 
@@ -309,6 +310,26 @@
     return cuerpo;
   }
 
+  // Descarga binaria (el certificado en PDF) — peticion() de arriba siempre
+  // hace .json(), así que esto hace su propio fetch con el mismo token.
+  async function descargarArchivoCampista(ruta, nombreArchivo) {
+    var headers = {};
+    var token = localStorage.getItem(TOKEN_KEY);
+    if (token) headers.Authorization = "Bearer " + token;
+    var respuesta = await fetch(API_BASE + ruta, { headers: headers });
+    if (!respuesta.ok) {
+      var cuerpo = await respuesta.json().catch(function () { return {}; });
+      throw new Error(cuerpo.mensaje || "No se pudo generar el archivo");
+    }
+    var blob = await respuesta.blob();
+    var url = window.URL.createObjectURL(blob);
+    var enlace = document.createElement("a");
+    enlace.href = url;
+    enlace.download = nombreArchivo;
+    enlace.click();
+    window.URL.revokeObjectURL(url);
+  }
+
   // ==========================
   // Utilidades de localStorage compartidas por racha/logros/contadores.
   // ==========================
@@ -379,6 +400,7 @@
       document.getElementById("cf-perfil-municipio").textContent = p.municipio;
       document.getElementById("cf-perfil-estado").textContent = p.estadoAdmisionEtiqueta;
       document.getElementById("cf-perfil-carpa").textContent = p.carpaAsignada || "Aún sin asignar";
+      document.getElementById("cf-btn-descargar-certificado").classList.toggle("cf-oculto", !p.ingresoRegistrado || !!p.retirado);
       document.getElementById("cf-dias-restantes").textContent = p.diasRestantes;
       document.getElementById("cf-barra-progreso").style.width = p.progresoEspera + "%";
       document.getElementById("cf-referidos").textContent = p.referidos;
@@ -449,6 +471,21 @@
 
   document.getElementById("cf-btn-editar-perfil").addEventListener("click", function () {
     document.getElementById("cf-campista-editar").classList.toggle("cf-oculto");
+  });
+
+  document.getElementById("cf-btn-descargar-certificado").addEventListener("click", async function () {
+    var boton = this;
+    var textoOriginal = boton.textContent;
+    boton.disabled = true;
+    boton.textContent = "Generando...";
+    try {
+      await descargarArchivoCampista("/api/campista/certificado", "Certificado-Participacion.pdf");
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      boton.disabled = false;
+      boton.textContent = textoOriginal;
+    }
   });
 
   document.getElementById("cf-btn-salir-portal").addEventListener("click", function () {
