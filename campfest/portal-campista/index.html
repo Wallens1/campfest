@@ -52,6 +52,7 @@
       <button class="cf-portal-tab" data-portal-tab="historia">📜 Historia</button>
       <button class="cf-portal-tab" data-portal-tab="actividades">🎮 Actividades</button>
       <button class="cf-portal-tab" data-portal-tab="itinerario">🗓️ Itinerario</button>
+      <button class="cf-portal-tab" data-portal-tab="encuesta">📋 Encuesta</button>
     </div>
 
     <!-- ===== PESTAÑA: PERFIL ===== -->
@@ -204,6 +205,15 @@
       <div class="cf-panel" id="cf-campista-itinerario">
         <h3><span class="cf-dot"></span>Itinerario</h3>
         <div id="cf-lista-itinerario"><p>Cargando…</p></div>
+      </div>
+    </div>
+
+    <!-- ===== PESTAÑA: ENCUESTA ===== -->
+    <div class="cf-portal-panel" data-portal-panel="encuesta" hidden>
+      <div class="cf-panel" id="cf-campista-encuesta">
+        <h3><span class="cf-dot"></span>Encuesta de satisfacción</h3>
+        <p style="font-size:12.5px; opacity:.8;">Tu opinión nos ayuda a mejorar la próxima edición y a mostrarle a quienes apoyaron este evento el impacto que tuvo. Toma menos de 5 minutos.</p>
+        <div id="cf-encuesta-contenedor"><p>Cargando…</p></div>
       </div>
     </div>
 
@@ -451,6 +461,137 @@
     }
   }
 
+  // ==========================
+  // Encuesta de satisfacción — preguntas fijas (vienen del servidor, pero el
+  // set completo vive en services/encuestas.js del backend). Los botones de
+  // opción usan el mismo cf-btn/cf-btn-alt del resto del portal; el estado
+  // "seleccionado" se marca con estilos inline (no se toca la hoja de
+  // estilos compartida por todo el sitio).
+  // ==========================
+  var encuestaCargada = false;
+  var respuestasEncuestaCampista = {};
+
+  function marcarBotonSeleccionado(boton) {
+    var grupo = boton.parentElement;
+    Array.prototype.forEach.call(grupo.querySelectorAll(".cf-encuesta-boton"), function (b) {
+      b.style.background = "";
+      b.style.color = "";
+      b.style.boxShadow = "";
+    });
+    boton.style.background = "var(--pink)";
+    boton.style.color = "#fff";
+    boton.style.boxShadow = "5px 5px 0 var(--ink)";
+  }
+
+  function renderizarPreguntaEncuesta(pregunta, valorActual) {
+
+    var html = '<div class="cf-panel" data-pregunta="' + pregunta.codigo + '" style="margin-bottom:14px;">';
+    html += '<label style="display:block; font-weight:700; margin-bottom:10px; font-size:14px;">' + pregunta.texto + '</label>';
+
+    if (pregunta.tipo === "rating" || pregunta.tipo === "nps") {
+      var max = pregunta.tipo === "rating" ? 5 : 10;
+      var min = pregunta.tipo === "rating" ? 1 : 0;
+      html += '<div class="cf-encuesta-opciones" style="display:flex; gap:8px; flex-wrap:wrap;">';
+      for (var i = min; i <= max; i++) {
+        var activo = valorActual === i;
+        html += '<button type="button" class="cf-btn cf-btn-alt cf-encuesta-boton" data-valor="' + i + '" style="padding:8px 14px;' + (activo ? " background:var(--pink); color:#fff; box-shadow:5px 5px 0 var(--ink);" : "") + '">' + i + '</button>';
+      }
+      html += '</div>';
+      if (pregunta.tipo === "nps") html += '<p style="font-size:11px; opacity:.7; margin-top:4px;">0 = nada probable · 10 = totalmente probable</p>';
+    } else if (pregunta.tipo === "opcion") {
+      html += '<div class="cf-encuesta-opciones" style="display:flex; gap:8px; flex-wrap:wrap;">';
+      pregunta.opciones.forEach(function (op) {
+        var activo = valorActual === op;
+        html += '<button type="button" class="cf-btn cf-btn-alt cf-encuesta-boton" data-valor="' + op + '" style="padding:8px 14px;' + (activo ? " background:var(--pink); color:#fff; box-shadow:5px 5px 0 var(--ink);" : "") + '">' + op + '</button>';
+      });
+      html += '</div>';
+    } else {
+      html += '<textarea class="cf-encuesta-texto" rows="3" style="width:100%; padding:10px; border:2px solid var(--ink); border-radius:10px; font-family:inherit; font-size:14px;">' + (valorActual || "") + '</textarea>';
+    }
+
+    html += "</div>";
+    return html;
+
+  }
+
+  function wirePreguntaEncuesta(pregunta) {
+
+    var bloque = document.querySelector('[data-pregunta="' + pregunta.codigo + '"]');
+
+    if (pregunta.tipo === "texto") {
+      bloque.querySelector(".cf-encuesta-texto").addEventListener("input", function (evento) {
+        respuestasEncuestaCampista[pregunta.codigo] = evento.target.value;
+      });
+      return;
+    }
+
+    bloque.querySelectorAll(".cf-encuesta-boton").forEach(function (boton) {
+      boton.addEventListener("click", function () {
+        marcarBotonSeleccionado(boton);
+        var valor = boton.dataset.valor;
+        respuestasEncuestaCampista[pregunta.codigo] = (pregunta.tipo === "opcion") ? valor : Number(valor);
+      });
+    });
+
+  }
+
+  async function cargarEncuesta() {
+
+    if (encuestaCargada) return;
+    encuestaCargada = true;
+
+    var contenedor = document.getElementById("cf-encuesta-contenedor");
+
+    try {
+
+      var resultadoPreguntas = await peticion("/api/encuestas/campista/preguntas");
+      var resultadoMiRespuesta = await peticion("/api/encuestas/campista/mi-respuesta");
+      var preguntas = resultadoPreguntas.preguntas;
+      var yaRespondida = resultadoMiRespuesta.respuesta;
+
+      respuestasEncuestaCampista = yaRespondida ? Object.assign({}, yaRespondida.respuestas) : {};
+
+      var html = "";
+      if (yaRespondida) {
+        html += '<div class="cf-dato-curioso" style="margin-bottom:16px;"><strong>✅ Ya respondiste esta encuesta</strong><p>Puedes actualizar tus respuestas y volver a enviarla cuantas veces quieras.</p></div>';
+      }
+
+      preguntas.forEach(function (pregunta) {
+        html += renderizarPreguntaEncuesta(pregunta, respuestasEncuestaCampista[pregunta.codigo]);
+      });
+
+      html += '<button type="button" class="cf-btn cf-primary" id="cf-btn-enviar-encuesta" style="width:100%; justify-content:center; margin-top:8px;">Enviar encuesta</button>';
+      html += '<div class="cf-estado-campista" id="cf-estado-encuesta"></div>';
+
+      contenedor.innerHTML = html;
+
+      preguntas.forEach(wirePreguntaEncuesta);
+
+      document.getElementById("cf-btn-enviar-encuesta").addEventListener("click", async function () {
+
+        var estado = document.getElementById("cf-estado-encuesta");
+        ocultarEstado(estado);
+
+        try {
+          await peticion("/api/encuestas/campista", {
+            method: "POST",
+            body: JSON.stringify({ respuestas: respuestasEncuestaCampista })
+          });
+          mostrarEstado(estado, "ok", "¡Gracias por responder la encuesta! 💜");
+          desbloquearLogro("encuesta_respondida");
+        } catch (error) {
+          mostrarEstado(estado, "fallo", error.message);
+        }
+
+      });
+
+    } catch (error) {
+      contenedor.innerHTML = "<p>No se pudo cargar la encuesta. Intenta de nuevo más tarde.</p>";
+      encuestaCargada = false;
+    }
+
+  }
+
   async function cargarAnuncios() {
     var contenedor = document.getElementById("cf-lista-anuncios");
     try {
@@ -528,6 +669,7 @@
       if (tab === "historia") desbloquearLogro("historia");
       if (tab === "actividades") desbloquearLogro("tab_actividades");
       if (tab === "itinerario") desbloquearLogro("tab_itinerario");
+      if (tab === "encuesta") cargarEncuesta();
 
     });
   });
@@ -645,7 +787,8 @@
     { nombre: "Sesión y contenido", logros: [
       { id: "login", icono: "🔑", nombre: "Iniciaste sesión", desc: "Inicia sesión en tu portal" },
       { id: "insignia", icono: "🏅", nombre: "Tu insignia", desc: "Descarga tu insignia" },
-      { id: "historia", icono: "📜", nombre: "Historia conocida", desc: "Abre la pestaña Historia" }
+      { id: "historia", icono: "📜", nombre: "Historia conocida", desc: "Abre la pestaña Historia" },
+      { id: "encuesta_respondida", icono: "📋", nombre: "Tu opinión cuenta", desc: "Responde la encuesta de satisfacción" }
     ]},
     { nombre: "Secretos", logros: [
       { id: "secreto_codigo", icono: "🔢", nombre: "5 clics en tu código", secreto: true },
