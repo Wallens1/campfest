@@ -421,20 +421,56 @@ document.getElementById("btnCerrarAyudaRoles").addEventListener("click", () => {
 // ==========================
 
 const PASOS_TOUR = [
+
+    // ===== Bienvenida =====
     {
         titulo: "Bienvenido al Panel Logístico",
-        texto: "Este tour rápido te muestra lo esencial en menos de un minuto, resaltando cada botón real de la pantalla. Puedes saltarlo cuando quieras y volver a verlo después con el botón 🎓 de arriba.",
+        texto: "Este tour recorre TODO el panel, sección por sección — resaltando cada botón real de la pantalla cuando está visible. Si algo depende de tener un participante seleccionado o de que seas líder de tu rama, te lo explica igual aunque no lo veas resaltado en este momento. Puedes saltarlo cuando quieras y volver a verlo con el botón 🎓.",
         selector: null
     },
+
+    // ===== Barra superior (siempre visible) =====
     {
         titulo: "Tus 5 pestañas",
-        texto: "Registro: participantes del evento. Comunicación: reportar incidentes, objetos perdidos y pedir ayuda entre ramas. Tareas: lo que tu rama debe hacer. Mi cronograma: las actividades del evento. Materiales: catálogo y solicitudes.",
+        texto: "Registro, Comunicación, Tareas, Mi cronograma y Materiales. Vamos a recorrer cada una a fondo, en ese orden.",
         selector: ".tabs-modulo",
         vista: "registro"
     },
     {
-        titulo: "Cómo buscar a alguien",
-        texto: "Elige si vas a buscar por código, documento o nombre — según el dato que tengas a mano en ese momento.",
+        titulo: "Este mismo botón: el tour",
+        texto: "El 🎓 abre este tour guiado cuando quieras repasarlo — la primera vez se abre solo, después de eso solo aparece si lo pulsas.",
+        selector: "#btnVerTour",
+        vista: null
+    },
+    {
+        titulo: "Checklist de turno",
+        texto: "El 📋 abre un checklist con dos listas de chequeo — \"Al empezar el turno\" y \"Antes de irte\" — para no olvidar nada. Se guarda solo en tu celular y se reinicia cada día; no es un registro del sistema.",
+        selector: "#btnChecklistTurno",
+        vista: null
+    },
+    {
+        titulo: "Encuesta de satisfacción (staff)",
+        texto: "El 📝 abre tu propia encuesta de satisfacción como parte del equipo — organización, herramientas, comunicación, carga de trabajo. Puedes reenviarla si quieres actualizar tus respuestas.",
+        selector: "#btnEncuestaStaff",
+        vista: null
+    },
+    {
+        titulo: "¿Qué puedo hacer con mi rol?",
+        texto: "El botón \"?\" te recuerda la diferencia entre ser miembro y líder de tu rama, y qué puede hacer cada uno en este panel.",
+        selector: "#btnAyudaRoles",
+        vista: null
+    },
+    {
+        titulo: "Cerrar sesión",
+        texto: "Te saca del panel y vuelve a la pantalla de inicio de sesión.",
+        selector: "#btnCerrarSesion",
+        vista: null
+    },
+
+    // ===== Pestaña Registro: búsqueda =====
+    {
+        titulo: "Registro — cómo buscar a alguien",
+        texto: "Elige si vas a buscar por código, documento o nombre, según el dato que tengas a mano en ese momento.",
         selector: ".tabs-busqueda",
         vista: "registro"
     },
@@ -456,39 +492,196 @@ const PASOS_TOUR = [
     },
     {
         titulo: "O escanea el QR de la insignia",
-        texto: "Más rápido cuando la llegada es masiva: no hay que escribir nada, apuntas la cámara al QR de la insignia del campista y la búsqueda se hace sola.",
+        texto: "Más rápido en la llegada masiva: no hay que escribir nada, apuntas la cámara al QR de la insignia del campista y la búsqueda se hace sola.",
         selector: "#btnEscanearQR",
         vista: "registro"
     },
     {
-        titulo: "Reportar un incidente",
-        texto: "Desde Comunicación le avisas al Centro de Control cualquier novedad — categoría, prioridad, y a quién afecta si aplica.",
+        titulo: "Escanear código de salida",
+        texto: "Este es distinto: no busca a nadie, confirma la salida final del evento en un solo paso. Se usa con el código/QR que le aparece al campista al terminar su encuesta de satisfacción (obligatoria para poder salir) — apuntas la cámara y sigue escaneando al siguiente de la fila solo.",
+        selector: "#btnEscanearSalida",
+        vista: "registro"
+    },
+    {
+        titulo: "Resultados de la búsqueda",
+        texto: "Aquí aparece la lista de coincidencias — toca el resultado correcto para abrir su ficha completa.",
+        selector: "#resultados",
+        vista: "registro"
+    },
+
+    // ===== Pestaña Registro: la ficha =====
+    {
+        titulo: "La ficha del participante",
+        texto: "Al abrir a alguien, arriba de todo ves badges rápidos: si ya ingresó, cuántas entregas de alimentación lleva, en qué carpa está, si es líder de carpa, si está retirado, y si tiene alimentación especial.",
+        selector: "#badges",
+        vista: "registro"
+    },
+    {
+        titulo: "Datos personales y de salud",
+        texto: "Documento, edad, municipio, contactos de emergencia, RH, EPS, condición médica, restricciones alimentarias y alergias — resaltado en rojo lo que necesita atención especial.",
+        selector: "#gridInfo",
+        vista: "registro"
+    },
+    {
+        titulo: "Ingreso, con requisa policial",
+        texto: "Al pulsar \"Registrar ingreso\" se abre primero un mini-formulario de requisa: si no se encontró nada, solo confirmas; si se confiscó algo, lo agregas (objeto, cantidad, descripción) antes de confirmar, y queda guardado en el \"baúl\" con tu nombre.",
+        selector: "#bloqueIngreso",
+        vista: "registro"
+    },
+    {
+        titulo: "Infracciones",
+        texto: "Registras cualquier falta al reglamento con una descripción. Al llegar a la 3ra infracción, aparece un aviso en rojo: se puede descargar el acta de expulsión mutua en PDF (para firmar en papel), y admin/control pueden confirmar la expulsión desde aquí mismo.",
+        selector: "#listaInfracciones",
+        vista: "registro"
+    },
+    {
+        titulo: "Salida libre",
+        texto: "Solo aparece para participantes de Bugalagrande en zona urbana — pueden salir a comer, dormir o trabajar en su casa durante el evento. Registras la salida (con el motivo) y, cuando vuelve, el regreso. No se puede abrir una segunda salida libre mientras la anterior siga activa.",
+        selector: "#seccionSalidaLibre",
+        vista: "registro"
+    },
+    {
+        titulo: "Asignación de carpa",
+        texto: "Tocas la carpa en la cuadrícula (las que ya están llenas se ven distintas y no dejan seleccionarse), marcas si es líder de esa carpa, opcionalmente el motivo si es un cambio, y guardas.",
+        selector: "#gridCarpas",
+        vista: "registro"
+    },
+    {
+        titulo: "Corregir datos de contacto/salud",
+        texto: "Si detectas un dato mal cargado — teléfono, contacto de emergencia, condición médica, restricción alimentaria — lo corriges directamente aquí, y la corrección queda registrada en el historial del participante.",
+        selector: "#formDatosCriticos",
+        vista: "registro"
+    },
+    {
+        titulo: "Alimentación",
+        texto: "La lista de las 9 comidas del evento (desayunos, almuerzos, cenas y refrigerios). Pulsas \"Marcar\" junto a la que acabas de entregar — queda con la hora exacta y ya no se puede desmarcar por error.",
+        selector: "#checklistAlimentacion",
+        vista: "registro"
+    },
+    {
+        titulo: "Salida final del evento",
+        texto: "Es la contraparte del ingreso, al terminar el camp. Ahora exige que el participante ya haya completado su encuesta de satisfacción — si no la completó, este botón se bloquea y te lo avisa. Lo más rápido para registrar la salida es escanear su código (📤, ya lo vimos) en vez de usar este botón manual, que es más bien un respaldo por si el escaneo falla.",
+        selector: "#bloqueSalidaEvento",
+        vista: "registro"
+    },
+    {
+        titulo: "Historial",
+        texto: "El registro cronológico de todo lo que se ha hecho con ese participante — ingreso, requisa, carpa, alimentación, infracciones, salidas — con quién lo hizo y a qué hora.",
+        selector: "#historial",
+        vista: "registro"
+    },
+
+    // ===== Pestaña Comunicación =====
+    {
+        titulo: "Comunicación — reportar un incidente",
+        texto: "El puente con el Centro de Control: elige categoría (te muestra automáticamente quién lo atiende), prioridad, zona y lugar específico, opcionalmente vincula a un campista afectado, y describe qué pasó.",
         selector: "#btnAbrirFormIncidente",
         vista: "comunicacion"
     },
     {
+        titulo: "Mis incidentes reportados",
+        texto: "Todo lo que tú personalmente has reportado, con su código, descripción, prioridad y estado actual — para seguirle el pulso sin preguntarle a nadie.",
+        selector: "#listaMisIncidentes",
+        vista: "comunicacion"
+    },
+    {
         titulo: "Objetos perdidos",
-        texto: "Si encuentras algo suelto (no confiscado en una requisa), regístralo aquí para que quien lo busque lo pueda reclamar.",
+        texto: "Distinto de lo confiscado en una requisa: esto es para algo que encontraste suelto en el evento. Lo describes, dices dónde lo encontraste, y queda disponible para que alguien lo reclame.",
         selector: "#formObjetoPerdido",
         vista: "comunicacion"
     },
     {
-        titulo: "¿Dudas sobre tu rol?",
-        texto: "El botón \"?\" te recuerda qué puedes hacer según seas miembro o líder de tu rama.",
-        selector: "#btnAyudaRoles",
-        vista: null
+        titulo: "Pedir ayuda a otra rama",
+        texto: "Exclusivo de líderes de rama: pides ayuda a otro equipo (cuántas personas necesitas, para qué, y opcionalmente el detalle) — les llega como una solicitud que pueden aceptar.",
+        selector: "#tarjetaPedirAyuda",
+        vista: "comunicacion"
     },
     {
-        titulo: "Checklist de turno",
-        texto: "El botón 📋 abre un checklist rápido para no olvidar nada al empezar o terminar tu turno.",
-        selector: "#btnChecklistTurno",
-        vista: null
+        titulo: "Solicitudes para mi rama",
+        texto: "Las peticiones de ayuda que otras ramas te han hecho a ti — cada una es una tarjeta que se despliega con el detalle y quién ya se anotó a ayudar.",
+        selector: "#listaSolicitudesRecibidas",
+        vista: "comunicacion"
     },
     {
-        titulo: "¡Listo!",
-        texto: "Ya conoces lo esencial. Puedes volver a ver este tour cuando quieras con el botón 🎓 de arriba.",
+        titulo: "Solicitudes que yo pedí",
+        texto: "El estado de las ayudas que tu rama ha pedido a otras — cuántos se han anotado y si ya se completó.",
+        selector: "#listaSolicitudesEnviadas",
+        vista: "comunicacion"
+    },
+
+    // ===== Pestaña Tareas =====
+    {
+        titulo: "Tareas — crear una nueva",
+        texto: "Exclusivo de líderes: le asignas una tarea a tu propia rama, con título, detalle y opcionalmente la hora en que debe estar lista.",
+        selector: "#tarjetaCrearTarea",
+        vista: "tareas"
+    },
+    {
+        titulo: "Tareas de mi rama",
+        texto: "Cada tarea es una tarjeta que se despliega al tocarla: quién ya participó, las subtareas, y los comentarios. Si tienes una subtarea asignada a tu nombre, la marcas como hecha desde ahí mismo.",
+        selector: "#listaTareas",
+        vista: "tareas"
+    },
+    {
+        titulo: "Escribir una observación",
+        texto: "Exclusivo de líderes: le dejas una nota sobre el desempeño de alguien de tu rama (positiva, neutral o negativa) — esa persona puede responderla y confirmar que la leyó.",
+        selector: "#tarjetaEscribirObservacion",
+        vista: "tareas"
+    },
+    {
+        titulo: "Mis observaciones",
+        texto: "Las observaciones que tu líder te ha escrito a ti — puedes responderlas y marcarlas como leídas.",
+        selector: "#listaObservaciones",
+        vista: "tareas"
+    },
+
+    // ===== Pestaña Mi cronograma =====
+    {
+        titulo: "Mi cumplimiento",
+        texto: "Exclusivo de líderes: un indicador de cuántas subtareas de tu rama se completaron a tiempo versus tarde — para tener una idea rápida de cómo va el equipo.",
+        selector: "#tarjetaMiCumplimiento",
+        vista: "cronograma"
+    },
+    {
+        titulo: "Actividades del evento",
+        texto: "La lista completa del cronograma, con horarios y si el montaje/finalización ya quedaron listos. Al tocar una actividad se abre su detalle con las tareas de tu rama para esa actividad puntual, y (si eres líder) los botones para marcar montaje y finalización.",
+        selector: "#listaActividadesCronograma",
+        vista: "cronograma"
+    },
+
+    // ===== Pestaña Materiales =====
+    {
+        titulo: "Inventario de materiales",
+        texto: "El catálogo completo, filtrable por objetivo y ubicación — qué hay, cuánto, y quién lo tiene actualmente asignado.",
+        selector: "#listaCatalogoMateriales",
+        vista: "materiales"
+    },
+    {
+        titulo: "Mis lotes asignados",
+        texto: "Exclusivo de líderes: los materiales que tu rama ya tiene en su poder. Desde aquí devuelves lo que ya no necesitas, reportando cuánto vuelve en buen estado, dañado o perdido.",
+        selector: "#tarjetaMisLotesMaterial",
+        vista: "materiales"
+    },
+    {
+        titulo: "Solicitar materiales",
+        texto: "Cualquier miembro de una rama puede pedir materiales: marcas lo que necesitas y la cantidad, opcionalmente lo vinculas a una actividad y dices para cuándo lo necesitas. Cuando se entrega, el lote queda a nombre del líder de tu rama, sin importar quién lo pidió.",
+        selector: "#tarjetaSolicitarMaterial",
+        vista: "materiales"
+    },
+    {
+        titulo: "Solicitudes de materiales",
+        texto: "El estado de lo que tu rama ha pedido — pendiente, aprobada o entregada (o rechazada) — con la opción de ver solo las tuyas o las de toda tu rama.",
+        selector: "#tarjetaMisSolicitudesMaterial",
+        vista: "materiales"
+    },
+
+    // ===== Cierre =====
+    {
+        titulo: "¡Listo, ya viste todo el panel!",
+        texto: "Repasaste las 5 pestañas completas, la ficha del participante entera, y todos los botones de la barra superior. Puedes volver a ver este tour cuando quieras con el botón 🎓 de arriba.",
         selector: null
     }
+
 ];
 
 let indiceTourActual = 0;
@@ -537,6 +730,28 @@ function posicionarCuadroTour(target) {
 
 }
 
+// Muchas secciones del panel solo existen mientras hay un participante
+// seleccionado (ficha) o son exclusivas de líder de rama — en vez de que el
+// paso falle o resalte algo invisible, se revisa si el elemento (o algún
+// contenedor suyo) tiene "oculto"; si es así, el paso cae solo al modo
+// centrado, con el mismo texto explicando el concepto de todas formas.
+function elementoTourVisible(selector) {
+
+    if (!selector) return null;
+
+    const elemento = document.querySelector(selector);
+    if (!elemento) return null;
+
+    let nodo = elemento;
+    while (nodo) {
+        if (nodo.classList && nodo.classList.contains("oculto")) return null;
+        nodo = nodo.parentElement;
+    }
+
+    return elemento;
+
+}
+
 function irAPasoTour(indice) {
 
     limpiarPasoTourActual();
@@ -555,7 +770,7 @@ function irAPasoTour(indice) {
     document.getElementById("btnAnteriorTour").classList.toggle("oculto", indice === 0);
     document.getElementById("btnSiguienteTour").textContent = indice === PASOS_TOUR.length - 1 ? "Terminar" : "Siguiente";
 
-    const target = paso.selector ? document.querySelector(paso.selector) : null;
+    const target = elementoTourVisible(paso.selector);
     const fondo = document.getElementById("tourFondo");
 
     if (target) {
