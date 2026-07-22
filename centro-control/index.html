@@ -811,6 +811,25 @@
             <div id="listaUsosClaveExtrema" class="oculto" style="margin-top:10px; font-size:12px;"></div>
         </div>
 
+        <div class="tarjeta" style="margin-bottom:14px;">
+            <h3>Encuesta de satisfacción — habilitar salida</h3>
+            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+                La encuesta del campista solo se puede responder a partir de esta fecha y hora — y es
+                obligatoria para poder registrar la salida final del evento. Déjala para cerca del cierre,
+                así nadie la responde antes de vivir el evento completo.
+            </p>
+            <p class="detalle" id="estadoEncuestaHabilitada" style="margin-bottom:10px;">Cargando...</p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="inputFechaHabilitarEncuesta">Fecha y hora</label>
+                    <input type="datetime-local" id="inputFechaHabilitarEncuesta">
+                </div>
+                <button class="boton pequeno" id="btnHabilitarEncuesta" style="width:auto;">Guardar</button>
+                <button class="boton pequeno secundario" id="btnDeshabilitarEncuesta" style="width:auto;">Deshabilitar</button>
+            </div>
+            <div class="mensaje" id="mensajeEncuestaHabilitada"></div>
+        </div>
+
         </div>
 
         <div data-grupo-admin="importacion" class="oculto">
@@ -1212,6 +1231,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=41" defer></script>
+<script src="scripts/dashboard.js?v=42" defer></script>
 </body>
 </html>

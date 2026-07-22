@@ -535,6 +535,29 @@
 
   }
 
+  // Dibuja un QR simple en un canvas propio — mismo generador que ya usa la
+  // insignia (qrcode.min.js), pero aparte porque este QR es chico y solo, no
+  // horneado dentro de la insignia grande.
+  function dibujarQrSalida(elementoCanvas, texto) {
+    var ctx = elementoCanvas.getContext("2d");
+    var qr = qrcode(0, "M");
+    qr.addData(texto);
+    qr.make();
+    var modulos = qr.getModuleCount();
+    var lado = elementoCanvas.width;
+    var celda = lado / modulos;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, lado, lado);
+    ctx.fillStyle = "#1A1A1E";
+    for (var fila = 0; fila < modulos; fila++) {
+      for (var col = 0; col < modulos; col++) {
+        if (qr.isDark(fila, col)) {
+          ctx.fillRect(col * celda, fila * celda, celda, celda);
+        }
+      }
+    }
+  }
+
   async function cargarEncuesta() {
 
     if (encuestaCargada) return;
@@ -547,23 +570,53 @@
       var resultadoPreguntas = await peticion("/api/encuestas/campista/preguntas");
       var resultadoMiRespuesta = await peticion("/api/encuestas/campista/mi-respuesta");
       var preguntas = resultadoPreguntas.preguntas;
+      var habilitadaEn = resultadoPreguntas.habilitadaEn;
       var yaRespondida = resultadoMiRespuesta.respuesta;
+
+      var fechaHabilitacion = habilitadaEn ? new Date(habilitadaEn) : null;
+      var estaHabilitada = fechaHabilitacion && new Date() >= fechaHabilitacion;
+
+      if (!estaHabilitada) {
+        contenedor.innerHTML = '<div class="cf-dato-curioso"><strong>⏳ Todavía no está disponible</strong><p>' +
+          (fechaHabilitacion
+            ? "Se habilita el " + fechaHabilitacion.toLocaleString("es-CO") + ". Es obligatoria para poder registrar tu salida final del evento — no te vayas sin responderla."
+            : "El equipo organizador todavía no la habilita. Es obligatoria para poder registrar tu salida final del evento.") +
+          "</p></div>";
+        encuestaCargada = false;
+        return;
+      }
 
       respuestasEncuestaCampista = yaRespondida ? Object.assign({}, yaRespondida.respuestas) : {};
 
       var html = "";
-      if (yaRespondida) {
-        html += '<div class="cf-dato-curioso" style="margin-bottom:16px;"><strong>✅ Ya respondiste esta encuesta</strong><p>Puedes actualizar tus respuestas y volver a enviarla cuantas veces quieras.</p></div>';
+
+      if (yaRespondida && yaRespondida.codigoSalida) {
+        html += '<div class="cf-panel" style="text-align:center; margin-bottom:16px;">' +
+          '<strong>✅ Ya respondiste la encuesta</strong>' +
+          '<p style="font-size:12.5px; margin:6px 0 12px;">' +
+          (yaRespondida.codigoSalidaUsado
+            ? "Este código ya se usó para registrar tu salida del evento."
+            : "Muéstrale este código al staff de logística para registrar tu salida del evento:") +
+          '</p>' +
+          '<canvas id="cf-canvas-salida" width="220" height="220" style="margin:0 auto; display:block; border-radius:12px;"></canvas>' +
+          '<p style="font-family:monospace; font-size:15px; font-weight:700; margin-top:10px; letter-spacing:1px;">' + yaRespondida.codigoSalida + '</p>' +
+          '</div>';
+      } else if (yaRespondida) {
+        html += '<div class="cf-dato-curioso" style="margin-bottom:16px;"><strong>Puedes actualizar tus respuestas</strong><p>Ya respondiste antes — si envías de nuevo, se actualiza tu respuesta.</p></div>';
       }
 
       preguntas.forEach(function (pregunta) {
         html += renderizarPreguntaEncuesta(pregunta, respuestasEncuestaCampista[pregunta.codigo]);
       });
 
-      html += '<button type="button" class="cf-btn cf-primary" id="cf-btn-enviar-encuesta" style="width:100%; justify-content:center; margin-top:8px;">Enviar encuesta</button>';
+      html += '<button type="button" class="cf-btn cf-primary" id="cf-btn-enviar-encuesta" style="width:100%; justify-content:center; margin-top:8px;">' + (yaRespondida ? "Actualizar respuestas" : "Enviar encuesta") + '</button>';
       html += '<div class="cf-estado-campista" id="cf-estado-encuesta"></div>';
 
       contenedor.innerHTML = html;
+
+      if (yaRespondida && yaRespondida.codigoSalida) {
+        dibujarQrSalida(document.getElementById("cf-canvas-salida"), yaRespondida.codigoSalida);
+      }
 
       preguntas.forEach(wirePreguntaEncuesta);
 
@@ -577,8 +630,10 @@
             method: "POST",
             body: JSON.stringify({ respuestas: respuestasEncuestaCampista })
           });
-          mostrarEstado(estado, "ok", "¡Gracias por responder la encuesta! 💜");
           desbloquearLogro("encuesta_respondida");
+          // Se recarga para mostrar (o actualizar) el QR del código de salida.
+          encuestaCargada = false;
+          await cargarEncuesta();
         } catch (error) {
           mostrarEstado(estado, "fallo", error.message);
         }

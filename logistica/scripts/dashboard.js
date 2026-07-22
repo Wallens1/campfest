@@ -1021,6 +1021,122 @@ btnEscanearQR.addEventListener("click", abrirEscanerQR);
 btnCerrarEscanerQR.addEventListener("click", cerrarEscanerQR);
 
 // ==========================
+// Escaneo del código de salida — se genera cuando el campista termina la
+// encuesta de satisfacción (obligatoria antes de poder irse). A diferencia
+// del escáner de ingreso, este no busca ni abre una ficha: confirma la
+// salida directamente con un solo escaneo, pensado para una fila de gente
+// saliendo al mismo tiempo. Mismo mecanismo de cámara + jsQR que el de
+// arriba, duplicado a propósito para no arriesgar el escáner de ingreso
+// que ya funciona.
+// ==========================
+
+const overlayEscanerSalida = document.getElementById("overlayEscanerSalida");
+const videoEscanerSalida = document.getElementById("videoEscanerSalida");
+const btnEscanearSalida = document.getElementById("btnEscanearSalida");
+const btnCerrarEscanerSalida = document.getElementById("btnCerrarEscanerSalida");
+const mensajeEscanerSalida = document.getElementById("mensajeEscanerSalida");
+
+const canvasEscanerSalida = document.createElement("canvas");
+const ctxEscanerSalida = canvasEscanerSalida.getContext("2d", { willReadFrequently: true });
+
+let streamEscanerSalida = null;
+let escaneandoSalida = false;
+
+async function abrirEscanerSalida() {
+
+    if (!("mediaDevices" in navigator) || !navigator.mediaDevices.getUserMedia) {
+        mostrarMensaje(mensajeEscanerSalida, "Este navegador no permite acceso a la cámara.", "fallo");
+        return;
+    }
+
+    overlayEscanerSalida.classList.remove("oculto");
+    ocultarMensaje(mensajeEscanerSalida);
+
+    try {
+
+        streamEscanerSalida = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }
+        });
+
+        videoEscanerSalida.srcObject = streamEscanerSalida;
+        await videoEscanerSalida.play();
+
+        escaneandoSalida = true;
+        requestAnimationFrame(cicloEscanerSalida);
+
+    } catch (error) {
+        mostrarMensaje(mensajeEscanerSalida, "No se pudo abrir la cámara: " + error.message, "fallo");
+    }
+
+}
+
+function cerrarEscanerSalida() {
+
+    escaneandoSalida = false;
+    overlayEscanerSalida.classList.add("oculto");
+
+    if (streamEscanerSalida) {
+        streamEscanerSalida.getTracks().forEach((track) => track.stop());
+        streamEscanerSalida = null;
+    }
+
+}
+
+function cicloEscanerSalida() {
+
+    if (!escaneandoSalida) return;
+
+    if (videoEscanerSalida.readyState === videoEscanerSalida.HAVE_ENOUGH_DATA) {
+
+        canvasEscanerSalida.width = videoEscanerSalida.videoWidth;
+        canvasEscanerSalida.height = videoEscanerSalida.videoHeight;
+        ctxEscanerSalida.drawImage(videoEscanerSalida, 0, 0, canvasEscanerSalida.width, canvasEscanerSalida.height);
+
+        const imagen = ctxEscanerSalida.getImageData(0, 0, canvasEscanerSalida.width, canvasEscanerSalida.height);
+        const resultado = jsQR(imagen.data, imagen.width, imagen.height);
+
+        if (resultado && resultado.data) {
+            escaneandoSalida = false; // se pausa mientras se confirma; se reactiva sola abajo
+            confirmarSalidaEscaneada(resultado.data.trim());
+            return;
+        }
+
+    }
+
+    requestAnimationFrame(cicloEscanerSalida);
+
+}
+
+async function confirmarSalidaEscaneada(codigo) {
+
+    try {
+
+        const resultado = await peticionApi("/api/logistica/salida-por-codigo", {
+            method: "POST",
+            body: JSON.stringify({ codigo })
+        });
+
+        mostrarMensaje(mensajeEscanerSalida, `✅ Salida registrada: ${resultado.nombre}`, "ok");
+
+    } catch (error) {
+        mostrarMensaje(mensajeEscanerSalida, error.message, "fallo");
+    }
+
+    // Sigue escaneando al siguiente en la fila sin que el staff tenga que
+    // volver a pulsar nada — la cámara nunca se cierra entre una persona y la siguiente.
+    setTimeout(() => {
+        if (!overlayEscanerSalida.classList.contains("oculto")) {
+            escaneandoSalida = true;
+            requestAnimationFrame(cicloEscanerSalida);
+        }
+    }, 2200);
+
+}
+
+btnEscanearSalida.addEventListener("click", abrirEscanerSalida);
+btnCerrarEscanerSalida.addEventListener("click", cerrarEscanerSalida);
+
+// ==========================
 // Ficha del participante
 // ==========================
 
@@ -1044,7 +1160,8 @@ function renderizarFicha(datos) {
 
     const {
         participante, servicios, entregas, totalServicios, entregasRealizadas, historial: eventos,
-        elegibleSalidaLibre, salidaLibreActiva, infracciones, totalInfracciones, objetosConfiscados
+        elegibleSalidaLibre, salidaLibreActiva, infracciones, totalInfracciones, objetosConfiscados,
+        encuestaCompletada
     } = datos;
 
     fichaNombre.textContent = participante.nombre;
@@ -1071,7 +1188,7 @@ function renderizarFicha(datos) {
         + (participante.tiene_restricciones_alimentarias ? ` — ⚠️ ${participante.restricciones_alimentarias_detalle || "restricción alimentaria"}` : "");
     renderizarAlimentacion(servicios, entregas);
 
-    renderizarSalidaEvento(participante);
+    renderizarSalidaEvento(participante, encuestaCompletada);
 
     renderizarHistorial(eventos);
 
@@ -1400,7 +1517,7 @@ function renderizarSalidaLibre(elegible, salidaActiva) {
 
 // La contraparte del ingreso, al terminar el evento — distinta de "salida
 // libre" (excursión de un día) y de "retirado" (salida anticipada).
-function renderizarSalidaEvento(participante) {
+function renderizarSalidaEvento(participante, encuestaCompletada) {
 
     const bloque = document.getElementById("bloqueSalidaEvento");
 
@@ -1411,6 +1528,11 @@ function renderizarSalidaEvento(participante) {
 
     if (participante.retirado) {
         bloque.innerHTML = `<p class="detalle">Este participante ya está marcado como retirado.</p>`;
+        return;
+    }
+
+    if (!participante.salida_evento_registrada && !encuestaCompletada) {
+        bloque.innerHTML = `<p class="detalle" style="color:var(--coral); font-weight:600;">⚠️ Todavía no completó la encuesta de satisfacción — es obligatoria antes de poder registrar su salida. Lo más rápido es escanear su código de salida cuando la termine (📤 arriba).</p>`;
         return;
     }
 

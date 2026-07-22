@@ -396,6 +396,7 @@ function mostrarSubpestanaAdmin(grupo) {
     if (grupo === "baul") cargarBaulGlobal();
     if (grupo === "perdidos") cargarObjetosPerdidosGlobal();
     if (grupo === "dietas") cargarDietasEspeciales();
+    if (grupo === "evento") cargarEstadoEncuestaHabilitada();
     if (grupo === "encuestas") { cargarResumenEncuesta("campista"); cargarResumenEncuesta("staff"); }
 
 }
@@ -976,6 +977,82 @@ document.getElementById("btnDesactivarAlertaExtrema").addEventListener("click", 
         const resultado = await peticionApi("/api/centro-control/alerta-extrema/desactivar", { method: "POST", body: JSON.stringify({ clave }) });
         mostrarMensaje(mensaje, resultado.mensaje, "ok");
         await cargarEstadoEvento();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+// ==========================
+// Fecha/hora de habilitación de la encuesta de satisfacción — la encuesta
+// es obligatoria para que el campista pueda registrar su salida final.
+// ==========================
+
+async function cargarEstadoEncuestaHabilitada() {
+
+    const estado = document.getElementById("estadoEncuestaHabilitada");
+
+    try {
+
+        const { encuestaHabilitadaEn } = await peticionApi("/api/centro-control/encuesta/estado");
+
+        if (encuestaHabilitadaEn) {
+            const fecha = new Date(encuestaHabilitadaEn);
+            const yaHabilitada = fecha <= new Date();
+            estado.innerHTML = yaHabilitada
+                ? `<span class="badge verde">Habilitada desde ${fecha.toLocaleString("es-CO")}</span>`
+                : `<span class="badge neutro">Se habilita el ${fecha.toLocaleString("es-CO")}</span>`;
+
+            // Prellena el campo con la fecha ya configurada, en formato que
+            // acepta <input type="datetime-local"> (sin zona horaria ni segundos).
+            const inputFecha = document.getElementById("inputFechaHabilitarEncuesta");
+            const offsetMin = fecha.getTimezoneOffset();
+            const fechaLocal = new Date(fecha.getTime() - offsetMin * 60000);
+            inputFecha.value = fechaLocal.toISOString().slice(0, 16);
+        } else {
+            estado.innerHTML = `<span class="badge rojo">Todavía no está habilitada</span>`;
+        }
+
+    } catch (error) {
+        estado.textContent = "No se pudo cargar el estado de la encuesta.";
+    }
+
+}
+
+document.getElementById("btnHabilitarEncuesta").addEventListener("click", async () => {
+
+    const valor = document.getElementById("inputFechaHabilitarEncuesta").value;
+    const mensaje = document.getElementById("mensajeEncuestaHabilitada");
+
+    if (!valor) {
+        mostrarMensaje(mensaje, "Elige una fecha y hora", "fallo");
+        return;
+    }
+
+    try {
+        const resultado = await peticionApi("/api/centro-control/encuesta/habilitar", {
+            method: "POST",
+            body: JSON.stringify({ fechaHora: new Date(valor).toISOString() })
+        });
+        mostrarMensaje(mensaje, resultado.mensaje, "ok");
+        await cargarEstadoEncuestaHabilitada();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+document.getElementById("btnDeshabilitarEncuesta").addEventListener("click", async () => {
+
+    if (!confirm("¿Deshabilitar la encuesta? Nadie podrá responderla hasta que se configure una nueva fecha.")) return;
+
+    const mensaje = document.getElementById("mensajeEncuestaHabilitada");
+
+    try {
+        const resultado = await peticionApi("/api/centro-control/encuesta/deshabilitar", { method: "POST" });
+        mostrarMensaje(mensaje, resultado.mensaje, "ok");
+        document.getElementById("inputFechaHabilitarEncuesta").value = "";
+        await cargarEstadoEncuestaHabilitada();
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
     }

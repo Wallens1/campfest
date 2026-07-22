@@ -140,7 +140,8 @@
             <button type="submit" class="boton pequeno">Buscar</button>
         </form>
 
-        <button type="button" class="boton pequeno secundario" id="btnEscanearQR" style="width:auto; margin-bottom:14px;">📷 Escanear QR de la insignia</button>
+        <button type="button" class="boton pequeno secundario" id="btnEscanearQR" style="width:auto; margin-bottom:8px;">📷 Escanear QR de la insignia</button>
+        <button type="button" class="boton pequeno secundario" id="btnEscanearSalida" style="width:auto; margin-bottom:14px;">📤 Escanear código de salida</button>
 
         <div class="mensaje" id="mensajeBusqueda"></div>
 
@@ -502,8 +503,18 @@
     </div>
 </div>
 
+<!-- ===== ESCÁNER DEL CÓDIGO DE SALIDA (encuesta completada) ===== -->
+<div class="overlay-escaner oculto" id="overlayEscanerSalida">
+    <div class="caja-escaner">
+        <video id="videoEscanerSalida" playsinline autoplay muted></video>
+        <p class="ayuda-escaner">Apunta la cámara al código de salida que le aparece al campista tras completar la encuesta</p>
+        <div class="mensaje" id="mensajeEscanerSalida"></div>
+        <button type="button" class="boton pequeno" id="btnCerrarEscanerSalida" style="width:auto;">Cancelar</button>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../scripts/jsQR.js" defer></script>
-<script src="../scripts/dashboard.js?v=29" defer></script>
+<script src="../scripts/dashboard.js?v=30" defer></script>
 </body>
 </html>
