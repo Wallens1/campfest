@@ -786,6 +786,7 @@
             <button type="button" class="tab-modulo" data-subpestana-admin="baul">Baúl</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="perdidos">Perdidos</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="dietas">Dietas</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="encuestas">Encuestas</button>
         </div>
 
         <div data-grupo-admin="evento">
@@ -1118,6 +1119,24 @@
 
         </div>
 
+        <div data-grupo-admin="encuestas" class="oculto">
+
+        <div class="tarjeta">
+            <h3>Encuesta de campistas</h3>
+            <p class="detalle" style="margin-top:-6px;">Resumen agregado — promedios, distribuciones y comentarios abiertos. El detalle crudo de cada respuesta está en el Excel.</p>
+            <button class="boton pequeno terciario" id="btnExportarEncuestaCampistaExcel" style="width:auto; margin-bottom:10px;">Exportar Excel</button>
+            <div id="resumenEncuestaCampista"></div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Encuesta de staff</h3>
+            <p class="detalle" style="margin-top:-6px;">Misma lógica, para la encuesta que responde el equipo de Centro de Control y Panel Logístico.</p>
+            <button class="boton pequeno terciario" id="btnExportarEncuestaStaffExcel" style="width:auto; margin-bottom:10px;">Exportar Excel</button>
+            <div id="resumenEncuestaStaff"></div>
+        </div>
+
+        </div>
+
     </section>
 
 </div>
@@ -1193,6 +1212,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=40" defer></script>
+<script src="scripts/dashboard.js?v=41" defer></script>
 </body>
 </html>

@@ -396,6 +396,7 @@ function mostrarSubpestanaAdmin(grupo) {
     if (grupo === "baul") cargarBaulGlobal();
     if (grupo === "perdidos") cargarObjetosPerdidosGlobal();
     if (grupo === "dietas") cargarDietasEspeciales();
+    if (grupo === "encuestas") { cargarResumenEncuesta("campista"); cargarResumenEncuesta("staff"); }
 
 }
 
@@ -581,6 +582,74 @@ async function cargarDietasEspeciales() {
 
 document.getElementById("btnExportarDietasEspecialesExcel").addEventListener("click", () => {
     descargarArchivo("/api/centro-control/participantes/dietas-especiales/exportar/excel", "dietas-especiales-campfest.xlsx");
+});
+
+//==========================
+// Resumen agregado de las encuestas de satisfacción (campista y staff) —
+// mismo endpoint de resumen para ambos tipos, solo cambia la ruta.
+//==========================
+
+function renderizarResumenEncuesta(resumen) {
+
+    if (resumen.total === 0) {
+        return `<p class="detalle">Sin respuestas todavía.</p>`;
+    }
+
+    return `
+        <p class="detalle" style="margin-bottom:10px;"><strong>${resumen.total}</strong> respuesta(s).</p>
+        ${resumen.preguntas.map((p) => {
+
+            if (p.tipo === "rating" || p.tipo === "nps") {
+                const maximo = p.tipo === "rating" ? 5 : 10;
+                return `
+                    <div class="dato" style="margin-bottom:10px;">
+                        <span class="etiqueta">${p.texto}</span>
+                        <span class="valor">${p.promedio !== null ? `${p.promedio} / ${maximo}` : "—"} <span class="detalle">(${p.respuestas} respuesta(s))</span></span>
+                    </div>
+                `;
+            }
+
+            if (p.tipo === "opcion") {
+                return `
+                    <div class="dato" style="margin-bottom:10px;">
+                        <span class="etiqueta">${p.texto}</span>
+                        <span class="valor">${Object.entries(p.conteo).map(([op, n]) => `${op}: ${n}`).join(" · ")}</span>
+                    </div>
+                `;
+            }
+
+            // texto libre
+            return `
+                <div class="dato" style="margin-bottom:10px;">
+                    <span class="etiqueta">${p.texto} (${p.comentarios.length})</span>
+                    ${p.comentarios.length > 0 ? `<ul style="margin:6px 0 0; padding-left:18px;">${p.comentarios.map((c) => `<li class="detalle">${c}</li>`).join("")}</ul>` : `<span class="valor">—</span>`}
+                </div>
+            `;
+
+        }).join("")}
+    `;
+
+}
+
+async function cargarResumenEncuesta(tipo) {
+
+    const contenedor = document.getElementById(tipo === "campista" ? "resumenEncuestaCampista" : "resumenEncuestaStaff");
+
+    try {
+        const { resumen } = await peticionApi(`/api/encuestas/${tipo}/resumen`);
+        contenedor.innerHTML = renderizarResumenEncuesta(resumen);
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">No se pudo cargar el resumen.</p>`;
+    }
+
+}
+
+document.getElementById("btnExportarEncuestaCampistaExcel").addEventListener("click", () => {
+    descargarArchivo("/api/encuestas/campista/exportar/excel", "encuesta-campistas-campfest.xlsx");
+});
+
+document.getElementById("btnExportarEncuestaStaffExcel").addEventListener("click", () => {
+    descargarArchivo("/api/encuestas/staff/exportar/excel", "encuesta-staff-campfest.xlsx");
 });
 
 document.querySelectorAll("[data-subpestana-admin]").forEach((tab) => {

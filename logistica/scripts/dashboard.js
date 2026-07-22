@@ -564,6 +564,134 @@ document.getElementById("btnCerrarChecklist").addEventListener("click", () => {
 });
 
 // ==========================
+// Encuesta de satisfacción (staff) — mismo motor de preguntas dinámicas que
+// el portal del campista, pero con las clases de esta app (.boton en vez de
+// .cf-btn). El estado "seleccionado" se marca con estilos inline, sin tocar
+// la hoja de estilos compartida.
+// ==========================
+
+let respuestasEncuestaStaff = {};
+
+function marcarBotonEncuestaSeleccionado(boton) {
+    const grupo = boton.parentElement;
+    grupo.querySelectorAll(".boton-encuesta").forEach((b) => {
+        b.style.background = "";
+        b.style.color = "";
+    });
+    boton.style.background = "var(--morado)";
+    boton.style.color = "#fff";
+}
+
+function renderizarPreguntaEncuestaStaff(pregunta, valorActual) {
+
+    let opciones = "";
+
+    if (pregunta.tipo === "rating" || pregunta.tipo === "nps") {
+        const max = pregunta.tipo === "rating" ? 5 : 10;
+        const min = pregunta.tipo === "rating" ? 1 : 0;
+        for (let i = min; i <= max; i++) {
+            const activo = valorActual === i;
+            opciones += `<button type="button" class="boton pequeno secundario boton-encuesta" data-valor="${i}" style="width:auto; padding:6px 12px;${activo ? " background:var(--morado); color:#fff;" : ""}">${i}</button>`;
+        }
+    } else if (pregunta.tipo === "opcion") {
+        pregunta.opciones.forEach((op) => {
+            const activo = valorActual === op;
+            opciones += `<button type="button" class="boton pequeno secundario boton-encuesta" data-valor="${op}" style="width:auto; padding:6px 12px;${activo ? " background:var(--morado); color:#fff;" : ""}">${op}</button>`;
+        });
+    }
+
+    if (pregunta.tipo === "texto") {
+        return `
+            <div class="dato" data-pregunta-staff="${pregunta.codigo}" style="margin-bottom:14px;">
+                <span class="etiqueta">${pregunta.texto}</span>
+                <textarea class="input-texto-encuesta-staff" rows="3" style="width:100%; margin-top:6px; padding:8px; border:2px solid #ddd; border-radius:8px; font-family:inherit;">${valorActual || ""}</textarea>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="dato" data-pregunta-staff="${pregunta.codigo}" style="margin-bottom:14px;">
+            <span class="etiqueta">${pregunta.texto}</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">${opciones}</div>
+        </div>
+    `;
+
+}
+
+async function cargarEncuestaStaff() {
+
+    const contenedor = document.getElementById("contenedorEncuestaStaff");
+
+    try {
+
+        const [{ preguntas }, { respuesta: yaRespondida }] = await Promise.all([
+            peticionApi("/api/encuestas/staff/preguntas"),
+            peticionApi("/api/encuestas/staff/mi-respuesta")
+        ]);
+
+        respuestasEncuestaStaff = yaRespondida ? { ...yaRespondida.respuestas } : {};
+
+        const aviso = yaRespondida
+            ? `<div class="mensaje mostrar ok" style="margin-bottom:12px;">Ya respondiste esta encuesta — puedes actualizarla y reenviarla.</div>`
+            : "";
+
+        contenedor.innerHTML = aviso
+            + preguntas.map((p) => renderizarPreguntaEncuestaStaff(p, respuestasEncuestaStaff[p.codigo])).join("")
+            + `<button class="boton pequeno" id="btnEnviarEncuestaStaff" style="margin-top:6px;">Enviar encuesta</button>
+               <div class="mensaje" id="mensajeEncuestaStaff"></div>`;
+
+        preguntas.forEach((pregunta) => {
+
+            const bloque = contenedor.querySelector(`[data-pregunta-staff="${pregunta.codigo}"]`);
+
+            if (pregunta.tipo === "texto") {
+                bloque.querySelector(".input-texto-encuesta-staff").addEventListener("input", (evento) => {
+                    respuestasEncuestaStaff[pregunta.codigo] = evento.target.value;
+                });
+                return;
+            }
+
+            bloque.querySelectorAll(".boton-encuesta").forEach((boton) => {
+                boton.addEventListener("click", () => {
+                    marcarBotonEncuestaSeleccionado(boton);
+                    respuestasEncuestaStaff[pregunta.codigo] = pregunta.tipo === "opcion" ? boton.dataset.valor : Number(boton.dataset.valor);
+                });
+            });
+
+        });
+
+        document.getElementById("btnEnviarEncuestaStaff").addEventListener("click", async () => {
+
+            const mensaje = document.getElementById("mensajeEncuestaStaff");
+
+            try {
+                await peticionApi("/api/encuestas/staff", {
+                    method: "POST",
+                    body: JSON.stringify({ respuestas: respuestasEncuestaStaff })
+                });
+                mostrarMensaje(mensaje, "¡Gracias por responder la encuesta!", "ok");
+            } catch (error) {
+                mostrarMensaje(mensaje, error.message, "fallo");
+            }
+
+        });
+
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">No se pudo cargar la encuesta.</p>`;
+    }
+
+}
+
+document.getElementById("btnEncuestaStaff").addEventListener("click", () => {
+    document.getElementById("overlayEncuestaStaff").classList.remove("oculto");
+    cargarEncuestaStaff();
+});
+
+document.getElementById("btnCerrarEncuestaStaff").addEventListener("click", () => {
+    document.getElementById("overlayEncuestaStaff").classList.add("oculto");
+});
+
+// ==========================
 // Navegación entre pestañas
 // ==========================
 

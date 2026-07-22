@@ -43,6 +43,7 @@
             <span class="usuario-actual" id="usuarioActual"></span>
             <button class="boton pequeno secundario" id="btnVerTour" style="width:auto; padding:10px 14px;" title="Tour guiado">🎓</button>
             <button class="boton pequeno secundario" id="btnChecklistTurno" style="width:auto; padding:10px 14px;" title="Checklist de turno">📋</button>
+            <button class="boton pequeno secundario" id="btnEncuestaStaff" style="width:auto; padding:10px 14px;" title="Encuesta de satisfacción">📝</button>
             <button class="boton pequeno secundario" id="btnAyudaRoles" style="width:auto; padding:10px 14px;">?</button>
             <button class="boton pequeno" id="btnCerrarSesion">Cerrar sesión</button>
         </div>
@@ -96,6 +97,18 @@
 
             <h4 style="font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--morado); margin:16px 0 6px;">Antes de irte</h4>
             <div id="checklistCierre"></div>
+        </div>
+    </div>
+
+    <!-- ===== ENCUESTA DE SATISFACCIÓN (STAFF) ===== -->
+    <div class="oculto overlay-escaner" id="overlayEncuestaStaff">
+        <div class="caja-escaner" style="text-align:left; max-width:480px; max-height:85vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <h3 style="margin:0;">Encuesta de satisfacción</h3>
+                <button class="boton pequeno secundario" id="btnCerrarEncuestaStaff" style="width:auto;">Cerrar</button>
+            </div>
+            <p class="detalle" style="margin-top:-4px; margin-bottom:14px;">Tu opinión ayuda a mejorar la próxima edición y a mostrarle a quienes apoyan este evento cómo funcionó el equipo. Puedes reenviarla para actualizar tus respuestas.</p>
+            <div id="contenedorEncuestaStaff"><p class="detalle">Cargando...</p></div>
         </div>
     </div>
 
@@ -488,6 +501,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../scripts/jsQR.js" defer></script>
-<script src="../scripts/dashboard.js?v=27" defer></script>
+<script src="../scripts/dashboard.js?v=28" defer></script>
 </body>
 </html>
