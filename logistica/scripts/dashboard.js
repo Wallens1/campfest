@@ -1166,8 +1166,16 @@ function renderizarListaTareas(contenedor, tareas, contenedorKey) {
         return;
     }
 
-    contenedor.innerHTML = tareas.map((t) => `
-        <div class="tarjeta-expandible" data-tarea="${t.id}">
+    const idAbierto = detallesTareaAbiertos[contenedorKey];
+
+    // La tarjeta que ya estaba abierta se dibuja abierta desde el primer
+    // instante (con un placeholder), no colapsada — si no, cada refresco del
+    // polling la mostraba cerrada durante el viaje de ida y vuelta a la API
+    // (más largo con mala conexión), como si el usuario la hubiera cerrado.
+    contenedor.innerHTML = tareas.map((t) => {
+        const abierta = t.id === idAbierto;
+        return `
+        <div class="tarjeta-expandible ${abierta ? "abierta" : ""}" data-tarea="${t.id}">
             <div class="fila-encabezado">
                 <span class="codigo">${t.titulo}</span>
                 <span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span>
@@ -1178,9 +1186,10 @@ function renderizarListaTareas(contenedor, tareas, contenedorKey) {
                 ${t.hora_programada ? ` · Listo antes de: ${formatearHora(t.hora_programada)}` : ""}
                 ${t.cantidad_personas ? ` · ${t.checks_count || 0}/${t.cantidad_personas} aceptaron` : ""}
             </div>
-            <div class="oculto" id="detalleTarea-${contenedorKey}-${t.id}"></div>
+            <div class="${abierta ? "" : "oculto"}" id="detalleTarea-${contenedorKey}-${t.id}">${abierta ? '<p class="detalle">Actualizando…</p>' : ""}</div>
         </div>
-    `).join("");
+    `;
+    }).join("");
 
     contenedor.querySelectorAll("[data-tarea]").forEach((card) => {
         card.addEventListener("click", (evento) => {
@@ -1194,16 +1203,17 @@ function renderizarListaTareas(contenedor, tareas, contenedorKey) {
     });
 
     // El polling reconstruye esta lista cada pocos segundos; si había un
-    // detalle abierto EN ESTE CONTENEDOR, se vuelve a abrir con datos frescos
-    // en vez de quedar colapsado como si el usuario nunca hubiera hecho clic.
-    const idAbierto = detallesTareaAbiertos[contenedorKey];
+    // detalle abierto EN ESTE CONTENEDOR, se refrescan sus datos en silencio
+    // (ya se dibujó abierto arriba, así que esto solo reemplaza el
+    // placeholder — no hay alert si falla, para no interrumpir cada 7s por
+    // una conexión inestable).
     if (idAbierto && tareas.some((t) => t.id === idAbierto)) {
-        abrirDetalleTarea(idAbierto, true, contenedorKey);
+        abrirDetalleTarea(idAbierto, true, contenedorKey, true);
     }
 
 }
 
-async function abrirDetalleTarea(id, forzar, contenedorKey) {
+async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
 
     const contenedor = document.getElementById(`detalleTarea-${contenedorKey}-${id}`);
 
@@ -1415,7 +1425,8 @@ async function abrirDetalleTarea(id, forzar, contenedorKey) {
         });
 
     } catch (error) {
-        alert(error.message);
+        if (silencioso) console.error(error);
+        else alert(error.message);
     }
 
 }
