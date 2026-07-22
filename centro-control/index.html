@@ -1062,6 +1062,16 @@
             <button class="boton pequeno terciario" id="btnExportarTodo" style="width:auto;">Exportar todo el evento</button>
         </div>
 
+        <div class="tarjeta">
+            <h3>Otras exportaciones</h3>
+            <p class="detalle" style="margin-top:-6px;">Excel de módulos que no tienen su propio botón de export en su pestaña.</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="boton pequeno terciario" id="btnExportarInfraccionesExcel" style="width:auto;">Infracciones (Excel)</button>
+                <button class="boton pequeno terciario" id="btnExportarTareasExcel" style="width:auto;">Tareas y solicitudes (Excel)</button>
+                <button class="boton pequeno terciario" id="btnExportarObservacionesExcel" style="width:auto;">Observaciones (Excel)</button>
+            </div>
+        </div>
+
         </div>
 
         <div data-grupo-admin="baul" class="oculto">
@@ -1069,6 +1079,7 @@
         <div class="tarjeta">
             <h3>Baúl de objetos confiscados</h3>
             <p class="detalle" style="margin-top:-6px;">Todo lo confiscado en la requisa de ingreso, de todos los participantes — para auditar y devolver al final del evento.</p>
+            <button class="boton pequeno terciario" id="btnExportarBaulExcel" style="width:auto; margin-bottom:10px;">Exportar Excel</button>
             <div id="listaBaulGlobal"></div>
         </div>
 
@@ -1149,6 +1160,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=35" defer></script>
+<script src="scripts/dashboard.js?v=36" defer></script>
 </body>
 </html>

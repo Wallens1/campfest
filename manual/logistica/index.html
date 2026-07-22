@@ -361,6 +361,7 @@ footer.manual-footer {
 
     <div class="nav-role logistica"><span class="dot"></span>Logística</div>
     <a href="#log-registro">Registro</a>
+    <a href="#log-infracciones">Infracciones y requisa</a>
     <a href="#log-comunicacion">Comunicación</a>
     <a href="#log-tareas">Tareas</a>
     <a href="#log-cronograma">Mi cronograma</a>
@@ -725,7 +726,10 @@ footer.manual-footer {
   </ol>
 
   <h4 class="sub">Respaldo</h4>
-  <p>El botón <span class="ui">Exportar todo el evento</span> descarga un solo Excel con participantes, incidentes, materiales y actividades — pensado para archivo, no reemplaza los exports específicos de cada módulo.</p>
+  <p>El botón <span class="ui">Exportar todo el evento</span> descarga un solo Excel con participantes, incidentes, materiales y actividades — pensado para archivo, no reemplaza los exports específicos de cada módulo. Además de esta descarga manual, el servidor sube automáticamente el mismo respaldo a almacenamiento en la nube una vez al día.</p>
+
+  <h4 class="sub">Baúl</h4>
+  <p>El listado global de <strong>todos</strong> los objetos confiscados en la requisa de ingreso (ver <a href="#log-infracciones">Infracciones y requisa</a>), de todos los participantes del evento — participante, objeto, cantidad, fecha, quién lo confiscó y su estado. Pulsa <span class="ui">Marcar devuelto</span> cuando se le entregue de vuelta al participante, por ejemplo al final del evento.</p>
 </section>
 
 <!-- ======================================================================= -->
@@ -765,8 +769,32 @@ footer.manual-footer {
   <figure class="screen wide"><img src="capturas/log_01_ficha_participante.png" alt="Ficha completa de un participante, con ingreso, carpa, alimentación e historial"><figcaption>Ficha completa: badges de estado, todos los datos personales, ingreso, salida libre, asignación de carpa, alimentación e historial.</figcaption></figure>
   <p>Arriba de todo, cuatro etiquetas rápidas: si ya <strong>ingresó</strong>, cuántas <strong>entregas</strong> de alimentación lleva, en qué <strong>carpa</strong> está y si es <strong>líder de carpa</strong>. Debajo, toda su información: documento, edad, municipio, contactos de emergencia, RH, EPS, condición médica, restricciones alimentarias y alergias (resaltadas si aplican), carpa propia, código, y más.</p>
 
-  <h4 class="sub">Registrar el ingreso</h4>
-  <p>Si el participante todavía no ha llegado, verás el botón <span class="ui">Registrar ingreso</span>. Pulsa una sola vez cuando esa persona efectivamente llegue al camp — no se puede registrar dos veces (el sistema avisa si ya estaba registrado).</p>
+  <h4 class="sub">Registrar el ingreso (con requisa policial)</h4>
+  <p>Si el participante todavía no ha llegado, verás el botón <span class="ui">Registrar ingreso</span>. Al pulsarlo se abre un pequeño formulario de requisa antes de confirmar — es el paso obligatorio para dejar constancia de lo que se encontró en la revisión policial de la entrada:</p>
+  <ol class="steps">
+    <li>Si no se encontró nada, pulsa directo <span class="ui">Confirmar ingreso</span>.</li>
+    <li>Si se le confiscó algo, pulsa <span class="ui">+ Agregar objeto</span> por cada elemento: escribe qué es, la cantidad y, si hace falta, una descripción. Puedes agregar varias filas y quitar cualquiera con <span class="ui">Quitar</span>.</li>
+    <li>Pulsa <span class="ui">Confirmar ingreso</span> — el ingreso queda registrado y cada objeto declarado queda guardado en el "baúl" con tu nombre y la hora, para que se pueda devolver más adelante.</li>
+  </ol>
+  <p>No se puede registrar el ingreso dos veces (el sistema avisa si ya estaba registrado); si ya ingresó, en su lugar verás la hora de ingreso y, debajo, los objetos que se le hayan confiscado con su estado ("En baúl" o "Devuelto").</p>
+
+  <h3 class="feature" id="log-infracciones"><span class="tag logistica">Pestaña</span>Infracciones y requisa</h3>
+  <p>Dentro de la misma ficha de Registro, debajo de Ingreso, está el bloque de <strong>Infracciones</strong> — el registro de faltas al reglamento de convivencia de ese participante.</p>
+
+  <h4 class="sub">Registrar una infracción</h4>
+  <ol class="steps">
+    <li>Escribe la descripción de lo ocurrido en el campo de texto.</li>
+    <li>Pulsa <span class="ui">Registrar infracción</span>.</li>
+  </ol>
+  <p>La lista muestra todas las infracciones anteriores de ese participante, con la fecha y quién la registró.</p>
+
+  <div class="note warn">
+    <strong class="label">A la 3ra infracción se debe firmar la expulsión mutua</strong>
+    Al llegar a 3 infracciones aparece un aviso en rojo con dos botones: <span class="ui">Descargar acta (PDF)</span> — genera el acta de expulsión mutua con las 3 infracciones listadas, para imprimir y firmar en papel (representante del campamento, participante y acudiente) — y <span class="ui">Confirmar expulsión firmada</span>, visible solo para administrador y Centro de Control, que se pulsa una vez el acta ya esté firmada: deja al participante marcado como retirado y libera su carpa si tenía una asignada. Esta acción no se puede deshacer.
+  </div>
+
+  <h4 class="sub">El "baúl" de objetos confiscados</h4>
+  <p>Todo lo que se confisca en la requisa de ingreso (ver arriba) queda en un registro permanente por participante, y también en un listado global que solo ve Centro de Control en <a href="#admin-administracion">Administración → Baúl</a>, para poder auditar y devolver todo al final del evento.</p>
 
   <h4 class="sub">Asignar una carpa</h4>
   <ol class="steps">

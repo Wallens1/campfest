@@ -1396,7 +1396,21 @@ async function cargarParticipantes() {
 
     try {
 
-        const { participantes } = await peticionApi("/api/centro-control/participantes/resumen");
+        // El backend pagina de a 500 (con total real) — si el evento pasa de
+        // 500 participantes, antes el resto desaparecía en silencio; ahora
+        // se piden todas las páginas necesarias hasta traerlos todos.
+        const PAGINA = 500;
+        let participantes = [];
+        let offset = 0;
+        let total = Infinity;
+
+        while (offset < total) {
+            const respuesta = await peticionApi(`/api/centro-control/participantes/resumen?limit=${PAGINA}&offset=${offset}`);
+            participantes = participantes.concat(respuesta.participantes);
+            total = respuesta.total;
+            offset += PAGINA;
+        }
+
         ultimosParticipantes = participantes;
         renderizarTablaParticipantes(participantes);
 
@@ -3717,6 +3731,22 @@ async function resolverSolicitudMaterial(id, accion, motivo) {
 
 document.getElementById("btnExportarTodo").addEventListener("click", () => {
     descargarArchivo("/api/centro-control/exportar/todo", "campfest-respaldo-completo.xlsx");
+});
+
+document.getElementById("btnExportarInfraccionesExcel").addEventListener("click", () => {
+    descargarArchivo("/api/infracciones/exportar/excel", "infracciones-campfest.xlsx");
+});
+
+document.getElementById("btnExportarTareasExcel").addEventListener("click", () => {
+    descargarArchivo("/api/tareas/exportar/excel", "tareas-campfest.xlsx");
+});
+
+document.getElementById("btnExportarObservacionesExcel").addEventListener("click", () => {
+    descargarArchivo("/api/observaciones/exportar/excel", "observaciones-campfest.xlsx");
+});
+
+document.getElementById("btnExportarBaulExcel").addEventListener("click", () => {
+    descargarArchivo("/api/infracciones/objetos-confiscados/exportar/excel", "baul-objetos-confiscados-campfest.xlsx");
 });
 
 document.getElementById("btnExportarInventarioExcel").addEventListener("click", () => {
