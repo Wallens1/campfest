@@ -278,6 +278,8 @@ async function mostrarPanel(sesion) {
 
     actualizarTodoPolling();
     intervaloPolling = setInterval(actualizarTodoPolling, POLLING_MS);
+
+    iniciarOnboardingSiEsNecesario();
 }
 
 function actualizarTodoPolling() {
@@ -404,6 +406,160 @@ document.getElementById("btnAyudaRoles").addEventListener("click", () => {
 
 document.getElementById("btnCerrarAyudaRoles").addEventListener("click", () => {
     document.getElementById("panelAyudaRoles").classList.add("oculto");
+});
+
+// ==========================
+// Tour guiado — se muestra solo una vez por dispositivo/navegador (no hay
+// nada que sincronizar con el servidor, es puramente una ayuda de primer
+// uso), y se puede volver a abrir cuando se quiera con el botón 🎓.
+// ==========================
+
+const PASOS_TOUR = [
+    {
+        titulo: "Bienvenido al Panel Logístico",
+        texto: "Este tour rápido te muestra lo esencial en menos de un minuto. Puedes saltarlo en cualquier momento y volver a verlo después con el botón 🎓 de arriba."
+    },
+    {
+        titulo: "Tus 5 pestañas",
+        texto: "Registro: participantes del evento. Comunicación: reportar incidentes y pedir ayuda entre ramas. Tareas: lo que tu rama debe hacer. Mi cronograma: las actividades del evento. Materiales: catálogo y solicitudes."
+    },
+    {
+        titulo: "Buscar o escanear a un participante",
+        texto: "En Registro, busca por código, documento o nombre — o usa \"📷 Escanear QR de la insignia\" para no escribir nada cuando la llegada es masiva."
+    },
+    {
+        titulo: "Ingreso con requisa",
+        texto: "Al registrar el ingreso se te pide confirmar la requisa policial: si no se encontró nada, solo confirmas; si se confiscó algo, lo agregas antes de confirmar y queda guardado en el \"baúl\"."
+    },
+    {
+        titulo: "Infracciones",
+        texto: "Debajo de Ingreso puedes registrar una infracción. A la 3ra, el sistema te avisa que hay que firmar el acta de expulsión mutua."
+    },
+    {
+        titulo: "¿Dudas sobre tu rol?",
+        texto: "El botón \"?\" te recuerda qué puedes hacer según seas miembro o líder de tu rama. El botón 📋 abre un checklist rápido para el inicio y cierre de tu turno."
+    }
+];
+
+let pasoTourActual = 0;
+
+function mostrarPasoTour() {
+
+    const paso = PASOS_TOUR[pasoTourActual];
+
+    document.getElementById("pasoTourNumero").textContent = `Paso ${pasoTourActual + 1} de ${PASOS_TOUR.length}`;
+    document.getElementById("tourTitulo").textContent = paso.titulo;
+    document.getElementById("tourTexto").textContent = paso.texto;
+
+    document.getElementById("btnAnteriorTour").classList.toggle("oculto", pasoTourActual === 0);
+    document.getElementById("btnSiguienteTour").textContent = pasoTourActual === PASOS_TOUR.length - 1 ? "Terminar" : "Siguiente";
+
+}
+
+function abrirTour() {
+    pasoTourActual = 0;
+    mostrarPasoTour();
+    document.getElementById("overlayTour").classList.remove("oculto");
+}
+
+function cerrarTour() {
+    document.getElementById("overlayTour").classList.add("oculto");
+    localStorage.setItem("cf_onboarding_completado", "true");
+}
+
+function iniciarOnboardingSiEsNecesario() {
+    if (!localStorage.getItem("cf_onboarding_completado")) abrirTour();
+}
+
+document.getElementById("btnVerTour").addEventListener("click", abrirTour);
+document.getElementById("btnSaltarTour").addEventListener("click", cerrarTour);
+
+document.getElementById("btnSiguienteTour").addEventListener("click", () => {
+    if (pasoTourActual === PASOS_TOUR.length - 1) {
+        cerrarTour();
+        return;
+    }
+    pasoTourActual++;
+    mostrarPasoTour();
+});
+
+document.getElementById("btnAnteriorTour").addEventListener("click", () => {
+    if (pasoTourActual === 0) return;
+    pasoTourActual--;
+    mostrarPasoTour();
+});
+
+// ==========================
+// Checklist de apertura/cierre de turno — recordatorio personal guardado en
+// este dispositivo (localStorage), se reinicia cada día; no es un registro
+// del sistema, así que no necesita ningún endpoint nuevo en el backend.
+// ==========================
+
+const CHECKLIST_APERTURA = [
+    "Probé que la cámara abre para escanear el QR de las insignias",
+    "Revisé si hay una alerta extrema o modo evento activo",
+    "Revisé los materiales ya asignados a mi rama (pestaña Materiales)",
+    "Revisé las tareas pendientes de mi rama"
+];
+
+const CHECKLIST_CIERRE = [
+    "No quedan participantes con ingreso a medias por registrar",
+    "Devolví o dejé anotado lo que falta devolver de materiales",
+    "Le avisé al Centro de Control cualquier novedad pendiente",
+    "Revisé que no queden solicitudes de ayuda de mi rama sin responder"
+];
+
+function claveChecklistHoy() {
+    const hoy = new Date().toISOString().slice(0, 10);
+    return `cf_checklist_turno_${hoy}`;
+}
+
+function cargarEstadoChecklist() {
+    try {
+        return JSON.parse(localStorage.getItem(claveChecklistHoy())) || {};
+    } catch (error) {
+        return {};
+    }
+}
+
+function renderizarChecklistTurno() {
+
+    const estado = cargarEstadoChecklist();
+
+    const renderGrupo = (contenedorId, items, prefijo) => {
+        document.getElementById(contenedorId).innerHTML = items.map((texto, indice) => {
+            const clave = `${prefijo}${indice}`;
+            const marcado = !!estado[clave];
+            return `
+                <label style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; font-size:13.5px; cursor:pointer;">
+                    <input type="checkbox" data-checklist="${clave}" ${marcado ? "checked" : ""} style="margin-top:3px;">
+                    <span style="${marcado ? "text-decoration:line-through; color:#999;" : ""}">${texto}</span>
+                </label>
+            `;
+        }).join("");
+    };
+
+    renderGrupo("checklistApertura", CHECKLIST_APERTURA, "apertura-");
+    renderGrupo("checklistCierre", CHECKLIST_CIERRE, "cierre-");
+
+    document.querySelectorAll("#overlayChecklist [data-checklist]").forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+            const estadoActual = cargarEstadoChecklist();
+            estadoActual[checkbox.dataset.checklist] = checkbox.checked;
+            localStorage.setItem(claveChecklistHoy(), JSON.stringify(estadoActual));
+            renderizarChecklistTurno();
+        });
+    });
+
+}
+
+document.getElementById("btnChecklistTurno").addEventListener("click", () => {
+    renderizarChecklistTurno();
+    document.getElementById("overlayChecklist").classList.remove("oculto");
+});
+
+document.getElementById("btnCerrarChecklist").addEventListener("click", () => {
+    document.getElementById("overlayChecklist").classList.add("oculto");
 });
 
 // ==========================

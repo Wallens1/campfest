@@ -41,6 +41,8 @@
         <span class="marca">Camp Fest · Logística</span>
         <div class="barra-superior-acciones">
             <span class="usuario-actual" id="usuarioActual"></span>
+            <button class="boton pequeno secundario" id="btnVerTour" style="width:auto; padding:10px 14px;" title="Tour guiado">🎓</button>
+            <button class="boton pequeno secundario" id="btnChecklistTurno" style="width:auto; padding:10px 14px;" title="Checklist de turno">📋</button>
             <button class="boton pequeno secundario" id="btnAyudaRoles" style="width:auto; padding:10px 14px;">?</button>
             <button class="boton pequeno" id="btnCerrarSesion">Cerrar sesión</button>
         </div>
@@ -61,6 +63,39 @@
                 <p><strong>Logística (líder de una rama):</strong> además crea tareas y pide ayuda a otras ramas, asigna subtareas a su gente, escribe observaciones, solicita materiales al Centro de Control y marca las fases (montaje/finalizada) de las actividades donde participa.</p>
                 <p><strong>Admin/Control:</strong> gestionan todo desde el panel de Centro de Control, no desde este panel de logística.</p>
             </div>
+        </div>
+    </div>
+
+    <!-- ===== TOUR GUIADO (primer ingreso) ===== -->
+    <div class="oculto overlay-escaner" id="overlayTour">
+        <div class="caja-escaner" style="text-align:left; max-width:440px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span id="pasoTourNumero" style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--morado);"></span>
+                <button class="boton pequeno secundario" id="btnSaltarTour" style="width:auto; padding:6px 12px; font-size:11px;">Saltar</button>
+            </div>
+            <h3 id="tourTitulo" style="margin:6px 0 8px;"></h3>
+            <p id="tourTexto" style="font-size:14px; line-height:1.5; margin:0 0 16px;"></p>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="boton pequeno secundario" id="btnAnteriorTour" style="width:auto;">Atrás</button>
+                <button class="boton pequeno" id="btnSiguienteTour" style="width:auto;">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CHECKLIST DE APERTURA/CIERRE DE TURNO ===== -->
+    <div class="oculto overlay-escaner" id="overlayChecklist">
+        <div class="caja-escaner" style="text-align:left; max-width:460px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3 style="margin:0;">Checklist de turno</h3>
+                <button class="boton pequeno secundario" id="btnCerrarChecklist" style="width:auto;">Cerrar</button>
+            </div>
+            <p class="detalle" style="margin-top:-4px; margin-bottom:14px;">Se guarda en este dispositivo y se reinicia cada día — es un recordatorio personal, no queda registrado en el sistema.</p>
+
+            <h4 style="font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--morado); margin-bottom:6px;">Al empezar el turno</h4>
+            <div id="checklistApertura"></div>
+
+            <h4 style="font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--morado); margin:16px 0 6px;">Antes de irte</h4>
+            <div id="checklistCierre"></div>
         </div>
     </div>
 
@@ -436,6 +471,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../scripts/jsQR.js" defer></script>
-<script src="../scripts/dashboard.js?v=24" defer></script>
+<script src="../scripts/dashboard.js?v=25" defer></script>
 </body>
 </html>
