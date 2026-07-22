@@ -859,7 +859,7 @@ function renderizarInfracciones(infracciones, totalInfracciones, participante) {
         alerta.innerHTML = `
             <div class="alerta-chip" style="display:flex; flex-direction:column; gap:8px; align-items:flex-start; cursor:default;">
                 <span>⚠️ Este participante llegó a ${totalInfracciones} infracciones — se debe firmar el acta de expulsión mutua.</span>
-                <div style="display:flex; gap:8px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button class="boton pequeno secundario" id="btnDescargarActaExpulsion" style="width:auto;">Descargar acta (PDF)</button>
                     ${puedeConfirmar ? `<button class="boton pequeno" id="btnConfirmarExpulsion" style="width:auto;">Confirmar expulsión firmada</button>` : ""}
                 </div>

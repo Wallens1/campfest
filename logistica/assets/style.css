@@ -191,6 +191,8 @@ body{
     display:flex;
     justify-content:space-between;
     align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
     margin-bottom:24px;
 }
 
@@ -199,9 +201,20 @@ body{
     font-size:18px;
 }
 
+.barra-superior-acciones{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
 .barra-superior .usuario-actual{
     font-size:13px;
     color:#555;
+    max-width:180px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .buscador{
@@ -275,6 +288,7 @@ body{
 
 .tabs-busqueda{
     display:flex;
+    flex-wrap:wrap;
     gap:8px;
     margin-bottom:14px;
 }
@@ -670,6 +684,41 @@ body{
 
 .carpa-card.llena .ocupacion{ color:var(--coral); font-weight:700; }
 .carpa-card.llena{ border-color:var(--coral); }
+
+/* ===== MÓVIL — usado en campo desde el celular, así que esto no es
+   opcional: menos relleno para aprovechar la pantalla, tabs más
+   compactos, y las tarjetas principales sin el borde de "cómic" tan
+   grueso que en un teléfono resta espacio útil sin aportar nada. ===== */
+
+@media (max-width:600px){
+
+    #pantallaPanel{ padding:16px 12px 70px; }
+
+    .tarjeta, .ficha, .tarjeta-incidente{
+        padding:18px;
+        border-width:2px;
+        box-shadow:5px 5px 0 var(--tinta);
+    }
+
+    .tab-modulo{
+        padding:8px 12px;
+        font-size:12px;
+    }
+
+    .barra-superior .marca{ font-size:15px; }
+
+    .ficha h2{ font-size:17px; }
+
+    .grid-carpas{
+        grid-template-columns:repeat(auto-fill, minmax(90px, 1fr));
+    }
+
+}
+
+@media (max-width:360px){
+    .barra-superior .usuario-actual{ display:none; }
+}
+
 /* ===== BANNER DE CONEXIÓN ===== */
 
 .banner-sin-conexion{
