@@ -3905,6 +3905,45 @@ document.getElementById("btnExportarObservacionesExcel").addEventListener("click
     descargarArchivo("/api/observaciones/exportar/excel", "observaciones-campfest.xlsx");
 });
 
+document.getElementById("btnCargarPendientesSalida").addEventListener("click", async () => {
+
+    const contenedor = document.getElementById("listaPendientesSalida");
+    contenedor.innerHTML = `<p class="detalle">Cargando...</p>`;
+
+    try {
+
+        const { participantes } = await peticionApi("/api/centro-control/participantes/pendientes-salida");
+
+        contenedor.innerHTML = participantes.length === 0 ? `<p class="detalle">Todos los que ingresaron ya tienen registrada su salida.</p>` : `
+            <p class="detalle" style="margin-bottom:8px;"><strong>${participantes.length}</strong> pendiente(s):</p>
+            <div class="tabla-wrap">
+                <table class="tabla-participantes">
+                    <thead>
+                        <tr>
+                            <th>Participante</th>
+                            <th>Carpa</th>
+                            <th>Hora de ingreso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${participantes.map((p) => `
+                            <tr>
+                                <td>${p.nombre} (${p.codigo})</td>
+                                <td>${p.carpa_asignada || "—"}</td>
+                                <td>${formatearFechaHora(p.hora_ingreso)}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">No se pudo cargar la lista.</p>`;
+    }
+
+});
+
 document.getElementById("btnExportarBaulExcel").addEventListener("click", () => {
     descargarArchivo("/api/infracciones/objetos-confiscados/exportar/excel", "baul-objetos-confiscados-campfest.xlsx");
 });

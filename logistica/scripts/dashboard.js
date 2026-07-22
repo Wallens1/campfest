@@ -812,6 +812,8 @@ function renderizarFicha(datos) {
         + (participante.tiene_restricciones_alimentarias ? ` — ⚠️ ${participante.restricciones_alimentarias_detalle || "restricción alimentaria"}` : "");
     renderizarAlimentacion(servicios, entregas);
 
+    renderizarSalidaEvento(participante);
+
     renderizarHistorial(eventos);
 
 }
@@ -1133,6 +1135,58 @@ function renderizarSalidaLibre(elegible, salidaActiva) {
             }
 
         });
+    });
+
+}
+
+// La contraparte del ingreso, al terminar el evento — distinta de "salida
+// libre" (excursión de un día) y de "retirado" (salida anticipada).
+function renderizarSalidaEvento(participante) {
+
+    const bloque = document.getElementById("bloqueSalidaEvento");
+
+    if (!participante.ingreso_registrado) {
+        bloque.innerHTML = `<p class="detalle">Aún no ha registrado el ingreso — no aplica todavía.</p>`;
+        return;
+    }
+
+    if (participante.retirado) {
+        bloque.innerHTML = `<p class="detalle">Este participante ya está marcado como retirado.</p>`;
+        return;
+    }
+
+    if (participante.salida_evento_registrada) {
+        bloque.innerHTML = `
+            <span class="badge verde">Salió del evento a las ${formatearHora(participante.salida_evento_en)}</span>
+            ${participante.salida_evento_con ? `<div class="detalle" style="margin-top:6px;">Se fue con: ${participante.salida_evento_con}</div>` : ""}
+        `;
+        return;
+    }
+
+    bloque.innerHTML = `
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:end;">
+            <input type="text" id="inputConQuienSaleEvento" placeholder="¿Con quién se va? (opcional)" style="flex:1; min-width:160px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+            <button class="boton pequeno" id="btnRegistrarSalidaEvento" style="width:auto;">Registrar salida del evento</button>
+        </div>
+    `;
+
+    document.getElementById("btnRegistrarSalidaEvento").addEventListener("click", async () => {
+
+        if (!confirm("¿Confirmas que este participante se va del evento? Esta acción marca su salida final.")) return;
+
+        const conQuienSeVa = document.getElementById("inputConQuienSaleEvento").value.trim();
+
+        try {
+            await peticionApi(`/api/logistica/participante/${participanteActualId}/salida-evento`, {
+                method: "POST",
+                body: JSON.stringify({ conQuienSeVa })
+            });
+            mostrarMensaje(mensajeFicha, "Salida del evento registrada correctamente", "ok");
+            await seleccionarParticipante(participanteActualId);
+        } catch (error) {
+            mostrarMensaje(mensajeFicha, error.message, "fallo");
+        }
+
     });
 
 }
