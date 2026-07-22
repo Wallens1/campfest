@@ -106,6 +106,16 @@
                 <div id="bloqueIngreso"></div>
             </div>
 
+            <div class="seccion">
+                <h3>Infracciones</h3>
+                <div id="alertaExpulsion" class="oculto" style="margin-bottom:10px;"></div>
+                <div id="listaInfracciones"></div>
+                <form id="formNuevaInfraccion" style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; align-items:end;">
+                    <input type="text" id="inputDescripcionInfraccion" placeholder="Describe la infracción" style="flex:1; min-width:200px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                    <button type="submit" class="boton pequeno secundario" style="width:auto;">Registrar infracción</button>
+                </form>
+            </div>
+
             <div class="seccion oculto" id="seccionSalidaLibre">
                 <h3>Salida libre</h3>
                 <div id="bloqueSalidaLibre"></div>
@@ -424,6 +434,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../scripts/jsQR.js" defer></script>
-<script src="../scripts/dashboard.js?v=21" defer></script>
+<script src="../scripts/dashboard.js?v=22" defer></script>
 </body>
 </html>

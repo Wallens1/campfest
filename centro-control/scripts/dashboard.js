@@ -359,6 +359,68 @@ function mostrarSubpestanaAdmin(grupo) {
         div.classList.toggle("oculto", div.dataset.grupoAdmin !== grupo);
     });
 
+    if (grupo === "baul") cargarBaulGlobal();
+
+}
+
+//==========================
+// Baúl global de objetos confiscados (todos los participantes)
+//==========================
+
+async function cargarBaulGlobal() {
+
+    const contenedor = document.getElementById("listaBaulGlobal");
+
+    try {
+
+        const { objetos } = await peticionApi("/api/infracciones/objetos-confiscados");
+
+        contenedor.innerHTML = objetos.length === 0 ? `<p class="detalle">Sin objetos confiscados todavía.</p>` : `
+            <div class="tabla-wrap">
+                <table class="tabla-participantes">
+                    <thead>
+                        <tr>
+                            <th>Participante</th>
+                            <th>Objeto</th>
+                            <th>Cantidad</th>
+                            <th>Fecha</th>
+                            <th>Confiscado por</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${objetos.map((o) => `
+                            <tr>
+                                <td>${o.participante_nombre} (${o.participante_codigo})</td>
+                                <td>${o.objeto}${o.descripcion ? ` — <span class="detalle">${o.descripcion}</span>` : ""}</td>
+                                <td>${o.cantidad}</td>
+                                <td>${formatearFechaHora(o.creado_en)}</td>
+                                <td>${o.confiscado_por_nombre || "—"}</td>
+                                <td><span class="badge ${o.devuelto ? "verde" : "neutro"}">${o.devuelto ? "Devuelto" : "En baúl"}</span></td>
+                                <td>${o.devuelto ? "" : `<button class="boton pequeno secundario" data-devolver-objeto="${o.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar devuelto</button>`}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contenedor.querySelectorAll("[data-devolver-objeto]").forEach((boton) => {
+            boton.addEventListener("click", async () => {
+                try {
+                    await peticionApi(`/api/infracciones/objetos-confiscados/${boton.dataset.devolverObjeto}/devolver`, { method: "POST" });
+                    await cargarBaulGlobal();
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        });
+
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">No se pudo cargar el baúl.</p>`;
+    }
+
 }
 
 document.querySelectorAll("[data-subpestana-admin]").forEach((tab) => {
@@ -3869,7 +3931,7 @@ function renderizarTablaInscripciones(participantes) {
 
 }
 
-function alternarDetalleInscripcion(id) {
+async function alternarDetalleInscripcion(id) {
 
     const fila = document.getElementById(`filaDetalleInscripcion-${id}`);
     const contenedor = document.getElementById(`detalleInscripcion-${id}`);
@@ -3909,9 +3971,75 @@ function alternarDetalleInscripcion(id) {
             <p class="detalle"><strong>Expectativa post-campamento:</strong> ${p.expectativa_post_campamento || "—"}</p>
         </div>
         ` : `<p class="detalle" style="margin-top:10px;">Es de Bugalagrande — no aplica el bloque de liderazgo.</p>`}
+        <div id="infraccionesInscripcion-${id}" style="margin-top:14px; padding-top:10px; border-top:1px solid #eee;">
+            <p class="detalle">Cargando infracciones…</p>
+        </div>
     `;
 
     fila.classList.remove("oculto");
+
+    cargarInfraccionesInscripcion(id);
+
+}
+
+async function cargarInfraccionesInscripcion(id) {
+
+    const contenedorInfracciones = document.getElementById(`infraccionesInscripcion-${id}`);
+    if (!contenedorInfracciones) return;
+
+    try {
+
+        const { infracciones, totalInfracciones, participante } = await peticionApi(`/api/centro-control/participantes/${id}`);
+
+        const listaInfracciones = infracciones.length === 0
+            ? `<p class="detalle">Sin infracciones registradas.</p>`
+            : `<ul style="margin-top:6px; padding-left:18px;">${infracciones.map((i) => `<li class="detalle">${formatearFechaHora(i.creado_en)} — ${i.descripcion} (${i.registrado_por_nombre || "—"})</li>`).join("")}</ul>`;
+
+        const puedeConfirmar = perfilActual?.rol === "admin" || perfilActual?.rol === "control";
+
+        const banner = totalInfracciones >= 3 && !participante.retirado ? `
+            <div class="alerta-chip critica" style="display:flex; flex-direction:column; gap:8px; align-items:flex-start; cursor:default; margin-top:8px;">
+                <span>⚠️ Este participante llegó a ${totalInfracciones} infracciones — se debe firmar el acta de expulsión mutua.</span>
+                <div style="display:flex; gap:8px;">
+                    <button class="boton pequeno secundario" id="btnDescargarActaInscripcion-${id}" style="width:auto;">Descargar acta (PDF)</button>
+                    ${puedeConfirmar ? `<button class="boton pequeno" id="btnConfirmarExpulsionInscripcion-${id}" style="width:auto;">Confirmar expulsión firmada</button>` : ""}
+                </div>
+            </div>
+        ` : "";
+
+        contenedorInfracciones.innerHTML = `
+            <strong style="font-size:12px;">Infracciones (${totalInfracciones})</strong>
+            ${listaInfracciones}
+            ${banner}
+        `;
+
+        const btnDescargar = document.getElementById(`btnDescargarActaInscripcion-${id}`);
+        if (btnDescargar) {
+            btnDescargar.addEventListener("click", () => {
+                descargarArchivo(`/api/infracciones/participante/${id}/expulsion/pdf`, `Acta-Expulsion-${participante.codigo || id}.pdf`);
+            });
+        }
+
+        const btnConfirmar = document.getElementById(`btnConfirmarExpulsionInscripcion-${id}`);
+        if (btnConfirmar) {
+            btnConfirmar.addEventListener("click", async () => {
+
+                if (!confirm("¿Confirmas que el acta de expulsión mutua ya fue firmada? El participante quedará marcado como retirado.")) return;
+
+                try {
+                    await peticionApi(`/api/infracciones/participante/${id}/expulsion/confirmar`, { method: "POST" });
+                    await cargarInfraccionesInscripcion(id);
+                    await cargarInscripciones();
+                } catch (error) {
+                    alert(error.message);
+                }
+
+            });
+        }
+
+    } catch (error) {
+        contenedorInfracciones.innerHTML = `<p class="detalle">No se pudieron cargar las infracciones.</p>`;
+    }
 
 }
 

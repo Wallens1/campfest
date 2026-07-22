@@ -124,6 +124,8 @@ async function peticionApi(ruta, opciones = {}) {
         }
     });
 
+    if (opciones.binario) return respuesta;
+
     const cuerpo = await respuesta.json();
 
     if (!respuesta.ok) {
@@ -131,6 +133,27 @@ async function peticionApi(ruta, opciones = {}) {
     }
 
     return cuerpo;
+
+}
+
+async function descargarArchivo(ruta, nombreArchivo) {
+
+    const respuesta = await peticionApi(ruta, { binario: true });
+
+    if (!respuesta.ok) {
+        alert("No se pudo generar el archivo");
+        return;
+    }
+
+    const blob = await respuesta.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const enlace = document.createElement("a");
+    enlace.href = url;
+    enlace.download = nombreArchivo;
+    enlace.click();
+
+    window.URL.revokeObjectURL(url);
 
 }
 
@@ -569,7 +592,10 @@ async function seleccionarParticipante(id) {
 
 function renderizarFicha(datos) {
 
-    const { participante, servicios, entregas, totalServicios, entregasRealizadas, historial: eventos, elegibleSalidaLibre, salidaLibreActiva } = datos;
+    const {
+        participante, servicios, entregas, totalServicios, entregasRealizadas, historial: eventos,
+        elegibleSalidaLibre, salidaLibreActiva, infracciones, totalInfracciones, objetosConfiscados
+    } = datos;
 
     fichaNombre.textContent = participante.nombre;
     fichaDocumento.textContent = `Documento: ${participante.documento}`;
@@ -581,7 +607,8 @@ function renderizarFicha(datos) {
     document.getElementById("inputContactoEmergenciaTelefonoCritico").value = participante.contacto_emergencia_telefono || "";
     document.getElementById("inputCondicionMedicaCritico").value = participante.condicion_medica_detalle || "";
     document.getElementById("inputRestriccionAlimentariaCritico").value = participante.restricciones_alimentarias_detalle || "";
-    renderizarIngreso(participante);
+    renderizarIngreso(participante, objetosConfiscados || []);
+    renderizarInfracciones(infracciones || [], totalInfracciones || 0, participante);
     renderizarSalidaLibre(elegibleSalidaLibre, salidaLibreActiva);
 
     carpaSeleccionada = participante.carpa_asignada || null;
@@ -678,19 +705,87 @@ function renderizarInfo(participante) {
 
 }
 
-function renderizarIngreso(participante) {
+function filaObjetoRequisaHtml() {
+    return `
+        <div class="fila-objeto-requisa" style="display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap; align-items:end;">
+            <input type="text" class="input-objeto-requisa" placeholder="Objeto" style="flex:2; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+            <input type="number" class="input-cantidad-requisa" placeholder="Cant." value="1" min="1" style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+            <input type="text" class="input-descripcion-requisa" placeholder="Descripción (opcional)" style="flex:2; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+            <button type="button" class="boton pequeno secundario btn-quitar-objeto-requisa" style="width:auto; padding:4px 10px; font-size:11px;">Quitar</button>
+        </div>
+    `;
+}
+
+function agregarFilaObjetoRequisa() {
+
+    const contenedor = document.getElementById("filasObjetosRequisa");
+    contenedor.insertAdjacentHTML("beforeend", filaObjetoRequisaHtml());
+
+    const filas = contenedor.querySelectorAll(".fila-objeto-requisa");
+    const nueva = filas[filas.length - 1];
+
+    nueva.querySelector(".btn-quitar-objeto-requisa").addEventListener("click", () => nueva.remove());
+
+}
+
+function renderizarIngreso(participante, objetosConfiscados) {
 
     if (participante.ingreso_registrado) {
-        bloqueIngreso.innerHTML = `<span class="badge verde">Ingresó a las ${formatearHora(participante.hora_ingreso)}</span>`;
+
+        const listaObjetos = objetosConfiscados.length === 0
+            ? ""
+            : `
+                <div style="margin-top:8px;">
+                    <span class="etiqueta">Objetos confiscados en la requisa</span>
+                    ${objetosConfiscados.map((o) => `
+                        <div class="incidente-mini">
+                            <div>
+                                <span class="codigo">${o.objeto} (x${o.cantidad})</span>
+                                ${o.descripcion ? `<div class="descripcion">${o.descripcion}</div>` : ""}
+                            </div>
+                            <span class="badge ${o.devuelto ? "verde" : "neutro"}">${o.devuelto ? "Devuelto" : "En baúl"}</span>
+                        </div>
+                    `).join("")}
+                </div>
+            `;
+
+        bloqueIngreso.innerHTML = `<span class="badge verde">Ingresó a las ${formatearHora(participante.hora_ingreso)}</span>${listaObjetos}`;
         return;
+
     }
 
-    bloqueIngreso.innerHTML = `<button class="boton pequeno" id="btnRegistrarIngreso">Registrar ingreso</button>`;
+    bloqueIngreso.innerHTML = `
+        <button class="boton pequeno" id="btnRegistrarIngreso">Registrar ingreso</button>
+        <div class="oculto" id="formRequisaIngreso" style="margin-top:10px;">
+            <p class="detalle" style="margin-bottom:6px;">Requisa policial — si se encontró algo, agrégalo antes de confirmar el ingreso.</p>
+            <div id="filasObjetosRequisa"></div>
+            <button type="button" class="boton pequeno secundario" id="btnAgregarObjetoRequisa" style="width:auto; margin-top:4px;">+ Agregar objeto</button>
+            <div style="margin-top:10px;">
+                <button type="button" class="boton pequeno" id="btnConfirmarIngresoConRequisa" style="width:auto;">Confirmar ingreso</button>
+            </div>
+        </div>
+    `;
 
-    document.getElementById("btnRegistrarIngreso").addEventListener("click", async () => {
+    document.getElementById("btnRegistrarIngreso").addEventListener("click", (evento) => {
+        evento.target.classList.add("oculto");
+        document.getElementById("formRequisaIngreso").classList.remove("oculto");
+    });
+
+    document.getElementById("btnAgregarObjetoRequisa").addEventListener("click", agregarFilaObjetoRequisa);
+
+    document.getElementById("btnConfirmarIngresoConRequisa").addEventListener("click", async () => {
+
+        const objetos = Array.from(document.querySelectorAll(".fila-objeto-requisa")).map((fila) => ({
+            objeto: fila.querySelector(".input-objeto-requisa").value.trim(),
+            cantidad: fila.querySelector(".input-cantidad-requisa").value,
+            descripcion: fila.querySelector(".input-descripcion-requisa").value.trim()
+        })).filter((o) => o.objeto !== "");
 
         try {
-            await peticionApi(`/api/logistica/participante/${participanteActualId}/ingreso`, { method: "POST" });
+            await peticionApi(`/api/logistica/participante/${participanteActualId}/ingreso`, {
+                method: "POST",
+                body: JSON.stringify({ objetosConfiscados: objetos })
+            });
             mostrarMensaje(mensajeFicha, "Ingreso registrado correctamente", "ok");
             await seleccionarParticipante(participanteActualId);
         } catch (error) {
@@ -698,6 +793,91 @@ function renderizarIngreso(participante) {
         }
 
     });
+
+}
+
+//==========================
+// Infracciones — a la 3ra se debe firmar el acta de expulsión mutua.
+//==========================
+
+function renderizarInfracciones(infracciones, totalInfracciones, participante) {
+
+    const lista = document.getElementById("listaInfracciones");
+    const alerta = document.getElementById("alertaExpulsion");
+
+    lista.innerHTML = infracciones.length === 0
+        ? `<p class="detalle">Sin infracciones registradas.</p>`
+        : infracciones.map((i) => `
+            <div class="incidente-mini">
+                <div>
+                    <span class="codigo">${formatearHora(i.creado_en)}</span>
+                    <div class="descripcion">${i.descripcion}</div>
+                </div>
+                <span class="badge neutro">${i.registrado_por_nombre || "—"}</span>
+            </div>
+        `).join("");
+
+    if (totalInfracciones >= 3 && !participante.retirado) {
+
+        const puedeConfirmar = perfilActual?.rol === "admin" || perfilActual?.rol === "control";
+
+        alerta.classList.remove("oculto");
+        alerta.innerHTML = `
+            <div class="alerta-chip" style="display:flex; flex-direction:column; gap:8px; align-items:flex-start; cursor:default;">
+                <span>⚠️ Este participante llegó a ${totalInfracciones} infracciones — se debe firmar el acta de expulsión mutua.</span>
+                <div style="display:flex; gap:8px;">
+                    <button class="boton pequeno secundario" id="btnDescargarActaExpulsion" style="width:auto;">Descargar acta (PDF)</button>
+                    ${puedeConfirmar ? `<button class="boton pequeno" id="btnConfirmarExpulsion" style="width:auto;">Confirmar expulsión firmada</button>` : ""}
+                </div>
+            </div>
+        `;
+
+        document.getElementById("btnDescargarActaExpulsion").addEventListener("click", () => {
+            descargarArchivo(`/api/infracciones/participante/${participante.id}/expulsion/pdf`, `Acta-Expulsion-${participante.codigo || participante.id}.pdf`);
+        });
+
+        if (puedeConfirmar) {
+            document.getElementById("btnConfirmarExpulsion").addEventListener("click", async () => {
+
+                if (!confirm("¿Confirmas que el acta de expulsión mutua ya fue firmada? El participante quedará marcado como retirado.")) return;
+
+                try {
+                    await peticionApi(`/api/infracciones/participante/${participante.id}/expulsion/confirmar`, { method: "POST" });
+                    mostrarMensaje(mensajeFicha, "Expulsión confirmada", "ok");
+                    await seleccionarParticipante(participanteActualId);
+                } catch (error) {
+                    mostrarMensaje(mensajeFicha, error.message, "fallo");
+                }
+
+            });
+        }
+
+    } else {
+        alerta.classList.add("oculto");
+        alerta.innerHTML = "";
+    }
+
+    const formNuevaInfraccion = document.getElementById("formNuevaInfraccion");
+    formNuevaInfraccion.onsubmit = async (evento) => {
+
+        evento.preventDefault();
+        const input = document.getElementById("inputDescripcionInfraccion");
+        const descripcion = input.value.trim();
+        if (!descripcion) return;
+
+        try {
+            await peticionApi("/api/infracciones", {
+                method: "POST",
+                body: JSON.stringify({ participanteId: participante.id, descripcion })
+            });
+            input.value = "";
+            mostrarMensaje(mensajeFicha, "Infracción registrada correctamente", "ok");
+            await seleccionarParticipante(participanteActualId);
+        } catch (error) {
+            mostrarMensaje(mensajeFicha, error.message, "fallo");
+        }
+
+    };
 
 }
 

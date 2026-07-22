@@ -781,6 +781,7 @@
             <button type="button" class="tab-modulo" data-subpestana-admin="ramas">Ramas y usuarios</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="auditoria">Auditoría</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="respaldo">Respaldo</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="baul">Baúl</button>
         </div>
 
         <div data-grupo-admin="evento">
@@ -1063,6 +1064,16 @@
 
         </div>
 
+        <div data-grupo-admin="baul" class="oculto">
+
+        <div class="tarjeta">
+            <h3>Baúl de objetos confiscados</h3>
+            <p class="detalle" style="margin-top:-6px;">Todo lo confiscado en la requisa de ingreso, de todos los participantes — para auditar y devolver al final del evento.</p>
+            <div id="listaBaulGlobal"></div>
+        </div>
+
+        </div>
+
     </section>
 
 </div>
@@ -1138,6 +1149,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=34" defer></script>
+<script src="scripts/dashboard.js?v=35" defer></script>
 </body>
 </html>
