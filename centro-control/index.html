@@ -784,6 +784,8 @@
             <button type="button" class="tab-modulo" data-subpestana-admin="auditoria">Auditoría</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="respaldo">Respaldo</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="baul">Baúl</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="perdidos">Perdidos</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="dietas">Dietas</button>
         </div>
 
         <div data-grupo-admin="evento">
@@ -1087,6 +1089,28 @@
 
         </div>
 
+        <div data-grupo-admin="perdidos" class="oculto">
+
+        <div class="tarjeta">
+            <h3>Objetos perdidos</h3>
+            <p class="detalle" style="margin-top:-6px;">Objetos encontrados sueltos en el evento (no confiscados) — para que el campista que preguntó por algo lo pueda reclamar.</p>
+            <button class="boton pequeno terciario" id="btnExportarObjetosPerdidosExcel" style="width:auto; margin-bottom:10px;">Exportar Excel</button>
+            <div id="listaObjetosPerdidos"></div>
+        </div>
+
+        </div>
+
+        <div data-grupo-admin="dietas" class="oculto">
+
+        <div class="tarjeta">
+            <h3>Dietas especiales</h3>
+            <p class="detalle" style="margin-top:-6px;">Participantes con restricción alimentaria o alergia a algún alimento — para que el equipo de alimentación sepa qué preparar aparte en cada comida. El detalle no cambia comida a comida, así que este mismo listado sirve para las 9 del evento.</p>
+            <button class="boton pequeno terciario" id="btnExportarDietasEspecialesExcel" style="width:auto; margin-bottom:10px;">Exportar Excel</button>
+            <div id="listaDietasEspeciales"></div>
+        </div>
+
+        </div>
+
     </section>
 
 </div>
@@ -1162,6 +1186,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=37" defer></script>
+<script src="scripts/dashboard.js?v=39" defer></script>
 </body>
 </html>

@@ -289,6 +289,7 @@ function actualizarTodoPolling() {
     cargarObservaciones();
     cargarEstadoEvento();
     cargarAvisosInternos();
+    cargarObjetosPerdidosLogistica();
 }
 
 // Avisos dirigidos puntualmente a este usuario (ej. "tu actividad fue
@@ -1458,6 +1459,59 @@ async function cargarMisIncidentes() {
     }
 
 }
+
+async function cargarObjetosPerdidosLogistica() {
+
+    try {
+
+        const { objetos } = await peticionApi("/api/objetos-perdidos?reclamado=false");
+        const contenedor = document.getElementById("listaObjetosPerdidosLogistica");
+
+        contenedor.innerHTML = objetos.length === 0
+            ? `<p class="detalle">Sin objetos perdidos sin reclamar.</p>`
+            : objetos.map((o) => `
+                <div class="incidente-mini">
+                    <div>
+                        <span class="codigo">${o.descripcion}</span>
+                        <div class="descripcion">${o.lugar_encontrado ? `Encontrado en: ${o.lugar_encontrado} · ` : ""}Por: ${o.encontrado_por_nombre || "—"}</div>
+                    </div>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+document.getElementById("formObjetoPerdido").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeObjetoPerdido");
+
+    await conBotonDeshabilitado(evento.target, async () => {
+
+        try {
+
+            await peticionApi("/api/objetos-perdidos", {
+                method: "POST",
+                body: JSON.stringify({
+                    descripcion: document.getElementById("inputDescripcionObjetoPerdido").value.trim(),
+                    lugarEncontrado: document.getElementById("inputLugarObjetoPerdido").value.trim()
+                })
+            });
+
+            mostrarMensaje(mensaje, "Objeto perdido registrado", "ok");
+            document.getElementById("formObjetoPerdido").reset();
+            await cargarObjetosPerdidosLogistica();
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
+
+});
 
 function renderizarAlimentacion(servicios, entregas) {
 

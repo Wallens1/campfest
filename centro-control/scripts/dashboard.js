@@ -394,6 +394,8 @@ function mostrarSubpestanaAdmin(grupo) {
     });
 
     if (grupo === "baul") cargarBaulGlobal();
+    if (grupo === "perdidos") cargarObjetosPerdidosGlobal();
+    if (grupo === "dietas") cargarDietasEspeciales();
 
 }
 
@@ -456,6 +458,130 @@ async function cargarBaulGlobal() {
     }
 
 }
+
+//==========================
+// Objetos perdidos (distinto del baúl de confiscados) — encontrados sueltos
+// en el evento, no siempre con un dueño identificado de entrada.
+//==========================
+
+async function cargarObjetosPerdidosGlobal() {
+
+    const contenedor = document.getElementById("listaObjetosPerdidos");
+
+    try {
+
+        const { objetos } = await peticionApi("/api/objetos-perdidos");
+
+        contenedor.innerHTML = objetos.length === 0 ? `<p class="detalle">Sin objetos perdidos registrados todavía.</p>` : `
+            <div class="tabla-wrap">
+                <table class="tabla-participantes">
+                    <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Lugar</th>
+                            <th>Encontrado por</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${objetos.map((o) => `
+                            <tr>
+                                <td>${o.descripcion}</td>
+                                <td>${o.lugar_encontrado || "—"}</td>
+                                <td>${o.encontrado_por_nombre || "—"}</td>
+                                <td>${formatearFechaHora(o.creado_en)}</td>
+                                <td>
+                                    <span class="badge ${o.reclamado ? "verde" : "neutro"}">${o.reclamado ? "Reclamado" : "Sin reclamar"}</span>
+                                    ${o.reclamado ? `<div class="detalle">Entregado a: ${o.entregado_a}</div>` : ""}
+                                </td>
+                                <td>${o.reclamado ? "" : `<button class="boton pequeno secundario" data-reclamar-objeto="${o.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar reclamado</button>`}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contenedor.querySelectorAll("[data-reclamar-objeto]").forEach((boton) => {
+            boton.addEventListener("click", async () => {
+
+                const entregadoA = prompt("¿A quién se le entregó este objeto? (nombre)");
+                if (!entregadoA || !entregadoA.trim()) return;
+
+                try {
+                    await peticionApi(`/api/objetos-perdidos/${boton.dataset.reclamarObjeto}/reclamar`, {
+                        method: "POST",
+                        body: JSON.stringify({ entregadoA: entregadoA.trim() })
+                    });
+                    await cargarObjetosPerdidosGlobal();
+                } catch (error) {
+                    alert(error.message);
+                }
+
+            });
+        });
+
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">No se pudieron cargar los objetos perdidos.</p>`;
+    }
+
+}
+
+document.getElementById("btnExportarObjetosPerdidosExcel").addEventListener("click", () => {
+    descargarArchivo("/api/objetos-perdidos/exportar/excel", "objetos-perdidos-campfest.xlsx");
+});
+
+//==========================
+// Dietas especiales (alimentación) — el dato ya existía por participante;
+// esto solo lo agrupa en un listado accionable para el equipo de comida.
+//==========================
+
+async function cargarDietasEspeciales() {
+
+    const contenedor = document.getElementById("listaDietasEspeciales");
+
+    try {
+
+        const { participantes } = await peticionApi("/api/centro-control/participantes/dietas-especiales");
+
+        contenedor.innerHTML = participantes.length === 0 ? `<p class="detalle">Sin dietas especiales registradas.</p>` : `
+            <div class="tabla-wrap">
+                <table class="tabla-participantes">
+                    <thead>
+                        <tr>
+                            <th>Participante</th>
+                            <th>Carpa</th>
+                            <th>Ingresó</th>
+                            <th>Restricción alimentaria</th>
+                            <th>Alergia a alimento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${participantes.map((p) => `
+                            <tr>
+                                <td>${p.nombre} (${p.codigo})</td>
+                                <td>${p.carpa_asignada || "—"}</td>
+                                <td><span class="badge ${p.ingreso_registrado ? "verde" : "neutro"}">${p.ingreso_registrado ? "Sí" : "No"}</span></td>
+                                <td>${p.tiene_restricciones_alimentarias ? `<span class="dato alerta"><span class="valor">${p.restricciones_alimentarias_detalle || "Sí"}</span></span>` : "—"}</td>
+                                <td>${p.alergia_alimento ? `<span class="dato alerta"><span class="valor">${p.alergia_alimento_detalle || "Sí"}</span></span>` : "—"}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">No se pudieron cargar las dietas especiales.</p>`;
+    }
+
+}
+
+document.getElementById("btnExportarDietasEspecialesExcel").addEventListener("click", () => {
+    descargarArchivo("/api/centro-control/participantes/dietas-especiales/exportar/excel", "dietas-especiales-campfest.xlsx");
+});
 
 document.querySelectorAll("[data-subpestana-admin]").forEach((tab) => {
     tab.addEventListener("click", () => mostrarSubpestanaAdmin(tab.dataset.subpestanaAdmin));
