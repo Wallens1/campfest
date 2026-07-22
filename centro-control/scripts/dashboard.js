@@ -109,19 +109,53 @@ async function cargarZonasSelects() {
 
 }
 
+// ==========================
+// Aviso de "sin conexión" — antes, si el polling (cada 7s) fallaba por un
+// problema de red, no había ningún indicio visible más que un
+// console.error; el panel se veía "colgado" sin que nadie supiera si es
+// culpa del wifi, del servidor o si simplemente no ha pasado nada nuevo.
+// Solo un FALLO DE RED (fetch nunca llegó a responder) cuenta para esto —
+// una respuesta HTTP de error real (400/403/500...) es un problema
+// distinto que cada acción ya reporta por su lado.
+// ==========================
+
+let fallosDeRedConsecutivos = 0;
+const UMBRAL_AVISO_SIN_CONEXION = 2;
+
+function marcarConexionOk() {
+    fallosDeRedConsecutivos = 0;
+    document.getElementById("bannerSinConexion")?.classList.add("oculto");
+}
+
+function marcarFalloDeRed() {
+    fallosDeRedConsecutivos++;
+    if (fallosDeRedConsecutivos >= UMBRAL_AVISO_SIN_CONEXION) {
+        document.getElementById("bannerSinConexion")?.classList.remove("oculto");
+    }
+}
+
 async function peticionApi(ruta, opciones = {}) {
 
     const { data: sesion } = await supabaseClient.auth.getSession();
     const token = sesion?.session?.access_token;
 
-    const respuesta = await fetch(`${API_BASE}${ruta}`, {
-        ...opciones,
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            ...(opciones.headers || {})
-        }
-    });
+    let respuesta;
+
+    try {
+        respuesta = await fetch(`${API_BASE}${ruta}`, {
+            ...opciones,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                ...(opciones.headers || {})
+            }
+        });
+    } catch (errorRed) {
+        marcarFalloDeRed();
+        throw new Error("No se pudo conectar con el servidor. Revisa tu conexión a internet.");
+    }
+
+    marcarConexionOk();
 
     if (opciones.binario) return respuesta;
 

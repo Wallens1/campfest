@@ -670,3 +670,18 @@ body{
 
 .carpa-card.llena .ocupacion{ color:var(--coral); font-weight:700; }
 .carpa-card.llena{ border-color:var(--coral); }
+/* ===== BANNER DE CONEXIÓN ===== */
+
+.banner-sin-conexion{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:100;
+    background:var(--rojo);
+    color:#fff;
+    text-align:center;
+    font-weight:700;
+    font-size:13px;
+    padding:8px 12px;
+}
