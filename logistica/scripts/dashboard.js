@@ -410,62 +410,195 @@ document.getElementById("btnCerrarAyudaRoles").addEventListener("click", () => {
 });
 
 // ==========================
-// Tour guiado — se muestra solo una vez por dispositivo/navegador (no hay
-// nada que sincronizar con el servidor, es puramente una ayuda de primer
-// uso), y se puede volver a abrir cuando se quiera con el botón 🎓.
+// Tour guiado — resalta el elemento REAL de la pantalla que se está
+// explicando (con un resplandor + el resto de la pantalla oscurecido) y un
+// cuadro de texto que flota al lado suyo, en vez de un modal genérico
+// centrado. Se muestra solo una vez por dispositivo/navegador (no hay nada
+// que sincronizar con el servidor), y se puede volver a abrir con 🎓. Al
+// terminar (o saltar), todo vuelve exactamente a como estaba: se quita el
+// resaltado, se borra cualquier texto de ejemplo que se haya puesto, y se
+// vuelve a la pestaña donde estaba el usuario antes de empezar.
 // ==========================
 
 const PASOS_TOUR = [
     {
         titulo: "Bienvenido al Panel Logístico",
-        texto: "Este tour rápido te muestra lo esencial en menos de un minuto. Puedes saltarlo en cualquier momento y volver a verlo después con el botón 🎓 de arriba."
+        texto: "Este tour rápido te muestra lo esencial en menos de un minuto, resaltando cada botón real de la pantalla. Puedes saltarlo cuando quieras y volver a verlo después con el botón 🎓 de arriba.",
+        selector: null
     },
     {
         titulo: "Tus 5 pestañas",
-        texto: "Registro: participantes del evento. Comunicación: reportar incidentes y pedir ayuda entre ramas. Tareas: lo que tu rama debe hacer. Mi cronograma: las actividades del evento. Materiales: catálogo y solicitudes."
+        texto: "Registro: participantes del evento. Comunicación: reportar incidentes, objetos perdidos y pedir ayuda entre ramas. Tareas: lo que tu rama debe hacer. Mi cronograma: las actividades del evento. Materiales: catálogo y solicitudes.",
+        selector: ".tabs-modulo",
+        vista: "registro"
     },
     {
-        titulo: "Buscar o escanear a un participante",
-        texto: "En Registro, busca por código, documento o nombre — o usa \"📷 Escanear QR de la insignia\" para no escribir nada cuando la llegada es masiva."
+        titulo: "Cómo buscar a alguien",
+        texto: "Elige si vas a buscar por código, documento o nombre — según el dato que tengas a mano en ese momento.",
+        selector: ".tabs-busqueda",
+        vista: "registro"
     },
     {
-        titulo: "Ingreso con requisa",
-        texto: "Al registrar el ingreso se te pide confirmar la requisa policial: si no se encontró nada, solo confirmas; si se confiscó algo, lo agregas antes de confirmar y queda guardado en el \"baúl\"."
+        titulo: "Escribe y pulsa Buscar",
+        texto: "Por ejemplo, así se vería si alguien te dice su código por WhatsApp — escribes el dato y pulsas \"Buscar\":",
+        selector: "#formBuscar",
+        vista: "registro",
+        accion: () => {
+            const input = document.getElementById("inputBusqueda");
+            input.dataset.valorOriginalTour = input.value;
+            input.value = "CF-0001";
+        },
+        revertir: () => {
+            const input = document.getElementById("inputBusqueda");
+            input.value = input.dataset.valorOriginalTour || "";
+            delete input.dataset.valorOriginalTour;
+        }
     },
     {
-        titulo: "Infracciones",
-        texto: "Debajo de Ingreso puedes registrar una infracción. A la 3ra, el sistema te avisa que hay que firmar el acta de expulsión mutua."
+        titulo: "O escanea el QR de la insignia",
+        texto: "Más rápido cuando la llegada es masiva: no hay que escribir nada, apuntas la cámara al QR de la insignia del campista y la búsqueda se hace sola.",
+        selector: "#btnEscanearQR",
+        vista: "registro"
+    },
+    {
+        titulo: "Reportar un incidente",
+        texto: "Desde Comunicación le avisas al Centro de Control cualquier novedad — categoría, prioridad, y a quién afecta si aplica.",
+        selector: "#btnAbrirFormIncidente",
+        vista: "comunicacion"
+    },
+    {
+        titulo: "Objetos perdidos",
+        texto: "Si encuentras algo suelto (no confiscado en una requisa), regístralo aquí para que quien lo busque lo pueda reclamar.",
+        selector: "#formObjetoPerdido",
+        vista: "comunicacion"
     },
     {
         titulo: "¿Dudas sobre tu rol?",
-        texto: "El botón \"?\" te recuerda qué puedes hacer según seas miembro o líder de tu rama. El botón 📋 abre un checklist rápido para el inicio y cierre de tu turno."
+        texto: "El botón \"?\" te recuerda qué puedes hacer según seas miembro o líder de tu rama.",
+        selector: "#btnAyudaRoles",
+        vista: null
+    },
+    {
+        titulo: "Checklist de turno",
+        texto: "El botón 📋 abre un checklist rápido para no olvidar nada al empezar o terminar tu turno.",
+        selector: "#btnChecklistTurno",
+        vista: null
+    },
+    {
+        titulo: "¡Listo!",
+        texto: "Ya conoces lo esencial. Puedes volver a ver este tour cuando quieras con el botón 🎓 de arriba.",
+        selector: null
     }
 ];
 
-let pasoTourActual = 0;
+let indiceTourActual = 0;
+let elementoResaltadoTour = null;
+let vistaAntesDelTour = null;
 
-function mostrarPasoTour() {
+function limpiarPasoTourActual() {
 
-    const paso = PASOS_TOUR[pasoTourActual];
+    if (elementoResaltadoTour) {
+        elementoResaltadoTour.classList.remove("tour-resaltado");
+        elementoResaltadoTour = null;
+    }
 
-    document.getElementById("pasoTourNumero").textContent = `Paso ${pasoTourActual + 1} de ${PASOS_TOUR.length}`;
+    const pasoQueSeVa = PASOS_TOUR[indiceTourActual];
+    if (pasoQueSeVa && pasoQueSeVa.revertir) pasoQueSeVa.revertir();
+
+}
+
+function posicionarCuadroTour(target) {
+
+    const cuadro = document.getElementById("tourCuadro");
+    cuadro.classList.remove("oculto");
+    const cuadroRect = cuadro.getBoundingClientRect();
+
+    if (!target) {
+        cuadro.style.transform = "translate(-50%, -50%)";
+        cuadro.style.top = "50%";
+        cuadro.style.left = "50%";
+        return;
+    }
+
+    cuadro.style.transform = "none";
+
+    const rect = target.getBoundingClientRect();
+    const espacioAbajo = window.innerHeight - rect.bottom;
+    const ponerArriba = espacioAbajo < (cuadroRect.height + 20) && rect.top > espacioAbajo;
+
+    const top = ponerArriba
+        ? Math.max(10, rect.top - cuadroRect.height - 14)
+        : Math.min(rect.bottom + 14, window.innerHeight - cuadroRect.height - 10);
+
+    const left = Math.min(Math.max(10, rect.left), window.innerWidth - cuadroRect.width - 10);
+
+    cuadro.style.top = `${top}px`;
+    cuadro.style.left = `${left}px`;
+
+}
+
+function irAPasoTour(indice) {
+
+    limpiarPasoTourActual();
+    indiceTourActual = indice;
+
+    const paso = PASOS_TOUR[indice];
+
+    if (paso.vista) {
+        const tab = document.querySelector(`.tab-modulo[data-vista="${paso.vista}"]`);
+        if (tab && !tab.classList.contains("activo")) tab.click();
+    }
+
+    document.getElementById("pasoTourNumero").textContent = `Paso ${indice + 1} de ${PASOS_TOUR.length}`;
     document.getElementById("tourTitulo").textContent = paso.titulo;
     document.getElementById("tourTexto").textContent = paso.texto;
+    document.getElementById("btnAnteriorTour").classList.toggle("oculto", indice === 0);
+    document.getElementById("btnSiguienteTour").textContent = indice === PASOS_TOUR.length - 1 ? "Terminar" : "Siguiente";
 
-    document.getElementById("btnAnteriorTour").classList.toggle("oculto", pasoTourActual === 0);
-    document.getElementById("btnSiguienteTour").textContent = pasoTourActual === PASOS_TOUR.length - 1 ? "Terminar" : "Siguiente";
+    const target = paso.selector ? document.querySelector(paso.selector) : null;
+    const fondo = document.getElementById("tourFondo");
+
+    if (target) {
+
+        fondo.classList.add("oculto");
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        target.classList.add("tour-resaltado");
+        elementoResaltadoTour = target;
+
+        // Se espera a que termine el scroll suave antes de medir dónde
+        // quedó el elemento — si se mide antes, el cuadro queda mal ubicado.
+        setTimeout(() => posicionarCuadroTour(target), 320);
+
+    } else {
+
+        fondo.classList.remove("oculto");
+        posicionarCuadroTour(null);
+
+    }
+
+    if (paso.accion) paso.accion();
 
 }
 
 function abrirTour() {
-    pasoTourActual = 0;
-    mostrarPasoTour();
-    document.getElementById("overlayTour").classList.remove("oculto");
+    vistaAntesDelTour = document.querySelector(".tab-modulo.activo")?.dataset.vista || "registro";
+    irAPasoTour(0);
 }
 
 function cerrarTour() {
-    document.getElementById("overlayTour").classList.add("oculto");
+
+    limpiarPasoTourActual();
+
+    document.getElementById("tourFondo").classList.add("oculto");
+    document.getElementById("tourCuadro").classList.add("oculto");
+
+    if (vistaAntesDelTour) {
+        const tab = document.querySelector(`.tab-modulo[data-vista="${vistaAntesDelTour}"]`);
+        if (tab && !tab.classList.contains("activo")) tab.click();
+    }
+
     localStorage.setItem("cf_onboarding_completado", "true");
+
 }
 
 function iniciarOnboardingSiEsNecesario() {
@@ -476,18 +609,16 @@ document.getElementById("btnVerTour").addEventListener("click", abrirTour);
 document.getElementById("btnSaltarTour").addEventListener("click", cerrarTour);
 
 document.getElementById("btnSiguienteTour").addEventListener("click", () => {
-    if (pasoTourActual === PASOS_TOUR.length - 1) {
+    if (indiceTourActual === PASOS_TOUR.length - 1) {
         cerrarTour();
         return;
     }
-    pasoTourActual++;
-    mostrarPasoTour();
+    irAPasoTour(indiceTourActual + 1);
 });
 
 document.getElementById("btnAnteriorTour").addEventListener("click", () => {
-    if (pasoTourActual === 0) return;
-    pasoTourActual--;
-    mostrarPasoTour();
+    if (indiceTourActual === 0) return;
+    irAPasoTour(indiceTourActual - 1);
 });
 
 // ==========================

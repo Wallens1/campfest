@@ -734,3 +734,34 @@ body{
     font-size:13px;
     padding:8px 12px;
 }
+
+/* ===== TOUR GUIADO (resalta un elemento real de la pantalla) ===== */
+
+#tourFondo{
+    position:fixed;
+    inset:0;
+    background:rgba(26,26,46,.6);
+    z-index:998;
+    transition:opacity .15s ease;
+}
+
+#tourCuadro{
+    position:fixed;
+    z-index:1000;
+    transition:top .2s ease, left .2s ease;
+}
+
+/* Se aplica al elemento real que se está explicando: lo sube por encima del
+   fondo oscuro (position:relative es necesario para que z-index funcione en
+   elementos que normalmente son static) y le pone un resplandor amarillo
+   para que salte a la vista sin necesidad de un recorte/máscara en el fondo. */
+.tour-resaltado{
+    position:relative !important;
+    z-index:999 !important;
+    box-shadow:0 0 0 4px var(--amarillo), 0 0 0 999px rgba(26,26,46,.6) !important;
+    border-radius:10px;
+}
+
+@media (max-width:480px){
+    #tourCuadro .tarjeta{ max-width:88vw; }
+}
