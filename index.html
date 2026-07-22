@@ -479,6 +479,20 @@
   </div>
 </section>
 
+<!-- MAPA DEL EVENTO (oculto hasta que el admin lo publique) -->
+<section class="cf-section cf-oculto" id="cf-seccion-mapa-evento">
+  <div class="cf-section-inner">
+    <div class="cf-section-head">
+      <span class="cf-tag">Mapa</span>
+      <h2>Así te vas a mover en el evento</h2>
+    </div>
+    <div class="cf-panel">
+      <h3><span class="cf-dot"></span>Mapa del evento</h3>
+      <div id="cf-mapa-evento-home"></div>
+    </div>
+  </div>
+</section>
+
 
 <!-- CTA FINAL -->
 <section class="cf-section cf-reveal" id="inscripcion">
@@ -655,6 +669,31 @@
       // el bloque se queda con "Cargando información..." si falla
     }
 
+  }
+
+  iniciar();
+
+})();
+</script>
+
+<script src="./campfest/assets/mapa-evento.js"></script>
+<script>
+(function () {
+
+  // El mapa vive oculto hasta que el admin lo publica desde Centro de
+  // Control — mientras tanto, esta sección ni siquiera aparece en la home.
+  var API_BASE = "https://campfest-api-production.up.railway.app";
+
+  async function iniciar() {
+    try {
+      var respuesta = await fetch(API_BASE + "/api/mapa");
+      var datos = await respuesta.json();
+      if (!datos.publicado) return;
+      document.getElementById("cf-seccion-mapa-evento").classList.remove("cf-oculto");
+      window.renderizarMapaEvento(document.getElementById("cf-mapa-evento-home"), datos);
+    } catch (e) {
+      // si falla, la sección se queda oculta — no rompe el resto de la home
+    }
   }
 
   iniciar();

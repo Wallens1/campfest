@@ -787,6 +787,7 @@
             <button type="button" class="tab-modulo" data-subpestana-admin="perdidos">Perdidos</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="dietas">Dietas</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="encuestas">Encuestas</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="mapa">Mapa del evento</button>
         </div>
 
         <div data-grupo-admin="evento">
@@ -1156,8 +1157,84 @@
 
         </div>
 
+        <div data-grupo-admin="mapa" class="oculto">
+
+        <div class="tarjeta">
+            <h3>Mapa del evento</h3>
+            <p class="detalle" style="margin-top:-6px;">Dibuja zonas sobre una imagen del sitio (ej. un triángulo llamado "Baños") para que campistas y visitantes se ubiquen. Mientras no lo publiques, solo tú lo ves aquí.</p>
+
+            <div class="banner-estado-mapa" id="bannerEstadoMapa">
+                <span id="textoEstadoMapa">Cargando estado del mapa...</span>
+                <button type="button" class="boton pequeno secundario" id="btnTogglePublicarMapa" style="width:auto;" disabled>...</button>
+            </div>
+
+            <form id="formSubirImagenMapa" style="display:flex; gap:8px; align-items:flex-end; margin:16px 0;">
+                <div class="campo" style="flex:1; margin-bottom:0;">
+                    <label for="inputImagenMapa">Imagen base del mapa (plano o foto aérea)</label>
+                    <input type="file" id="inputImagenMapa" accept="image/*">
+                </div>
+                <button type="submit" class="boton pequeno terciario" style="width:auto;">Subir imagen</button>
+            </form>
+
+            <div class="mensaje" id="mensajeMapa"></div>
+
+            <div id="envoltorioEditorMapa" class="oculto">
+
+                <div class="herramientas-mapa">
+                    <button type="button" class="boton pequeno amarillo" id="btnNuevaZonaMapa" style="width:auto;">+ Nueva zona</button>
+                    <button type="button" class="boton pequeno secundario oculto" id="btnDeshacerPuntoMapa" style="width:auto;">Deshacer último punto</button>
+                    <button type="button" class="boton pequeno terciario oculto" id="btnCerrarFormaMapa" style="width:auto;" disabled>Cerrar forma</button>
+                    <button type="button" class="boton pequeno oculto" id="btnCancelarDibujoMapa" style="width:auto; background:#999;">Cancelar</button>
+                    <span class="detalle oculto" id="ayudaDibujoMapa" style="align-self:center;">Toca la imagen para ir agregando los vértices de la zona (mínimo 3).</span>
+                </div>
+
+                <div class="mapa-lienzo" id="lienzoMapa">
+                    <img id="imagenMapaEditor" alt="Plano del evento">
+                    <svg id="svgEditorMapa" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+                </div>
+
+                <div class="seccion">
+                    <h3>Zonas creadas</h3>
+                    <div id="listaZonasMapa"><p class="detalle">Sin zonas todavía.</p></div>
+                </div>
+
+            </div>
+        </div>
+
+        </div>
+
     </section>
 
+</div>
+
+<!-- ===== PANEL DE DETALLE / EDICIÓN DE UNA ZONA DEL MAPA ===== -->
+<div class="overlay-detalle oculto" id="overlayZonaMapa"></div>
+<div class="panel-detalle" id="panelZonaMapa">
+    <button class="cerrar-panel" id="btnCerrarZonaMapa">✕</button>
+
+    <h2 id="tituloPanelZonaMapa">Nueva zona</h2>
+
+    <div class="campo">
+        <label for="inputNombreZonaMapa">Nombre</label>
+        <input type="text" id="inputNombreZonaMapa" placeholder="Ej: Baños">
+    </div>
+
+    <div class="campo">
+        <label for="inputDescripcionZonaMapa">Descripción (opcional)</label>
+        <textarea id="inputDescripcionZonaMapa" placeholder="Ej: Baños cerca del comedor, junto a las carpas de la rama azul"></textarea>
+    </div>
+
+    <div class="campo">
+        <label for="inputColorZonaMapa">Color en el mapa</label>
+        <input type="color" id="inputColorZonaMapa" value="#FFC93C" style="width:80px; height:38px; padding:2px;">
+    </div>
+
+    <div class="acciones-incidente">
+        <button type="button" class="boton pequeno" id="btnGuardarZonaMapa" style="width:auto;">Guardar zona</button>
+        <button type="button" class="boton pequeno secundario oculto" id="btnEliminarZonaMapa" style="width:auto; background:var(--rojo);">Eliminar zona</button>
+    </div>
+
+    <div class="mensaje" id="mensajePanelZonaMapa"></div>
 </div>
 
 <!-- ===== PANEL DE DETALLE DEL INCIDENTE ===== -->
@@ -1231,6 +1308,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=42" defer></script>
+<script src="scripts/dashboard.js?v=43" defer></script>
 </body>
 </html>

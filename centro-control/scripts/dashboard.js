@@ -398,6 +398,7 @@ function mostrarSubpestanaAdmin(grupo) {
     if (grupo === "dietas") cargarDietasEspeciales();
     if (grupo === "evento") cargarEstadoEncuestaHabilitada();
     if (grupo === "encuestas") { cargarResumenEncuesta("campista"); cargarResumenEncuesta("staff"); }
+    if (grupo === "mapa") cargarMapaAdmin();
 
 }
 
@@ -4674,6 +4675,312 @@ function renderizarGraficosInscripciones(estadisticas) {
     });
 
 }
+
+// ==========================
+// Mapa del evento — zonas dibujadas sobre una imagen (admin crea/edita,
+// todos los demás solo la ven una vez publicada). Los puntos de cada zona
+// se guardan como porcentaje (0-100) relativo al tamaño de la imagen, así
+// que el dibujo se ve igual sin importar el tamaño de pantalla.
+// ==========================
+
+let mapaEstadoActual = { publicado: false, imagenUrl: null, zonas: [] };
+let modoDibujoMapaActivo = false;
+let puntosDibujoMapaActual = [];
+let zonaMapaEnEdicionId = null;
+
+async function cargarMapaAdmin() {
+
+    try {
+
+        const datos = await peticionApi("/api/mapa/admin");
+        mapaEstadoActual = { publicado: datos.publicado, imagenUrl: datos.imagenUrl, zonas: datos.zonas };
+
+        renderizarBannerEstadoMapa();
+        renderizarImagenMapa();
+        renderizarZonasEnSvgYLista();
+
+    } catch (error) {
+        document.getElementById("textoEstadoMapa").textContent = "No se pudo cargar el mapa.";
+    }
+
+}
+
+function renderizarBannerEstadoMapa() {
+
+    const banner = document.getElementById("bannerEstadoMapa");
+    const texto = document.getElementById("textoEstadoMapa");
+    const boton = document.getElementById("btnTogglePublicarMapa");
+
+    banner.classList.toggle("publicado", mapaEstadoActual.publicado);
+    banner.classList.toggle("borrador", !mapaEstadoActual.publicado);
+
+    texto.textContent = mapaEstadoActual.publicado
+        ? "Publicado — todos lo ven (portal del campista y sitio público)"
+        : "Borrador — solo tú lo ves aquí";
+
+    boton.disabled = false;
+    boton.textContent = mapaEstadoActual.publicado ? "Ocultar mapa" : "Publicar mapa";
+
+}
+
+function renderizarImagenMapa() {
+
+    const envoltorio = document.getElementById("envoltorioEditorMapa");
+    const img = document.getElementById("imagenMapaEditor");
+
+    if (!mapaEstadoActual.imagenUrl) {
+        envoltorio.classList.add("oculto");
+        return;
+    }
+
+    envoltorio.classList.remove("oculto");
+    img.src = mapaEstadoActual.imagenUrl;
+
+}
+
+function centroideZonaMapa(puntos) {
+    return {
+        x: puntos.reduce((suma, p) => suma + p.x, 0) / puntos.length,
+        y: puntos.reduce((suma, p) => suma + p.y, 0) / puntos.length
+    };
+}
+
+function renderizarZonasEnSvgYLista() {
+
+    const svg = document.getElementById("svgEditorMapa");
+    const lista = document.getElementById("listaZonasMapa");
+
+    const grupos = mapaEstadoActual.zonas.map((zona) => {
+        const puntos = zona.puntos.map((p) => `${p.x},${p.y}`).join(" ");
+        const centro = centroideZonaMapa(zona.puntos);
+        return `
+            <g data-zona-svg="${zona.id}">
+                <polygon class="mapa-zona-poligono" points="${puntos}" style="fill:${zona.color}; stroke:${zona.color};"></polygon>
+                <text class="mapa-zona-etiqueta" x="${centro.x}" y="${centro.y}">${zona.nombre}</text>
+            </g>
+        `;
+    }).join("");
+
+    svg.innerHTML = `<g id="grupoZonasExistentesMapa">${grupos}</g><g id="grupoDibujoTemporalMapa"></g>`;
+
+    svg.querySelectorAll("[data-zona-svg]").forEach((g) => {
+        g.addEventListener("click", (evento) => {
+            if (modoDibujoMapaActivo) return;
+            evento.stopPropagation();
+            const zona = mapaEstadoActual.zonas.find((z) => z.id === g.dataset.zonaSvg);
+            if (zona) abrirPanelZonaMapa(zona);
+        });
+    });
+
+    lista.innerHTML = mapaEstadoActual.zonas.length === 0
+        ? `<p class="detalle">Sin zonas todavía.</p>`
+        : mapaEstadoActual.zonas.map((zona) => `
+            <div class="item-zona-mapa" data-zona-lista="${zona.id}">
+                <div class="muestra-color" style="background:${zona.color};"></div>
+                <div class="info-zona">
+                    <strong>${zona.nombre}</strong>
+                    <span>${zona.actividades.length} actividad(es) vinculada(s)</span>
+                </div>
+            </div>
+        `).join("");
+
+    lista.querySelectorAll("[data-zona-lista]").forEach((item) => {
+        item.addEventListener("click", () => {
+            const zona = mapaEstadoActual.zonas.find((z) => z.id === item.dataset.zonaLista);
+            if (zona) abrirPanelZonaMapa(zona);
+        });
+    });
+
+}
+
+function coordenadasClicMapa(evento) {
+    const rect = document.getElementById("imagenMapaEditor").getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((evento.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((evento.clientY - rect.top) / rect.height) * 100));
+    return { x: Math.round(x * 100) / 100, y: Math.round(y * 100) / 100 };
+}
+
+function renderizarDibujoTemporalMapa() {
+
+    const grupo = document.getElementById("grupoDibujoTemporalMapa");
+    if (!grupo) return;
+
+    const puntosTexto = puntosDibujoMapaActual.map((p) => `${p.x},${p.y}`).join(" ");
+    const marcadores = puntosDibujoMapaActual.map((p) => `<circle class="mapa-punto-temporal" cx="${p.x}" cy="${p.y}" r="1.2"></circle>`).join("");
+
+    grupo.innerHTML = `
+        <polyline class="mapa-dibujo-temporal" points="${puntosTexto}"></polyline>
+        ${marcadores}
+    `;
+
+    document.getElementById("btnCerrarFormaMapa").disabled = puntosDibujoMapaActual.length < 3;
+
+}
+
+function iniciarModoDibujoMapa() {
+
+    modoDibujoMapaActivo = true;
+    puntosDibujoMapaActual = [];
+
+    document.getElementById("lienzoMapa").classList.add("modo-dibujo");
+    document.getElementById("btnNuevaZonaMapa").classList.add("oculto");
+    document.getElementById("btnDeshacerPuntoMapa").classList.remove("oculto");
+    document.getElementById("btnCerrarFormaMapa").classList.remove("oculto");
+    document.getElementById("btnCancelarDibujoMapa").classList.remove("oculto");
+    document.getElementById("ayudaDibujoMapa").classList.remove("oculto");
+
+    renderizarDibujoTemporalMapa();
+
+}
+
+function detenerModoDibujoMapa() {
+
+    modoDibujoMapaActivo = false;
+    puntosDibujoMapaActual = [];
+
+    document.getElementById("lienzoMapa").classList.remove("modo-dibujo");
+    document.getElementById("btnNuevaZonaMapa").classList.remove("oculto");
+    document.getElementById("btnDeshacerPuntoMapa").classList.add("oculto");
+    document.getElementById("btnCerrarFormaMapa").classList.add("oculto");
+    document.getElementById("btnCancelarDibujoMapa").classList.add("oculto");
+    document.getElementById("ayudaDibujoMapa").classList.add("oculto");
+
+    const grupo = document.getElementById("grupoDibujoTemporalMapa");
+    if (grupo) grupo.innerHTML = "";
+
+}
+
+function abrirPanelZonaMapa(zona) {
+
+    zonaMapaEnEdicionId = zona ? zona.id : null;
+
+    document.getElementById("tituloPanelZonaMapa").textContent = zona ? "Editar zona" : "Nueva zona";
+    document.getElementById("inputNombreZonaMapa").value = zona ? zona.nombre : "";
+    document.getElementById("inputDescripcionZonaMapa").value = zona ? (zona.descripcion || "") : "";
+    document.getElementById("inputColorZonaMapa").value = zona ? zona.color : "#FFC93C";
+    document.getElementById("btnEliminarZonaMapa").classList.toggle("oculto", !zona);
+
+    ocultarMensaje(document.getElementById("mensajePanelZonaMapa"));
+
+    document.getElementById("panelZonaMapa").classList.add("abierto");
+    document.getElementById("overlayZonaMapa").classList.remove("oculto");
+
+}
+
+function cerrarPanelZonaMapa() {
+    document.getElementById("panelZonaMapa").classList.remove("abierto");
+    document.getElementById("overlayZonaMapa").classList.add("oculto");
+    zonaMapaEnEdicionId = null;
+}
+
+document.getElementById("btnNuevaZonaMapa").addEventListener("click", iniciarModoDibujoMapa);
+document.getElementById("btnCancelarDibujoMapa").addEventListener("click", detenerModoDibujoMapa);
+
+document.getElementById("btnDeshacerPuntoMapa").addEventListener("click", () => {
+    puntosDibujoMapaActual.pop();
+    renderizarDibujoTemporalMapa();
+});
+
+document.getElementById("svgEditorMapa").addEventListener("click", (evento) => {
+    if (!modoDibujoMapaActivo) return;
+    puntosDibujoMapaActual.push(coordenadasClicMapa(evento));
+    renderizarDibujoTemporalMapa();
+});
+
+document.getElementById("btnCerrarFormaMapa").addEventListener("click", () => {
+    if (puntosDibujoMapaActual.length < 3) return;
+    abrirPanelZonaMapa(null);
+});
+
+document.getElementById("btnCerrarZonaMapa").addEventListener("click", cerrarPanelZonaMapa);
+document.getElementById("overlayZonaMapa").addEventListener("click", cerrarPanelZonaMapa);
+
+document.getElementById("btnGuardarZonaMapa").addEventListener("click", async () => {
+
+    const mensaje = document.getElementById("mensajePanelZonaMapa");
+    const nombre = document.getElementById("inputNombreZonaMapa").value.trim();
+
+    if (!nombre) {
+        mostrarMensaje(mensaje, "Indica el nombre de la zona", "fallo");
+        return;
+    }
+
+    const payload = {
+        nombre,
+        descripcion: document.getElementById("inputDescripcionZonaMapa").value.trim(),
+        color: document.getElementById("inputColorZonaMapa").value
+    };
+
+    try {
+
+        if (zonaMapaEnEdicionId) {
+            await peticionApi(`/api/mapa/zonas/${zonaMapaEnEdicionId}`, { method: "PATCH", body: JSON.stringify(payload) });
+        } else {
+            payload.puntos = puntosDibujoMapaActual;
+            await peticionApi("/api/mapa/zonas", { method: "POST", body: JSON.stringify(payload) });
+        }
+
+        detenerModoDibujoMapa();
+        cerrarPanelZonaMapa();
+        await cargarMapaAdmin();
+
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
+
+document.getElementById("btnEliminarZonaMapa").addEventListener("click", async () => {
+
+    if (!zonaMapaEnEdicionId) return;
+    if (!confirm("¿Eliminar esta zona del mapa? No se puede deshacer.")) return;
+
+    try {
+        await peticionApi(`/api/mapa/zonas/${zonaMapaEnEdicionId}`, { method: "DELETE" });
+        cerrarPanelZonaMapa();
+        await cargarMapaAdmin();
+    } catch (error) {
+        mostrarMensaje(document.getElementById("mensajePanelZonaMapa"), error.message, "fallo");
+    }
+
+});
+
+document.getElementById("btnTogglePublicarMapa").addEventListener("click", async () => {
+
+    try {
+        await peticionApi(mapaEstadoActual.publicado ? "/api/mapa/despublicar" : "/api/mapa/publicar", { method: "POST" });
+        await cargarMapaAdmin();
+    } catch (error) {
+        alert(error.message);
+    }
+
+});
+
+document.getElementById("formSubirImagenMapa").addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+
+    const mensaje = document.getElementById("mensajeMapa");
+    const archivo = document.getElementById("inputImagenMapa").files[0];
+
+    if (!archivo) {
+        mostrarMensaje(mensaje, "Selecciona una imagen primero", "fallo");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("imagen", archivo);
+
+    try {
+        await subirArchivo("/api/mapa/imagen", formData);
+        document.getElementById("inputImagenMapa").value = "";
+        mostrarMensaje(mensaje, "Imagen actualizada correctamente", "ok");
+        await cargarMapaAdmin();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+
+});
 
 // ==========================
 // Arranque

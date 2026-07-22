@@ -53,6 +53,7 @@
       <button class="cf-portal-tab" data-portal-tab="actividades">🎮 Actividades</button>
       <button class="cf-portal-tab" data-portal-tab="itinerario">🗓️ Itinerario</button>
       <button class="cf-portal-tab" data-portal-tab="encuesta">📋 Encuesta</button>
+      <button class="cf-portal-tab" data-portal-tab="mapa">🗺️ Mapa</button>
     </div>
 
     <!-- ===== PESTAÑA: PERFIL ===== -->
@@ -217,6 +218,14 @@
       </div>
     </div>
 
+    <!-- ===== PESTAÑA: MAPA ===== -->
+    <div class="cf-portal-panel" data-portal-panel="mapa" hidden>
+      <div class="cf-panel" id="cf-campista-mapa">
+        <h3><span class="cf-dot"></span>Mapa del evento</h3>
+        <div id="cf-mapa-contenedor"><p>Cargando…</p></div>
+      </div>
+    </div>
+
   </div>
 
 </section>
@@ -289,6 +298,7 @@
 </style>
 
 <script src="qrcode.min.js"></script>
+<script src="../assets/mapa-evento.js"></script>
 <script>
 (function () {
 
@@ -725,9 +735,25 @@
       if (tab === "actividades") desbloquearLogro("tab_actividades");
       if (tab === "itinerario") desbloquearLogro("tab_itinerario");
       if (tab === "encuesta") cargarEncuesta();
+      if (tab === "mapa") cargarMapaEvento();
 
     });
   });
+
+  // ==========================
+  // Mapa del evento — misma respuesta pública que consume el sitio público,
+  // el renderizado (imagen + zonas) lo hace mapa-evento.js.
+  // ==========================
+  async function cargarMapaEvento() {
+    var contenedor = document.getElementById("cf-mapa-contenedor");
+    try {
+      var respuesta = await fetch(API_BASE + "/api/mapa");
+      var datos = await respuesta.json();
+      window.renderizarMapaEvento(contenedor, datos);
+    } catch (e) {
+      contenedor.innerHTML = "<p>No se pudo cargar el mapa. Intenta de nuevo más tarde.</p>";
+    }
+  }
 
   // ==========================
   // Historia: cada bloque se abre/cierra, y cada hito se puede marcar visto.
