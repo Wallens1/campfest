@@ -28,7 +28,7 @@
             ".cf-mapa-zona{ fill-opacity:.35; stroke-width:.6; cursor:pointer; transition:fill-opacity .12s ease; }" +
             ".cf-mapa-zona:hover, .cf-mapa-zona-activa{ fill-opacity:.6; }" +
             ".cf-mapa-zona-marcador{ fill:#fff; stroke:var(--ink); stroke-width:.5; pointer-events:none; }" +
-            ".cf-mapa-zona-numero{ font-size:3.6px; font-weight:800; fill:var(--ink); text-anchor:middle; dominant-baseline:central; pointer-events:none; }" +
+            ".cf-mapa-zona-numero{ font-family:'Poppins', sans-serif; font-size:2.6px; font-weight:700; fill:var(--ink); text-anchor:middle; pointer-events:none; }" +
             ".cf-mapa-leyenda{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }" +
             ".cf-mapa-leyenda-item{ display:flex; align-items:center; gap:6px; padding:6px 12px 6px 6px; border-radius:999px; border:2px solid var(--ink); background:var(--white); font-size:12.5px; font-weight:700; cursor:pointer; }" +
             ".cf-mapa-leyenda-item.cf-mapa-leyenda-activa{ background:var(--yellow); }" +
@@ -60,8 +60,8 @@
             var centro = coordenadasCentro(zona.puntos);
             return '<g data-cf-zona="' + zona.id + '">' +
                 '<polygon class="cf-mapa-zona" points="' + puntos + '" style="fill:' + zona.color + '; stroke:' + zona.color + ';"></polygon>' +
-                '<circle class="cf-mapa-zona-marcador" cx="' + centro.x + '" cy="' + centro.y + '" r="3.4"></circle>' +
-                '<text class="cf-mapa-zona-numero" x="' + centro.x + '" y="' + centro.y + '">' + (indice + 1) + '</text>' +
+                '<circle class="cf-mapa-zona-marcador" cx="' + centro.x + '" cy="' + centro.y + '" r="2.8"></circle>' +
+                '<text class="cf-mapa-zona-numero" x="' + centro.x + '" y="' + centro.y + '" dy="0.9">' + (indice + 1) + '</text>' +
                 '</g>';
         }).join("");
 

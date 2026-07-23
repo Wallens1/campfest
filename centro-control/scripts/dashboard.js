@@ -4841,8 +4841,8 @@ function renderizarZonasEnSvgYLista(mapa) {
         return `
             <g data-zona-svg="${zona.id}">
                 <polygon class="mapa-zona-poligono" points="${puntos}" style="fill:${zona.color}; stroke:${zona.color};"></polygon>
-                <circle class="mapa-zona-marcador" cx="${centro.x}" cy="${centro.y}" r="3.4"></circle>
-                <text class="mapa-zona-numero" x="${centro.x}" y="${centro.y}">${indice + 1}</text>
+                <circle class="mapa-zona-marcador" cx="${centro.x}" cy="${centro.y}" r="2.8"></circle>
+                <text class="mapa-zona-numero" x="${centro.x}" y="${centro.y}" dy="0.9">${indice + 1}</text>
             </g>
         `;
     }).join("");
