@@ -1161,7 +1161,13 @@
 
         <div class="tarjeta">
             <h3>Mapa del evento</h3>
-            <p class="detalle" style="margin-top:-6px;">Dibuja zonas sobre una imagen del sitio (ej. un triángulo llamado "Baños") para que campistas y visitantes se ubiquen. Mientras no lo publiques, solo tú lo ves aquí.</p>
+            <p class="detalle" style="margin-top:-6px;">Puedes guardar varios mapas candidatos a la vez (ej. si hay más de una sede propuesta) y dibujar zonas en cada uno para comparar. Solo el que publiques queda visible para todos — los demás quedan como borrador, visibles solo aquí.</p>
+
+            <button type="button" class="boton pequeno amarillo" id="btnNuevoMapaCandidato" style="width:auto; margin-bottom:14px;">+ Nuevo mapa candidato</button>
+
+            <div id="listaMapasCandidatos"><p class="detalle">Cargando...</p></div>
+
+            <div id="envoltorioMapaSeleccionado" class="oculto" style="margin-top:18px; border-top:2px solid #eee; padding-top:16px;">
 
             <div class="banner-estado-mapa" id="bannerEstadoMapa">
                 <span id="textoEstadoMapa">Cargando estado del mapa...</span>
@@ -1170,7 +1176,7 @@
 
             <form id="formSubirImagenMapa" style="display:flex; gap:8px; align-items:flex-end; margin:16px 0;">
                 <div class="campo" style="flex:1; margin-bottom:0;">
-                    <label for="inputImagenMapa">Imagen base del mapa (plano o foto aérea)</label>
+                    <label for="inputImagenMapa">Imagen base de este mapa (plano o foto aérea)</label>
                     <input type="file" id="inputImagenMapa" accept="image/*">
                 </div>
                 <button type="submit" class="boton pequeno terciario" style="width:auto;">Subir imagen</button>
@@ -1197,6 +1203,8 @@
                     <h3>Zonas creadas</h3>
                     <div id="listaZonasMapa"><p class="detalle">Sin zonas todavía.</p></div>
                 </div>
+
+            </div>
 
             </div>
         </div>
@@ -1308,6 +1316,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=43" defer></script>
+<script src="scripts/dashboard.js?v=44" defer></script>
 </body>
 </html>

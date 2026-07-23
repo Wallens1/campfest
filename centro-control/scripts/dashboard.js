@@ -398,7 +398,7 @@ function mostrarSubpestanaAdmin(grupo) {
     if (grupo === "dietas") cargarDietasEspeciales();
     if (grupo === "evento") cargarEstadoEncuestaHabilitada();
     if (grupo === "encuestas") { cargarResumenEncuesta("campista"); cargarResumenEncuesta("staff"); }
-    if (grupo === "mapa") cargarMapaAdmin();
+    if (grupo === "mapa") cargarMapasCandidatos();
 
 }
 
@@ -4677,64 +4677,149 @@ function renderizarGraficosInscripciones(estadisticas) {
 }
 
 // ==========================
-// Mapa del evento — zonas dibujadas sobre una imagen (admin crea/edita,
-// todos los demás solo la ven una vez publicada). Los puntos de cada zona
-// se guardan como porcentaje (0-100) relativo al tamaño de la imagen, así
+// Mapa del evento — puede haber varios mapas candidatos guardados a la vez
+// (ej. para comparar sedes propuestas), pero como mucho uno publicado
+// (visible para todos) al mismo tiempo. Los puntos de cada zona se guardan
+// como porcentaje (0-100) relativo al tamaño de la imagen de SU mapa, así
 // que el dibujo se ve igual sin importar el tamaño de pantalla.
 // ==========================
 
-let mapaEstadoActual = { publicado: false, imagenUrl: null, zonas: [] };
+let mapasCandidatos = [];
+let mapaSeleccionadoId = null;
 let modoDibujoMapaActivo = false;
 let puntosDibujoMapaActual = [];
 let zonaMapaEnEdicionId = null;
 
-async function cargarMapaAdmin() {
+function mapaSeleccionado() {
+    return mapasCandidatos.find((m) => m.id === mapaSeleccionadoId) || null;
+}
+
+async function cargarMapasCandidatos() {
 
     try {
 
         const datos = await peticionApi("/api/mapa/admin");
-        mapaEstadoActual = { publicado: datos.publicado, imagenUrl: datos.imagenUrl, zonas: datos.zonas };
+        mapasCandidatos = datos.mapas;
 
-        renderizarBannerEstadoMapa();
-        renderizarImagenMapa();
-        renderizarZonasEnSvgYLista();
+        if (mapaSeleccionadoId && !mapasCandidatos.some((m) => m.id === mapaSeleccionadoId)) {
+            mapaSeleccionadoId = null;
+        }
+
+        renderizarListaMapasCandidatos();
+        renderizarEditorMapaSeleccionado();
 
     } catch (error) {
-        document.getElementById("textoEstadoMapa").textContent = "No se pudo cargar el mapa.";
+        document.getElementById("listaMapasCandidatos").innerHTML = `<p class="detalle">No se pudieron cargar los mapas.</p>`;
     }
 
 }
 
-function renderizarBannerEstadoMapa() {
+function renderizarListaMapasCandidatos() {
+
+    const contenedor = document.getElementById("listaMapasCandidatos");
+
+    if (mapasCandidatos.length === 0) {
+        contenedor.innerHTML = `<p class="detalle">Todavía no has creado ningún mapa candidato.</p>`;
+        return;
+    }
+
+    contenedor.innerHTML = mapasCandidatos.map((mapa) => `
+        <div class="item-zona-mapa" data-mapa-candidato="${mapa.id}" style="${mapa.id === mapaSeleccionadoId ? "border-color:var(--teal);" : ""}">
+            <div class="info-zona">
+                <strong>${mapa.nombre} <span class="badge ${mapa.publicado ? "verde" : "neutro"}" style="margin-left:6px;">${mapa.publicado ? "Publicado" : "Borrador"}</span></strong>
+                <span>${mapa.zonas.length} zona(s)</span>
+            </div>
+            <button type="button" class="boton pequeno secundario" data-renombrar-mapa="${mapa.id}" style="width:auto; padding:6px 10px; font-size:11px;">Renombrar</button>
+            <button type="button" class="boton pequeno" data-eliminar-mapa="${mapa.id}" style="width:auto; padding:6px 10px; font-size:11px; background:var(--rojo);">Eliminar</button>
+        </div>
+    `).join("");
+
+    contenedor.querySelectorAll("[data-mapa-candidato]").forEach((item) => {
+        item.addEventListener("click", (evento) => {
+            if (evento.target.closest("button")) return;
+            mapaSeleccionadoId = item.dataset.mapaCandidato;
+            detenerModoDibujoMapa();
+            renderizarListaMapasCandidatos();
+            renderizarEditorMapaSeleccionado();
+        });
+    });
+
+    contenedor.querySelectorAll("[data-renombrar-mapa]").forEach((boton) => {
+        boton.addEventListener("click", async (evento) => {
+            evento.stopPropagation();
+            const mapa = mapasCandidatos.find((m) => m.id === boton.dataset.renombrarMapa);
+            const nuevoNombre = prompt("Nuevo nombre para este mapa:", mapa.nombre);
+            if (!nuevoNombre || !nuevoNombre.trim()) return;
+            try {
+                await peticionApi(`/api/mapa/${mapa.id}`, { method: "PATCH", body: JSON.stringify({ nombre: nuevoNombre.trim() }) });
+                await cargarMapasCandidatos();
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    });
+
+    contenedor.querySelectorAll("[data-eliminar-mapa]").forEach((boton) => {
+        boton.addEventListener("click", async (evento) => {
+            evento.stopPropagation();
+            if (!confirm("¿Eliminar este mapa candidato y todas sus zonas? No se puede deshacer.")) return;
+            try {
+                await peticionApi(`/api/mapa/${boton.dataset.eliminarMapa}`, { method: "DELETE" });
+                if (mapaSeleccionadoId === boton.dataset.eliminarMapa) mapaSeleccionadoId = null;
+                await cargarMapasCandidatos();
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    });
+
+}
+
+function renderizarEditorMapaSeleccionado() {
+
+    const mapa = mapaSeleccionado();
+    const envoltorio = document.getElementById("envoltorioMapaSeleccionado");
+
+    envoltorio.classList.toggle("oculto", !mapa);
+
+    if (!mapa) return;
+
+    renderizarBannerEstadoMapa(mapa);
+    renderizarImagenMapa(mapa);
+    renderizarZonasEnSvgYLista(mapa);
+
+}
+
+function renderizarBannerEstadoMapa(mapa) {
 
     const banner = document.getElementById("bannerEstadoMapa");
     const texto = document.getElementById("textoEstadoMapa");
     const boton = document.getElementById("btnTogglePublicarMapa");
 
-    banner.classList.toggle("publicado", mapaEstadoActual.publicado);
-    banner.classList.toggle("borrador", !mapaEstadoActual.publicado);
+    banner.classList.toggle("publicado", mapa.publicado);
+    banner.classList.toggle("borrador", !mapa.publicado);
 
-    texto.textContent = mapaEstadoActual.publicado
+    texto.textContent = mapa.publicado
         ? "Publicado — todos lo ven (portal del campista y sitio público)"
         : "Borrador — solo tú lo ves aquí";
 
     boton.disabled = false;
-    boton.textContent = mapaEstadoActual.publicado ? "Ocultar mapa" : "Publicar mapa";
+    boton.textContent = mapa.publicado ? "Ocultar mapa" : "Publicar mapa";
 
 }
 
-function renderizarImagenMapa() {
+function renderizarImagenMapa(mapa) {
 
     const envoltorio = document.getElementById("envoltorioEditorMapa");
     const img = document.getElementById("imagenMapaEditor");
 
-    if (!mapaEstadoActual.imagenUrl) {
+    if (!mapa.imagenUrl) {
         envoltorio.classList.add("oculto");
         return;
     }
 
     envoltorio.classList.remove("oculto");
-    img.src = mapaEstadoActual.imagenUrl;
+    img.src = mapa.imagenUrl;
 
 }
 
@@ -4745,12 +4830,12 @@ function centroideZonaMapa(puntos) {
     };
 }
 
-function renderizarZonasEnSvgYLista() {
+function renderizarZonasEnSvgYLista(mapa) {
 
     const svg = document.getElementById("svgEditorMapa");
     const lista = document.getElementById("listaZonasMapa");
 
-    const grupos = mapaEstadoActual.zonas.map((zona) => {
+    const grupos = mapa.zonas.map((zona) => {
         const puntos = zona.puntos.map((p) => `${p.x},${p.y}`).join(" ");
         const centro = centroideZonaMapa(zona.puntos);
         return `
@@ -4767,14 +4852,14 @@ function renderizarZonasEnSvgYLista() {
         g.addEventListener("click", (evento) => {
             if (modoDibujoMapaActivo) return;
             evento.stopPropagation();
-            const zona = mapaEstadoActual.zonas.find((z) => z.id === g.dataset.zonaSvg);
+            const zona = mapa.zonas.find((z) => z.id === g.dataset.zonaSvg);
             if (zona) abrirPanelZonaMapa(zona);
         });
     });
 
-    lista.innerHTML = mapaEstadoActual.zonas.length === 0
+    lista.innerHTML = mapa.zonas.length === 0
         ? `<p class="detalle">Sin zonas todavía.</p>`
-        : mapaEstadoActual.zonas.map((zona) => `
+        : mapa.zonas.map((zona) => `
             <div class="item-zona-mapa" data-zona-lista="${zona.id}">
                 <div class="muestra-color" style="background:${zona.color};"></div>
                 <div class="info-zona">
@@ -4786,7 +4871,7 @@ function renderizarZonasEnSvgYLista() {
 
     lista.querySelectorAll("[data-zona-lista]").forEach((item) => {
         item.addEventListener("click", () => {
-            const zona = mapaEstadoActual.zonas.find((z) => z.id === item.dataset.zonaLista);
+            const zona = mapa.zonas.find((z) => z.id === item.dataset.zonaLista);
             if (zona) abrirPanelZonaMapa(zona);
         });
     });
@@ -4917,12 +5002,12 @@ document.getElementById("btnGuardarZonaMapa").addEventListener("click", async ()
             await peticionApi(`/api/mapa/zonas/${zonaMapaEnEdicionId}`, { method: "PATCH", body: JSON.stringify(payload) });
         } else {
             payload.puntos = puntosDibujoMapaActual;
-            await peticionApi("/api/mapa/zonas", { method: "POST", body: JSON.stringify(payload) });
+            await peticionApi(`/api/mapa/${mapaSeleccionadoId}/zonas`, { method: "POST", body: JSON.stringify(payload) });
         }
 
         detenerModoDibujoMapa();
         cerrarPanelZonaMapa();
-        await cargarMapaAdmin();
+        await cargarMapasCandidatos();
 
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
@@ -4938,18 +5023,36 @@ document.getElementById("btnEliminarZonaMapa").addEventListener("click", async (
     try {
         await peticionApi(`/api/mapa/zonas/${zonaMapaEnEdicionId}`, { method: "DELETE" });
         cerrarPanelZonaMapa();
-        await cargarMapaAdmin();
+        await cargarMapasCandidatos();
     } catch (error) {
         mostrarMensaje(document.getElementById("mensajePanelZonaMapa"), error.message, "fallo");
     }
 
 });
 
-document.getElementById("btnTogglePublicarMapa").addEventListener("click", async () => {
+document.getElementById("btnNuevoMapaCandidato").addEventListener("click", async () => {
+
+    const nombre = prompt('Nombre de este mapa candidato (ej. "Sede A - Parque Central"):');
+    if (!nombre || !nombre.trim()) return;
 
     try {
-        await peticionApi(mapaEstadoActual.publicado ? "/api/mapa/despublicar" : "/api/mapa/publicar", { method: "POST" });
-        await cargarMapaAdmin();
+        const resultado = await peticionApi("/api/mapa", { method: "POST", body: JSON.stringify({ nombre: nombre.trim() }) });
+        mapaSeleccionadoId = resultado.mapa.id;
+        await cargarMapasCandidatos();
+    } catch (error) {
+        alert(error.message);
+    }
+
+});
+
+document.getElementById("btnTogglePublicarMapa").addEventListener("click", async () => {
+
+    const mapa = mapaSeleccionado();
+    if (!mapa) return;
+
+    try {
+        await peticionApi(`/api/mapa/${mapa.id}/${mapa.publicado ? "despublicar" : "publicar"}`, { method: "POST" });
+        await cargarMapasCandidatos();
     } catch (error) {
         alert(error.message);
     }
@@ -4972,10 +5075,10 @@ document.getElementById("formSubirImagenMapa").addEventListener("submit", async 
     formData.append("imagen", archivo);
 
     try {
-        await subirArchivo("/api/mapa/imagen", formData);
+        await subirArchivo(`/api/mapa/${mapaSeleccionadoId}/imagen`, formData);
         document.getElementById("inputImagenMapa").value = "";
         mostrarMensaje(mensaje, "Imagen actualizada correctamente", "ok");
-        await cargarMapaAdmin();
+        await cargarMapasCandidatos();
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
     }
