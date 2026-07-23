@@ -15,6 +15,20 @@
         return { x: sx / puntos.length, y: sy / puntos.length };
     }
 
+    // Pin como los de un mapa de parque/atracción: un círculo (el "bulbo",
+    // donde va el número) con una colita triangular que apunta exactamente
+    // al punto de la zona — la punta toca el punto, el bulbo queda arriba.
+    function marcadorPin(punta, radio) {
+        var centroBulbo = { x: punta.x, y: punta.y - radio * 1.7 };
+        var anchoCola = radio * 0.55;
+        var yBaseCola = centroBulbo.y + radio * 0.85;
+        return {
+            centroBulbo: centroBulbo,
+            radio: radio,
+            puntosCola: (punta.x - anchoCola) + "," + yBaseCola + " " + (punta.x + anchoCola) + "," + yBaseCola + " " + punta.x + "," + punta.y
+        };
+    }
+
     function inyectarEstilos() {
 
         if (document.getElementById("cf-mapa-evento-estilos")) return;
@@ -25,10 +39,11 @@
             ".cf-mapa-lienzo{ position:relative; width:100%; border:3px solid var(--ink); border-radius:14px; overflow:hidden; line-height:0; background:#eee; }" +
             ".cf-mapa-lienzo img{ width:100%; display:block; }" +
             ".cf-mapa-lienzo svg{ position:absolute; top:0; left:0; width:100%; height:100%; }" +
-            ".cf-mapa-zona{ fill-opacity:.35; stroke-width:.6; cursor:pointer; transition:fill-opacity .12s ease; }" +
-            ".cf-mapa-zona:hover, .cf-mapa-zona-activa{ fill-opacity:.6; }" +
-            ".cf-mapa-zona-marcador{ fill:#fff; stroke:var(--ink); stroke-width:.5; pointer-events:none; }" +
-            ".cf-mapa-zona-numero{ font-family:'Poppins', sans-serif; font-size:2.6px; font-weight:700; fill:var(--ink); text-anchor:middle; pointer-events:none; }" +
+            ".cf-mapa-zona{ fill-opacity:.28; stroke-width:.6; cursor:pointer; transition:fill-opacity .12s ease; }" +
+            ".cf-mapa-zona:hover, .cf-mapa-zona-activa{ fill-opacity:.5; }" +
+            ".cf-mapa-pin{ filter:drop-shadow(0 .6px 1.1px rgba(0,0,0,.45)); pointer-events:none; }" +
+            ".cf-mapa-pin-cola, .cf-mapa-pin-bulbo{ stroke:var(--ink); stroke-width:.35; }" +
+            ".cf-mapa-zona-numero{ font-family:'Poppins', sans-serif; font-size:2.7px; font-weight:700; fill:#fff; text-anchor:middle; paint-order:stroke; stroke:var(--ink); stroke-width:.5px; stroke-linejoin:round; pointer-events:none; }" +
             ".cf-mapa-leyenda{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }" +
             ".cf-mapa-leyenda-item{ display:flex; align-items:center; gap:6px; padding:6px 12px 6px 6px; border-radius:999px; border:2px solid var(--ink); background:var(--white); font-size:12.5px; font-weight:700; cursor:pointer; }" +
             ".cf-mapa-leyenda-item.cf-mapa-leyenda-activa{ background:var(--yellow); }" +
@@ -58,10 +73,14 @@
         var poligonos = zonas.map(function (zona, indice) {
             var puntos = zona.puntos.map(function (p) { return p.x + "," + p.y; }).join(" ");
             var centro = coordenadasCentro(zona.puntos);
+            var pin = marcadorPin(centro, 3);
             return '<g data-cf-zona="' + zona.id + '">' +
                 '<polygon class="cf-mapa-zona" points="' + puntos + '" style="fill:' + zona.color + '; stroke:' + zona.color + ';"></polygon>' +
-                '<circle class="cf-mapa-zona-marcador" cx="' + centro.x + '" cy="' + centro.y + '" r="2.8"></circle>' +
-                '<text class="cf-mapa-zona-numero" x="' + centro.x + '" y="' + centro.y + '" dy="0.9">' + (indice + 1) + '</text>' +
+                '<g class="cf-mapa-pin">' +
+                '<polygon class="cf-mapa-pin-cola" points="' + pin.puntosCola + '" style="fill:' + zona.color + ';"></polygon>' +
+                '<circle class="cf-mapa-pin-bulbo" cx="' + pin.centroBulbo.x + '" cy="' + pin.centroBulbo.y + '" r="' + pin.radio + '" style="fill:' + zona.color + ';"></circle>' +
+                '<text class="cf-mapa-zona-numero" x="' + pin.centroBulbo.x + '" y="' + pin.centroBulbo.y + '" dy="0.95">' + (indice + 1) + '</text>' +
+                '</g>' +
                 '</g>';
         }).join("");
 

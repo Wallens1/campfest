@@ -4830,6 +4830,20 @@ function centroideZonaMapa(puntos) {
     };
 }
 
+// Pin como los de un mapa de parque/atracción: un círculo (el "bulbo",
+// donde va el número) con una colita triangular que apunta exactamente al
+// punto de la zona — la punta toca el punto, el bulbo queda arriba.
+function marcadorPin(punta, radio) {
+    const centroBulbo = { x: punta.x, y: punta.y - radio * 1.7 };
+    const anchoCola = radio * 0.55;
+    const yBaseCola = centroBulbo.y + radio * 0.85;
+    return {
+        centroBulbo,
+        radio,
+        puntosCola: `${punta.x - anchoCola},${yBaseCola} ${punta.x + anchoCola},${yBaseCola} ${punta.x},${punta.y}`
+    };
+}
+
 function renderizarZonasEnSvgYLista(mapa) {
 
     const svg = document.getElementById("svgEditorMapa");
@@ -4838,11 +4852,15 @@ function renderizarZonasEnSvgYLista(mapa) {
     const grupos = mapa.zonas.map((zona, indice) => {
         const puntos = zona.puntos.map((p) => `${p.x},${p.y}`).join(" ");
         const centro = centroideZonaMapa(zona.puntos);
+        const pin = marcadorPin(centro, 3);
         return `
             <g data-zona-svg="${zona.id}">
                 <polygon class="mapa-zona-poligono" points="${puntos}" style="fill:${zona.color}; stroke:${zona.color};"></polygon>
-                <circle class="mapa-zona-marcador" cx="${centro.x}" cy="${centro.y}" r="2.8"></circle>
-                <text class="mapa-zona-numero" x="${centro.x}" y="${centro.y}" dy="0.9">${indice + 1}</text>
+                <g class="mapa-pin-zona">
+                    <polygon class="mapa-pin-cola" points="${pin.puntosCola}" style="fill:${zona.color};"></polygon>
+                    <circle class="mapa-pin-bulbo" cx="${pin.centroBulbo.x}" cy="${pin.centroBulbo.y}" r="${pin.radio}" style="fill:${zona.color};"></circle>
+                    <text class="mapa-zona-numero" x="${pin.centroBulbo.x}" y="${pin.centroBulbo.y}" dy="0.95">${indice + 1}</text>
+                </g>
             </g>
         `;
     }).join("");
