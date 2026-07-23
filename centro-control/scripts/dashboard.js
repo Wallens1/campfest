@@ -4835,13 +4835,14 @@ function renderizarZonasEnSvgYLista(mapa) {
     const svg = document.getElementById("svgEditorMapa");
     const lista = document.getElementById("listaZonasMapa");
 
-    const grupos = mapa.zonas.map((zona) => {
+    const grupos = mapa.zonas.map((zona, indice) => {
         const puntos = zona.puntos.map((p) => `${p.x},${p.y}`).join(" ");
         const centro = centroideZonaMapa(zona.puntos);
         return `
             <g data-zona-svg="${zona.id}">
                 <polygon class="mapa-zona-poligono" points="${puntos}" style="fill:${zona.color}; stroke:${zona.color};"></polygon>
-                <text class="mapa-zona-etiqueta" x="${centro.x}" y="${centro.y}">${zona.nombre}</text>
+                <circle class="mapa-zona-marcador" cx="${centro.x}" cy="${centro.y}" r="3.4"></circle>
+                <text class="mapa-zona-numero" x="${centro.x}" y="${centro.y}">${indice + 1}</text>
             </g>
         `;
     }).join("");
@@ -4849,19 +4850,28 @@ function renderizarZonasEnSvgYLista(mapa) {
     svg.innerHTML = `<g id="grupoZonasExistentesMapa">${grupos}</g><g id="grupoDibujoTemporalMapa"></g>`;
 
     svg.querySelectorAll("[data-zona-svg]").forEach((g) => {
+
         g.addEventListener("click", (evento) => {
             if (modoDibujoMapaActivo) return;
             evento.stopPropagation();
             const zona = mapa.zonas.find((z) => z.id === g.dataset.zonaSvg);
             if (zona) abrirPanelZonaMapa(zona);
         });
+
+        g.addEventListener("mouseenter", () => {
+            document.querySelector(`[data-zona-lista="${g.dataset.zonaSvg}"]`)?.classList.add("resaltada");
+        });
+        g.addEventListener("mouseleave", () => {
+            document.querySelector(`[data-zona-lista="${g.dataset.zonaSvg}"]`)?.classList.remove("resaltada");
+        });
+
     });
 
     lista.innerHTML = mapa.zonas.length === 0
         ? `<p class="detalle">Sin zonas todavía.</p>`
-        : mapa.zonas.map((zona) => `
+        : mapa.zonas.map((zona, indice) => `
             <div class="item-zona-mapa" data-zona-lista="${zona.id}">
-                <div class="muestra-color" style="background:${zona.color};"></div>
+                <span class="numero-zona" style="background:${zona.color};">${indice + 1}</span>
                 <div class="info-zona">
                     <strong>${zona.nombre}</strong>
                     <span>${zona.actividades.length} actividad(es) vinculada(s)</span>
@@ -4870,10 +4880,19 @@ function renderizarZonasEnSvgYLista(mapa) {
         `).join("");
 
     lista.querySelectorAll("[data-zona-lista]").forEach((item) => {
+
         item.addEventListener("click", () => {
             const zona = mapa.zonas.find((z) => z.id === item.dataset.zonaLista);
             if (zona) abrirPanelZonaMapa(zona);
         });
+
+        item.addEventListener("mouseenter", () => {
+            svg.querySelector(`[data-zona-svg="${item.dataset.zonaLista}"] .mapa-zona-poligono`)?.classList.add("resaltada");
+        });
+        item.addEventListener("mouseleave", () => {
+            svg.querySelector(`[data-zona-svg="${item.dataset.zonaLista}"] .mapa-zona-poligono`)?.classList.remove("resaltada");
+        });
+
     });
 
 }

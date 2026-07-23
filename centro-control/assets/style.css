@@ -726,17 +726,22 @@ table.tabla-participantes td{
     transition:fill-opacity .12s ease;
 }
 
-.mapa-zona-poligono:hover{ fill-opacity:.55; }
+.mapa-zona-poligono:hover, .mapa-zona-poligono.resaltada{ fill-opacity:.55; }
 
-.mapa-zona-etiqueta{
-    font-size:3.2px;
-    font-weight:700;
+.mapa-zona-marcador{
+    fill:#fff;
+    stroke:var(--tinta);
+    stroke-width:.5;
+    pointer-events:none;
+}
+
+.mapa-zona-numero{
+    font-size:3.6px;
+    font-weight:800;
     fill:var(--tinta);
     text-anchor:middle;
+    dominant-baseline:central;
     pointer-events:none;
-    paint-order:stroke;
-    stroke:#fff;
-    stroke-width:.6px;
 }
 
 .mapa-dibujo-temporal{ fill:none; stroke:var(--tinta); stroke-width:.5; stroke-dasharray:1.5,1; }
@@ -753,13 +758,18 @@ table.tabla-participantes td{
     cursor:pointer;
 }
 
-.item-zona-mapa:hover{ border-color:var(--teal); }
+.item-zona-mapa:hover, .item-zona-mapa.resaltada{ border-color:var(--teal); }
 
-.item-zona-mapa .muestra-color{
-    width:16px;
-    height:16px;
-    border-radius:4px;
+.item-zona-mapa .numero-zona{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;
+    height:22px;
+    border-radius:50%;
     border:2px solid var(--tinta);
+    font-size:11px;
+    font-weight:800;
     flex-shrink:0;
 }
 
