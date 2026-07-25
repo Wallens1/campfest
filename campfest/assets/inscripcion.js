@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
             telefono: valorDe("telefono"),
             contactoEmergenciaNombre: valorDe("contactoEmergenciaNombre"),
             contactoEmergenciaTelefono: valorDe("contactoEmergenciaTelefono"),
+            contactoEmergenciaCorreo: valorDe("contactoEmergenciaCorreo"),
             contactoEmergencia2Nombre: valorDe("contactoEmergencia2Nombre"),
             contactoEmergencia2Telefono: valorDe("contactoEmergencia2Telefono"),
             correoPersonal: valorDe("correoPersonal"),

@@ -15,7 +15,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 const CATEGORIAS = [
     "inconveniente", "queja", "reclamo", "sugerencia", "accidente",
     "emergencia_medica", "convivencia", "disciplina", "logistica",
-    "alimentacion", "objetos_perdidos", "seguridad", "otro"
+    "alimentacion", "objetos_perdidos", "seguridad", "persona_desaparecida", "otro"
 ];
 
 const PRIORIDADES = ["baja", "media", "alta", "critica"];
@@ -290,6 +290,8 @@ function actualizarTodoPolling() {
     cargarEstadoEvento();
     cargarAvisosInternos();
     cargarObjetosPerdidosLogistica();
+    cargarMiTurnoDeHoy();
+    cargarVerificacionesMias();
 }
 
 // Avisos dirigidos puntualmente a este usuario (ej. "tu actividad fue
@@ -455,6 +457,12 @@ const PASOS_TOUR = [
         vista: null
     },
     {
+        titulo: "Plan de Emergencias",
+        texto: "El 🚨 abre el directorio institucional (Policía, Bomberos, Cruz Roja, Hospital...) y las rutas de actuación paso a paso — ábrelo rápido si pasa algo real.",
+        selector: "#btnVerEmergencias",
+        vista: null
+    },
+    {
         titulo: "¿Qué puedo hacer con mi rol?",
         texto: "El botón \"?\" te recuerda la diferencia entre ser miembro y líder de tu rama, y qué puede hacer cada uno en este panel.",
         selector: "#btnAyudaRoles",
@@ -582,6 +590,18 @@ const PASOS_TOUR = [
         titulo: "Mis incidentes reportados",
         texto: "Todo lo que tú personalmente has reportado, con su código, descripción, prioridad y estado actual — para seguirle el pulso sin preguntarle a nadie.",
         selector: "#listaMisIncidentes",
+        vista: "comunicacion"
+    },
+    {
+        titulo: "Mi turno de centinela",
+        texto: "Solo aparece si el admin te asignó un turno nocturno para hoy — te deja marcar cuándo lo empiezas y cuándo lo terminas, para que el Centro de Control sepa que la vigilancia está cubierta.",
+        selector: "#tarjetaMiTurnoCentinela",
+        vista: "comunicacion"
+    },
+    {
+        titulo: "Verificaciones operativas",
+        texto: "Ronda de seguridad, verificación de terreno, infraestructura (extintores/luz/sonido) o manejo de residuos — un botón por tipo. Si todo está bien, queda registrado en un clic; si encontraste algo raro, te pide que lo describas.",
+        selector: "[data-registrar-verificacion]",
         vista: "comunicacion"
     },
     {
@@ -1038,6 +1058,187 @@ document.getElementById("btnCerrarEncuestaStaff").addEventListener("click", () =
 });
 
 // ==========================
+// Plan de Emergencias (solo lectura) — directorio institucional + rutas.
+// ==========================
+
+let emergenciasCargadas = false;
+
+async function cargarEmergenciasLogistica() {
+
+    if (emergenciasCargadas) return;
+
+    try {
+
+        const { contactos, rutas } = await peticionApi("/api/emergencias");
+
+        document.getElementById("listaContactosEmergenciaLogistica").innerHTML = contactos.map((c) => `
+            <div class="incidente-mini">
+                <div><span class="codigo">${c.entidad}</span><div class="descripcion">${c.funcion || ""}</div></div>
+                <div class="descripcion">${c.telefono || "sin teléfono"}</div>
+            </div>
+        `).join("");
+
+        document.getElementById("listaRutasEmergenciaLogistica").innerHTML = rutas.map((r) => `
+            <button type="button" class="cf-ruta-toggle" data-ruta-logistica="${r.codigo}" style="display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border:2px solid #ddd; border-radius:8px; background:var(--crema); font-weight:700; font-size:13px; cursor:pointer; font-family:inherit;">${r.titulo}</button>
+            <div class="oculto" data-ruta-logistica-pasos="${r.codigo}" style="padding:6px 16px 14px;">
+                <ol style="margin:0; padding-left:18px; font-size:12.5px;">
+                    ${r.pasos.map((p) => `<li style="margin-bottom:4px;">${p}</li>`).join("")}
+                </ol>
+            </div>
+        `).join("");
+
+        document.querySelectorAll("[data-ruta-logistica]").forEach((boton) => {
+            boton.addEventListener("click", () => {
+                document.querySelector(`[data-ruta-logistica-pasos="${boton.dataset.rutaLogistica}"]`).classList.toggle("oculto");
+            });
+        });
+
+        emergenciasCargadas = true;
+
+    } catch (error) {
+        document.getElementById("listaContactosEmergenciaLogistica").innerHTML = `<p class="detalle">No se pudo cargar el directorio.</p>`;
+    }
+
+}
+
+document.getElementById("btnVerEmergencias").addEventListener("click", () => {
+    document.getElementById("overlayEmergencias").classList.remove("oculto");
+    cargarEmergenciasLogistica();
+});
+
+document.getElementById("btnCerrarEmergencias").addEventListener("click", () => {
+    document.getElementById("overlayEmergencias").classList.add("oculto");
+});
+
+// ==========================
+// Verificaciones operativas — rondas, terreno, infraestructura, residuos.
+// ==========================
+
+const ETIQUETAS_VERIFICACION = {
+    ronda_seguridad: "Ronda de seguridad",
+    verificacion_terreno: "Verificación de terreno",
+    infraestructura: "Infraestructura",
+    manejo_residuos: "Manejo de residuos"
+};
+
+async function cargarVerificacionesMias() {
+
+    const contenedor = document.getElementById("listaVerificacionesMias");
+
+    try {
+
+        const hoy = new Date().toISOString().slice(0, 10);
+        const { verificaciones } = await peticionApi(`/api/verificaciones?fecha=${hoy}`);
+
+        contenedor.innerHTML = verificaciones.length === 0
+            ? `<p class="detalle">Sin verificaciones registradas hoy todavía.</p>`
+            : verificaciones.slice(0, 10).map((v) => `
+                <div class="incidente-mini">
+                    <div><span class="codigo">${ETIQUETAS_VERIFICACION[v.tipo] || v.tipo}</span><div class="descripcion">${v.registrado_por_nombre || "—"}</div></div>
+                    <div class="descripcion">${v.sin_novedades ? "Sin novedades" : `Novedad: ${v.novedades}`}</div>
+                </div>
+            `).join("");
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+document.querySelectorAll("[data-registrar-verificacion]").forEach((boton) => {
+
+    boton.addEventListener("click", async () => {
+
+        const tipo = boton.dataset.registrarVerificacion;
+        const mensaje = document.getElementById("mensajeVerificacionOperativa");
+
+        const novedad = prompt(`${ETIQUETAS_VERIFICACION[tipo]} — ¿alguna novedad? (déjalo vacío si todo está bien)`);
+
+        if (novedad === null) return; // canceló
+
+        try {
+
+            await peticionApi("/api/verificaciones", {
+                method: "POST",
+                body: JSON.stringify({
+                    tipo,
+                    sinNovedades: novedad.trim() === "",
+                    novedades: novedad.trim()
+                })
+            });
+
+            mostrarMensaje(mensaje, "Verificación registrada", "ok");
+            cargarVerificacionesMias();
+
+        } catch (error) {
+            mostrarMensaje(mensaje, error.message, "fallo");
+        }
+
+    });
+
+});
+
+// ==========================
+// Mi turno de centinela — solo se muestra si el usuario tiene un turno
+// asignado hoy.
+// ==========================
+
+async function cargarMiTurnoDeHoy() {
+
+    const tarjeta = document.getElementById("tarjetaMiTurnoCentinela");
+
+    try {
+
+        const hoy = new Date().toISOString().slice(0, 10);
+        const { turnos } = await peticionApi(`/api/turnos-centinela?fecha=${hoy}`);
+
+        const miTurno = turnos.find((t) => (t.asignados || []).includes(perfilActual?.id));
+
+        tarjeta.classList.toggle("oculto", !miTurno);
+
+        if (!miTurno) return;
+
+        document.getElementById("detalleMiTurnoCentinela").innerHTML = `
+            <p style="font-size:13px; margin:0 0 10px;">${formatearHora(miTurno.hora_inicio)} – ${formatearHora(miTurno.hora_fin)} · con ${miTurno.asignadosNombres.filter((n) => n).join(", ")}</p>
+            ${miTurno.finalizado
+                ? `<span class="badge" style="background:#e2f7ea; color:#0f7a3d; padding:4px 10px; border-radius:6px; font-size:12px;">Turno finalizado</span>`
+                : miTurno.iniciado
+                    ? `<button type="button" class="boton pequeno" data-finalizar-turno="${miTurno.id}" style="width:auto;">Marcar fin de turno</button>`
+                    : `<button type="button" class="boton pequeno secundario" data-iniciar-turno="${miTurno.id}" style="width:auto;">Marcar inicio de turno</button>`
+            }
+        `;
+
+        const botonIniciar = document.querySelector("[data-iniciar-turno]");
+        if (botonIniciar) {
+            botonIniciar.addEventListener("click", async () => {
+                try {
+                    await peticionApi(`/api/turnos-centinela/${botonIniciar.dataset.iniciarTurno}/inicio`, { method: "POST" });
+                    cargarMiTurnoDeHoy();
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        }
+
+        const botonFinalizar = document.querySelector("[data-finalizar-turno]");
+        if (botonFinalizar) {
+            botonFinalizar.addEventListener("click", async () => {
+                try {
+                    await peticionApi(`/api/turnos-centinela/${botonFinalizar.dataset.finalizarTurno}/fin`, { method: "POST" });
+                    cargarMiTurnoDeHoy();
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+// ==========================
 // Navegación entre pestañas
 // ==========================
 
@@ -1387,6 +1588,7 @@ function renderizarFicha(datos) {
     document.getElementById("inputTelefonoCritico").value = participante.telefono || "";
     document.getElementById("inputContactoEmergenciaNombreCritico").value = participante.contacto_emergencia_nombre || "";
     document.getElementById("inputContactoEmergenciaTelefonoCritico").value = participante.contacto_emergencia_telefono || "";
+    document.getElementById("inputContactoEmergenciaCorreoCritico").value = participante.contacto_emergencia_correo || "";
     document.getElementById("inputCondicionMedicaCritico").value = participante.condicion_medica_detalle || "";
     document.getElementById("inputRestriccionAlimentariaCritico").value = participante.restricciones_alimentarias_detalle || "";
     renderizarIngreso(participante, objetosConfiscados || []);
@@ -1829,6 +2031,7 @@ document.getElementById("formDatosCriticos").addEventListener("submit", async (e
                 telefono: document.getElementById("inputTelefonoCritico").value.trim(),
                 contacto_emergencia_nombre: document.getElementById("inputContactoEmergenciaNombreCritico").value.trim(),
                 contacto_emergencia_telefono: document.getElementById("inputContactoEmergenciaTelefonoCritico").value.trim(),
+                contacto_emergencia_correo: document.getElementById("inputContactoEmergenciaCorreoCritico").value.trim(),
                 condicion_medica_detalle: document.getElementById("inputCondicionMedicaCritico").value.trim(),
                 restricciones_alimentarias_detalle: document.getElementById("inputRestriccionAlimentariaCritico").value.trim()
             })
@@ -2010,6 +2213,17 @@ document.getElementById("inputCategoria").addEventListener("change", async (even
 
     const contenedor = document.getElementById("responsablesCategoria");
     const categoria = evento.target.value;
+
+    // Ruta 3 del Plan de Emergencias: una persona desaparecida siempre se
+    // reporta en prioridad crítica — el backend lo fuerza igual, pero aquí
+    // se refleja de una vez para que no genere confusión ver otra cosa.
+    const inputPrioridad = document.getElementById("inputPrioridad");
+    if (categoria === "persona_desaparecida") {
+        inputPrioridad.value = "critica";
+        inputPrioridad.disabled = true;
+    } else {
+        inputPrioridad.disabled = false;
+    }
 
     if (!categoria) {
         contenedor.classList.add("oculto");

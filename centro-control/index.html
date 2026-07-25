@@ -788,6 +788,8 @@
             <button type="button" class="tab-modulo" data-subpestana-admin="dietas">Dietas</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="encuestas">Encuestas</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="mapa">Mapa del evento</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="emergencias">Emergencias</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="aliados">Aliados</button>
         </div>
 
         <div data-grupo-admin="evento">
@@ -1211,6 +1213,87 @@
 
         </div>
 
+        <div data-grupo-admin="emergencias" class="oculto">
+
+        <div class="tarjeta">
+            <h3>Directorio institucional de emergencias</h3>
+            <p class="detalle" style="margin-top:-6px;">Mantenlo actualizado — sobre todo los que dicen "Por confirmar".</p>
+            <div id="listaContactosEmergencia"><p class="detalle">Cargando...</p></div>
+            <form id="formNuevoContactoEmergencia" style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; align-items:flex-end;">
+                <input type="text" id="inputEntidadContacto" placeholder="Entidad" style="flex:2; min-width:160px; padding:10px 12px; border:2px solid #ddd; border-radius:8px;" required>
+                <input type="text" id="inputTelefonoContacto" placeholder="Teléfono" style="flex:1; min-width:100px; padding:10px 12px; border:2px solid #ddd; border-radius:8px;">
+                <input type="text" id="inputFuncionContacto" placeholder="Función" style="flex:2; min-width:160px; padding:10px 12px; border:2px solid #ddd; border-radius:8px;">
+                <button type="submit" class="boton pequeno" style="width:auto;">Agregar</button>
+            </form>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Rutas de actuación</h3>
+            <p class="detalle" style="margin-top:-6px;">Toca una ruta para ver los pasos exactos — para consultar en el momento de una emergencia real.</p>
+            <div id="listaRutasEmergencia"></div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Matriz de riesgos</h3>
+            <div id="tablaMatrizRiesgos"></div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Turnos de centinela nocturno</h3>
+            <p class="detalle" style="margin-top:-6px;">3 turnos por noche, 2 personas cada uno — créalos y asígnales gente disponible.</p>
+            <form id="formNuevoTurnoCentinela" style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; align-items:flex-end;">
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="inputFechaTurno">Fecha</label>
+                    <input type="date" id="inputFechaTurno" required>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="inputHoraInicioTurno">Hora inicio</label>
+                    <input type="time" id="inputHoraInicioTurno" required>
+                </div>
+                <div class="campo" style="margin-bottom:0;">
+                    <label for="inputHoraFinTurno">Hora fin</label>
+                    <input type="time" id="inputHoraFinTurno" required>
+                </div>
+            </form>
+            <div class="campo">
+                <label>Asignados</label>
+                <div id="checkboxesAsignadosTurno" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+            </div>
+            <button type="button" class="boton pequeno" id="btnCrearTurnoCentinela" style="width:auto; margin-bottom:14px;">Crear turno</button>
+            <div id="listaTurnosCentinela"><p class="detalle">Cargando...</p></div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Verificaciones operativas</h3>
+            <p class="detalle" style="margin-top:-6px;">Rondas de seguridad, verificación de terreno, infraestructura y manejo de residuos que el staff va registrando desde el Panel Logístico.</p>
+            <div class="tabs-modulo" id="filtroTipoVerificacion" style="margin-bottom:12px;">
+                <button type="button" class="tab-modulo activo" data-tipo-verificacion="">Todas</button>
+                <button type="button" class="tab-modulo" data-tipo-verificacion="ronda_seguridad">Rondas</button>
+                <button type="button" class="tab-modulo" data-tipo-verificacion="verificacion_terreno">Terreno</button>
+                <button type="button" class="tab-modulo" data-tipo-verificacion="infraestructura">Infraestructura</button>
+                <button type="button" class="tab-modulo" data-tipo-verificacion="manejo_residuos">Residuos</button>
+            </div>
+            <div id="listaVerificacionesOperativas"><p class="detalle">Cargando...</p></div>
+        </div>
+
+        </div>
+
+        <div data-grupo-admin="aliados" class="oculto">
+
+        <div class="tarjeta">
+            <h3>Aliados institucionales</h3>
+            <p class="detalle" style="margin-top:-6px;">Precárgalos antes del evento y marca su llegada/salida el día de la visita.</p>
+            <form id="formNuevoAliado" style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+                <input type="text" id="inputEntidadAliado" placeholder="Entidad" style="flex:2; min-width:160px; padding:10px 12px; border:2px solid #ddd; border-radius:8px;" required>
+                <input type="text" id="inputRepresentanteAliado" placeholder="Representante" style="flex:1; min-width:140px; padding:10px 12px; border:2px solid #ddd; border-radius:8px;">
+                <input type="text" id="inputTelefonoAliado" placeholder="Teléfono" style="flex:1; min-width:100px; padding:10px 12px; border:2px solid #ddd; border-radius:8px;">
+                <button type="submit" class="boton pequeno" style="width:auto;">Agregar</button>
+            </form>
+            <div id="listaAliados"><p class="detalle">Cargando...</p></div>
+        </div>
+
+        </div>
+
     </section>
 
 </div>
@@ -1316,6 +1399,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=47" defer></script>
+<script src="scripts/dashboard.js?v=48" defer></script>
 </body>
 </html>
