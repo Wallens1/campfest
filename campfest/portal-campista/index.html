@@ -3,41 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi portal · Camp Fest 2026</title>
+<title>Mi portal · Camp Fest Bugalagrande 2027</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='14' cy='14' r='11' fill='%23FF2E8B' stroke='%231A1A1E' stroke-width='3'/%3E%3Cpath d='M22 18l7 12H15z' fill='%23FFD400' stroke='%231A1A1E' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
 
 <body id="cf26">
 
-<nav class="cf-nav">
-  <a href="../../index.html">Inicio</a>
-  <a href="../itinerario/">Itinerario</a>
-  <a href="../cartilla-del-campista/">Cartilla del campista</a>
-  <a href="../i-mayores-de-18-anos/">Mayores de edad</a>
-  <a href="../i-menores-de-edad/">Menores de edad</a>
-  <a href="../proceso-de-seleccion/">Proceso de selección</a>
-  <a href="../generar-constancias/">Generar Invitación</a>
-  <a href="../organizadores/">Organizadores</a>
-  <a href="./" class="cf-active">Mi portal</a>
+<a class="cf-skip" href="#contenido">Saltar al contenido</a>
+<nav class="cf-nav" aria-label="Principal">
+  <div class="cf-nav-inner">
+    <a class="cf-nav-brand" href="../../"><span class="cf-nav-mark" aria-hidden="true"></span><span>Camp Fest</span></a>
+    <a class="cf-nav-cta" href="../../#inscripcion">Inscribirme</a>
+    <button class="cf-nav-toggle" type="button" aria-expanded="false" aria-controls="cf-nav-links" aria-label="Abrir menú" data-icons="../../campfest/assets/icons.svg"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-menu"/></svg></button>
+    <div class="cf-nav-links" id="cf-nav-links">
+      <a href="../../">Inicio</a>
+      <a class="cf-nav-subpagina" href="../../#enfoque">Enfoque</a>
+      <a class="cf-nav-subpagina" href="../../#legal">Marco legal</a>
+      <a class="cf-nav-subpagina" href="../../#presupuesto">Presupuesto</a>
+      <a class="cf-nav-subpagina" href="../../campfest/itinerario/">Itinerario</a>
+      <details class="cf-nav-more cf-nav-subpagina">
+        <summary>Más <svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-chevron"/></svg></summary>
+        <div class="cf-nav-more-panel">
+          <a href="../../campfest/cartilla-del-campista/">Cartilla del campista</a>
+          <a href="../../campfest/i-mayores-de-18-anos/">Inscripción mayores de edad</a>
+          <a href="../../campfest/i-menores-de-edad/">Inscripción menores de edad</a>
+          <a href="../../campfest/proceso-de-seleccion/">Proceso de selección</a>
+          <a href="../../campfest/generar-constancias/">Generar invitación</a>
+          <a href="../../campfest/organizadores/">Organizadores</a>
+          <a href="../../campfest/bugalagrande/">Bugalagrande</a>
+        </div>
+      </details>
+      <a href="../../campfest/portal-campista/" aria-current="page">Mi portal</a>
+    </div>
+  </div>
 </nav>
+<main id="contenido">
 
 <section class="cf-section" style="max-width:640px;">
 
   <div id="cf-campista-login">
     <div class="cf-panel">
-      <h3><span class="cf-dot"></span>¡Bienvenido a tu portal, campista!</h3>
-      <p style="margin-bottom:16px;">Ingresa tu código de participante y tu número de documento para ver tu perfil, tu cuenta regresiva, tu insignia y el itinerario en tiempo real.</p>
+      <h2 class="cf-panel-title"><span class="cf-dot"></span>¡Bienvenido a tu portal, campista!</h2>
+      <p style="margin-bottom:16px;">Ingresa tu código de participante y tu número de documento para ver tu perfil, tu insignia, la fecha del campamento y el itinerario.</p>
       <form id="cf-form-login-campista" novalidate>
         <div class="cf-campo-campista">
           <label for="cf-input-codigo">Código de participante</label>
-          <input type="text" id="cf-input-codigo" placeholder="CF-0001" autocomplete="username" required>
+          <input type="text" id="cf-input-codigo" placeholder="CF-0001…" autocomplete="username" spellcheck="false" autocapitalize="characters" required>
         </div>
         <div class="cf-campo-campista">
           <label for="cf-input-documento">Número de documento</label>
-          <input type="text" id="cf-input-documento" placeholder="Tu cédula" inputmode="numeric" autocomplete="current-password" required>
+          <input type="text" id="cf-input-documento" placeholder="Ej. 1112223334…" inputmode="numeric" autocomplete="current-password" required>
         </div>
         <button type="submit" class="cf-btn cf-primary" style="width:100%; justify-content:center;">Ingresar</button>
-        <div class="cf-estado-campista" id="cf-estado-login"></div>
+        <div class="cf-estado-campista" id="cf-estado-login" role="status" aria-live="polite"></div>
       </form>
     </div>
   </div>
@@ -48,26 +70,26 @@
 
 
     <div class="cf-portal-tabs" role="tablist">
-      <button class="cf-portal-tab is-active" data-portal-tab="perfil">👤 Perfil</button>
-      <button class="cf-portal-tab" data-portal-tab="historia">📜 Historia</button>
-      <button class="cf-portal-tab" data-portal-tab="actividades">🎮 Actividades</button>
-      <button class="cf-portal-tab" data-portal-tab="itinerario">🗓️ Itinerario</button>
-      <button class="cf-portal-tab" data-portal-tab="encuesta">📋 Encuesta</button>
-      <button class="cf-portal-tab" data-portal-tab="mapa">🗺️ Mapa</button>
+      <button class="cf-portal-tab is-active" data-portal-tab="perfil"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-users"/></svg> Perfil</button>
+      <button class="cf-portal-tab" data-portal-tab="historia"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-book"/></svg> Historia</button>
+      <button class="cf-portal-tab" data-portal-tab="actividades"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-gamepad"/></svg> Actividades</button>
+      <button class="cf-portal-tab" data-portal-tab="itinerario"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-calendar"/></svg> Itinerario</button>
+      <button class="cf-portal-tab" data-portal-tab="encuesta"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-clipboard"/></svg> Encuesta</button>
+      <button class="cf-portal-tab" data-portal-tab="mapa"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-map"/></svg> Mapa</button>
     </div>
 
     <!-- ===== PESTAÑA: PERFIL ===== -->
     <div class="cf-portal-panel is-active" data-portal-panel="perfil">
 
       <div class="cf-panel" id="cf-campista-perfil-panel">
-        <h3><span class="cf-dot"></span>Hola, <span id="cf-perfil-nombre">campista</span> 👋</h3>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span>Hola, <span id="cf-perfil-nombre">campista</span></h2>
         <div class="cf-perfil-grid">
-          <div><small>Código</small><strong id="cf-perfil-codigo" class="cf-easter-egg-trigger">—</strong></div>
-          <div><small>Municipio</small><strong id="cf-perfil-municipio">—</strong></div>
-          <div><small>Estado</small><strong id="cf-perfil-estado">—</strong></div>
-          <div><small>Carpa</small><strong id="cf-perfil-carpa">—</strong></div>
+          <div><small>Código</small><strong id="cf-perfil-codigo" class="cf-easter-egg-trigger">-</strong></div>
+          <div><small>Municipio</small><strong id="cf-perfil-municipio">-</strong></div>
+          <div><small>Estado</small><strong id="cf-perfil-estado">-</strong></div>
+          <div><small>Carpa</small><strong id="cf-perfil-carpa">-</strong></div>
         </div>
-        <div id="cf-easter-egg" class="cf-oculto">✨ Encontraste el secreto de Camp Fest — nos vemos en noviembre. ¡Gracias por tu paciencia! 💜</div>
+        <div id="cf-easter-egg" class="cf-oculto">Encontraste el secreto de Camp Fest. Nos vemos en 2027, gracias por tu paciencia.</div>
         <button type="button" class="cf-btn cf-btn-alt" id="cf-btn-editar-perfil" style="margin-top:14px;">Editar mis datos</button>
         <button type="button" class="cf-btn cf-btn-alt" id="cf-btn-descargar-insignia" style="margin-top:14px;">Descargar mi insignia</button>
         <button type="button" class="cf-btn cf-btn-alt cf-oculto" id="cf-btn-descargar-certificado" style="margin-top:14px;">Descargar certificado de participación</button>
@@ -75,54 +97,54 @@
       </div>
 
       <div class="cf-panel" id="cf-campista-anuncios">
-      <h3><span class="cf-dot"></span>Avisos</h3>
+      <h2 class="cf-panel-title"><span class="cf-dot"></span>Avisos</h2>
       <div id="cf-lista-anuncios"><p>No hay avisos por ahora.</p></div>
     </div>
 
       <div class="cf-panel cf-oculto" id="cf-campista-editar">
-        <h3><span class="cf-dot"></span>Actualizar mis datos</h3>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span>Actualizar mis datos</h2>
         <form id="cf-form-editar-perfil">
           <div class="cf-campo-campista"><label>Teléfono</label><input type="text" name="telefono" inputmode="numeric"></div>
-          <div class="cf-campo-campista"><label>Correo personal</label><input type="email" name="correo_personal"></div>
-          <div class="cf-campo-campista"><label>Contacto de emergencia — nombre</label><input type="text" name="contacto_emergencia_nombre"></div>
-          <div class="cf-campo-campista"><label>Contacto de emergencia — teléfono</label><input type="text" name="contacto_emergencia_telefono" inputmode="numeric"></div>
-          <div class="cf-campo-campista"><label>Correo del contacto de emergencia (para avisos automáticos si eres menor de edad)</label><input type="email" name="contacto_emergencia_correo"></div>
+          <div class="cf-campo-campista"><label>Correo personal</label><input type="email" name="correo_personal" autocomplete="email" spellcheck="false"></div>
+          <div class="cf-campo-campista"><label>Contacto de emergencia: nombre</label><input type="text" name="contacto_emergencia_nombre"></div>
+          <div class="cf-campo-campista"><label>Contacto de emergencia: teléfono</label><input type="text" name="contacto_emergencia_telefono" inputmode="numeric"></div>
+          <div class="cf-campo-campista"><label>Correo del contacto de emergencia (para avisos automáticos si eres menor de edad)</label><input type="email" name="contacto_emergencia_correo" autocomplete="off" spellcheck="false"></div>
           <button type="submit" class="cf-btn cf-primary" style="width:100%; justify-content:center;">Guardar cambios</button>
-          <div class="cf-estado-campista" id="cf-estado-editar"></div>
+          <div class="cf-estado-campista" id="cf-estado-editar" role="status" aria-live="polite"></div>
         </form>
       </div>
 
       <div class="cf-panel">
-        <h3><span class="cf-dot"></span>Faltan <span id="cf-dias-restantes" class="cf-clic-dias" title="Haz clic para ver algo curioso">—</span> días para Camp Fest</h3>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span><span id="cf-cuenta-texto">Faltan <span id="cf-dias-restantes" class="cf-clic-dias" title="Haz clic para ver algo curioso">-</span> días para Camp Fest</span></h2>
         <div class="cf-barra-progreso"><div class="cf-barra-progreso-relleno" id="cf-barra-progreso"></div></div>
-        <p style="margin-top:10px;">🎉 Has invitado a <strong id="cf-referidos">0</strong> amigos y amigas de Bugalagrande — ¡sigue invitando para el premio especial!</p>
+        <p style="margin-top:10px;">Has invitado a <strong id="cf-referidos">0</strong> amigos y amigas de Bugalagrande, ¡sigue invitando para el premio especial!</p>
       </div>
 
       <div class="cf-panel">
-        <h3><span class="cf-dot"></span>Tu racha</h3>
-        <p id="cf-racha-texto" style="font-size:16px; font-weight:700;">—</p>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span>Tu racha</h2>
+        <p id="cf-racha-texto" style="font-size:16px; font-weight:700;">-</p>
         <div class="cf-dato-curioso">
-          <strong>💡 Dato curioso de hoy</strong>
-          <p id="cf-dato-curioso-texto">—</p>
+          <strong><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-bulb"/></svg> Dato curioso de hoy</strong>
+          <p id="cf-dato-curioso-texto">-</p>
         </div>
       </div>
 
       <div class="cf-panel">
-        <button type="button" class="cf-historia-toggle" id="cf-btn-pistas">🔍 ¿Buscas secretos?</button>
+        <button type="button" class="cf-historia-toggle" id="cf-btn-pistas"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-search"/></svg> ¿Buscas secretos?</button>
         <div class="cf-oculto" id="cf-bloque-pistas" style="margin-top:10px;">
           <p>Hay 3 secretos escondidos en este portal. Aquí van las pistas (sin arruinar la sorpresa):</p>
           <ul style="line-height:1.6;">
-            <li>Tu código de participante podría abrir algo... si le prestas atención varias veces seguidas.</li>
-            <li>El nombre del municipio anfitrión tiene poder — si te atreves a escribirlo en cualquier parte de la página.</li>
+            <li>Tu código de participante podría abrir algo… si le prestas atención varias veces seguidas.</li>
+            <li>El nombre del municipio anfitrión tiene poder, si te atreves a escribirlo en cualquier parte de la página.</li>
             <li>Los números también esconden cosas. ¿Qué pasa si le haces clic a tu cuenta regresiva?</li>
           </ul>
-          <p style="margin-top:10px;">También hay más secretos escondidos en el resto del sitio — no están en botones ni imágenes, están en el propio texto. Lee con calma cada página. 🤫</p>
+          <p style="margin-top:10px;">También hay más secretos escondidos en el resto del sitio, no están en botones ni imágenes, están en el propio texto. Lee con calma cada página.</p>
         </div>
       </div>
 
       <div class="cf-panel">
-        <h3><span class="cf-dot"></span>Tus logros</h3>
-        <p style="font-size:12.5px; opacity:.7; margin-top:-6px;">Cada logro bloqueado te dice cómo conseguirlo — excepto los 3 secretos, ¡esos hay que descubrirlos!</p>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span>Tus logros</h2>
+        <p style="font-size:12.5px; opacity:.7; margin-top:-6px;">Cada logro bloqueado te dice cómo conseguirlo, excepto los 3 secretos, ¡esos hay que descubrirlos!</p>
         <div id="cf-logros-grid"></div>
       </div>
 
@@ -131,46 +153,46 @@
     <!-- ===== PESTAÑA: HISTORIA ===== -->
     <div class="cf-portal-panel" data-portal-panel="historia" hidden>
       <div class="cf-panel">
-        <h3><span class="cf-dot"></span>Historia de Bugalagrande</h3>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span>Historia de Bugalagrande</h2>
 
-        <button type="button" class="cf-historia-toggle" data-historia-toggle="linea">🕰️ Línea de tiempo</button>
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="linea"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-clock"/></svg> Línea de tiempo</button>
         <div class="cf-oculto cf-historia-contenido" data-historia-contenido="linea">
-          <div class="cf-hito" data-hito="1662"><strong>1662</strong> — Fundación por Diego Rengifo Salazar, quien trajo población indígena a su encomienda.</div>
-          <div class="cf-hito" data-hito="1854"><strong>1854</strong> — La Cámara de Provincia de Buga le cambia el nombre a "Nariño", en honor a Antonio Nariño.</div>
-          <div class="cf-hito" data-hito="1865"><strong>1865</strong> — La Corporación Legislativa de Tuluá le restituye el nombre Bugalagrande y la categoría de Distrito Municipal.</div>
-          <div class="cf-hito" data-hito="1886"><strong>1886</strong> — Bugalagrande es declarado municipio oficialmente.</div>
+          <div class="cf-hito" data-hito="1662"><strong>1662</strong>: Fundación por Diego Rengifo Salazar, quien trajo población indígena a su encomienda.</div>
+          <div class="cf-hito" data-hito="1854"><strong>1854</strong>: La Cámara de Provincia de Buga le cambia el nombre a "Nariño", en honor a Antonio Nariño.</div>
+          <div class="cf-hito" data-hito="1865"><strong>1865</strong>: La Corporación Legislativa de Tuluá le restituye el nombre Bugalagrande y la categoría de Distrito Municipal.</div>
+          <div class="cf-hito" data-hito="1886"><strong>1886</strong>: Bugalagrande es declarado municipio oficialmente.</div>
         </div>
 
-        <button type="button" class="cf-historia-toggle" data-historia-toggle="actualidad">📰 Bugalagrande hoy</button>
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="actualidad"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-news"/></svg> Bugalagrande hoy</button>
         <div class="cf-oculto cf-historia-contenido" data-historia-contenido="actualidad">
           <p>Hoy Bugalagrande tiene cerca de <strong>21.600 habitantes</strong>, repartidos entre el casco urbano y sus 9 corregimientos.</p>
-          <p>Su economía actual gira alrededor de la caña de azúcar, el café, el banano y la ganadería — además de una de las fábricas de Nestlé más grandes del país.</p>
+          <p>Su economía actual gira alrededor de la caña de azúcar, el café, el banano y la ganadería, además de una de las fábricas de Nestlé más grandes del país.</p>
           <p>Cada agosto se celebran las Fiestas de Retorno: reinado, carnaval y música que reúnen a la comunidad y a quienes regresan al municipio.</p>
-          <p>Su juventud está organizada en el Subsistema de Participación Juvenil, el mismo que impulsa Camp Fest 2026.</p>
+          <p>Su juventud está organizada en el Subsistema de Participación Juvenil; varios de sus jóvenes participan en Camp Fest.</p>
         </div>
 
-        <button type="button" class="cf-historia-toggle" data-historia-toggle="curiosidades">💡 Curiosidades</button>
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="curiosidades"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-bulb"/></svg> Curiosidades</button>
         <div class="cf-oculto cf-historia-contenido" data-historia-contenido="curiosidades">
-          <p>El nombre "Bugalagrande" viene de que el río que pasa por el pueblo es más grande que el que pasa por la vecina Buga — literalmente "Buga la grande".</p>
+          <p>El nombre "Bugalagrande" viene de que el río que pasa por el pueblo es más grande que el que pasa por la vecina Buga, literalmente "Buga la grande".</p>
           <p>Es uno de los municipios con el nombre más largo del Valle del Cauca.</p>
           <p>Una de las fábricas de Nestlé más grandes del país tiene sede en Bugalagrande.</p>
-          <p>Está en la confluencia del río Bugalagrande y el río Cauca — tierra muy fértil para caña de azúcar, café, banano, piña y más.</p>
+          <p>Está en la confluencia del río Bugalagrande y el río Cauca, tierra muy fértil para caña de azúcar, café, banano, piña y más.</p>
           <p>Cuenta con 9 corregimientos: Galicia, Uribe, Overo, Paila Arriba, Ceilán, Chorreras, Mestizal, El Guayabo y Raiceros.</p>
           <p>Tiene dos colegios emblemáticos: I.E. Diego Rengifo Salazar e I.E. Antonio Nariño, con los nombres de dos figuras clave de su historia.</p>
         </div>
 
-        <button type="button" class="cf-historia-toggle" data-historia-toggle="lugares">📍 Lugares para conocer</button>
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="lugares"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-pin"/></svg> Lugares para conocer</button>
         <div class="cf-oculto cf-historia-contenido" data-historia-contenido="lugares">
-          <p>Capilla Nuestra Señora de la Concepción de El Overo — patrimonio cultural del Valle.</p>
+          <p>Capilla Nuestra Señora de la Concepción de El Overo, patrimonio cultural del Valle.</p>
           <p>Parroquia San Bernabé y la antigua estación del tren.</p>
           <p>El río Bugalagrande, ideal para paseos y caminatas.</p>
           <p>El parque principal, de arquitectura colonial.</p>
-          <p>Las Fiestas de Retorno, en agosto — reinado, carnaval y música.</p>
+          <p>Las Fiestas de Retorno, en agosto: reinado, carnaval y música.</p>
           <p>Dulces típicos: manjar blanco, dulce de vidanca y desamargao.</p>
           <p>Los corregimientos de El Overo y El Guayabo, conocidos por sus artesanías.</p>
         </div>
 
-        <button type="button" class="cf-historia-toggle" data-historia-toggle="fuentes">🔗 Fuentes</button>
+        <button type="button" class="cf-historia-toggle" data-historia-toggle="fuentes"><svg class="cf-i" aria-hidden="true"><use href="../assets/icons.svg#i-link"/></svg> Fuentes</button>
         <div class="cf-oculto cf-historia-contenido" data-historia-contenido="fuentes">
           <p style="font-size:13px; opacity:.8;">Información investigada de: Wikipedia, ESAP (repositorio institucional), El Tiempo, El País, INCIVA, Mi Bugalagrande y Turismo Valle del Cauca.</p>
         </div>
@@ -181,22 +203,22 @@
     <!-- ===== PESTAÑA: ACTIVIDADES ===== -->
     <div class="cf-portal-panel" data-portal-panel="actividades" hidden>
       <div class="cf-panel">
-        <h3><span class="cf-dot"></span>Actividades</h3>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span>Actividades</h2>
         <p style="font-size:13px; opacity:.8; margin-top:-6px;">Puedes jugar todas las veces que quieras.</p>
         <div class="cf-juegos-grid">
-          <button class="cf-juego-card" data-juego="trivia">🧠<br>Trivia</button>
-          <button class="cf-juego-card" data-juego="vof">✅<br>V o F</button>
-          <button class="cf-juego-card" data-juego="linea">🕰️<br>Ordena la línea</button>
-          <button class="cf-juego-card" data-juego="memorama">🧩<br>Memorama</button>
-          <button class="cf-juego-card" data-juego="ruleta">🎡<br>Ruleta</button>
-          <button class="cf-juego-card" data-juego="ahorcado">🔤<br>Adivina la palabra</button>
-          <button class="cf-juego-card" data-juego="relampago">⚡<br>Quiz relámpago</button>
-          <button class="cf-juego-card" data-juego="iconos">🔍<br>Encuentra el ícono</button>
-          <button class="cf-juego-card" data-juego="personalidad">🎭<br>¿Qué campista eres?</button>
-          <button class="cf-juego-card" data-juego="reaccion">⏱️<br>Reto de reacción</button>
-          <button class="cf-juego-card" data-juego="simon">🎨<br>Simón dice</button>
-          <button class="cf-juego-card" data-juego="sopa">🔠<br>Sopa de letras</button>
-          <button class="cf-juego-card" data-juego="atrapa">🎯<br>Atrapa los objetivos</button>
+          <button class="cf-juego-card" data-juego="trivia"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-bulb"/></svg><br>Trivia</button>
+          <button class="cf-juego-card" data-juego="vof"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-check-circle"/></svg><br>V o F</button>
+          <button class="cf-juego-card" data-juego="linea"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-clock"/></svg><br>Ordena la línea</button>
+          <button class="cf-juego-card" data-juego="memorama"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-dice"/></svg><br>Memorama</button>
+          <button class="cf-juego-card" data-juego="ruleta"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-repeat"/></svg><br>Ruleta</button>
+          <button class="cf-juego-card" data-juego="ahorcado"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-pencil"/></svg><br>Adivina la palabra</button>
+          <button class="cf-juego-card" data-juego="relampago"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-bolt"/></svg><br>Quiz relámpago</button>
+          <button class="cf-juego-card" data-juego="iconos"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-search"/></svg><br>Encuentra el ícono</button>
+          <button class="cf-juego-card" data-juego="personalidad"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-mask"/></svg><br>¿Qué campista eres?</button>
+          <button class="cf-juego-card" data-juego="reaccion"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-hourglass"/></svg><br>Reto de reacción</button>
+          <button class="cf-juego-card" data-juego="simon"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-palette"/></svg><br>Simón dice</button>
+          <button class="cf-juego-card" data-juego="sopa"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-list"/></svg><br>Sopa de letras</button>
+          <button class="cf-juego-card" data-juego="atrapa"><svg class="cf-i" style="width:26px;height:26px" aria-hidden="true"><use href="../assets/icons.svg#i-target"/></svg><br>Atrapa los objetivos</button>
         </div>
         <div id="cf-juego-contenedor" style="margin-top:16px;"></div>
       </div>
@@ -205,7 +227,7 @@
     <!-- ===== PESTAÑA: ITINERARIO ===== -->
     <div class="cf-portal-panel" data-portal-panel="itinerario" hidden>
       <div class="cf-panel" id="cf-campista-itinerario">
-        <h3><span class="cf-dot"></span>Itinerario</h3>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span>Itinerario</h2>
         <div id="cf-lista-itinerario"><p>Cargando…</p></div>
       </div>
     </div>
@@ -213,7 +235,7 @@
     <!-- ===== PESTAÑA: ENCUESTA ===== -->
     <div class="cf-portal-panel" data-portal-panel="encuesta" hidden>
       <div class="cf-panel" id="cf-campista-encuesta">
-        <h3><span class="cf-dot"></span>Encuesta de satisfacción</h3>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span>Encuesta de satisfacción</h2>
         <p style="font-size:12.5px; opacity:.8;">Tu opinión nos ayuda a mejorar la próxima edición y a mostrarle a quienes apoyaron este evento el impacto que tuvo. Toma menos de 5 minutos.</p>
         <div id="cf-encuesta-contenedor"><p>Cargando…</p></div>
       </div>
@@ -222,7 +244,7 @@
     <!-- ===== PESTAÑA: MAPA ===== -->
     <div class="cf-portal-panel" data-portal-panel="mapa" hidden>
       <div class="cf-panel" id="cf-campista-mapa">
-        <h3><span class="cf-dot"></span>Mapa del evento</h3>
+        <h2 class="cf-panel-title"><span class="cf-dot"></span>Mapa del evento</h2>
         <div id="cf-mapa-contenedor"><p>Cargando…</p></div>
       </div>
     </div>
@@ -235,11 +257,52 @@
 
 <div id="cf-mensaje-secreto"></div>
 
+</main>
+
+<svg class="cf-footer-wave" viewBox="0 0 500 40" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 20 Q 25 0, 50 20 T 100 20 T 150 20 T 200 20 T 250 20 T 300 20 T 350 20 T 400 20 T 450 20 T 500 20 V40 H0 Z" fill="#1A1A1E"/>
+</svg>
 <footer class="cf-footer">
-  <div class="cf-social">
-    <a href="https://www.instagram.com/campfest_2026/?hl=es-la" target="_blank" rel="noopener">ig</a>
+  <div class="cf-footer-grid">
+    <div>
+      <h2>Camp Fest Bugalagrande</h2>
+      <p style="margin-top:10px; max-width:36ch;">Jóvenes que reconstruyen. II Campamento Juvenil del Valle del Cauca, primer semestre de 2027.</p>
+      <div class="cf-social">
+        <a href="https://www.instagram.com/campfest_2026/?hl=es-la" target="_blank" rel="noopener" aria-label="Instagram de Camp Fest"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-instagram"/></svg></a>
+        <a href="mailto:wallensserna17@gmail.com" aria-label="Escribir al equipo organizador"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-mail"/></svg></a>
+      </div>
+    </div>
+    <div>
+      <h3>Participar</h3>
+      <ul>
+        <li><a href="../../campfest/i-mayores-de-18-anos/">Inscripción mayores de edad</a></li>
+        <li><a href="../../campfest/i-menores-de-edad/">Inscripción menores de edad</a></li>
+        <li><a href="../../campfest/proceso-de-seleccion/">Proceso de selección</a></li>
+        <li><a href="../../campfest/portal-campista/">Mi portal</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>El proyecto</h3>
+      <ul>
+        <li><a href="../../#enfoque">Enfoque y principios</a></li>
+        <li><a href="../../#legal">Marco legal</a></li>
+        <li><a href="../../#viabilidad">Viabilidad</a></li>
+        <li><a href="../../#presupuesto">Presupuesto</a></li>
+        <li><a href="../../campfest/organizadores/">Organizadores</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Contacto</h3>
+      <ul>
+        <li><a href="mailto:wallensserna17@gmail.com"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-mail"/></svg>wallensserna17@gmail.com</a></li>
+        <li><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-pin"/></svg> Bugalagrande, Valle del Cauca</li>
+      </ul>
+    </div>
   </div>
-  <p>© 2026 SUBSISTEMA DE PARTICIPACION JUVENIL DE BUGALAGRANDE. TODOS LOS DERECHOS RESERVADOS.</p>
+  <div class="cf-footer-legal">
+    <span>© 2026 Camp Fest Bugalagrande. Organizado en Bugalagrande, Valle del Cauca.</span>
+    <span>Iniciativa juvenil amparada en la Ley 1622 de 2013 y la Ley 1885 de 2018.</span>
+  </div>
 </footer>
 
 <style>
@@ -293,7 +356,7 @@
 .cf-nota-no-vinculante { font-size: 11.5px; opacity: .65; margin: -4px 0 8px; font-style: italic; }
 .cf-logros-grid-interna { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
 .cf-logro-item { text-align: center; padding: 8px 4px; border-radius: 10px; border: 2px solid var(--ink); font-size: 10px; font-weight: 700; line-height: 1.2; }
-.cf-logro-item .cf-logro-icono { font-size: 22px; display: block; margin-bottom: 3px; }
+.cf-logro-item .cf-logro-icono { display: flex; justify-content: center; margin-bottom: 4px; }
 .cf-logro-item.cf-desbloqueado { background: var(--yellow); }
 .cf-logro-item.cf-bloqueado { background: #eee; opacity: .6; }
 </style>
@@ -301,6 +364,12 @@
 <script src="qrcode.min.js"></script>
 <script src="../assets/mapa-evento.js"></script>
 <script>
+  // Iconos del set propio (../assets/icons.svg) para el HTML que arma el JS.
+  function ic(nombre, tamano) {
+    var estilo = tamano ? ' style="width:' + tamano + '; height:' + tamano + '"' : "";
+    return '<svg class="cf-i"' + estilo + ' aria-hidden="true"><use href="../assets/icons.svg#i-' + nombre + '"/></svg>';
+  }
+
 (function () {
 
   var API_BASE = "https://campfest-api-production.up.railway.app";
@@ -331,7 +400,7 @@
     return cuerpo;
   }
 
-  // Descarga binaria (el certificado en PDF) — peticion() de arriba siempre
+  // Descarga binaria (el certificado en PDF), peticion() de arriba siempre
   // hace .json(), así que esto hace su propio fetch con el mismo token.
   async function descargarArchivoCampista(ruta, nombreArchivo) {
     var headers = {};
@@ -379,7 +448,8 @@
       if (estado.alertaActiva) {
         var alertaBox = document.getElementById("cf-campista-alerta");
         alertaBox.className = "cf-alert";
-        alertaBox.innerHTML = '<div class="cf-alert-inner"><strong>⚠ Alerta</strong><span>' + estado.alertaMensaje + "</span></div>";
+        alertaBox.innerHTML = '<div class="cf-alert-inner"><strong>' + ic("alert") + ' Alerta</strong><span></span></div>';
+        alertaBox.querySelector("span").textContent = estado.alertaMensaje;
       }
     } catch (e) {
       // si el backend no responde, el login sigue disponible igual
@@ -422,14 +492,19 @@
       document.getElementById("cf-perfil-estado").textContent = p.estadoAdmisionEtiqueta;
       document.getElementById("cf-perfil-carpa").textContent = p.carpaAsignada || "Aún sin asignar";
       document.getElementById("cf-btn-descargar-certificado").classList.toggle("cf-oculto", !p.ingresoRegistrado || !!p.retirado);
-      document.getElementById("cf-dias-restantes").textContent = p.diasRestantes;
-      document.getElementById("cf-barra-progreso").style.width = p.progresoEspera + "%";
+      // diasRestantes llega en null mientras no haya día exacto anunciado.
+      var hayFecha = typeof p.diasRestantes === "number";
+      document.getElementById("cf-cuenta-texto").firstChild.textContent = hayFecha ? "Faltan " : "Camp Fest será en el primer semestre de 2027: ";
+      document.getElementById("cf-cuenta-texto").lastChild.textContent = hayFecha ? " días para Camp Fest" : "";
+      document.getElementById("cf-dias-restantes").textContent = hayFecha ? p.diasRestantes : "día por anunciar";
+      document.getElementById("cf-barra-progreso").parentNode.classList.toggle("cf-oculto", !hayFecha);
+      if (hayFecha) document.getElementById("cf-barra-progreso").style.width = p.progresoEspera + "%";
       document.getElementById("cf-referidos").textContent = p.referidos;
 
       window._cfPerfilActual = p;
 
       // Los logros ahora viven en la base de datos (ligados al participante),
-      // pero localStorage sigue siendo una cache local — necesaria porque las
+      // pero localStorage sigue siendo una cache local, necesaria porque las
       // otras páginas del sitio escriben secretos ahí sin tener siempre el
       // token a la mano. Al cargar el perfil, el servidor manda: se unen los
       // dos conjuntos y lo que el servidor no conocía se sincroniza con él.
@@ -463,7 +538,7 @@
       } else {
         contenedor.innerHTML = resultado.actividades.map(function (a) {
           var hora = new Date(a.hora_inicio).toLocaleString("es-CO", { day: "2-digit", month: "short", hour: "numeric", minute: "2-digit" });
-          return '<div class="cf-item-itinerario"><strong>' + hora + "</strong> — " + a.titulo + (a.espacio_usado ? " (" + a.espacio_usado + ")" : "") + "</div>";
+          return '<div class="cf-item-itinerario"><strong>' + hora + "</strong>, " + a.titulo + (a.espacio_usado ? " (" + a.espacio_usado + ")" : "") + "</div>";
         }).join("");
       }
       desbloquearLogro("vio_itinerario_real");
@@ -473,7 +548,7 @@
   }
 
   // ==========================
-  // Encuesta de satisfacción — preguntas fijas (vienen del servidor, pero el
+  // Encuesta de satisfacción, preguntas fijas (vienen del servidor, pero el
   // set completo vive en services/encuestas.js del backend). Los botones de
   // opción usan el mismo cf-btn/cf-btn-alt del resto del portal; el estado
   // "seleccionado" se marca con estilos inline (no se toca la hoja de
@@ -546,7 +621,7 @@
 
   }
 
-  // Dibuja un QR simple en un canvas propio — mismo generador que ya usa la
+  // Dibuja un QR simple en un canvas propio, mismo generador que ya usa la
   // insignia (qrcode.min.js), pero aparte porque este QR es chico y solo, no
   // horneado dentro de la insignia grande.
   function dibujarQrSalida(elementoCanvas, texto) {
@@ -588,9 +663,9 @@
       var estaHabilitada = fechaHabilitacion && new Date() >= fechaHabilitacion;
 
       if (!estaHabilitada) {
-        contenedor.innerHTML = '<div class="cf-dato-curioso"><strong>⏳ Todavía no está disponible</strong><p>' +
+        contenedor.innerHTML = '<div class="cf-dato-curioso"><strong>' + ic("hourglass") + ' Todavía no está disponible</strong><p>' +
           (fechaHabilitacion
-            ? "Se habilita el " + fechaHabilitacion.toLocaleString("es-CO") + ". Es obligatoria para poder registrar tu salida final del evento — no te vayas sin responderla."
+            ? "Se habilita el " + fechaHabilitacion.toLocaleString("es-CO") + ". Es obligatoria para poder registrar tu salida final del evento, no te vayas sin responderla."
             : "El equipo organizador todavía no la habilita. Es obligatoria para poder registrar tu salida final del evento.") +
           "</p></div>";
         encuestaCargada = false;
@@ -603,7 +678,7 @@
 
       if (yaRespondida && yaRespondida.codigoSalida) {
         html += '<div class="cf-panel" style="text-align:center; margin-bottom:16px;">' +
-          '<strong>✅ Ya respondiste la encuesta</strong>' +
+          '<strong>' + ic("check-circle") + ' Ya respondiste la encuesta</strong>' +
           '<p style="font-size:12.5px; margin:6px 0 12px;">' +
           (yaRespondida.codigoSalidaUsado
             ? "Este código ya se usó para registrar tu salida del evento."
@@ -613,7 +688,7 @@
           '<p style="font-family:monospace; font-size:15px; font-weight:700; margin-top:10px; letter-spacing:1px;">' + yaRespondida.codigoSalida + '</p>' +
           '</div>';
       } else if (yaRespondida) {
-        html += '<div class="cf-dato-curioso" style="margin-bottom:16px;"><strong>Puedes actualizar tus respuestas</strong><p>Ya respondiste antes — si envías de nuevo, se actualiza tu respuesta.</p></div>';
+        html += '<div class="cf-dato-curioso" style="margin-bottom:16px;"><strong>Puedes actualizar tus respuestas</strong><p>Ya respondiste antes, si envías de nuevo, se actualiza tu respuesta.</p></div>';
       }
 
       preguntas.forEach(function (pregunta) {
@@ -684,7 +759,7 @@
     var boton = this;
     var textoOriginal = boton.textContent;
     boton.disabled = true;
-    boton.textContent = "Generando...";
+    boton.textContent = "Generando…";
     try {
       await descargarArchivoCampista("/api/campista/certificado", "Certificado-Participacion.pdf");
     } catch (error) {
@@ -742,7 +817,7 @@
   });
 
   // ==========================
-  // Mapa del evento — misma respuesta pública que consume el sitio público,
+  // Mapa del evento, misma respuesta pública que consume el sitio público,
   // el renderizado (imagen + zonas) lo hace mapa-evento.js.
   // ==========================
   async function cargarMapaEvento() {
@@ -800,7 +875,7 @@
   });
 
   // ==========================
-  // Racha de visitas — todo en localStorage, sin backend.
+  // Racha de visitas, todo en localStorage, sin backend.
   // ==========================
   function actualizarRacha() {
 
@@ -818,8 +893,8 @@
     }
 
     var texto = racha <= 1
-      ? "Primer día por aquí — vuelve mañana para empezar tu racha 🔥"
-      : "🔥 Llevas " + racha + " días seguidos visitando tu portal";
+      ? "Primer día por aquí. Vuelve mañana para empezar tu racha"
+      : "Llevas " + racha + " días seguidos visitando tu portal";
     document.getElementById("cf-racha-texto").textContent = texto;
 
     if (racha >= 3) desbloquearLogro("racha3");
@@ -838,12 +913,12 @@
     "El nombre 'Bugalagrande' viene de que su río es más grande que el de la vecina Buga.",
     "Más de la mitad de los cupos de Camp Fest están reservados para jóvenes de Bugalagrande.",
     "Invitar amigos de tu municipio a inscribirse te da puntos extra para un premio especial.",
-    "El Valle del Cauca tiene 42 municipios — Camp Fest recibe jóvenes de todos ellos.",
+    "El Valle del Cauca tiene 42 municipios, Camp Fest recibe jóvenes de todos ellos.",
     "Llevar tu propia carpa es opcional: el campamento también tiene carpas disponibles.",
     "Camp Fest incluye espacios de liderazgo, recreación, cultura y bienestar.",
-    "El código de participante (CF-XXXX) es único — guárdalo, lo necesitas el día del evento.",
+    "El código de participante (CF-XXXX) es único: guárdalo, lo necesitas el día del evento.",
     "La cartilla del campista tiene todo lo que necesitas saber antes de llegar.",
-    "Camp Fest 2026 se aplazó a noviembre para elegir la mejor sede y cuidar tu seguridad.",
+    "Camp Fest pasó al primer semestre de 2027 y ahora se centra en la reconstrucción social después del terremoto.",
     "El proceso de selección no exige experiencia previa en liderazgo juvenil.",
     "Los menores de edad necesitan permiso físico (no solo virtual) para asistir.",
     "Tip de campamento: empaca ropa cómoda, protector solar y una linterna.",
@@ -863,128 +938,128 @@
   }
 
   // ==========================
-  // Logros — 70, agrupados por categoría. Todo alcanzable por cualquiera.
+  // Logros, 70, agrupados por categoría. Todo alcanzable por cualquiera.
   // ==========================
   var CATEGORIAS_LOGROS = [
     { nombre: "Sesión y contenido", logros: [
-      { id: "login", icono: "🔑", nombre: "Iniciaste sesión", desc: "Inicia sesión en tu portal" },
-      { id: "insignia", icono: "🏅", nombre: "Tu insignia", desc: "Descarga tu insignia" },
-      { id: "historia", icono: "📜", nombre: "Historia conocida", desc: "Abre la pestaña Historia" },
-      { id: "encuesta_respondida", icono: "📋", nombre: "Tu opinión cuenta", desc: "Responde la encuesta de satisfacción" }
+      { id: "login", icono: "key", nombre: "Iniciaste sesión", desc: "Inicia sesión en tu portal" },
+      { id: "insignia", icono: "medal", nombre: "Tu insignia", desc: "Descarga tu insignia" },
+      { id: "historia", icono: "book", nombre: "Historia conocida", desc: "Abre la pestaña Historia" },
+      { id: "encuesta_respondida", icono: "clipboard", nombre: "Tu opinión cuenta", desc: "Responde la encuesta de satisfacción" }
     ]},
     { nombre: "Secretos", logros: [
-      { id: "secreto_codigo", icono: "🔢", nombre: "5 clics en tu código", secreto: true },
-      { id: "secreto_palabra", icono: "🗝️", nombre: "La palabra secreta", secreto: true },
-      { id: "secreto_dias", icono: "⏱️", nombre: "Descifraste la cuenta regresiva", secreto: true },
-      { id: "detective", icono: "🕵️", nombre: "Encontraste los 3 secretos", secreto: true }
+      { id: "secreto_codigo", icono: "list", nombre: "5 clics en tu código", secreto: true },
+      { id: "secreto_palabra", icono: "key", nombre: "La palabra secreta", secreto: true },
+      { id: "secreto_dias", icono: "hourglass", nombre: "Descifraste la cuenta regresiva", secreto: true },
+      { id: "detective", icono: "search", nombre: "Encontraste los 3 secretos", secreto: true }
     ]},
     { nombre: "Actividades completadas", logros: [
-      { id: "act_trivia", icono: "🧠", nombre: "Trivia", desc: "Completa la trivia de Bugalagrande" },
-      { id: "act_vof", icono: "✅", nombre: "Verdadero o Falso", desc: "Completa el Verdadero o Falso" },
-      { id: "act_linea_tiempo", icono: "🕰️", nombre: "Línea de tiempo", desc: "Ordena la línea de tiempo" },
-      { id: "act_memorama", icono: "🧩", nombre: "Memorama", desc: "Completa el memorama" },
-      { id: "act_ruleta", icono: "🎡", nombre: "Ruleta", desc: "Gira la ruleta de la suerte" },
-      { id: "act_palabra", icono: "🔤", nombre: "Adivina la palabra", desc: "Adivina la palabra del ahorcado" },
-      { id: "act_relampago", icono: "⚡", nombre: "Quiz relámpago", desc: "Completa el quiz relámpago" },
-      { id: "act_iconos", icono: "🔍", nombre: "Encuentra el ícono", desc: "Encuentra el ícono distinto" },
-      { id: "act_personalidad", icono: "🎭", nombre: "Tipo de campista", desc: "Completa el test de personalidad" },
-      { id: "act_reaccion", icono: "⏱️", nombre: "Reto de reacción", desc: "Juega el reto de reacción" },
-      { id: "act_simon", icono: "🎨", nombre: "Simón dice", desc: "Completa una ronda de Simón dice" },
-      { id: "act_sopa", icono: "🔠", nombre: "Sopa de letras", desc: "Encuentra todas las palabras de la sopa de letras" },
-      { id: "act_atrapa", icono: "🎯", nombre: "Atrapa los objetivos", desc: "Completa una sesión de Atrapa los objetivos" }
+      { id: "act_trivia", icono: "bulb", nombre: "Trivia", desc: "Completa la trivia de Bugalagrande" },
+      { id: "act_vof", icono: "check-circle", nombre: "Verdadero o Falso", desc: "Completa el Verdadero o Falso" },
+      { id: "act_linea_tiempo", icono: "clock", nombre: "Línea de tiempo", desc: "Ordena la línea de tiempo" },
+      { id: "act_memorama", icono: "dice", nombre: "Memorama", desc: "Completa el memorama" },
+      { id: "act_ruleta", icono: "repeat", nombre: "Ruleta", desc: "Gira la ruleta de la suerte" },
+      { id: "act_palabra", icono: "pencil", nombre: "Adivina la palabra", desc: "Adivina la palabra del ahorcado" },
+      { id: "act_relampago", icono: "bolt", nombre: "Quiz relámpago", desc: "Completa el quiz relámpago" },
+      { id: "act_iconos", icono: "search", nombre: "Encuentra el ícono", desc: "Encuentra el ícono distinto" },
+      { id: "act_personalidad", icono: "mask", nombre: "Tipo de campista", desc: "Completa el test de personalidad" },
+      { id: "act_reaccion", icono: "hourglass", nombre: "Reto de reacción", desc: "Juega el reto de reacción" },
+      { id: "act_simon", icono: "palette", nombre: "Simón dice", desc: "Completa una ronda de Simón dice" },
+      { id: "act_sopa", icono: "list", nombre: "Sopa de letras", desc: "Encuentra todas las palabras de la sopa de letras" },
+      { id: "act_atrapa", icono: "target", nombre: "Atrapa los objetivos", desc: "Completa una sesión de Atrapa los objetivos" }
     ]},
     { nombre: "Desempeño destacado", logros: [
-      { id: "trivia_perfecta", icono: "🏆", nombre: "Trivia perfecta", desc: "Saca puntaje perfecto en la trivia" },
-      { id: "vof_perfecto", icono: "🏆", nombre: "V o F perfecto", desc: "Saca puntaje perfecto en Verdadero o Falso" },
-      { id: "relampago_perfecto", icono: "🏆", nombre: "Relámpago perfecto", desc: "Saca el puntaje perfecto en el quiz relámpago" },
-      { id: "reaccion_rapida", icono: "⚡", nombre: "Rápido como un rayo", desc: "Reacciona más rápido que el umbral de tu dificultad" },
-      { id: "simon_experto", icono: "🎨", nombre: "Memoria de experto", desc: "Llega a una secuencia de 8 o más en Simón dice" },
-      { id: "atrapa_certero", icono: "🎯", nombre: "Puntería certera", desc: "Atrapa el 90% o más de los objetivos (con al menos 8 aparecidos)" }
+      { id: "trivia_perfecta", icono: "trophy", nombre: "Trivia perfecta", desc: "Saca puntaje perfecto en la trivia" },
+      { id: "vof_perfecto", icono: "trophy", nombre: "V o F perfecto", desc: "Saca puntaje perfecto en Verdadero o Falso" },
+      { id: "relampago_perfecto", icono: "trophy", nombre: "Relámpago perfecto", desc: "Saca el puntaje perfecto en el quiz relámpago" },
+      { id: "reaccion_rapida", icono: "bolt", nombre: "Rápido como un rayo", desc: "Reacciona más rápido que el umbral de tu dificultad" },
+      { id: "simon_experto", icono: "palette", nombre: "Memoria de experto", desc: "Llega a una secuencia de 8 o más en Simón dice" },
+      { id: "atrapa_certero", icono: "target", nombre: "Puntería certera", desc: "Atrapa el 90% o más de los objetivos (con al menos 8 aparecidos)" }
     ]},
     { nombre: "Meta-actividad", logros: [
-      { id: "todas_actividades", icono: "🎯", nombre: "Todas las actividades", desc: "Completa las 13 actividades al menos una vez" }
+      { id: "todas_actividades", icono: "target", nombre: "Todas las actividades", desc: "Completa las 13 actividades al menos una vez" }
     ]},
     { nombre: "Dificultad", logros: [
-      { id: "un_dificil", icono: "🔴", nombre: "Primer reto difícil", desc: "Completa cualquier actividad en dificultad Difícil" },
-      { id: "cinco_dificiles", icono: "🔴", nombre: "Cinco retos difíciles", desc: "Completa 5 actividades distintas en dificultad Difícil" },
-      { id: "maestro_dificultad", icono: "👑", nombre: "Maestro de la dificultad", desc: "Completa las 12 actividades con dificultad, en Difícil" }
+      { id: "un_dificil", icono: "fire", nombre: "Primer reto difícil", desc: "Completa cualquier actividad en dificultad Difícil" },
+      { id: "cinco_dificiles", icono: "fire", nombre: "Cinco retos difíciles", desc: "Completa 5 actividades distintas en dificultad Difícil" },
+      { id: "maestro_dificultad", icono: "crown", nombre: "Maestro de la dificultad", desc: "Completa las 12 actividades con dificultad, en Difícil" }
     ]},
     { nombre: "Racha de visitas", logros: [
-      { id: "racha3", icono: "🔥", nombre: "3 días de racha", desc: "Visita el portal 3 días seguidos" },
-      { id: "racha7", icono: "🔥", nombre: "7 días de racha", desc: "Visita el portal 7 días seguidos" },
-      { id: "racha14", icono: "🔥", nombre: "14 días de racha", desc: "Visita el portal 14 días seguidos" },
-      { id: "racha30", icono: "🔥", nombre: "30 días de racha", desc: "Visita el portal 30 días seguidos" },
-      { id: "racha60", icono: "🔥", nombre: "60 días de racha", desc: "Visita el portal 60 días seguidos" }
+      { id: "racha3", icono: "fire", nombre: "3 días de racha", desc: "Visita el portal 3 días seguidos" },
+      { id: "racha7", icono: "fire", nombre: "7 días de racha", desc: "Visita el portal 7 días seguidos" },
+      { id: "racha14", icono: "fire", nombre: "14 días de racha", desc: "Visita el portal 14 días seguidos" },
+      { id: "racha30", icono: "fire", nombre: "30 días de racha", desc: "Visita el portal 30 días seguidos" },
+      { id: "racha60", icono: "fire", nombre: "60 días de racha", desc: "Visita el portal 60 días seguidos" }
     ]},
     { nombre: "Amigos invitados", logros: [
-      { id: "referido1", icono: "🤝", nombre: "Tu primer amigo", desc: "Invita a tu primer amigo" },
-      { id: "referido3", icono: "👥", nombre: "3 amigos", desc: "Invita a 3 amigos" },
-      { id: "referido5", icono: "🎉", nombre: "5 amigos", desc: "Invita a 5 amigos" },
-      { id: "referido10", icono: "🌟", nombre: "10 amigos", desc: "Invita a 10 amigos" },
-      { id: "referido20", icono: "👑", nombre: "20 amigos", desc: "Invita a 20 amigos" }
+      { id: "referido1", icono: "handshake", nombre: "Tu primer amigo", desc: "Invita a tu primer amigo" },
+      { id: "referido3", icono: "users", nombre: "3 amigos", desc: "Invita a 3 amigos" },
+      { id: "referido5", icono: "sparkle", nombre: "5 amigos", desc: "Invita a 5 amigos" },
+      { id: "referido10", icono: "star", nombre: "10 amigos", desc: "Invita a 10 amigos" },
+      { id: "referido20", icono: "crown", nombre: "20 amigos", desc: "Invita a 20 amigos" }
     ]},
     { nombre: "Cuenta regresiva", logros: [
-      { id: "cuenta100", icono: "📅", nombre: "100 días o menos", desc: "Espera a que falten 100 días o menos" },
-      { id: "cuenta50", icono: "📅", nombre: "50 días o menos", desc: "Espera a que falten 50 días o menos" },
-      { id: "cuenta30", icono: "📆", nombre: "30 días o menos", desc: "Espera a que falten 30 días o menos" },
-      { id: "cuenta14", icono: "📆", nombre: "14 días o menos", desc: "Espera a que falten 14 días o menos" },
-      { id: "cuenta7", icono: "⏳", nombre: "¡Falta una semana!", desc: "Espera a que falte una semana" },
-      { id: "cuenta3", icono: "⏳", nombre: "¡Faltan 3 días!", desc: "Espera a que falten 3 días" },
-      { id: "cuenta1", icono: "⏳", nombre: "¡Es casi mañana!", desc: "Espera a que falte 1 día" },
-      { id: "diadelevento", icono: "🎊", nombre: "¡Es el día!", desc: "Entra el día del evento" }
+      { id: "cuenta100", icono: "calendar", nombre: "100 días o menos", desc: "Espera a que falten 100 días o menos" },
+      { id: "cuenta50", icono: "calendar", nombre: "50 días o menos", desc: "Espera a que falten 50 días o menos" },
+      { id: "cuenta30", icono: "calendar", nombre: "30 días o menos", desc: "Espera a que falten 30 días o menos" },
+      { id: "cuenta14", icono: "calendar", nombre: "14 días o menos", desc: "Espera a que falten 14 días o menos" },
+      { id: "cuenta7", icono: "hourglass", nombre: "¡Falta una semana!", desc: "Espera a que falte una semana" },
+      { id: "cuenta3", icono: "hourglass", nombre: "¡Faltan 3 días!", desc: "Espera a que falten 3 días" },
+      { id: "cuenta1", icono: "hourglass", nombre: "¡Es casi mañana!", desc: "Espera a que falte 1 día" },
+      { id: "diadelevento", icono: "sparkle", nombre: "¡Es el día!", desc: "Entra el día del evento" }
     ]},
     { nombre: "Visitas totales", logros: [
-      { id: "visitas5", icono: "🎯", nombre: "5 visitas", desc: "Visita tu portal 5 veces" },
-      { id: "visitas10", icono: "🎯", nombre: "10 visitas", desc: "Visita tu portal 10 veces" },
-      { id: "visitas25", icono: "🌟", nombre: "25 visitas", desc: "Visita tu portal 25 veces" },
-      { id: "visitas50", icono: "👑", nombre: "50 visitas", desc: "Visita tu portal 50 veces" }
+      { id: "visitas5", icono: "target", nombre: "5 visitas", desc: "Visita tu portal 5 veces" },
+      { id: "visitas10", icono: "target", nombre: "10 visitas", desc: "Visita tu portal 10 veces" },
+      { id: "visitas25", icono: "star", nombre: "25 visitas", desc: "Visita tu portal 25 veces" },
+      { id: "visitas50", icono: "crown", nombre: "50 visitas", desc: "Visita tu portal 50 veces" }
     ]},
     { nombre: "Horario de visita", logros: [
-      { id: "nocturno", icono: "🌙", nombre: "Visitante nocturno", desc: "Visita el portal entre 11pm y 5am" },
-      { id: "madrugador", icono: "☀️", nombre: "Madrugador", desc: "Visita el portal entre 5am y 7am" }
+      { id: "nocturno", icono: "moon", nombre: "Visitante nocturno", desc: "Visita el portal entre 11pm y 5am" },
+      { id: "madrugador", icono: "sun", nombre: "Madrugador", desc: "Visita el portal entre 5am y 7am" }
     ]},
     { nombre: "Exploración", logros: [
-      { id: "tab_actividades", icono: "🎮", nombre: "Pestaña Actividades", desc: "Abre la pestaña Actividades" },
-      { id: "tab_itinerario", icono: "🗓️", nombre: "Pestaña Itinerario", desc: "Abre la pestaña Itinerario" },
-      { id: "hito_1662", icono: "🕰️", nombre: "Hito 1662", desc: "Abre el hito de 1662 en Historia" },
-      { id: "hito_1854", icono: "🕰️", nombre: "Hito 1854", desc: "Abre el hito de 1854 en Historia" },
-      { id: "hito_1865", icono: "🕰️", nombre: "Hito 1865", desc: "Abre el hito de 1865 en Historia" },
-      { id: "hito_1886", icono: "🕰️", nombre: "Hito 1886", desc: "Abre el hito de 1886 en Historia" },
-      { id: "linea_completa", icono: "📜", nombre: "Línea de tiempo completa", desc: "Revisa los 4 hitos de la historia" },
-      { id: "vio_actualidad", icono: "📰", nombre: "Bugalagrande hoy", desc: "Abre el bloque 'Bugalagrande hoy' en Historia" },
-      { id: "vio_curiosidades", icono: "💡", nombre: "Curiosidades", desc: "Abre el bloque de curiosidades en Historia" },
-      { id: "vio_lugares", icono: "📍", nombre: "Lugares para conocer", desc: "Abre el bloque de lugares en Historia" },
-      { id: "vio_fuentes", icono: "🔗", nombre: "Fuentes", desc: "Revisa las fuentes de la investigación" },
-      { id: "historia_completa", icono: "🎓", nombre: "Historia completa", desc: "Revisa todos los bloques de Historia" },
-      { id: "vio_pistas", icono: "🔍", nombre: "Cazador de pistas", desc: "Abre el bloque de pistas de secretos" },
-      { id: "vio_itinerario_real", icono: "🗓️", nombre: "Itinerario revisado", desc: "Revisa el itinerario del evento" },
-      { id: "vio_avisos", icono: "📢", nombre: "Avisos revisados", desc: "Revisa los avisos del portal" },
-      { id: "repitio_trivia", icono: "🔁", nombre: "Repitió la trivia", desc: "Juega la trivia más de una vez" },
-      { id: "repitio_reaccion", icono: "🔁", nombre: "Repitió el reto de reacción", desc: "Juega el reto de reacción 4 veces o más" },
-      { id: "insignia_2veces", icono: "🏅", nombre: "Coleccionista de insignias", desc: "Descarga tu insignia 2 veces o más" },
-      { id: "explorador", icono: "🧭", nombre: "Explorador", desc: "Abre las 4 pestañas del portal" },
-      { id: "sabelotodo", icono: "🎓", nombre: "Sabelotodo", desc: "Completa Historia, todas las actividades, explora todo el portal y encuentra los secretos del sitio" }
+      { id: "tab_actividades", icono: "gamepad", nombre: "Pestaña Actividades", desc: "Abre la pestaña Actividades" },
+      { id: "tab_itinerario", icono: "calendar", nombre: "Pestaña Itinerario", desc: "Abre la pestaña Itinerario" },
+      { id: "hito_1662", icono: "clock", nombre: "Hito 1662", desc: "Abre el hito de 1662 en Historia" },
+      { id: "hito_1854", icono: "clock", nombre: "Hito 1854", desc: "Abre el hito de 1854 en Historia" },
+      { id: "hito_1865", icono: "clock", nombre: "Hito 1865", desc: "Abre el hito de 1865 en Historia" },
+      { id: "hito_1886", icono: "clock", nombre: "Hito 1886", desc: "Abre el hito de 1886 en Historia" },
+      { id: "linea_completa", icono: "book", nombre: "Línea de tiempo completa", desc: "Revisa los 4 hitos de la historia" },
+      { id: "vio_actualidad", icono: "news", nombre: "Bugalagrande hoy", desc: "Abre el bloque 'Bugalagrande hoy' en Historia" },
+      { id: "vio_curiosidades", icono: "bulb", nombre: "Curiosidades", desc: "Abre el bloque de curiosidades en Historia" },
+      { id: "vio_lugares", icono: "pin", nombre: "Lugares para conocer", desc: "Abre el bloque de lugares en Historia" },
+      { id: "vio_fuentes", icono: "link", nombre: "Fuentes", desc: "Revisa las fuentes de la investigación" },
+      { id: "historia_completa", icono: "grad", nombre: "Historia completa", desc: "Revisa todos los bloques de Historia" },
+      { id: "vio_pistas", icono: "search", nombre: "Cazador de pistas", desc: "Abre el bloque de pistas de secretos" },
+      { id: "vio_itinerario_real", icono: "calendar", nombre: "Itinerario revisado", desc: "Revisa el itinerario del evento" },
+      { id: "vio_avisos", icono: "megaphone", nombre: "Avisos revisados", desc: "Revisa los avisos del portal" },
+      { id: "repitio_trivia", icono: "repeat", nombre: "Repitió la trivia", desc: "Juega la trivia más de una vez" },
+      { id: "repitio_reaccion", icono: "repeat", nombre: "Repitió el reto de reacción", desc: "Juega el reto de reacción 4 veces o más" },
+      { id: "insignia_2veces", icono: "medal", nombre: "Coleccionista de insignias", desc: "Descarga tu insignia 2 veces o más" },
+      { id: "explorador", icono: "compass", nombre: "Explorador", desc: "Abre las 4 pestañas del portal" },
+      { id: "sabelotodo", icono: "grad", nombre: "Sabelotodo", desc: "Completa Historia, todas las actividades, explora todo el portal y encuentra los secretos del sitio" }
     ]},
     { nombre: "Secretos del sitio", logros: [
-      { id: "secreto_sitio_inicio", icono: "🏠", nombre: "Secreto del inicio", secreto: true },
-      { id: "secreto_sitio_itinerario", icono: "🗓️", nombre: "Secreto del itinerario", secreto: true },
-      { id: "secreto_sitio_cartilla", icono: "📘", nombre: "Secreto de la cartilla", secreto: true },
-      { id: "secreto_sitio_mayores", icono: "🔐", nombre: "Secreto de mayores de edad", secreto: true },
-      { id: "secreto_sitio_menores", icono: "🔐", nombre: "Secreto de menores de edad", secreto: true },
-      { id: "secreto_sitio_proceso", icono: "📋", nombre: "Secreto del proceso de selección", secreto: true },
-      { id: "secreto_sitio_constancias", icono: "📄", nombre: "Secreto de las constancias", secreto: true },
-      { id: "secreto_sitio_organizadores", icono: "🤝", nombre: "Secreto de organizadores", secreto: true },
-      { id: "secreto_sitio_bugalagrande", icono: "🏘️", nombre: "Secreto de Bugalagrande", secreto: true },
-      { id: "detective_sitio", icono: "🕵️", nombre: "Detective del sitio", secreto: true }
+      { id: "secreto_sitio_inicio", icono: "home", nombre: "Secreto del inicio", secreto: true },
+      { id: "secreto_sitio_itinerario", icono: "calendar", nombre: "Secreto del itinerario", secreto: true },
+      { id: "secreto_sitio_cartilla", icono: "book", nombre: "Secreto de la cartilla", secreto: true },
+      { id: "secreto_sitio_mayores", icono: "lock", nombre: "Secreto de mayores de edad", secreto: true },
+      { id: "secreto_sitio_menores", icono: "lock", nombre: "Secreto de menores de edad", secreto: true },
+      { id: "secreto_sitio_proceso", icono: "clipboard", nombre: "Secreto del proceso de selección", secreto: true },
+      { id: "secreto_sitio_constancias", icono: "file", nombre: "Secreto de las constancias", secreto: true },
+      { id: "secreto_sitio_organizadores", icono: "handshake", nombre: "Secreto de organizadores", secreto: true },
+      { id: "secreto_sitio_bugalagrande", icono: "home", nombre: "Secreto de Bugalagrande", secreto: true },
+      { id: "detective_sitio", icono: "search", nombre: "Detective del sitio", secreto: true }
     ]},
     { nombre: "Logros finales", logros: [
-      { id: "coleccionista", icono: "✨", nombre: "Coleccionista", desc: "Desbloquea 25 logros vinculantes o más" },
-      { id: "veterano", icono: "🎖️", nombre: "Veterano", desc: "Desbloquea 40 logros vinculantes o más" },
-      { id: "perfeccionista", icono: "👑", nombre: "Perfeccionista", desc: "Desbloquea todos los demás logros vinculantes" },
-      { id: "gran_detective", icono: "🕵️", nombre: "Gran detective", secreto: true }
+      { id: "coleccionista", icono: "sparkle", nombre: "Coleccionista", desc: "Desbloquea 25 logros vinculantes o más" },
+      { id: "veterano", icono: "medal", nombre: "Veterano", desc: "Desbloquea 40 logros vinculantes o más" },
+      { id: "perfeccionista", icono: "crown", nombre: "Perfeccionista", desc: "Desbloquea todos los demás logros vinculantes" },
+      { id: "gran_detective", icono: "search", nombre: "Gran detective", secreto: true }
     ]},
     { nombre: "Logros especiales (no vinculantes)", notaVinculante: true, logros: [
-      { id: "asistio_evento", icono: "🎪", nombre: "¡Nos vimos en Camp Fest!", desc: "Asiste físicamente al evento", noVinculante: true }
+      { id: "asistio_evento", icono: "tent", nombre: "¡Nos vimos en Camp Fest!", desc: "Asiste físicamente al evento", noVinculante: true }
     ]}
   ];
 
@@ -1055,7 +1130,7 @@
         }
       })
       .catch(function () {
-        // Sin conexión o el servidor no respondió — el logro sigue guardado
+        // Sin conexión o el servidor no respondió, el logro sigue guardado
         // localmente y se reintentará sincronizar en el próximo login.
       });
   }
@@ -1068,6 +1143,7 @@
     if (p.referidos >= 10) desbloquearLogro("referido10");
     if (p.referidos >= 20) desbloquearLogro("referido20");
 
+    if (typeof p.diasRestantes === "number") {
     if (p.diasRestantes <= 100) desbloquearLogro("cuenta100");
     if (p.diasRestantes <= 50) desbloquearLogro("cuenta50");
     if (p.diasRestantes <= 30) desbloquearLogro("cuenta30");
@@ -1076,6 +1152,7 @@
     if (p.diasRestantes <= 3) desbloquearLogro("cuenta3");
     if (p.diasRestantes <= 1) desbloquearLogro("cuenta1");
     if (p.diasRestantes <= 0) desbloquearLogro("diadelevento");
+    }
 
     var hora = new Date().getHours();
     if (hora >= 23 || hora < 5) desbloquearLogro("nocturno");
@@ -1097,13 +1174,13 @@
     var desbloqueados = obtenerLogrosDesbloqueados();
     contenedor.innerHTML = CATEGORIAS_LOGROS.map(function (categoria) {
       return '<div class="cf-logro-categoria"><h4>' + categoria.nombre + " (" + categoria.logros.filter(function (l) { return desbloqueados.indexOf(l.id) !== -1; }).length + "/" + categoria.logros.length + ")</h4>" +
-        (categoria.notaVinculante ? '<p class="cf-nota-no-vinculante">Estos logros no cuentan para Coleccionista, Veterano ni Perfeccionista — no todos los pueden alcanzar.</p>' : "") +
+        (categoria.notaVinculante ? '<p class="cf-nota-no-vinculante">Estos logros no cuentan para Coleccionista, Veterano ni Perfeccionista, no todos los pueden alcanzar.</p>' : "") +
         '<div class="cf-logros-grid-interna">' +
         categoria.logros.map(function (logro) {
           var desbloqueado = desbloqueados.indexOf(logro.id) !== -1;
           var etiqueta = desbloqueado ? logro.nombre : (logro.secreto ? "???" : logro.desc);
           return '<div class="cf-logro-item ' + (desbloqueado ? "cf-desbloqueado" : "cf-bloqueado") + '">' +
-            '<span class="cf-logro-icono">' + (desbloqueado ? logro.icono : "🔒") + "</span>" +
+            '<span class="cf-logro-icono">' + ic(desbloqueado ? logro.icono : "lock", "24px") + "</span>" +
             "<span>" + etiqueta + "</span>" +
             "</div>";
         }).join("") +
@@ -1118,7 +1195,7 @@
   document.addEventListener("keypress", function (evento) {
     bufferTeclas = (bufferTeclas + evento.key).slice(-20).toLowerCase();
     if (bufferTeclas.indexOf("bugalagrande") !== -1) {
-      mostrarMensajeSecreto("🎉 ¡Descubriste la palabra secreta! Bugalagrande te espera en noviembre.");
+      mostrarMensajeSecreto("Descubriste la palabra secreta. Bugalagrande te espera en 2027.");
       desbloquearLogro("secreto_palabra");
       bufferTeclas = "";
     }
@@ -1160,7 +1237,7 @@
     if (!p) return;
     var elemento = this;
     var original = elemento.textContent;
-    elemento.textContent = (p.diasRestantes * 24) + "h";
+    elemento.textContent = typeof p.diasRestantes === "number" ? (p.diasRestantes * 24) + "h" : "pronto";
     desbloquearLogro("secreto_dias");
     setTimeout(function () { elemento.textContent = original; }, 1800);
   });
@@ -1202,37 +1279,37 @@
     { anio: 1886, texto: "Declarado municipio" }
   ];
 
-  var EMOJIS_MEMORAMA = ["🏕️", "🎪", "🎵", "🌽", "🔥", "🎒", "🌟", "⚽", "🎨", "📚"];
+  var EMOJIS_MEMORAMA = ["tent", "music", "plant", "fire", "star", "ball", "palette", "book", "compass", "sun"];
   var PALABRAS_AHORCADO_FACIL = ["OVERO", "NARINO", "RETORNO"];
   var PALABRAS_AHORCADO_DIFICIL = ["BUGALAGRANDE", "CAMPFEST", "RENGIFO"];
   var PALABRAS_AHORCADO = PALABRAS_AHORCADO_FACIL.concat(PALABRAS_AHORCADO_DIFICIL);
 
   var PREGUNTAS_PERSONALIDAD = [
-    { texto: "En un tiempo libre en el campamento, prefieres...", opciones: [
+    { texto: "En un tiempo libre en el campamento, prefieres…", opciones: [
       { texto: "Explorar algo nuevo", tipo: "aventurero" },
       { texto: "Organizar una actividad para el grupo", tipo: "lider" },
       { texto: "Dibujar o escribir", tipo: "artista" },
       { texto: "Jugar algo físico", tipo: "deportista" }
     ]},
-    { texto: "Tu amigo tiene un problema — tú...", opciones: [
+    { texto: "Tu amigo tiene un problema, tú…", opciones: [
       { texto: "Propones un plan para resolverlo ya", tipo: "lider" },
       { texto: "Lo escuchas y le levantas el ánimo", tipo: "artista" },
       { texto: "Lo invitas a moverse y despejarse", tipo: "deportista" },
       { texto: "Le sugieres probar algo distinto", tipo: "aventurero" }
     ]},
-    { texto: "Tu actividad favorita del itinerario sería...", opciones: [
+    { texto: "Tu actividad favorita del itinerario sería…", opciones: [
       { texto: "Las dinámicas de integración", tipo: "aventurero" },
       { texto: "Los espacios de liderazgo juvenil", tipo: "lider" },
-      { texto: "El show de talentos", tipo: "artista" },
-      { texto: "La piscina y tiempo libre activo", tipo: "deportista" }
+      { texto: "La muestra artística", tipo: "artista" },
+      { texto: "La pausa activa", tipo: "deportista" }
     ]},
-    { texto: "Si pudieras elegir un superpoder para Camp Fest...", opciones: [
+    { texto: "Si pudieras elegir un superpoder para Camp Fest…", opciones: [
       { texto: "Teletransportarte a cualquier actividad", tipo: "aventurero" },
       { texto: "Inspirar a cualquiera con tus palabras", tipo: "lider" },
       { texto: "Crear música o arte al instante", tipo: "artista" },
       { texto: "Energía infinita todo el día", tipo: "deportista" }
     ]},
-    { texto: "Si tuvieras que representar a tu grupo en una actividad sorpresa, elegirías...", opciones: [
+    { texto: "Si tuvieras que representar a tu grupo en una actividad sorpresa, elegirías…", opciones: [
       { texto: "Explorar el lugar antes que todos", tipo: "aventurero" },
       { texto: "Organizar quién hace qué", tipo: "lider" },
       { texto: "Proponer algo creativo y distinto", tipo: "artista" },
@@ -1250,7 +1327,7 @@
       { texto: "Cantar, dibujar o inventar algo con otros", tipo: "artista" },
       { texto: "Proponer un juego físico o un reto", tipo: "deportista" }
     ]},
-    { texto: "Tu lema personal se parece más a...", opciones: [
+    { texto: "Tu lema personal se parece más a…", opciones: [
       { texto: "\"La vida es una aventura\"", tipo: "aventurero" },
       { texto: "\"Juntos llegamos más lejos\"", tipo: "lider" },
       { texto: "\"Todo se puede crear\"", tipo: "artista" },
@@ -1259,10 +1336,10 @@
   ];
 
   var RESULTADOS_PERSONALIDAD = {
-    aventurero: "🧭 ¡Eres el Aventurero! Siempre listo para lo nuevo.",
-    lider: "🌟 ¡Eres el Líder! Inspiras y organizas al grupo.",
-    artista: "🎨 ¡Eres el Artista! Ves el mundo con creatividad.",
-    deportista: "⚡ ¡Eres el Deportista! Energía sin parar."
+    aventurero: "Eres el Aventurero. Siempre listo para lo nuevo.",
+    lider: "Eres el Líder. Inspiras y organizas al grupo.",
+    artista: "Eres el Artista. Ves el mundo con creatividad.",
+    deportista: "Eres el Deportista. Energía sin parar."
   };
 
   function iniciarQuizGenerico(config) {
@@ -1285,7 +1362,7 @@
 
       contenedor.innerHTML =
         '<p style="font-weight:700; margin-bottom:10px;">' + p.texto + "</p>" +
-        (segundosRestantes > 0 ? '<p id="cf-quiz-tiempo" style="font-size:13px; opacity:.7;">⏱️ ' + segundosRestantes + "s</p>" : "") +
+        (segundosRestantes > 0 ? '<p id="cf-quiz-tiempo" style="font-size:13px;">' + segundosRestantes + "s</p>" : "") +
         p.opciones.map(function (op, i) {
           return '<button class="cf-btn cf-btn-alt cf-quiz-opcion" data-i="' + i + '" style="display:block; width:100%; margin-bottom:8px; text-align:left;">' + op + "</button>";
         }).join("") +
@@ -1295,7 +1372,7 @@
         if (temporizador) clearInterval(temporizador);
         var correcto = i === p.correctaIndex;
         if (correcto) puntaje++;
-        document.getElementById("cf-quiz-feedback").innerHTML = '<p style="margin-top:8px; font-weight:700; color:' + (correcto ? "#0f7a67" : "#b4225f") + ';">' + (correcto ? "¡Correcto! ✅" : "No era esa 😅") + "</p>";
+        document.getElementById("cf-quiz-feedback").innerHTML = '<p style="margin-top:8px; font-weight:700; color:' + (correcto ? "#0f7a67" : "#b4225f") + ';">' + (correcto ? "¡Correcto!" : "No era esa") + "</p>";
         contenedor.querySelectorAll(".cf-quiz-opcion").forEach(function (b) { b.disabled = true; });
         setTimeout(function () { indice++; mostrarPregunta(); }, 1100);
       }
@@ -1308,7 +1385,7 @@
         temporizador = setInterval(function () {
           segundosRestantes--;
           var elTiempo = document.getElementById("cf-quiz-tiempo");
-          if (elTiempo) elTiempo.textContent = "⏱️ " + segundosRestantes + "s";
+          if (elTiempo) elTiempo.textContent = segundosRestantes + "s";
           if (segundosRestantes <= 0) { clearInterval(temporizador); responder(-1); }
         }, 1000);
       }
@@ -1328,9 +1405,9 @@
     var contenedor = document.getElementById("cf-juego-contenedor");
     contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:10px;">Elige la dificultad para ' + nombreJuego + ':</p>' +
       '<div style="display:flex; gap:10px; flex-wrap:wrap;">' +
-      '<button class="cf-btn cf-btn-alt cf-dificultad-opcion" data-dificultad="facil">🟢 Fácil</button>' +
-      '<button class="cf-btn cf-btn-alt cf-dificultad-opcion" data-dificultad="medio">🟡 Medio</button>' +
-      '<button class="cf-btn cf-btn-alt cf-dificultad-opcion" data-dificultad="dificil">🔴 Difícil</button>' +
+      '<button class="cf-btn cf-btn-alt cf-dificultad-opcion" data-dificultad="facil"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:var(--cyan)"></span> Fácil</button>' +
+      '<button class="cf-btn cf-btn-alt cf-dificultad-opcion" data-dificultad="medio"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:var(--yellow)"></span> Medio</button>' +
+      '<button class="cf-btn cf-btn-alt cf-dificultad-opcion" data-dificultad="dificil"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:var(--pink)"></span> Difícil</button>' +
       "</div>";
     contenedor.querySelectorAll(".cf-dificultad-opcion").forEach(function (boton) {
       boton.addEventListener("click", function () { callback(boton.dataset.dificultad); });
@@ -1354,7 +1431,7 @@
 
     contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:10px;">Haz clic en los hitos del más antiguo al más reciente:</p>' +
       orden.map(function (h) {
-        return '<button class="cf-btn cf-btn-alt cf-linea-opcion" data-anio="' + h.anio + '" style="display:block; width:100%; margin-bottom:8px;">' + (mostrarAnio ? h.anio + " — " + h.texto : h.texto) + "</button>";
+        return '<button class="cf-btn cf-btn-alt cf-linea-opcion" data-anio="' + h.anio + '" style="display:block; width:100%; margin-bottom:8px;">' + (mostrarAnio ? h.anio + ", " + h.texto : h.texto) + "</button>";
       }).join("") + '<div id="cf-linea-feedback"></div>';
 
     contenedor.querySelectorAll(".cf-linea-opcion").forEach(function (boton) {
@@ -1364,12 +1441,12 @@
           boton.style.opacity = 0.4;
           siguienteEsperado++;
           if (siguienteEsperado === ordenados.length) {
-            document.getElementById("cf-linea-feedback").innerHTML = '<p style="color:#0f7a67; font-weight:700; margin-top:10px;">¡Perfecto orden! 🎉</p>';
+            document.getElementById("cf-linea-feedback").innerHTML = '<p style="color:#0f7a67; font-weight:700; margin-top:10px;">¡Perfecto orden!</p>';
             desbloquearLogro("act_linea_tiempo");
             registrarActividadDificil("linea", dificultad);
           }
         } else {
-          document.getElementById("cf-linea-feedback").innerHTML = '<p style="color:#b4225f; font-weight:700; margin-top:10px;">Ese no va ahí — ¡sigue intentando!</p>';
+          document.getElementById("cf-linea-feedback").innerHTML = '<p style="color:#b4225f; font-weight:700; margin-top:10px;">Ese no va ahí, ¡sigue intentando!</p>';
         }
       });
     });
@@ -1389,7 +1466,7 @@
       contenedor.innerHTML = '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">' +
         cartas.map(function (emoji, i) {
           var visible = reveladas.indexOf(i) !== -1 || emparejadas.indexOf(i) !== -1;
-          return '<button class="cf-carta-memoria" data-i="' + i + '" style="aspect-ratio:1; font-size:22px; border-radius:10px; border:2px solid var(--ink); background:' + (visible ? "var(--yellow)" : "var(--cream)") + ';">' + (visible ? emoji : "❓") + "</button>";
+          return '<button class="cf-carta-memoria" data-i="' + i + '" style="aspect-ratio:1; font-size:22px; border-radius:10px; border:2px solid var(--ink); background:' + (visible ? "var(--yellow)" : "var(--cream)") + ';">' + (visible ? ic(emoji, "28px") : ic("question", "28px")) + "</button>";
         }).join("") + '</div><p id="cf-memoria-estado" style="margin-top:10px; font-weight:700;"></p>';
 
       contenedor.querySelectorAll(".cf-carta-memoria").forEach(function (boton) {
@@ -1406,7 +1483,7 @@
               bloqueado = false;
               render();
               if (emparejadas.length === cartas.length) {
-                document.getElementById("cf-memoria-estado").textContent = "¡Encontraste todas las parejas! 🎉";
+                document.getElementById("cf-memoria-estado").textContent = "¡Encontraste todas las parejas!";
                 desbloquearLogro("act_memorama");
                 registrarActividadDificil("memorama", dificultad);
               }
@@ -1424,13 +1501,13 @@
 
   function iniciarJuegoRuleta(contenedorId) {
     var contenedor = document.getElementById(contenedorId);
-    contenedor.innerHTML = '<button class="cf-btn cf-primary" id="cf-btn-girar">🎡 Girar la ruleta</button><p id="cf-ruleta-resultado" style="margin-top:14px; font-weight:700;"></p>';
+    contenedor.innerHTML = '<button class="cf-btn cf-primary" id="cf-btn-girar">' + ic("repeat") + ' Girar la ruleta</button><p id="cf-ruleta-resultado" style="margin-top:14px; font-weight:700;"></p>';
     document.getElementById("cf-btn-girar").addEventListener("click", function () {
       var resultadoEl = document.getElementById("cf-ruleta-resultado");
-      resultadoEl.textContent = "Girando... 🎡";
+      resultadoEl.textContent = "Girando…";
       setTimeout(function () {
         var mensaje = DATOS_CURIOSOS[Math.floor(Math.random() * DATOS_CURIOSOS.length)];
-        resultadoEl.textContent = "🎉 " + mensaje;
+        resultadoEl.textContent = mensaje;
         desbloquearLogro("act_ruleta");
       }, 900);
     });
@@ -1464,11 +1541,11 @@
           if (palabra.indexOf(letra) === -1) erroresRestantes--;
           render();
           if (palabra.split("").every(function (l) { return adivinadas.indexOf(l) !== -1; })) {
-            document.getElementById("cf-ahorcado-estado").textContent = "¡Ganaste! Era " + palabra + " 🎉";
+            document.getElementById("cf-ahorcado-estado").textContent = "¡Ganaste! Era " + palabra + "";
             desbloquearLogro("act_palabra");
             registrarActividadDificil("ahorcado", dificultad);
           } else if (erroresRestantes <= 0) {
-            document.getElementById("cf-ahorcado-estado").textContent = "Se acabaron los intentos. Era " + palabra + " — ¡inténtalo de nuevo!";
+            document.getElementById("cf-ahorcado-estado").textContent = "Se acabaron los intentos. Era " + palabra + ", ¡inténtalo de nuevo!";
           }
         });
       });
@@ -1486,13 +1563,13 @@
     var distinto = Math.floor(Math.random() * total);
     contenedor.innerHTML = '<p style="font-weight:700; margin-bottom:10px;">Encuentra el ícono diferente:</p><div style="display:grid; grid-template-columns:repeat(' + columnas + ',1fr); gap:6px;">' +
       Array.from({ length: total }).map(function (_, i) {
-        return '<button class="cf-icono-boton" data-i="' + i + '" style="font-size:' + tamanoFuente + '; padding:8px; border-radius:8px; border:2px solid var(--ink); background:var(--cream);">' + (i === distinto ? "🌠" : "🌟") + "</button>";
+        return '<button class="cf-icono-boton" data-i="' + i + '" style="font-size:' + tamanoFuente + '; padding:8px; border-radius:8px; border:2px solid var(--ink); background:var(--cream);">' + (i === distinto ? ic("sparkle", tamanoFuente === "14px" ? "20px" : "28px") : ic("star", tamanoFuente === "14px" ? "20px" : "28px")) + "</button>";
       }).join("") + '</div><p id="cf-iconos-estado" style="margin-top:10px; font-weight:700;"></p>';
 
     contenedor.querySelectorAll(".cf-icono-boton").forEach(function (boton) {
       boton.addEventListener("click", function () {
         if (parseInt(boton.dataset.i, 10) === distinto) {
-          document.getElementById("cf-iconos-estado").textContent = "¡Lo encontraste! 🎉";
+          document.getElementById("cf-iconos-estado").textContent = "¡Lo encontraste!";
           desbloquearLogro("act_iconos");
           registrarActividadDificil("iconos", dificultad);
         } else {
@@ -1554,7 +1631,7 @@
     var ventana = { facil: [2000, 5000], medio: [1000, 4000], dificil: [500, 3000] }[dificultad] || [1000, 4000];
     var umbralRapido = { facil: 600, medio: 450, dificil: 400 }[dificultad] || 450;
 
-    contenedor.innerHTML = '<p>Espera a que aparezca el botón y haz clic lo más rápido posible.' + (dificultad === "dificil" ? " Cuidado: a veces aparece una trampa." : "") + '</p><div id="cf-reaccion-zona" style="position:relative; height:200px; background:var(--cream); border-radius:10px; margin-top:10px;"><p style="text-align:center; padding-top:80px;">Prepárate...</p></div>';
+    contenedor.innerHTML = '<p>Espera a que aparezca el botón y haz clic lo más rápido posible.' + (dificultad === "dificil" ? " Cuidado: a veces aparece una trampa." : "") + '</p><div id="cf-reaccion-zona" style="position:relative; height:200px; background:var(--cream); border-radius:10px; margin-top:10px;"><p style="text-align:center; padding-top:80px;">Prepárate…</p></div>';
 
     var zona = document.getElementById("cf-reaccion-zona");
     var espera = ventana[0] + Math.random() * (ventana[1] - ventana[0]);
@@ -1572,7 +1649,7 @@
       var apareceEn = Date.now();
       boton.addEventListener("click", function () {
         var tiempoMs = Date.now() - apareceEn;
-        zona.innerHTML = '<p style="text-align:center; padding-top:70px; font-weight:700;">⏱️ ' + tiempoMs + " ms" + (tiempoMs < umbralRapido ? " — ¡rápido como un rayo! ⚡" : "") + "</p>";
+        zona.innerHTML = '<p style="text-align:center; padding-top:70px; font-weight:700;">' + tiempoMs + " ms" + (tiempoMs < umbralRapido ? ", ¡rápido como un rayo!" : "") + "</p>";
         var veces = incrementarContador("cf_veces_reaccion");
         desbloquearLogro("act_reaccion");
         registrarActividadDificil("reaccion", dificultad);
@@ -1592,7 +1669,7 @@
         senuelo.style.top = (Math.random() * 70) + "%";
         zona.appendChild(senuelo);
         senuelo.addEventListener("click", function () {
-          zona.innerHTML = '<p style="text-align:center; padding-top:70px; font-weight:700; color:#b4225f;">¡Era una trampa! 🙈 Intenta de nuevo.</p>';
+          zona.innerHTML = '<p style="text-align:center; padding-top:70px; font-weight:700; color:#b4225f;">¡Era una trampa! Intenta de nuevo.</p>';
         });
         setTimeout(function () {
           if (zona.contains(senuelo)) { senuelo.remove(); mostrarBotonReal(); }
@@ -1668,7 +1745,7 @@
               registrarActividadDificil("simon", dificultad);
             }
             if (secuencia.length >= 8) desbloquearLogro("simon_experto");
-            document.getElementById("cf-simon-estado").textContent = "¡Bien! Sigue a la siguiente ronda...";
+            document.getElementById("cf-simon-estado").textContent = "¡Bien! Sigue a la siguiente ronda…";
             setTimeout(function () { agregarPaso(); reproducirSecuencia(); }, 900);
           }
         });
@@ -1715,7 +1792,7 @@
     // Genera la grilla completa; si por mala suerte quedan muy pocas palabras
     // colocadas, reintenta desde cero. Las palabras a encontrar SIEMPRE se
     // derivan de lo que realmente quedó en la grilla (ubicaciones), nunca de
-    // la lista original — así el reto nunca pide encontrar algo que no está.
+    // la lista original, así el reto nunca pide encontrar algo que no está.
     for (var intentoGrilla = 0; intentoGrilla < 5; intentoGrilla++) {
       grilla = [];
       for (var f = 0; f < tamano; f++) {
@@ -1825,7 +1902,7 @@
             finTemporal = null;
             render();
             if (encontradas.length === palabrasObjetivo.length) {
-              document.getElementById("cf-sopa-estado").textContent = "¡Encontraste todas las palabras! 🎉";
+              document.getElementById("cf-sopa-estado").textContent = "¡Encontraste todas las palabras!";
               desbloquearLogro("act_sopa");
               registrarActividadDificil("sopa", dificultad);
             }
@@ -1860,7 +1937,7 @@
       if (!activo) return;
       aparecidos++;
       var objetivo = document.createElement("button");
-      objetivo.textContent = "🎯";
+      objetivo.innerHTML = ic("target", "26px");
       objetivo.style.position = "absolute";
       objetivo.style.left = (Math.random() * 85) + "%";
       objetivo.style.top = (Math.random() * 75) + "%";
@@ -1972,7 +2049,7 @@
   });
 
   // ==========================
-  // Insignia digital descargable — generada en el navegador con <canvas>.
+  // Insignia digital descargable, generada en el navegador con <canvas>.
   // ==========================
   function trazarRectRedondeado(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -2004,10 +2081,10 @@
   }
 
   var CONFIG_ESTADO_INSIGNIA = {
-    admitido: { color: "#2ECC71", texto: "✅ ¡ADMITIDO!", frase: "¡Voy a Camp Fest 2026! 🏕️", textoClaro: true },
-    pendiente: { color: "#FFD400", texto: "⏳ EN REVISIÓN", frase: "Estoy en el proceso de Camp Fest 2026", textoClaro: false },
-    no_admitido: { color: "#8A8A93", texto: "RESULTADO: NO ADMITIDO", frase: "Participé en el proceso de Camp Fest 2026", textoClaro: true },
-    desertor: { color: "#8A8A93", texto: "DESERCIÓN REGISTRADA", frase: "Camp Fest 2026", textoClaro: true }
+    admitido: { color: "#2ECC71", texto: "ADMITIDO", frase: "Voy a Camp Fest 2027", textoClaro: true },
+    pendiente: { color: "#FFD400", texto: "EN REVISIÓN", frase: "Estoy en el proceso de Camp Fest 2027", textoClaro: false },
+    no_admitido: { color: "#8A8A93", texto: "RESULTADO: NO ADMITIDO", frase: "Participé en el proceso de Camp Fest 2027", textoClaro: true },
+    desertor: { color: "#8A8A93", texto: "DESERCIÓN REGISTRADA", frase: "Camp Fest 2027", textoClaro: true }
   };
 
   document.getElementById("cf-btn-descargar-insignia").addEventListener("click", function () {
@@ -2045,9 +2122,9 @@
 
     ctx.fillStyle = WHITE;
     ctx.font = "bold 40px 'Poppins', Arial, sans-serif";
-    ctx.fillText("🏕 CAMP FEST 2026", W / 2, 110);
+    ctx.fillText("CAMP FEST BUGALAGRANDE", W / 2, 110);
     ctx.font = "600 20px 'Poppins', Arial, sans-serif";
-    ctx.fillText("13 – 15 de noviembre · Bugalagrande, Valle", W / 2, 145);
+    ctx.fillText("Primer semestre de 2027 · Bugalagrande, Valle", W / 2, 145);
 
     ctx.font = "bold 28px 'Poppins', Arial, sans-serif";
     var anchoSticker = ctx.measureText(estado.texto).width + 60;
@@ -2106,16 +2183,18 @@
     ctx.stroke();
     ctx.font = "700 18px 'Poppins', Arial, sans-serif";
     ctx.fillStyle = INK;
-    ctx.fillText("FALTAN", W / 2, cardY + 38);
+    var conDias = typeof p.diasRestantes === "number";
+    ctx.fillText(conDias ? "FALTAN" : "FECHA", W / 2, cardY + 38);
     ctx.font = "bold 56px 'Poppins', Arial, sans-serif";
     ctx.fillStyle = PINK;
-    ctx.fillText(String(p.diasRestantes), W / 2, cardY + 95);
+    if (!conDias) ctx.font = "bold 40px 'Poppins', Arial, sans-serif";
+    ctx.fillText(conDias ? String(p.diasRestantes) : "1.er SEMESTRE 2027", W / 2, cardY + 95);
     ctx.font = "700 18px 'Poppins', Arial, sans-serif";
     ctx.fillStyle = INK;
-    ctx.fillText("DÍAS", W / 2 + 90, cardY + 95);
+    if (conDias) ctx.fillText("DÍAS", W / 2 + 90, cardY + 95);
 
     // QR con el código CF- para que Logística lo escanee con la cámara en
-    // el ingreso, en vez de buscarlo a mano — mismo código que ya se
+    // el ingreso, en vez de buscarlo a mano, mismo código que ya se
     // muestra en texto arriba, solo que legible por máquina.
     var qrModulos, qrLado = 210, qrMargen = 14, qrY = 955;
     try {
@@ -2151,9 +2230,9 @@
 
     ctx.font = "600 20px 'Poppins', Arial, sans-serif";
     ctx.fillStyle = WHITE;
-    ctx.fillText("#CampFest2026 · campfest.online", W / 2, H - 60);
+    ctx.fillText("#CampFestBugalagrande · campfest.online", W / 2, H - 60);
     ctx.font = "500 15px 'Poppins', Arial, sans-serif";
-    ctx.fillText("Subsistema de Participación Juvenil de Bugalagrande", W / 2, H - 30);
+    ctx.fillText("Bugalagrande, Valle del Cauca", W / 2, H - 30);
 
     ctx.textAlign = "left";
 
@@ -2173,5 +2252,6 @@
 })();
 </script>
 
+<script src="../../campfest/assets/main.js" defer></script>
 </body>
 </html>

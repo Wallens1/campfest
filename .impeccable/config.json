@@ -1,0 +1,44 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "campfest/assets/style.css"
+        ],
+        "createdAt": "2026-10-15T04:32:57.403Z",
+        "reason": "Claude triage: flagged lines are 2-3px ink cell dividers (legal articles grid, directory columns), not accent tabs"
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "campfest/assets/style.css"
+        ],
+        "createdAt": "2026-10-15T04:32:57.608Z",
+        "reason": "Claude triage: flagged lines are CSS-triangle Memphis shapes and a header rule, not card accents"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-15T04:32:57.806Z",
+        "reason": "user pinned the incumbent Memphis palette (cream #FFF7EA ground) in chat"
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-15T04:32:57.997Z",
+        "reason": "user asked to keep the existing animations; sponsor marquee is incumbent and stops under reduced motion"
+      }
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+
+# Impeccable: archivos de trabajo locales
+.impeccable/review/
+.impeccable/questions/
+.impeccable/hook.cache.json

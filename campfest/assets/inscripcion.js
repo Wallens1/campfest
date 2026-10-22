@@ -1,4 +1,4 @@
-// Lógica compartida del formulario de inscripción — se incrusta igual en
+// Lógica compartida del formulario de inscripción, se incrusta igual en
 // i-mayores-de-18-anos/ e i-menores-de-edad/ (el mismo formulario en ambas
 // páginas; la fecha de nacimiento real decide si aplica el aviso de menor
 // de edad, no la página en la que se llenó).
@@ -118,8 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         boton.disabled = true;
-        boton.textContent = "Enviando...";
-        mostrarEstado("cargando", "Enviando tu inscripción, un momento...");
+        boton.textContent = "Enviando…";
+        mostrarEstado("cargando", "Enviando tu inscripción, un momento…");
 
         try {
 

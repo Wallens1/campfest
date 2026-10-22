@@ -1,4 +1,4 @@
-// Visor de solo lectura del mapa del evento — lo usan tanto el portal del
+// Visor de solo lectura del mapa del evento, lo usan tanto el portal del
 // campista como el sitio público. Las zonas llegan como puntos en
 // porcentaje (0-100) relativo a la imagen, así que un <svg viewBox="0 0 100
 // 100"> las dibuja directo, sin recalcular nada al cambiar de tamaño.
@@ -6,7 +6,7 @@
 // Las formas NO llevan el nombre completo escrito encima: en zonas chicas
 // el texto se salía y se encimaba con el de la zona vecina. En vez de eso,
 // cada forma muestra solo un número, y debajo del mapa hay una leyenda
-// "1. Baños, 2. Comedor..." — tocar la forma o la leyenda resalta ambas.
+// "1. Baños, 2. Comedor…", tocar la forma o la leyenda resalta ambas.
 (function () {
 
     function coordenadasCentro(puntos) {
@@ -17,7 +17,7 @@
 
     // Pin como los de un mapa de parque/atracción: un círculo (el "bulbo",
     // donde va el número) con una colita triangular que apunta exactamente
-    // al punto de la zona — la punta toca el punto, el bulbo queda arriba.
+    // al punto de la zona, la punta toca el punto, el bulbo queda arriba.
     function marcadorPin(punta, radio) {
         var centroBulbo = { x: punta.x, y: punta.y - radio * 1.7 };
         var anchoCola = radio * 0.55;
@@ -64,7 +64,7 @@
         inyectarEstilos();
 
         if (!datos || !datos.publicado) {
-            contenedor.innerHTML = '<p class="cf-mapa-vacio">El mapa del evento todavía no está disponible. Vuelve a revisar más cerca de la fecha. 💜</p>';
+            contenedor.innerHTML = '<p class="cf-mapa-vacio">El mapa del evento todavía no está disponible. Vuelve a revisar más cerca de la fecha.</p>';
             return;
         }
 
@@ -117,7 +117,7 @@
             var actividadesHtml = (zona.actividades && zona.actividades.length > 0)
                 ? "<ul>" + zona.actividades.map(function (a) {
                     var hora = a.horaInicio ? new Date(a.horaInicio).toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" }) : "";
-                    return "<li>" + a.titulo + (hora ? " — " + hora : "") + "</li>";
+                    return "<li>" + a.titulo + (hora ? ", " + hora : "") + "</li>";
                 }).join("") + "</ul>"
                 : "";
 

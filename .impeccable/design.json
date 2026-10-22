@@ -1,0 +1,628 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T04:39:23+00:00",
+  "title": "Design System: Camp Fest Bugalagrande",
+  "extensions": {
+    "colorMeta": {
+      "pink": {
+        "role": "secondary",
+        "displayName": "Hot Pink",
+        "canonical": "#FF2E8B",
+        "tonalRamp": [
+          "#210009",
+          "#480021",
+          "#77013B",
+          "#AA0758",
+          "#DD1D76",
+          "#FF5897",
+          "#FEA7C0",
+          "#FEE8ED"
+        ]
+      },
+      "yellow": {
+        "role": "primary",
+        "displayName": "Marquee Yellow",
+        "canonical": "#FFD400",
+        "tonalRamp": [
+          "#110A00",
+          "#2D2300",
+          "#4C3F06",
+          "#6F5C0F",
+          "#957B08",
+          "#BB9C0F",
+          "#E8C10F",
+          "#FEEFB8"
+        ]
+      },
+      "cyan": {
+        "role": "secondary",
+        "displayName": "Pool Cyan",
+        "canonical": "#00D2C6",
+        "tonalRamp": [
+          "#000F0E",
+          "#002B28",
+          "#014A46",
+          "#066C66",
+          "#1B9087",
+          "#26B5AB",
+          "#2DE0D4",
+          "#B9FEF7"
+        ]
+      },
+      "purple": {
+        "role": "primary",
+        "displayName": "Festival Purple",
+        "canonical": "#8B2FF0",
+        "tonalRamp": [
+          "#12002A",
+          "#2F045A",
+          "#510F92",
+          "#751CCE",
+          "#9740FE",
+          "#AE83F9",
+          "#CDB5FF",
+          "#F1EBFF"
+        ]
+      },
+      "orange": {
+        "role": "tertiary",
+        "displayName": "Campfire Orange",
+        "canonical": "#FF6B00",
+        "tonalRamp": [
+          "#1E0100",
+          "#421300",
+          "#6A2903",
+          "#973F09",
+          "#C5581A",
+          "#FE6A00",
+          "#FCAF8C",
+          "#FEEAE1"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Camp Ink",
+        "canonical": "#1A1A1E",
+        "tonalRamp": [
+          "#0B0B0E",
+          "#242428",
+          "#3F3F44",
+          "#5D5D62",
+          "#7D7D82",
+          "#9E9EA3",
+          "#C3C3C9",
+          "#EEEEF4"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Faded Ink",
+        "canonical": "#3B3842",
+        "tonalRamp": [
+          "#0C0912",
+          "#25222C",
+          "#413E48",
+          "#5F5C66",
+          "#7E7B87",
+          "#A09CA8",
+          "#C5C2CE",
+          "#F0ECF9"
+        ]
+      },
+      "cream": {
+        "role": "neutral",
+        "displayName": "Camp Cream",
+        "canonical": "#FFF7EA",
+        "tonalRamp": [
+          "#0F0A03",
+          "#29231A",
+          "#453F34",
+          "#635D52",
+          "#837C71",
+          "#A59D91",
+          "#CBC3B7",
+          "#F5EDE0"
+        ]
+      },
+      "cream-2": {
+        "role": "neutral",
+        "displayName": "Kraft Cream",
+        "canonical": "#FFEFD4",
+        "tonalRamp": [
+          "#130900",
+          "#2E220C",
+          "#4B3E27",
+          "#695C44",
+          "#897B63",
+          "#AB9C83",
+          "#D1C2A8",
+          "#FCECD1"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#404040",
+          "#5D5D5D",
+          "#7D7D7D",
+          "#9E9E9E",
+          "#C4C4C4",
+          "#EEEEEE"
+        ]
+      },
+      "tint-pink": {
+        "role": "neutral",
+        "displayName": "Pink Tint",
+        "canonical": "#FFE3EF",
+        "tonalRamp": [
+          "#15050D",
+          "#311D26",
+          "#4E3842",
+          "#6D5660",
+          "#8E7580",
+          "#B096A1",
+          "#D6BCC7",
+          "#FFE7F1"
+        ]
+      },
+      "tint-cyan": {
+        "role": "neutral",
+        "displayName": "Cyan Tint",
+        "canonical": "#DDF8F5",
+        "tonalRamp": [
+          "#000F0D",
+          "#122927",
+          "#2E4543",
+          "#4C6361",
+          "#6B8380",
+          "#8BA4A2",
+          "#B0CAC8",
+          "#DAF5F2"
+        ]
+      },
+      "tint-yellow": {
+        "role": "neutral",
+        "displayName": "Yellow Tint",
+        "canonical": "#FFF4BF",
+        "tonalRamp": [
+          "#100B00",
+          "#2B2400",
+          "#4A400C",
+          "#685E2D",
+          "#887E4D",
+          "#AA9F6D",
+          "#D0C592",
+          "#FBF0BB"
+        ]
+      },
+      "tint-purple": {
+        "role": "neutral",
+        "displayName": "Purple Tint",
+        "canonical": "#EFE3FF",
+        "tonalRamp": [
+          "#0F0618",
+          "#281F33",
+          "#443B51",
+          "#635870",
+          "#837891",
+          "#A499B3",
+          "#CABED9",
+          "#F3EAFE"
+        ]
+      },
+      "tint-orange": {
+        "role": "neutral",
+        "displayName": "Orange Tint",
+        "canonical": "#FFE7D6",
+        "tonalRamp": [
+          "#160700",
+          "#312013",
+          "#4E3B2E",
+          "#6D594B",
+          "#8E7969",
+          "#B09A8A",
+          "#D6BFAF",
+          "#FFEADC"
+        ]
+      },
+      "deep-pink": {
+        "role": "neutral",
+        "displayName": "Deep Pink",
+        "canonical": "#A3124F",
+        "tonalRamp": [
+          "#200008",
+          "#49001E",
+          "#790037",
+          "#A71852",
+          "#CE4271",
+          "#F56792",
+          "#FBA9BD",
+          "#FFE8EC"
+        ]
+      },
+      "deep-cyan": {
+        "role": "neutral",
+        "displayName": "Deep Cyan",
+        "canonical": "#00695F",
+        "tonalRamp": [
+          "#000F0D",
+          "#002B26",
+          "#024B43",
+          "#096D62",
+          "#398D82",
+          "#5DAFA4",
+          "#84D6CA",
+          "#B9FFF3"
+        ]
+      },
+      "deep-purple": {
+        "role": "neutral",
+        "displayName": "Deep Purple",
+        "canonical": "#5A13B0",
+        "tonalRamp": [
+          "#11002D",
+          "#2D015F",
+          "#4D0899",
+          "#6B30C6",
+          "#8A57EC",
+          "#A786FA",
+          "#C8B9FB",
+          "#EFEBFF"
+        ]
+      },
+      "deep-orange": {
+        "role": "neutral",
+        "displayName": "Deep Orange",
+        "canonical": "#A33F00",
+        "tonalRamp": [
+          "#1F0100",
+          "#421200",
+          "#6B2804",
+          "#983E0B",
+          "#C25B2A",
+          "#E77D4D",
+          "#FEAE8D",
+          "#FEEAE1"
+        ]
+      },
+      "deep-yellow": {
+        "role": "neutral",
+        "displayName": "Deep Yellow",
+        "canonical": "#6E5600",
+        "tonalRamp": [
+          "#120900",
+          "#2E2200",
+          "#4F3D03",
+          "#725A08",
+          "#937A33",
+          "#B59C56",
+          "#DCC27B",
+          "#FFEDBF"
+        ]
+      },
+      "paper-rule": {
+        "role": "neutral",
+        "displayName": "Paper Rule",
+        "canonical": "#ECE5D8",
+        "tonalRamp": [
+          "#0F0A03",
+          "#28231A",
+          "#453F35",
+          "#635D52",
+          "#837C71",
+          "#A49E91",
+          "#CAC3B7",
+          "#F5EEE1"
+        ],
+        "note": "Literal in style.css, not yet a custom property."
+      },
+      "paper-zebra": {
+        "role": "neutral",
+        "displayName": "Paper Zebra",
+        "canonical": "#FFFBF2",
+        "tonalRamp": [
+          "#0D0B06",
+          "#27241D",
+          "#433F38",
+          "#615D56",
+          "#807D75",
+          "#A29E96",
+          "#C8C4BB",
+          "#F2EEE5"
+        ],
+        "note": "Literal in style.css, not yet a custom property."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Home hero wordmark only; uppercase, white, 4px ink text shadow, second word yellow tilted -2deg. Subpage step: 700, clamp(36px, 6vw, 64px), 0.95, 3px shadow."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles in sentence case; one key word may carry the yellow highlighter band."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card, panel, article, ally and board titles (17-22px, 600-700)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text; prose at 17px with a 64-68ch measure."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Section intros in faded ink."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Stamps, board values and nav links; Fredoka for facts, tabular numerals for figures."
+      }
+    },
+    "shadows": [
+      {
+        "name": "block",
+        "value": "6px 6px 0 #1A1A1E",
+        "purpose": "Cards, panels, tables, legal grid, directory, menu, date badge."
+      },
+      {
+        "name": "block-s",
+        "value": "4px 4px 0 #1A1A1E",
+        "purpose": "Pillars, allies, rules, back pill, program tabs."
+      },
+      {
+        "name": "block-hero",
+        "value": "10px 10px 0 #1A1A1E",
+        "purpose": "Status board and final call to action (7px on phones)."
+      },
+      {
+        "name": "button-ink",
+        "value": "5px 5px 0 #FF2E8B",
+        "purpose": "Ink buttons; 7px on hover, 2px on press."
+      },
+      {
+        "name": "button-primary",
+        "value": "5px 5px 0 #1A1A1E",
+        "purpose": "Yellow primary buttons; 7px on hover, 2px on press."
+      },
+      {
+        "name": "button-secondary",
+        "value": "5px 5px 0 #00D2C6",
+        "purpose": "White secondary buttons."
+      },
+      {
+        "name": "card-hover",
+        "value": "9px 9px 0 #1A1A1E",
+        "purpose": "Link card hover lift."
+      },
+      {
+        "name": "input-focus",
+        "value": "3px 3px 0 #1A1A1E",
+        "purpose": "Focused form field."
+      },
+      {
+        "name": "display-text",
+        "value": "text-shadow: 4px 4px 0 #1A1A1E",
+        "purpose": "Hero wordmark (3px on subpage heroes)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "All state transitions and entrances."
+      },
+      {
+        "name": "state",
+        "value": "200ms",
+        "purpose": "Buttons, nav, links, icon nudges."
+      },
+      {
+        "name": "card",
+        "value": "250ms",
+        "purpose": "Card and sponsor lift."
+      },
+      {
+        "name": "reveal",
+        "value": "700ms, translateY(22px), 70ms stagger",
+        "purpose": "Scroll reveal; content stays visible by default without JS."
+      },
+      {
+        "name": "stamp-in",
+        "value": "500ms, scale(1.8) to 1, staggered 150ms",
+        "purpose": "Board stamps thump down after the board drops in (900ms)."
+      },
+      {
+        "name": "float",
+        "value": "4.5-6.5s ease-in-out infinite, 14px, 12deg",
+        "purpose": "Confetti float."
+      },
+      {
+        "name": "marquee",
+        "value": "34s linear infinite",
+        "purpose": "Sponsor strip; pauses on hover and focus, wraps statically under reduced motion."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation: none; transition: none",
+        "purpose": "Global kill switch under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "nav-collapse",
+        "value": "980px"
+      },
+      {
+        "name": "tablet",
+        "value": "720px"
+      },
+      {
+        "name": "phone",
+        "value": "520px"
+      },
+      {
+        "name": "narrow",
+        "value": "420px"
+      }
+    ],
+    "containers": [
+      {
+        "name": "wide",
+        "value": "1240px"
+      },
+      {
+        "name": "reading",
+        "value": "1020px"
+      }
+    ],
+    "iconography": {
+      "source": "campfest/assets/icons.svg",
+      "grid": "24px",
+      "stroke": "2px, round caps and joins, currentColor",
+      "usage": "<svg class=\"cf-i\"><use href=\".../icons.svg#i-name\"/></svg>"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Yellow pill with ink outline and ink block shadow; the main action.",
+      "html": "<a class=\"ds-btn ds-btn-primary\" href=\"#\">Inscribirme <svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></a>",
+      "css": ":host{--pink:#FF2E8B;--yellow:#FFD400;--cyan:#00D2C6;--purple:#8B2FF0;--orange:#FF6B00;--ink:#1A1A1E;--ink-2:#3B3842;--cream:#FFF7EA;--white:#FFFFFF;--tint-cyan:#DDF8F5;--tint-orange:#FFE7D6;--tint-yellow:#FFF4BF;--deep-cyan:#00695F;--deep-orange:#A33F00;--deep-pink:#A3124F;--deep-purple:#5A13B0;--ease-out:cubic-bezier(.16,1,.3,1);}.ds-i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.22em;flex:0 0 auto;}.ds-btn{display:inline-flex;align-items:center;gap:10px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;letter-spacing:.2px;border:3px solid var(--ink);border-radius:999px;padding:13px 26px;margin:8px;cursor:pointer;text-decoration:none;transition:transform .2s var(--ease-out),box-shadow .2s var(--ease-out);}.ds-btn .ds-i{transition:transform .2s var(--ease-out);}.ds-btn:hover{transform:translate(-2px,-2px);}.ds-btn:hover .ds-i{transform:translateX(3px);}.ds-btn:active{transform:translate(2px,2px);}.ds-btn:focus-visible{outline:3px solid var(--purple);outline-offset:3px;}.ds-btn-primary{background:var(--yellow);color:var(--ink);box-shadow:5px 5px 0 var(--ink);}.ds-btn-primary:hover{box-shadow:7px 7px 0 var(--ink);}.ds-btn-primary:active{box-shadow:2px 2px 0 var(--ink);}"
+    },
+    {
+      "name": "Ink Button",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "Ink pill with cream text casting a pink block shadow.",
+      "html": "<button class=\"ds-btn ds-btn-ink\" type=\"button\">Ver el itinerario <svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
+      "css": ":host{--pink:#FF2E8B;--yellow:#FFD400;--cyan:#00D2C6;--purple:#8B2FF0;--orange:#FF6B00;--ink:#1A1A1E;--ink-2:#3B3842;--cream:#FFF7EA;--white:#FFFFFF;--tint-cyan:#DDF8F5;--tint-orange:#FFE7D6;--tint-yellow:#FFF4BF;--deep-cyan:#00695F;--deep-orange:#A33F00;--deep-pink:#A3124F;--deep-purple:#5A13B0;--ease-out:cubic-bezier(.16,1,.3,1);}.ds-i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.22em;flex:0 0 auto;}.ds-btn{display:inline-flex;align-items:center;gap:10px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;letter-spacing:.2px;border:3px solid var(--ink);border-radius:999px;padding:13px 26px;margin:8px;cursor:pointer;text-decoration:none;transition:transform .2s var(--ease-out),box-shadow .2s var(--ease-out);}.ds-btn .ds-i{transition:transform .2s var(--ease-out);}.ds-btn:hover{transform:translate(-2px,-2px);}.ds-btn:hover .ds-i{transform:translateX(3px);}.ds-btn:active{transform:translate(2px,2px);}.ds-btn:focus-visible{outline:3px solid var(--purple);outline-offset:3px;}.ds-btn-ink{background:var(--ink);color:var(--cream);box-shadow:5px 5px 0 var(--pink);}.ds-btn-ink:hover{box-shadow:7px 7px 0 var(--pink);}.ds-btn-ink:active{box-shadow:2px 2px 0 var(--pink);}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "White pill with ink text casting a cyan block shadow.",
+      "html": "<button class=\"ds-btn ds-btn-sec\" type=\"button\">Leer la cartilla <svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
+      "css": ":host{--pink:#FF2E8B;--yellow:#FFD400;--cyan:#00D2C6;--purple:#8B2FF0;--orange:#FF6B00;--ink:#1A1A1E;--ink-2:#3B3842;--cream:#FFF7EA;--white:#FFFFFF;--tint-cyan:#DDF8F5;--tint-orange:#FFE7D6;--tint-yellow:#FFF4BF;--deep-cyan:#00695F;--deep-orange:#A33F00;--deep-pink:#A3124F;--deep-purple:#5A13B0;--ease-out:cubic-bezier(.16,1,.3,1);}.ds-i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.22em;flex:0 0 auto;}.ds-btn{display:inline-flex;align-items:center;gap:10px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;letter-spacing:.2px;border:3px solid var(--ink);border-radius:999px;padding:13px 26px;margin:8px;cursor:pointer;text-decoration:none;transition:transform .2s var(--ease-out),box-shadow .2s var(--ease-out);}.ds-btn .ds-i{transition:transform .2s var(--ease-out);}.ds-btn:hover{transform:translate(-2px,-2px);}.ds-btn:hover .ds-i{transform:translateX(3px);}.ds-btn:active{transform:translate(2px,2px);}.ds-btn:focus-visible{outline:3px solid var(--purple);outline-offset:3px;}.ds-btn-sec{background:var(--white);color:var(--ink);box-shadow:5px 5px 0 var(--cyan);}.ds-btn-sec:hover{box-shadow:7px 7px 0 var(--cyan);}.ds-btn-sec:active{box-shadow:2px 2px 0 var(--cyan);}"
+    },
+    {
+      "name": "Status Stamps",
+      "kind": "chip",
+      "refersTo": "stamp-ok",
+      "description": "Rotated ink-outlined stamps: cyan confirmed, yellow in progress, pink postponed, dashed white requested.",
+      "html": "<div class=\"ds-row\"><span class=\"ds-stamp is-ok\"><svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m5 12.5 4.5 4.5L19 7.5\"/></svg>Abiertas</span><span class=\"ds-stamp is-wip\"><svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9\"/></svg>En gestión</span><span class=\"ds-stamp is-hold\"><svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg>Aplazados</span><span class=\"ds-stamp is-ask\">Solicitado</span></div>",
+      "css": ":host{--pink:#FF2E8B;--yellow:#FFD400;--cyan:#00D2C6;--purple:#8B2FF0;--orange:#FF6B00;--ink:#1A1A1E;--ink-2:#3B3842;--cream:#FFF7EA;--white:#FFFFFF;--tint-cyan:#DDF8F5;--tint-orange:#FFE7D6;--tint-yellow:#FFF4BF;--deep-cyan:#00695F;--deep-orange:#A33F00;--deep-pink:#A3124F;--deep-purple:#5A13B0;--ease-out:cubic-bezier(.16,1,.3,1);}.ds-i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.22em;flex:0 0 auto;}.ds-stamp{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-family:'Fredoka',sans-serif;font-weight:600;font-size:12.5px;letter-spacing:.2px;padding:4px 10px;border:2px solid var(--ink);border-radius:8px;transform:rotate(-3deg);background:var(--white);color:var(--ink);}.ds-stamp .ds-i{width:14px;height:14px;stroke-width:2.6;}.ds-stamp.is-ok{background:var(--cyan);}.ds-stamp.is-wip{background:var(--yellow);}.ds-stamp.is-hold{background:var(--pink);}.ds-stamp.is-ask{border-style:dashed;}.ds-row{display:flex;flex-wrap:wrap;gap:14px;padding:8px;}"
+    },
+    {
+      "name": "Budget Source Chips",
+      "kind": "chip",
+      "refersTo": "chip-kind",
+      "description": "Flat inline status chip before a source name, plus the in-kind and money contribution chips.",
+      "html": "<ul class=\"ds-src\"><li><span class=\"ds-st is-hold\">aplazado, vigente</span> Gobernación del Valle, refrigerios</li><li><span class=\"ds-st is-wip\">en revisión</span> Alcaldía, refrigerios y agua</li><li><span class=\"ds-st is-ask\">solicitado</span> Carta enviada, sin respuesta</li></ul><span class=\"ds-kind\">En especie</span> <span class=\"ds-kind is-money\">En dinero</span>",
+      "css": ":host{--pink:#FF2E8B;--yellow:#FFD400;--cyan:#00D2C6;--purple:#8B2FF0;--orange:#FF6B00;--ink:#1A1A1E;--ink-2:#3B3842;--cream:#FFF7EA;--white:#FFFFFF;--tint-cyan:#DDF8F5;--tint-orange:#FFE7D6;--tint-yellow:#FFF4BF;--deep-cyan:#00695F;--deep-orange:#A33F00;--deep-pink:#A3124F;--deep-purple:#5A13B0;--ease-out:cubic-bezier(.16,1,.3,1);}.ds-src{list-style:none;display:grid;gap:6px;margin:0 0 12px;padding:0;font-family:'Poppins',sans-serif;font-size:14.5px;color:var(--ink);}.ds-st{display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:6px;border:1.5px solid var(--ink);margin-right:4px;color:var(--ink);background:var(--white);}.ds-st.is-ok{background:var(--cyan);}.ds-st.is-wip{background:var(--yellow);}.ds-st.is-hold{background:var(--pink);}.ds-st.is-ask{border-style:dashed;}.ds-kind{display:inline-block;font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--tint-cyan);color:var(--deep-cyan);}.ds-kind.is-money{background:var(--tint-orange);color:var(--deep-orange);}"
+    },
+    {
+      "name": "Status Board",
+      "kind": "custom",
+      "refersTo": "status-board",
+      "description": "Signature trust board: white panel, 4px ink outline, 10px block shadow, rows of icon tile, field, value and stamp.",
+      "html": "<aside class=\"ds-board\"><div class=\"ds-board-head\"><h2>Estado del campamento</h2><small>Actualizado en octubre de 2026</small></div><dl><div class=\"ds-board-row\"><span class=\"ds-tile is-orange\"><svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2\"/></svg></span><div><dt>Fecha</dt><dd>Primer semestre de 2027</dd></div><span class=\"ds-stamp is-wip\"><svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9\"/></svg>Día por anunciar</span></div><div class=\"ds-board-row\"><span class=\"ds-tile is-pink\"><svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.4\"/></svg></span><div><dt>Sede</dt><dd>Bugalagrande, lugar por confirmar</dd></div><span class=\"ds-stamp is-wip ds-tilt\"><svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9\"/></svg>En gestión</span></div></dl></aside>",
+      "css": ":host{--pink:#FF2E8B;--yellow:#FFD400;--cyan:#00D2C6;--purple:#8B2FF0;--orange:#FF6B00;--ink:#1A1A1E;--ink-2:#3B3842;--cream:#FFF7EA;--white:#FFFFFF;--tint-cyan:#DDF8F5;--tint-orange:#FFE7D6;--tint-yellow:#FFF4BF;--deep-cyan:#00695F;--deep-orange:#A33F00;--deep-pink:#A3124F;--deep-purple:#5A13B0;--ease-out:cubic-bezier(.16,1,.3,1);}.ds-i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.22em;flex:0 0 auto;}.ds-stamp{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-family:'Fredoka',sans-serif;font-weight:600;font-size:12.5px;letter-spacing:.2px;padding:4px 10px;border:2px solid var(--ink);border-radius:8px;transform:rotate(-3deg);background:var(--white);color:var(--ink);}.ds-stamp .ds-i{width:14px;height:14px;stroke-width:2.6;}.ds-stamp.is-ok{background:var(--cyan);}.ds-stamp.is-wip{background:var(--yellow);}.ds-stamp.is-hold{background:var(--pink);}.ds-stamp.is-ask{border-style:dashed;}.ds-tile{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;box-sizing:border-box;border-radius:12px;border:3px solid var(--ink);background:var(--yellow);color:var(--ink);flex:0 0 auto;}.ds-tile .ds-i{width:24px;height:24px;}.ds-tile.is-orange{background:var(--orange);}.ds-tile.is-pink{background:var(--pink);}.ds-board{position:relative;max-width:520px;margin:24px 16px 16px;background:var(--white);color:var(--ink);border:4px solid var(--ink);border-radius:24px;box-shadow:10px 10px 0 var(--ink);padding:22px 22px 14px;font-family:'Poppins',sans-serif;}.ds-board::before{content:'';position:absolute;top:-18px;right:28px;width:36px;height:36px;box-sizing:border-box;border-radius:50%;background:var(--cyan);border:4px solid var(--ink);}.ds-board-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:3px solid var(--ink);}.ds-board-head h2{margin:0;font-family:'Fredoka',sans-serif;font-weight:700;font-size:22px;line-height:1.1;}.ds-board-head small{font-size:12.5px;font-weight:600;color:var(--ink-2);}.ds-board dl{margin:0;}.ds-board-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:13px 0;border-bottom:2px dashed #D9D2C6;}.ds-board-row:last-child{border-bottom:0;}.ds-board dt{font-size:12.5px;font-weight:600;color:var(--ink-2);}.ds-board dd{margin:0;font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;line-height:1.2;}.ds-stamp.ds-tilt{transform:rotate(2deg);}"
+    },
+    {
+      "name": "Link Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "White, ink-outlined, slightly rotated card with icon tile, corner circle and deep-pink go link; straightens and lifts on hover.",
+      "html": "<a class=\"ds-card\" href=\"#\"><span class=\"ds-tile\"><svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2\"/></svg></span><h3>Itinerario</h3><p>Lo que pasa cada día, hora por hora.</p><span class=\"ds-go\">Ver itinerario <svg class=\"ds-i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></span></a>",
+      "css": ":host{--pink:#FF2E8B;--yellow:#FFD400;--cyan:#00D2C6;--purple:#8B2FF0;--orange:#FF6B00;--ink:#1A1A1E;--ink-2:#3B3842;--cream:#FFF7EA;--white:#FFFFFF;--tint-cyan:#DDF8F5;--tint-orange:#FFE7D6;--tint-yellow:#FFF4BF;--deep-cyan:#00695F;--deep-orange:#A33F00;--deep-pink:#A3124F;--deep-purple:#5A13B0;--ease-out:cubic-bezier(.16,1,.3,1);}.ds-i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.22em;flex:0 0 auto;}.ds-tile{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;box-sizing:border-box;border-radius:12px;border:3px solid var(--ink);background:var(--yellow);color:var(--ink);flex:0 0 auto;}.ds-tile .ds-i{width:24px;height:24px;}.ds-tile.is-orange{background:var(--orange);}.ds-tile.is-pink{background:var(--pink);}.ds-card{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:14px;max-width:300px;margin:16px;background:var(--white);color:var(--ink);text-decoration:none;border:3px solid var(--ink);border-radius:16px;padding:24px 22px 20px;box-shadow:6px 6px 0 var(--ink);overflow:hidden;transform:rotate(-1.2deg);transition:transform .25s var(--ease-out),box-shadow .25s var(--ease-out);font-family:'Poppins',sans-serif;}.ds-card::after{content:'';position:absolute;top:-22px;right:-22px;width:64px;height:64px;border-radius:50%;background:var(--yellow);}.ds-card>*{grid-column:2;position:relative;z-index:1;}.ds-card>.ds-tile{grid-column:1;grid-row:1/span 3;}.ds-card h3{margin:0;min-height:42px;display:flex;align-items:center;font-family:'Fredoka',sans-serif;font-weight:600;font-size:19px;line-height:1.2;}.ds-card p{margin:6px 0 0;font-size:14.5px;color:var(--ink-2);}.ds-go{padding-top:16px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:var(--deep-pink);display:inline-flex;align-items:center;gap:6px;}.ds-card:hover{transform:rotate(0) translateY(-6px);box-shadow:9px 9px 0 var(--ink);}.ds-card:active{transform:translateY(-2px);box-shadow:5px 5px 0 var(--ink);}.ds-card:focus-visible{outline:3px solid var(--purple);outline-offset:3px;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Cream field with a 2px ink outline; on focus it turns white with a purple outline and ink block shadow.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-n\">Nombre completo</label><input id=\"ds-n\" placeholder=\"Como aparece en tu documento\"></div>",
+      "css": ":host{--pink:#FF2E8B;--yellow:#FFD400;--cyan:#00D2C6;--purple:#8B2FF0;--orange:#FF6B00;--ink:#1A1A1E;--ink-2:#3B3842;--cream:#FFF7EA;--white:#FFFFFF;--tint-cyan:#DDF8F5;--tint-orange:#FFE7D6;--tint-yellow:#FFF4BF;--deep-cyan:#00695F;--deep-orange:#A33F00;--deep-pink:#A3124F;--deep-purple:#5A13B0;--ease-out:cubic-bezier(.16,1,.3,1);}.ds-field{max-width:360px;margin:12px;}.ds-field label{display:block;font-family:'Fredoka',sans-serif;font-size:14px;font-weight:600;margin-bottom:6px;color:var(--deep-purple);}.ds-field input{width:100%;box-sizing:border-box;padding:12px 14px;font-size:16px;font-family:'Poppins',sans-serif;border:2px solid var(--ink);border-radius:10px;background:var(--cream);color:var(--ink);transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;}.ds-field input::placeholder{color:#6E6A72;}.ds-field input:focus{outline:none;border-color:var(--purple);background:var(--white);box-shadow:3px 3px 0 var(--ink);}"
+    },
+    {
+      "name": "Navigation Bar",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "Sticky ink bar with a yellow bottom rule, pill links (yellow outline on hover, pink fill when active) and a yellow CTA.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-brand\"><span class=\"ds-mark\"></span>Camp Fest</span><a class=\"ds-cta\" href=\"#\">Inscribirme</a><div class=\"ds-links\"><a href=\"#\" aria-current=\"page\">Inicio</a><a href=\"#\">Marco legal</a><a href=\"#\">Presupuesto</a><a href=\"#\">Más</a></div></nav>",
+      "css": ":host{--pink:#FF2E8B;--yellow:#FFD400;--cyan:#00D2C6;--purple:#8B2FF0;--orange:#FF6B00;--ink:#1A1A1E;--ink-2:#3B3842;--cream:#FFF7EA;--white:#FFFFFF;--tint-cyan:#DDF8F5;--tint-orange:#FFE7D6;--tint-yellow:#FFF4BF;--deep-cyan:#00695F;--deep-orange:#A33F00;--deep-pink:#A3124F;--deep-purple:#5A13B0;--ease-out:cubic-bezier(.16,1,.3,1);}.ds-nav{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--ink);color:var(--cream);border-bottom:4px solid var(--yellow);padding:10px 20px;}.ds-brand{display:inline-flex;align-items:center;gap:10px;font-family:'Fredoka',sans-serif;font-weight:700;font-size:18px;letter-spacing:.3px;text-transform:uppercase;color:var(--white);}.ds-mark{position:relative;width:30px;height:30px;box-sizing:border-box;border-radius:50%;background:var(--pink);border:3px solid var(--cream);}.ds-mark::after{content:'';position:absolute;right:-7px;bottom:-4px;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--yellow);}.ds-cta{font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;background:var(--yellow);color:var(--ink);border:3px solid var(--cream);border-radius:999px;padding:7px 16px;text-decoration:none;transition:transform .2s var(--ease-out);}.ds-cta:hover{transform:translateY(-2px);}.ds-links{display:flex;gap:2px;margin-left:auto;}.ds-links a{font-family:'Fredoka',sans-serif;font-weight:500;font-size:14px;color:var(--cream);text-decoration:none;padding:8px 12px;border-radius:999px;border:2px solid transparent;transition:border-color .2s var(--ease-out);}.ds-links a:hover{border-color:var(--yellow);}.ds-links a[aria-current=page]{background:var(--pink);color:var(--ink);}.ds-nav a:focus-visible{outline:3px solid var(--purple);outline-offset:3px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Camp Trust Board",
+    "overview": "Camp Fest is a Memphis camp world drawn in thick ink: every object has a hard black outline, sits on a solid offset shadow, and is filled with one flat, loud color. Confetti, triangles, rings and floating shapes make it read as a youth festival. The trust board is what makes it credible. Each fact the public needs (date, registration, venue, allies, budget lines, legal articles) sits in a ruled, outlined container and carries a rotated status stamp that says how settled it is: confirmed, in progress, postponed, or requested.\n\nThe ground is warm cream, not white. White is reserved for the objects that sit on it: cards, boards, tables, panels. Bands of soft palette tint mark the sections, each closed by a 6px ink rule, and saturated color is concentrated in the hero, the postponement notice, the stamps, the icon tiles and the buttons. Display type is Fredoka, rounded and heavy, often uppercase. Body text is Poppins at a comfortable 16px with generous leading. The site is read mostly on phones, so every multi-column structure collapses to a single readable column and tables become stacked records.\n\nMotion is playful but optional. The hero copy rises in, the board drops in, and its stamps thump down one at a time. Confetti floats, cards straighten when hovered, and the sponsor strip scrolls. All of it is switched off under `prefers-reduced-motion`, and content never depends on JavaScript to become visible.",
+    "keyCharacteristics": [
+      "Thick ink outlines (2–4px #1A1A1E) on every interactive or containing object.",
+      "Solid, unblurred offset shadows in ink, pink or cyan; no soft shadows anywhere.",
+      "Status stamps (cyan, yellow, pink, dashed white) as the system's unit of honesty.",
+      "Custom 24px line icons with a 2px round stroke, usually seated in a colored ink-bordered tile; no emoji.",
+      "Cream ground, tinted section bands, white objects, saturated accents.",
+      "Fredoka display and labels over Poppins body."
+    ],
+    "rules": [
+      {
+        "name": "The Stamp Code Rule",
+        "body": "Status color is fixed: cyan means confirmed or ready, yellow means in progress or under review, pink means postponed but still in force, dashed white means requested with no answer. The same four meanings apply on the large rotated stamps and on the small inline budget chips. Never use these four fills for a decorative status that means something else.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink-On-Bright Rule",
+        "body": "Saturated pink, yellow, cyan and orange take ink text. White text belongs only on purple and ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tint-Deep Pair Rule",
+        "body": "Text on a tint uses that hue's deep shade, never the saturated hue and never plain gray.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fredoka-For-Facts Rule",
+        "body": "Values the visitor scans (board values, schedule times, goal figures, article numbers, registration codes) are set in Fredoka 600–700 with tabular numerals. Descriptions and explanations stay in Poppins.",
+        "section": "typography"
+      },
+      {
+        "name": "The Uppercase-Is-The-Name Rule",
+        "body": "Uppercase is used for the brand wordmark, hero titles and footer brand. Section headings stay in sentence case.",
+        "section": "typography"
+      },
+      {
+        "name": "The No-Blur Rule",
+        "body": "Shadows are solid offsets with zero blur radius. A soft or ambient shadow does not belong in this world.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Lift-Toward-Light Rule",
+        "body": "Hover moves an object up and to the left while its shadow grows; active pushes it back down. The light source never changes.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do outline every card, tile, button, stamp, input and table in ink (2–4px) and give containers a solid zero-blur offset shadow.",
+      "Do attach a status stamp to any fact whose state can change (date, venue, allies, budget sources), using the fixed four-color stamp code.",
+      "Do use icons from the project sprite (24px, 2px round stroke), seated in an ink-outlined color tile when they label a row or card.",
+      "Do put white objects on the cream ground or a tinted band, and close each section band with a 6px ink rule.",
+      "Do set text on a tint in that hue's deep shade, and set ink text on saturated pink, yellow, cyan and orange.",
+      "Do collapse every grid to one column and every table to stacked records on phones, and keep all motion behind `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "Don't use emoji as icons, or icons from outside the project sprite.",
+      "Don't blur a shadow or use a soft, ambient elevation; depth here is always a solid offset.",
+      "Don't reuse the stamp colors to mean anything other than confirmed, in progress, postponed or requested.",
+      "Don't set white body text on pink, orange, yellow or cyan.",
+      "Don't put small uppercase labels or kickers above section titles; the old title tag was retired from the system."
+    ]
+  }
+}
