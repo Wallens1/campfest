@@ -22,10 +22,17 @@ const PRIORIDADES = ["baja", "media", "alta", "critica"];
 
 const OBJETIVOS_MATERIAL = ["logistica", "entretenimiento", "auxilios", "decoracion", "emergencias", "utilidades"];
 
+// Escapa texto antes de meterlo en HTML: nombres, descripciones y mensajes
+// vienen de formularios (incluido el público de inscripción) y no deben
+// poder inyectar etiquetas ni scripts en el panel.
+function esc(valor) {
+    return String(valor).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
 function humanizar(texto) {
     if (!texto) return "—";
     const limpio = String(texto).replace(/_/g, " ");
-    return limpio.charAt(0).toUpperCase() + limpio.slice(1);
+    return esc(limpio.charAt(0).toUpperCase() + limpio.slice(1));
 }
 
 // ==========================
@@ -275,7 +282,7 @@ async function mostrarPanel(sesion) {
             const { miembros } = await peticionApi(`/api/centro-control/ramas/${perfilActual.rama_id}/miembros`);
             document.getElementById("inputMiembroObservacion").innerHTML = miembros
                 .filter((m) => m.id !== perfilActual.id)
-                .map((m) => `<option value="${m.id}">${m.nombre}</option>`).join("");
+                .map((m) => `<option value="${esc(m.id)}">${esc(m.nombre)}</option>`).join("");
         } catch (error) {
             console.error(error);
         }
@@ -310,8 +317,8 @@ async function cargarAvisosInternos() {
         const contenedor = document.getElementById("avisosInternosBarra");
 
         contenedor.innerHTML = avisos.map((a) => `
-            <div class="alerta-chip" data-aviso-interno="${a.id}">
-                <span>${icono("bell")} ${a.mensaje}</span>
+            <div class="alerta-chip" data-aviso-interno="${esc(a.id)}">
+                <span>${icono("bell")} ${esc(a.mensaje)}</span>
             </div>
         `).join("");
 
@@ -358,7 +365,7 @@ async function cargarRamas() {
         mapaRamas = Object.fromEntries(ramas.map((r) => [r.id, r.nombre]));
 
         document.getElementById("inputRamaDestinoSolicitud").innerHTML =
-            ramas.map((r) => `<option value="${r.id}">${r.nombre}</option>`).join("") +
+            ramas.map((r) => `<option value="${esc(r.id)}">${esc(r.nombre)}</option>`).join("") +
             `<option value="todas">Todas las ramas (urgente)</option>`;
 
     } catch (error) {
@@ -905,7 +912,7 @@ function renderizarChecklistTurno() {
             return `
                 <label style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; font-size:13.5px; cursor:pointer;">
                     <input type="checkbox" data-checklist="${clave}" ${marcado ? "checked" : ""} style="margin-top:3px;">
-                    <span style="${marcado ? "text-decoration:line-through; color:#999;" : ""}">${texto}</span>
+                    <span style="${marcado ? "text-decoration:line-through; color:#999;" : ""}">${esc(texto)}</span>
                 </label>
             `;
         }).join("");
@@ -967,22 +974,22 @@ function renderizarPreguntaEncuestaStaff(pregunta, valorActual) {
     } else if (pregunta.tipo === "opcion") {
         pregunta.opciones.forEach((op) => {
             const activo = valorActual === op;
-            opciones += `<button type="button" class="boton pequeno secundario boton-encuesta" data-valor="${op}" style="width:auto; padding:6px 12px;${activo ? " background:var(--morado); color:#fff;" : ""}">${op}</button>`;
+            opciones += `<button type="button" class="boton pequeno secundario boton-encuesta" data-valor="${esc(op)}" style="width:auto; padding:6px 12px;${activo ? " background:var(--morado); color:#fff;" : ""}">${esc(op)}</button>`;
         });
     }
 
     if (pregunta.tipo === "texto") {
         return `
-            <div class="dato" data-pregunta-staff="${pregunta.codigo}" style="margin-bottom:14px;">
-                <span class="etiqueta">${pregunta.texto}</span>
-                <textarea class="input-texto-encuesta-staff" rows="3" style="width:100%; margin-top:6px; padding:8px; border:2px solid #ddd; border-radius:8px; font-family:inherit;">${valorActual || ""}</textarea>
+            <div class="dato" data-pregunta-staff="${esc(pregunta.codigo)}" style="margin-bottom:14px;">
+                <span class="etiqueta">${esc(pregunta.texto)}</span>
+                <textarea class="input-texto-encuesta-staff" rows="3" style="width:100%; margin-top:6px; padding:8px; border:2px solid #ddd; border-radius:8px; font-family:inherit;">${esc(valorActual || "")}</textarea>
             </div>
         `;
     }
 
     return `
-        <div class="dato" data-pregunta-staff="${pregunta.codigo}" style="margin-bottom:14px;">
-            <span class="etiqueta">${pregunta.texto}</span>
+        <div class="dato" data-pregunta-staff="${esc(pregunta.codigo)}" style="margin-bottom:14px;">
+            <span class="etiqueta">${esc(pregunta.texto)}</span>
             <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">${opciones}</div>
         </div>
     `;
@@ -1078,16 +1085,16 @@ async function cargarEmergenciasLogistica() {
 
         document.getElementById("listaContactosEmergenciaLogistica").innerHTML = contactos.map((c) => `
             <div class="incidente-mini">
-                <div><span class="codigo">${c.entidad}</span><div class="descripcion">${c.funcion || ""}</div></div>
-                <div class="descripcion">${c.telefono || "sin teléfono"}</div>
+                <div><span class="codigo">${esc(c.entidad)}</span><div class="descripcion">${esc(c.funcion || "")}</div></div>
+                <div class="descripcion">${esc(c.telefono || "sin teléfono")}</div>
             </div>
         `).join("");
 
         document.getElementById("listaRutasEmergenciaLogistica").innerHTML = rutas.map((r) => `
-            <button type="button" class="cf-ruta-toggle" data-ruta-logistica="${r.codigo}" style="display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border:2px solid #ddd; border-radius:8px; background:var(--crema); font-weight:700; font-size:13px; cursor:pointer; font-family:inherit;">${r.titulo}</button>
-            <div class="oculto" data-ruta-logistica-pasos="${r.codigo}" style="padding:6px 16px 14px;">
+            <button type="button" class="cf-ruta-toggle" data-ruta-logistica="${esc(r.codigo)}" style="display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border:2px solid #ddd; border-radius:8px; background:var(--crema); font-weight:700; font-size:13px; cursor:pointer; font-family:inherit;">${esc(r.titulo)}</button>
+            <div class="oculto" data-ruta-logistica-pasos="${esc(r.codigo)}" style="padding:6px 16px 14px;">
                 <ol style="margin:0; padding-left:18px; font-size:12.5px;">
-                    ${r.pasos.map((p) => `<li style="margin-bottom:4px;">${p}</li>`).join("")}
+                    ${r.pasos.map((p) => `<li style="margin-bottom:4px;">${esc(p)}</li>`).join("")}
                 </ol>
             </div>
         `).join("");
@@ -1139,8 +1146,8 @@ async function cargarVerificacionesMias() {
             ? `<p class="detalle">Sin verificaciones registradas hoy todavía.</p>`
             : verificaciones.slice(0, 10).map((v) => `
                 <div class="incidente-mini">
-                    <div><span class="codigo">${ETIQUETAS_VERIFICACION[v.tipo] || v.tipo}</span><div class="descripcion">${v.registrado_por_nombre || "—"}</div></div>
-                    <div class="descripcion">${v.sin_novedades ? "Sin novedades" : `Novedad: ${v.novedades}`}</div>
+                    <div><span class="codigo">${ETIQUETAS_VERIFICACION[v.tipo] || v.tipo}</span><div class="descripcion">${esc(v.registrado_por_nombre || "—")}</div></div>
+                    <div class="descripcion">${v.sin_novedades ? "Sin novedades" : `Novedad: ${esc(v.novedades)}`}</div>
                 </div>
             `).join("");
 
@@ -1204,12 +1211,12 @@ async function cargarMiTurnoDeHoy() {
         if (!miTurno) return;
 
         document.getElementById("detalleMiTurnoCentinela").innerHTML = `
-            <p style="font-size:13px; margin:0 0 10px;">${formatearHora(miTurno.hora_inicio)} – ${formatearHora(miTurno.hora_fin)} · con ${miTurno.asignadosNombres.filter((n) => n).join(", ")}</p>
+            <p style="font-size:13px; margin:0 0 10px;">${formatearHora(miTurno.hora_inicio)} – ${formatearHora(miTurno.hora_fin)} · con ${esc(miTurno.asignadosNombres.filter((n) => n).join(", "))}</p>
             ${miTurno.finalizado
                 ? `<span class="badge" style="background:#e2f7ea; color:#0f7a3d; padding:4px 10px; border-radius:6px; font-size:12px;">Turno finalizado</span>`
                 : miTurno.iniciado
-                    ? `<button type="button" class="boton pequeno" data-finalizar-turno="${miTurno.id}" style="width:auto;">Marcar fin de turno</button>`
-                    : `<button type="button" class="boton pequeno secundario" data-iniciar-turno="${miTurno.id}" style="width:auto;">Marcar inicio de turno</button>`
+                    ? `<button type="button" class="boton pequeno" data-finalizar-turno="${esc(miTurno.id)}" style="width:auto;">Marcar fin de turno</button>`
+                    : `<button type="button" class="boton pequeno secundario" data-iniciar-turno="${esc(miTurno.id)}" style="width:auto;">Marcar inicio de turno</button>`
             }
         `;
 
@@ -1331,8 +1338,8 @@ function renderizarResultados(lista) {
         item.className = "resultado-item";
         item.innerHTML = `
             <div>
-                <div class="nombre">${participante.nombre}${participante.retirado ? ` <span class="estado-badge escalado">Retirado</span>` : ""}</div>
-                <div class="detalle">${participante.documento} · ${participante.municipio || ""}</div>
+                <div class="nombre">${esc(participante.nombre)}${participante.retirado ? ` <span class="estado-badge escalado">Retirado</span>` : ""}</div>
+                <div class="detalle">${esc(participante.documento)} · ${esc(participante.municipio || "")}</div>
             </div>
         `;
 
@@ -1624,7 +1631,7 @@ function renderizarBadges(participante, entregasRealizadas, totalServicios) {
 
     const alimentacionBadge = `<span class="badge neutro">${entregasRealizadas}/${totalServicios} entregas</span>`;
 
-    const carpaBadge = `<span class="badge neutro">Carpa: ${participante.carpa_asignada || "sin asignar"}</span>`;
+    const carpaBadge = `<span class="badge neutro">Carpa: ${esc(participante.carpa_asignada || "sin asignar")}</span>`;
 
     const liderBadge = `<span class="badge neutro">Líder de carpa: ${participante.es_lider_carpa ? "Sí" : "No"}</span>`;
 
@@ -1678,8 +1685,9 @@ function renderizarInfo(participante) {
         {
             etiqueta: "Certificado EPS",
             valor: participante.certificado_eps_url
-                ? `<a href="${participante.certificado_eps_url}" target="_blank" rel="noopener">Ver certificado</a>`
-                : null
+                ? `<a href="${esc(participante.certificado_eps_url)}" target="_blank" rel="noopener">Ver certificado</a>`
+                : null,
+            html: true
         },
         { etiqueta: "Carpa propia", valor: participante.carpa_propia ? "Sí" : "No" },
         { etiqueta: "Instancia del Subsistema", valor: participante.subsistema_instancia },
@@ -1687,10 +1695,10 @@ function renderizarInfo(participante) {
         { etiqueta: "Código", valor: participante.codigo }
     ];
 
-    gridInfo.innerHTML = campos.map(({ etiqueta, valor, alerta }) => `
+    gridInfo.innerHTML = campos.map(({ etiqueta, valor, alerta, html }) => `
         <div class="dato ${alerta ? "alerta" : ""}">
             <span class="etiqueta">${etiqueta}</span>
-            <span class="valor">${valor || "—"}</span>
+            <span class="valor">${html && valor ? valor : esc(valor || "—")}</span>
         </div>
     `).join("");
 
@@ -1731,8 +1739,8 @@ function renderizarIngreso(participante, objetosConfiscados) {
                     ${objetosConfiscados.map((o) => `
                         <div class="incidente-mini">
                             <div>
-                                <span class="codigo">${o.objeto} (x${o.cantidad})</span>
-                                ${o.descripcion ? `<div class="descripcion">${o.descripcion}</div>` : ""}
+                                <span class="codigo">${esc(o.objeto)} (x${esc(o.cantidad)})</span>
+                                ${o.descripcion ? `<div class="descripcion">${esc(o.descripcion)}</div>` : ""}
                             </div>
                             <span class="badge ${o.devuelto ? "verde" : "neutro"}">${o.devuelto ? "Devuelto" : "En baúl"}</span>
                         </div>
@@ -1802,9 +1810,9 @@ function renderizarInfracciones(infracciones, totalInfracciones, participante) {
             <div class="incidente-mini">
                 <div>
                     <span class="codigo">${formatearHora(i.creado_en)}</span>
-                    <div class="descripcion">${i.descripcion}</div>
+                    <div class="descripcion">${esc(i.descripcion)}</div>
                 </div>
-                <span class="badge neutro">${i.registrado_por_nombre || "—"}</span>
+                <span class="badge neutro">${esc(i.registrado_por_nombre || "—")}</span>
             </div>
         `).join("");
 
@@ -1890,7 +1898,7 @@ function renderizarSalidaLibre(elegible, salidaActiva) {
     if (salidaActiva) {
 
         bloqueSalidaLibre.innerHTML = `
-            <span class="badge neutro">En salida libre desde ${formatearHora(salidaActiva.salida_en)} (motivo: ${salidaActiva.motivo})</span>
+            <span class="badge neutro">En salida libre desde ${formatearHora(salidaActiva.salida_en)} (motivo: ${esc(salidaActiva.motivo)})</span>
             <button class="boton pequeno" id="btnRegresoSalidaLibre" style="margin-top:8px;">Registrar regreso</button>
         `;
 
@@ -1961,7 +1969,7 @@ function renderizarSalidaEvento(participante, encuestaCompletada) {
     if (participante.salida_evento_registrada) {
         bloque.innerHTML = `
             <span class="badge verde">Salió del evento a las ${formatearHora(participante.salida_evento_en)}</span>
-            ${participante.salida_evento_con ? `<div class="detalle" style="margin-top:6px;">Se fue con: ${participante.salida_evento_con}</div>` : ""}
+            ${participante.salida_evento_con ? `<div class="detalle" style="margin-top:6px;">Se fue con: ${esc(participante.salida_evento_con)}</div>` : ""}
         `;
         return;
     }
@@ -2064,7 +2072,7 @@ async function cargarCarpas() {
         carpasDisponibles = carpas;
         renderizarGridCarpas();
     } catch (error) {
-        gridCarpas.innerHTML = `<p class="detalle">${error.message}</p>`;
+        gridCarpas.innerHTML = `<p class="detalle">${esc(error.message)}</p>`;
     }
 
 }
@@ -2082,9 +2090,9 @@ function renderizarGridCarpas() {
         const llena = carpa.ocupacion >= carpa.capacidad && !esSeleccionada;
 
         return `
-            <div class="carpa-card ${esSeleccionada ? "seleccionada" : ""} ${llena ? "llena" : ""}" data-nombre="${carpa.nombre}">
-                <div class="nombre">${carpa.nombre}</div>
-                <div class="ocupacion">${carpa.ocupacion}/${carpa.capacidad}</div>
+            <div class="carpa-card ${esSeleccionada ? "seleccionada" : ""} ${llena ? "llena" : ""}" data-nombre="${esc(carpa.nombre)}">
+                <div class="nombre">${esc(carpa.nombre)}</div>
+                <div class="ocupacion">${esc(carpa.ocupacion)}/${esc(carpa.capacidad)}</div>
             </div>
         `;
 
@@ -2178,10 +2186,10 @@ document.getElementById("btnBuscarParticipanteIncidente").addEventListener("clic
         contenedor.innerHTML = resultados.length === 0
             ? `<p class="detalle">No se encontraron participantes.</p>`
             : resultados.map((p) => `
-                <div class="resultado-item" data-participante="${p.id}" data-nombre="${p.nombre}" style="margin-bottom:6px;">
+                <div class="resultado-item" data-participante="${esc(p.id)}" data-nombre="${esc(p.nombre)}" style="margin-bottom:6px;">
                     <div>
-                        <div class="nombre">${p.nombre}</div>
-                        <div class="detalle">${p.documento}</div>
+                        <div class="nombre">${esc(p.nombre)}</div>
+                        <div class="detalle">${esc(p.documento)}</div>
                     </div>
                 </div>
             `).join("");
@@ -2196,7 +2204,7 @@ document.getElementById("btnBuscarParticipanteIncidente").addEventListener("clic
         });
 
     } catch (error) {
-        contenedor.innerHTML = `<p class="detalle">${error.message}</p>`;
+        contenedor.innerHTML = `<p class="detalle">${esc(error.message)}</p>`;
     }
 
 });
@@ -2207,7 +2215,7 @@ async function cargarZonas() {
         const { zonas } = await peticionApi("/api/centro-control/zonas");
         const select = document.getElementById("inputZona");
         select.innerHTML = `<option value="">Selecciona zona</option>` +
-            zonas.map((z) => `<option value="${z.nombre}">${humanizar(z.nombre)}</option>`).join("");
+            zonas.map((z) => `<option value="${esc(z.nombre)}">${humanizar(z.nombre)}</option>`).join("");
     } catch (error) {
         console.error(error);
     }
@@ -2247,10 +2255,10 @@ document.getElementById("inputCategoria").addEventListener("change", async (even
             : responsables.map((r) => `
                 <div class="incidente-mini">
                     <div>
-                        <span class="codigo">${r.rol_en_rama === "lider" ? icono("star") : "•"} ${r.nombre}</span>
-                        <div class="descripcion">${r.rama_nombre}</div>
+                        <span class="codigo">${r.rol_en_rama === "lider" ? icono("star") : "•"} ${esc(r.nombre)}</span>
+                        <div class="descripcion">${esc(r.rama_nombre)}</div>
                     </div>
-                    <div class="descripcion">${r.telefono || "sin teléfono"} · ${r.zona ? humanizar(r.zona) : "sin zona"}</div>
+                    <div class="descripcion">${esc(r.telefono || "sin teléfono")} · ${r.zona ? humanizar(r.zona) : "sin zona"}</div>
                 </div>
             `).join("");
 
@@ -2313,12 +2321,12 @@ async function cargarMisIncidentes() {
             : incidentes.map((incidente) => `
                 <div class="incidente-mini">
                     <div>
-                        <span class="codigo">${incidente.codigo}</span>
-                        <div class="descripcion">${incidente.descripcion}</div>
+                        <span class="codigo">${esc(incidente.codigo)}</span>
+                        <div class="descripcion">${esc(incidente.descripcion)}</div>
                     </div>
                     <div>
-                        <span class="prioridad-badge ${incidente.prioridad}">${humanizar(incidente.prioridad)}</span>
-                        <span class="estado-badge ${incidente.estado}">${humanizar(incidente.estado)}</span>
+                        <span class="prioridad-badge ${esc(incidente.prioridad)}">${humanizar(incidente.prioridad)}</span>
+                        <span class="estado-badge ${esc(incidente.estado)}">${humanizar(incidente.estado)}</span>
                     </div>
                 </div>
             `).join("");
@@ -2341,8 +2349,8 @@ async function cargarObjetosPerdidosLogistica() {
             : objetos.map((o) => `
                 <div class="incidente-mini">
                     <div>
-                        <span class="codigo">${o.descripcion}</span>
-                        <div class="descripcion">${o.lugar_encontrado ? `Encontrado en: ${o.lugar_encontrado} · ` : ""}Por: ${o.encontrado_por_nombre || "—"}</div>
+                        <span class="codigo">${esc(o.descripcion)}</span>
+                        <div class="descripcion">${o.lugar_encontrado ? `Encontrado en: ${esc(o.lugar_encontrado)} · ` : ""}Por: ${esc(o.encontrado_por_nombre || "—")}</div>
                     </div>
                 </div>
             `).join("");
@@ -2395,11 +2403,11 @@ function renderizarAlimentacion(servicios, entregas) {
 
         if (entrega) {
             item.innerHTML = `
-                <span>${servicio.label}</span>
+                <span>${esc(servicio.label)}</span>
                 <span class="marcado">Entregado · ${formatearHora(entrega.hora)}</span>
             `;
         } else {
-            item.innerHTML = `<span>${servicio.label}</span>`;
+            item.innerHTML = `<span>${esc(servicio.label)}</span>`;
 
             const boton = document.createElement("button");
             boton.textContent = "Marcar";
@@ -2441,8 +2449,8 @@ function renderizarHistorial(eventos) {
     historial.innerHTML = eventos.map((evento) => `
         <div class="historial-item">
             <span class="hora">${formatearHora(evento.creado_en)}</span>
-            <div class="descripcion">${evento.descripcion}</div>
-            <div class="usuario">Usuario: ${evento.usuario_nombre || "—"}</div>
+            <div class="descripcion">${esc(evento.descripcion)}</div>
+            <div class="usuario">Usuario: ${esc(evento.usuario_nombre || "—")}</div>
         </div>
     `).join("");
 
@@ -2468,18 +2476,18 @@ function renderizarListaTareas(contenedor, tareas, contenedorKey) {
     contenedor.innerHTML = tareas.map((t) => {
         const abierta = t.id === idAbierto;
         return `
-        <div class="tarjeta-expandible ${abierta ? "abierta" : ""}" data-tarea="${t.id}">
+        <div class="tarjeta-expandible ${abierta ? "abierta" : ""}" data-tarea="${esc(t.id)}">
             <div class="fila-encabezado">
-                <span class="codigo">${t.titulo}</span>
-                <span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span>
+                <span class="codigo">${esc(t.titulo)}</span>
+                <span class="estado-badge ${esc(t.estado)}">${humanizar(t.estado)}</span>
             </div>
-            ${t.descripcion ? `<div class="descripcion">${t.descripcion}</div>` : ""}
+            ${t.descripcion ? `<div class="descripcion">${esc(t.descripcion)}</div>` : ""}
             <div class="descripcion">
-                ${t.tipo === "solicitud" ? `De ${mapaRamas[t.rama_origen_id] || "—"} para ${t.rama_id ? (mapaRamas[t.rama_id] || "—") : "todas las ramas"}` : `Rama: ${mapaRamas[t.rama_id] || "—"}`}
+                ${t.tipo === "solicitud" ? `De ${esc(mapaRamas[t.rama_origen_id] || "—")} para ${t.rama_id ? esc(mapaRamas[t.rama_id] || "—") : "todas las ramas"}` : `Rama: ${esc(mapaRamas[t.rama_id] || "—")}`}
                 ${t.hora_programada ? ` · Listo antes de: ${formatearHora(t.hora_programada)}` : ""}
-                ${t.cantidad_personas ? ` · ${t.checks_count || 0}/${t.cantidad_personas} aceptaron` : ""}
+                ${t.cantidad_personas ? ` · ${esc(t.checks_count || 0)}/${esc(t.cantidad_personas)} aceptaron` : ""}
             </div>
-            <div class="${abierta ? "" : "oculto"}" id="detalleTarea-${contenedorKey}-${t.id}">${abierta ? '<p class="detalle">Actualizando…</p>' : ""}</div>
+            <div class="${abierta ? "" : "oculto"}" id="detalleTarea-${contenedorKey}-${esc(t.id)}">${abierta ? '<p class="detalle">Actualizando…</p>' : ""}</div>
         </div>
     `;
     }).join("");
@@ -2562,13 +2570,13 @@ async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
             ? `<p class="detalle">Nadie se ha marcado todavía.</p>`
             : checks.map((c) => `
                 <div class="fila-conteo">
-                    <span class="nombre-fila-conteo">${c.nombre}</span>
-                    ${esLider ? `<button class="boton pequeno secundario" data-quitar-check="${c.usuario_id}" style="width:auto; padding:4px 10px; font-size:11px;">Quitar</button>` : ""}
+                    <span class="nombre-fila-conteo">${esc(c.nombre)}</span>
+                    ${esLider ? `<button class="boton pequeno secundario" data-quitar-check="${esc(c.usuario_id)}" style="width:auto; padding:4px 10px; font-size:11px;">Quitar</button>` : ""}
                 </div>
             `).join("");
 
         const cupoTexto = tarea.cantidad_personas
-            ? `<p class="detalle" style="margin-top:4px;">${checks.length}/${tarea.cantidad_personas} personas necesarias${cupoLleno ? " · cupo cubierto" : ""}</p>`
+            ? `<p class="detalle" style="margin-top:4px;">${esc(checks.length)}/${esc(tarea.cantidad_personas)} personas necesarias${cupoLleno ? " · cupo cubierto" : ""}</p>`
             : "";
 
         const botonMarcarHtml = yaMarcado
@@ -2602,9 +2610,9 @@ async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
                 : subtareas.map((s) => `
                     <div class="fila-conteo">
                         <span class="nombre-fila-conteo">
-                            ${s.estado === "hecha" ? icono("check-circle") : punto("pendiente")} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}
+                            ${s.estado === "hecha" ? icono("check-circle") : punto("pendiente")} ${esc(s.titulo)}${s.asignado_a_nombre ? ` · ${esc(s.asignado_a_nombre)}` : ""}
                         </span>
-                        ${s.estado === "pendiente" && puedeMarcarSubtarea(s) ? `<button class="boton pequeno" data-hecha-subtarea="${s.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar hecha</button>` : ""}
+                        ${s.estado === "pendiente" && puedeMarcarSubtarea(s) ? `<button class="boton pequeno" data-hecha-subtarea="${esc(s.id)}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar hecha</button>` : ""}
                     </div>
                 `).join("");
 
@@ -2631,13 +2639,13 @@ async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
             : comentarios.map((c) => `
                 <div class="historial-item">
                     <span class="hora">${formatearHora(c.creado_en)}</span>
-                    <div class="descripcion">${c.texto}</div>
-                    <div class="usuario">${c.nombre || "—"}</div>
+                    <div class="descripcion">${esc(c.texto)}</div>
+                    <div class="usuario">${esc(c.nombre || "—")}</div>
                 </div>
             `).join("");
 
         const lineaRamas = tarea.tipo === "tarea" && ramaIdsTarea.length > 1
-            ? `<p class="detalle" style="margin-top:4px;">Ramas responsables: ${ramaIdsTarea.map((idRama) => mapaRamas[idRama] || "—").join(", ")}</p>`
+            ? `<p class="detalle" style="margin-top:4px;">Ramas responsables: ${esc(ramaIdsTarea.map((idRama) => mapaRamas[idRama] || "—").join(", "))}</p>`
             : "";
 
         contenedor.innerHTML = `
@@ -2707,7 +2715,7 @@ async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
         if (selectAsignado) {
             peticionApi(`/api/centro-control/ramas/${tarea.rama_id}/miembros`).then(({ miembros }) => {
                 selectAsignado.innerHTML = `<option value="">Sin asignar</option>` +
-                    miembros.map((m) => `<option value="${m.id}">${m.nombre}</option>`).join("");
+                    miembros.map((m) => `<option value="${esc(m.id)}">${esc(m.nombre)}</option>`).join("");
             }).catch(() => {});
         }
 
@@ -2843,9 +2851,9 @@ function renderizarAlertasSolicitudes(recibidas) {
     });
 
     contenedor.innerHTML = pendientes.map((t) => `
-        <div class="alerta-chip" data-tarea-alerta="${t.id}">
-            <span>${icono("siren")} ${mapaRamas[t.rama_origen_id] || "Una rama"} necesita ayuda: ${t.titulo}</span>
-            <span class="numero">${t.cantidad_personas ? `${t.checks_count || 0}/${t.cantidad_personas}` : ""}</span>
+        <div class="alerta-chip" data-tarea-alerta="${esc(t.id)}">
+            <span>${icono("siren")} ${esc(mapaRamas[t.rama_origen_id] || "Una rama")} necesita ayuda: ${esc(t.titulo)}</span>
+            <span class="numero">${t.cantidad_personas ? `${esc(t.checks_count || 0)}/${esc(t.cantidad_personas)}` : ""}</span>
         </div>
     `).join("");
 
@@ -2956,16 +2964,16 @@ async function cargarObservaciones() {
                     <span class="hora">${formatearHora(o.creado_en)}</span>
                     <span class="badge ${o.tipo === "positiva" ? "verde" : o.tipo === "negativa" ? "rojo" : "neutro"}" style="margin-left:6px;">${humanizar(o.tipo)}</span>
                     ${!o.leido && o.usuario_id === perfilActual?.id ? `<span class="badge neutro">Sin leer</span>` : ""}
-                    <div class="descripcion">${o.texto}</div>
-                    <div class="usuario">${o.destinatario_nombre ? `Para: ${o.destinatario_nombre} · ` : ""}Escrita por: ${o.autor_nombre || "—"}</div>
+                    <div class="descripcion">${esc(o.texto)}</div>
+                    <div class="usuario">${o.destinatario_nombre ? `Para: ${esc(o.destinatario_nombre)} · ` : ""}Escrita por: ${esc(o.autor_nombre || "—")}</div>
                     ${(o.respuestas || []).map((r) => `
                         <div class="usuario" style="margin-left:12px; margin-top:4px; padding-left:8px; border-left:2px solid #ddd;">
-                            <strong>${r.usuario_nombre}:</strong> ${r.texto}
+                            <strong>${esc(r.usuario_nombre)}:</strong> ${esc(r.texto)}
                         </div>
                     `).join("")}
                     <div style="display:flex; gap:8px; margin-top:6px;">
-                        ${!o.leido && o.usuario_id === perfilActual?.id ? `<button class="boton pequeno secundario" data-marcar-leida="${o.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar como leída</button>` : ""}
-                        <button class="boton pequeno secundario" data-responder-observacion="${o.id}" style="width:auto; padding:4px 10px; font-size:11px;">Responder</button>
+                        ${!o.leido && o.usuario_id === perfilActual?.id ? `<button class="boton pequeno secundario" data-marcar-leida="${esc(o.id)}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar como leída</button>` : ""}
+                        <button class="boton pequeno secundario" data-responder-observacion="${esc(o.id)}" style="width:auto; padding:4px 10px; font-size:11px;">Responder</button>
                     </div>
                 </div>
             `).join("");
@@ -3050,17 +3058,17 @@ async function cargarCronograma() {
         contenedor.innerHTML = actividades.length === 0
             ? `<p class="detalle">Todavía no se ha cargado el cronograma del evento.</p>`
             : actividades.map((a) => `
-                <div class="incidente-mini tarjeta-actividad" data-actividad="${a.id}">
+                <div class="incidente-mini tarjeta-actividad" data-actividad="${esc(a.id)}">
                     <div style="width:100%;">
                         <div class="fila-encabezado-actividad">
-                            <span class="codigo">${a.titulo}</span>
+                            <span class="codigo">${esc(a.titulo)}</span>
                             <div class="badges-actividad">
                                 ${a.cancelada ? '<span class="badge rojo">Cancelada</span>' : ""}
                                 <span class="badge ${a.montaje_completado ? "verde" : "neutro"}">${a.montaje_completado ? "Montaje listo" : "Montaje pendiente"}</span>
                                 <span class="badge ${a.finalizada ? "verde" : "neutro"}">${a.finalizada ? "Finalizada" : "Sin finalizar"}</span>
                             </div>
                         </div>
-                        <div class="descripcion">${formatearFechaHora(a.hora_inicio)} — ${formatearFechaHora(a.hora_fin)} ${a.espacio_usado ? `· ${a.espacio_usado}` : ""}</div>
+                        <div class="descripcion">${formatearFechaHora(a.hora_inicio)} — ${formatearFechaHora(a.hora_fin)} ${a.espacio_usado ? `· ${esc(a.espacio_usado)}` : ""}</div>
                     </div>
                 </div>
             `).join("");
@@ -3097,10 +3105,10 @@ async function cargarMiCumplimiento() {
             ? `<p class="detalle">Todavía no hay tareas del cronograma para tu rama.</p>`
             : `
                 <div class="fila-conteo">
-                    <span class="nombre-fila-conteo">${miRama.completadas}/${miRama.total} tareas hechas</span>
-                    <span class="badge ${miRama.porcentajeCumplimiento >= 70 ? "verde" : "rojo"}">${miRama.porcentajeCumplimiento}% a tiempo</span>
+                    <span class="nombre-fila-conteo">${esc(miRama.completadas)}/${esc(miRama.total)} tareas hechas</span>
+                    <span class="badge ${miRama.porcentajeCumplimiento >= 70 ? "verde" : "rojo"}">${esc(miRama.porcentajeCumplimiento)}% a tiempo</span>
                 </div>
-                ${miRama.atrasoPromedioMinutos > 0 ? `<p class="detalle" style="margin-top:4px;">Atraso promedio: ${miRama.atrasoPromedioMinutos} min</p>` : ""}
+                ${miRama.atrasoPromedioMinutos > 0 ? `<p class="detalle" style="margin-top:4px;">Atraso promedio: ${esc(miRama.atrasoPromedioMinutos)} min</p>` : ""}
             `;
 
     } catch (error) {
@@ -3122,8 +3130,8 @@ async function abrirDetalleActividadCronograma(id) {
 
         document.getElementById("detalleActividadCronogramaInfo").innerHTML = `
             <div class="dato"><span class="etiqueta">Horario</span><span class="valor">${formatearFechaHora(actividad.hora_inicio)} — ${formatearFechaHora(actividad.hora_fin)}</span></div>
-            <div class="dato"><span class="etiqueta">Espacio</span><span class="valor">${actividad.espacio_usado || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${actividad.encargados_metodologicos || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Espacio</span><span class="valor">${esc(actividad.espacio_usado || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${esc(actividad.encargados_metodologicos || "—")}</span></div>
         `;
 
         // Una tarea puede tener 2+ ramas asignadas (t.ramas), no solo su
@@ -3167,7 +3175,7 @@ async function cargarMisMaterialesDeActividad(actividadId) {
             <div class="incidente-mini columna">
                 ${l.lineas.map((linea) => `
                     <div class="fila-conteo">
-                        <span class="nombre-fila-conteo">${linea.materialNombre} — ${linea.pendiente > 0 ? `${linea.pendiente} pendiente de devolver` : "devuelto"}</span>
+                        <span class="nombre-fila-conteo">${esc(linea.materialNombre)} — ${linea.pendiente > 0 ? `${esc(linea.pendiente)} pendiente de devolver` : "devuelto"}</span>
                     </div>
                 `).join("")}
             </div>
@@ -3281,13 +3289,13 @@ function renderizarCatalogoMateriales(materiales) {
         : materiales.map((m) => `
             <div class="incidente-mini columna">
                 <div style="display:flex; justify-content:space-between; gap:8px;">
-                    <span class="codigo">${m.nombre}</span>
-                    <span class="badge ${m.disponible > 0 ? "verde" : "rojo"}">${m.disponible}/${m.cantidad_total} disponibles</span>
+                    <span class="codigo">${esc(m.nombre)}</span>
+                    <span class="badge ${m.disponible > 0 ? "verde" : "rojo"}">${esc(m.disponible)}/${esc(m.cantidad_total)} disponibles</span>
                 </div>
                 <div class="descripcion">
-                    ${humanizar(m.objetivo)}${m.ubicacion ? ` · ${m.ubicacion}` : ""}${m.danadaOPerdida > 0 ? ` · ${m.danadaOPerdida} dañados/perdidos` : ""}
+                    ${humanizar(m.objetivo)}${m.ubicacion ? ` · ${esc(m.ubicacion)}` : ""}${m.danadaOPerdida > 0 ? ` · ${esc(m.danadaOPerdida)} dañados/perdidos` : ""}
                 </div>
-                ${m.tenedores.length > 0 ? `<div class="descripcion">Tienen: ${m.tenedores.map((t) => `${t.liderNombre} (${t.cantidad})`).join(", ")}</div>` : ""}
+                ${m.tenedores.length > 0 ? `<div class="descripcion">Tienen: ${m.tenedores.map((t) => `${esc(t.liderNombre)} (${esc(t.cantidad)})`).join(", ")}</div>` : ""}
             </div>
         `).join("");
 
@@ -3304,21 +3312,21 @@ async function cargarMisLotesMaterial() {
             ? `<p class="detalle">No tienes materiales asignados.</p>`
             : lotes.map((l) => `
                 <div class="incidente-mini columna">
-                    <div class="descripcion">${l.actividadTitulo ? `Actividad: ${l.actividadTitulo}` : "Sin actividad vinculada"} · ${new Date(l.creadoEn).toLocaleString("es-CO")}</div>
+                    <div class="descripcion">${l.actividadTitulo ? `Actividad: ${esc(l.actividadTitulo)}` : "Sin actividad vinculada"} · ${new Date(l.creadoEn).toLocaleString("es-CO")}</div>
                     ${l.lineas.map((linea) => `
                         <div class="fila-conteo">
-                            <span class="nombre-fila-conteo">${linea.materialNombre} — ${linea.pendiente > 0 ? `${linea.pendiente} pendiente` : "devuelto"}</span>
+                            <span class="nombre-fila-conteo">${esc(linea.materialNombre)} — ${linea.pendiente > 0 ? `${esc(linea.pendiente)} pendiente` : "devuelto"}</span>
                         </div>
                         ${linea.pendiente > 0 ? `
-                            <form class="form-devolver-material" data-lote="${l.id}" data-linea="${linea.id}" style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; align-items:end;">
+                            <form class="form-devolver-material" data-lote="${esc(l.id)}" data-linea="${esc(linea.id)}" style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; align-items:end;">
                                 <label style="font-size:11px;">Buen estado
-                                    <input type="number" min="0" max="${linea.pendiente}" class="input-buen-estado" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
+                                    <input type="number" min="0" max="${esc(linea.pendiente)}" class="input-buen-estado" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
                                 </label>
                                 <label style="font-size:11px;">Dañado
-                                    <input type="number" min="0" max="${linea.pendiente}" class="input-danado" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
+                                    <input type="number" min="0" max="${esc(linea.pendiente)}" class="input-danado" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
                                 </label>
                                 <label style="font-size:11px;">Perdido
-                                    <input type="number" min="0" max="${linea.pendiente}" class="input-perdido" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
+                                    <input type="number" min="0" max="${esc(linea.pendiente)}" class="input-perdido" value="0" style="width:60px; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
                                 </label>
                                 <label style="font-size:11px; flex:1; min-width:120px;">Comentario (opcional)
                                     <input type="text" class="input-comentario-devolucion" placeholder="Ej: se dañó por la lluvia" style="width:100%; padding:4px 6px; border:2px solid #ddd; border-radius:6px;">
@@ -3381,7 +3389,7 @@ async function cargarActividadesParaSolicitudMaterial() {
         const { actividades } = await peticionApi("/api/actividades");
 
         document.getElementById("inputActividadSolicitudMaterial").innerHTML = `<option value="">Sin actividad</option>` +
-            actividades.filter((a) => !a.cancelada).map((a) => `<option value="${a.id}">${a.titulo}</option>`).join("");
+            actividades.filter((a) => !a.cancelada).map((a) => `<option value="${esc(a.id)}">${esc(a.titulo)}</option>`).join("");
     } catch (error) {
         console.error(error);
     }
@@ -3396,8 +3404,8 @@ function renderizarChecklistSolicitudMaterial(materiales) {
         ? `<p class="detalle">No hay materiales en el catálogo.</p>`
         : materiales.map((m) => `
             <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                <input type="checkbox" class="checkbox-material-solicitud" value="${m.id}">
-                <span style="flex:1; font-size:13px;">${m.nombre} <span style="color:#888; font-size:11.5px;">(disponible: ${m.disponible})</span></span>
+                <input type="checkbox" class="checkbox-material-solicitud" value="${esc(m.id)}">
+                <span style="flex:1; font-size:13px;">${esc(m.nombre)} <span style="color:#888; font-size:11.5px;">(disponible: ${esc(m.disponible)})</span></span>
                 <input type="number" class="cantidad-material-solicitud" min="1" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
             </div>
         `).join("");
@@ -3464,13 +3472,13 @@ async function cargarMisSolicitudesMaterial() {
             : solicitudes.map((s) => `
                 <div class="incidente-mini columna">
                     <div style="display:flex; justify-content:space-between; gap:8px;">
-                        <span class="codigo">${s.items.map((i) => `${i.materialNombre} × ${i.cantidad}`).join(", ")}</span>
-                        <span class="estado-badge ${s.estado}">${humanizar(s.estado)}</span>
+                        <span class="codigo">${s.items.map((i) => `${esc(i.materialNombre)} × ${esc(i.cantidad)}`).join(", ")}</span>
+                        <span class="estado-badge ${esc(s.estado)}">${humanizar(s.estado)}</span>
                     </div>
                     <div class="descripcion">
-                        Pidió: ${s.solicitante_nombre} · ${new Date(s.creado_en).toLocaleString("es-CO")}
+                        Pidió: ${esc(s.solicitante_nombre)} · ${new Date(s.creado_en).toLocaleString("es-CO")}
                         ${s.necesario_para ? ` · Necesario para: ${new Date(s.necesario_para).toLocaleString("es-CO")}` : ""}
-                        ${s.notas ? ` · ${s.notas}` : ""}
+                        ${s.notas ? ` · ${esc(s.notas)}` : ""}
                     </div>
                 </div>
             `).join("");
@@ -3500,12 +3508,12 @@ async function mostrarFichaDesempeno(usuarioId, contenedor) {
     try {
         const { usuario, observaciones, cumplimiento } = await peticionApi(`/api/observaciones/ficha-desempeno/${usuarioId}`);
         contenedor.innerHTML = `
-            <div class="fila-conteo"><span class="nombre-fila-conteo">${usuario.nombre}</span><span class="badge neutro">${cumplimiento.porcentajeATiempo === null ? "Sin subtareas cerradas" : `${cumplimiento.porcentajeATiempo}% a tiempo`}</span></div>
-            <p class="detalle" style="margin:6px 0 0;">Subtareas: ${cumplimiento.aTiempo} a tiempo · ${cumplimiento.tarde} tarde · ${cumplimiento.pendientes} pendientes</p>
-            <p class="detalle" style="margin:2px 0 0;">Observaciones: ${observaciones.positiva} positivas · ${observaciones.neutral} neutrales · ${observaciones.negativa} negativas</p>
+            <div class="fila-conteo"><span class="nombre-fila-conteo">${esc(usuario.nombre)}</span><span class="badge neutro">${cumplimiento.porcentajeATiempo === null ? "Sin subtareas cerradas" : `${esc(cumplimiento.porcentajeATiempo)}% a tiempo`}</span></div>
+            <p class="detalle" style="margin:6px 0 0;">Subtareas: ${esc(cumplimiento.aTiempo)} a tiempo · ${esc(cumplimiento.tarde)} tarde · ${esc(cumplimiento.pendientes)} pendientes</p>
+            <p class="detalle" style="margin:2px 0 0;">Observaciones: ${esc(observaciones.positiva)} positivas · ${esc(observaciones.neutral)} neutrales · ${esc(observaciones.negativa)} negativas</p>
         `;
     } catch (error) {
-        contenedor.innerHTML = `<p class="detalle">${error.message}</p>`;
+        contenedor.innerHTML = `<p class="detalle">${esc(error.message)}</p>`;
     }
 }
 

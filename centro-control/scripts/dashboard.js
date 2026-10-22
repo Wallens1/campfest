@@ -46,10 +46,17 @@ const MUNICIPIOS_VALLE = [
 // Utilidades
 // ==========================
 
+// Escapa texto antes de meterlo en HTML: nombres, descripciones y mensajes
+// vienen de formularios (incluido el público de inscripción) y no deben
+// poder inyectar etiquetas ni scripts en el panel.
+function esc(valor) {
+    return String(valor).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
 function humanizar(texto) {
     if (!texto) return "—";
     const limpio = String(texto).replace(/_/g, " ");
-    return limpio.charAt(0).toUpperCase() + limpio.slice(1);
+    return esc(limpio.charAt(0).toUpperCase() + limpio.slice(1));
 }
 
 function mostrarMensaje(elemento, texto, tipo) {
@@ -285,9 +292,9 @@ async function cargarResponsablesPorCategoria(categoria, contenedor) {
         contenedor.innerHTML = responsables.map((r) => `
             <div class="fila-conteo">
                 <span class="etiqueta">
-                    ${r.rol_en_rama === "lider" ? icono("star") : "•"} ${r.nombre} · ${r.rama_nombre}
+                    ${r.rol_en_rama === "lider" ? icono("star") : "•"} ${esc(r.nombre)} · ${esc(r.rama_nombre)}
                 </span>
-                <span class="valor">${r.telefono || "sin teléfono"} · ${r.zona ? humanizar(r.zona) : "sin zona"}</span>
+                <span class="valor">${esc(r.telefono || "sin teléfono")} · ${r.zona ? humanizar(r.zona) : "sin zona"}</span>
             </div>
         `).join("");
 
@@ -509,13 +516,13 @@ async function cargarBaulGlobal() {
                     <tbody>
                         ${objetos.map((o) => `
                             <tr>
-                                <td>${o.participante_nombre} (${o.participante_codigo})</td>
-                                <td>${o.objeto}${o.descripcion ? ` — <span class="detalle">${o.descripcion}</span>` : ""}</td>
-                                <td>${o.cantidad}</td>
+                                <td>${esc(o.participante_nombre)} (${esc(o.participante_codigo)})</td>
+                                <td>${esc(o.objeto)}${o.descripcion ? ` — <span class="detalle">${esc(o.descripcion)}</span>` : ""}</td>
+                                <td>${esc(o.cantidad)}</td>
                                 <td>${formatearFechaHora(o.creado_en)}</td>
-                                <td>${o.confiscado_por_nombre || "—"}</td>
+                                <td>${esc(o.confiscado_por_nombre || "—")}</td>
                                 <td><span class="badge ${o.devuelto ? "verde" : "neutro"}">${o.devuelto ? "Devuelto" : "En baúl"}</span></td>
-                                <td>${o.devuelto ? "" : `<button class="boton pequeno secundario" data-devolver-objeto="${o.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar devuelto</button>`}</td>
+                                <td>${o.devuelto ? "" : `<button class="boton pequeno secundario" data-devolver-objeto="${esc(o.id)}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar devuelto</button>`}</td>
                             </tr>
                         `).join("")}
                     </tbody>
@@ -569,15 +576,15 @@ async function cargarObjetosPerdidosGlobal() {
                     <tbody>
                         ${objetos.map((o) => `
                             <tr>
-                                <td>${o.descripcion}</td>
-                                <td>${o.lugar_encontrado || "—"}</td>
-                                <td>${o.encontrado_por_nombre || "—"}</td>
+                                <td>${esc(o.descripcion)}</td>
+                                <td>${esc(o.lugar_encontrado || "—")}</td>
+                                <td>${esc(o.encontrado_por_nombre || "—")}</td>
                                 <td>${formatearFechaHora(o.creado_en)}</td>
                                 <td>
                                     <span class="badge ${o.reclamado ? "verde" : "neutro"}">${o.reclamado ? "Reclamado" : "Sin reclamar"}</span>
-                                    ${o.reclamado ? `<div class="detalle">Entregado a: ${o.entregado_a}</div>` : ""}
+                                    ${o.reclamado ? `<div class="detalle">Entregado a: ${esc(o.entregado_a)}</div>` : ""}
                                 </td>
-                                <td>${o.reclamado ? "" : `<button class="boton pequeno secundario" data-reclamar-objeto="${o.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar reclamado</button>`}</td>
+                                <td>${o.reclamado ? "" : `<button class="boton pequeno secundario" data-reclamar-objeto="${esc(o.id)}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar reclamado</button>`}</td>
                             </tr>
                         `).join("")}
                     </tbody>
@@ -642,11 +649,11 @@ async function cargarDietasEspeciales() {
                     <tbody>
                         ${participantes.map((p) => `
                             <tr>
-                                <td>${p.nombre} (${p.codigo})</td>
-                                <td>${p.carpa_asignada || "—"}</td>
+                                <td>${esc(p.nombre)} (${esc(p.codigo)})</td>
+                                <td>${esc(p.carpa_asignada || "—")}</td>
                                 <td><span class="badge ${p.ingreso_registrado ? "verde" : "neutro"}">${p.ingreso_registrado ? "Sí" : "No"}</span></td>
-                                <td>${p.tiene_restricciones_alimentarias ? `<span class="dato alerta"><span class="valor">${p.restricciones_alimentarias_detalle || "Sí"}</span></span>` : "—"}</td>
-                                <td>${p.alergia_alimento ? `<span class="dato alerta"><span class="valor">${p.alergia_alimento_detalle || "Sí"}</span></span>` : "—"}</td>
+                                <td>${p.tiene_restricciones_alimentarias ? `<span class="dato alerta"><span class="valor">${escesc(p.restricciones_alimentarias_detalle || "Sí")}</span></span>` : "—"}</td>
+                                <td>${p.alergia_alimento ? `<span class="dato alerta"><span class="valor">${escesc(p.alergia_alimento_detalle || "Sí")}</span></span>` : "—"}</td>
                             </tr>
                         `).join("")}
                     </tbody>
@@ -676,15 +683,15 @@ function renderizarResumenEncuesta(resumen) {
     }
 
     return `
-        <p class="detalle" style="margin-bottom:10px;"><strong>${resumen.total}</strong> respuesta(s).</p>
+        <p class="detalle" style="margin-bottom:10px;"><strong>${esc(resumen.total)}</strong> respuesta(s).</p>
         ${resumen.preguntas.map((p) => {
 
             if (p.tipo === "rating" || p.tipo === "nps") {
                 const maximo = p.tipo === "rating" ? 5 : 10;
                 return `
                     <div class="dato" style="margin-bottom:10px;">
-                        <span class="etiqueta">${p.texto}</span>
-                        <span class="valor">${p.promedio !== null ? `${p.promedio} / ${maximo}` : "—"} <span class="detalle">(${p.respuestas} respuesta(s))</span></span>
+                        <span class="etiqueta">${esc(p.texto)}</span>
+                        <span class="valor">${p.promedio !== null ? `${esc(p.promedio)} / ${maximo}` : "—"} <span class="detalle">(${esc(p.respuestas)} respuesta(s))</span></span>
                     </div>
                 `;
             }
@@ -692,7 +699,7 @@ function renderizarResumenEncuesta(resumen) {
             if (p.tipo === "opcion") {
                 return `
                     <div class="dato" style="margin-bottom:10px;">
-                        <span class="etiqueta">${p.texto}</span>
+                        <span class="etiqueta">${esc(p.texto)}</span>
                         <span class="valor">${Object.entries(p.conteo).map(([op, n]) => `${op}: ${n}`).join(" · ")}</span>
                     </div>
                 `;
@@ -701,8 +708,8 @@ function renderizarResumenEncuesta(resumen) {
             // texto libre
             return `
                 <div class="dato" style="margin-bottom:10px;">
-                    <span class="etiqueta">${p.texto} (${p.comentarios.length})</span>
-                    ${p.comentarios.length > 0 ? `<ul style="margin:6px 0 0; padding-left:18px;">${p.comentarios.map((c) => `<li class="detalle">${c}</li>`).join("")}</ul>` : `<span class="valor">—</span>`}
+                    <span class="etiqueta">${esc(p.texto)} (${esc(p.comentarios.length)})</span>
+                    ${p.comentarios.length > 0 ? `<ul style="margin:6px 0 0; padding-left:18px;">${p.comentarios.map((c) => `<li class="detalle">${esc(c)}</li>`).join("")}</ul>` : `<span class="valor">—</span>`}
                 </div>
             `;
 
@@ -786,7 +793,7 @@ async function iniciarDashboard() {
 
     const { operadores } = await peticionApi("/api/centro-control/operadores");
     mapaOperadores = Object.fromEntries(operadores.map((o) => [o.id, o.nombre]));
-    document.getElementById("filtroResponsable").innerHTML += operadores.map((o) => `<option value="${o.id}">${o.nombre}</option>`).join("");
+    document.getElementById("filtroResponsable").innerHTML += operadores.map((o) => `<option value="${esc(o.id)}">${esc(o.nombre)}</option>`).join("");
 
     const { ramas: todasLasRamas } = await peticionApi("/api/centro-control/ramas");
     mapaRamas = Object.fromEntries(todasLasRamas.map((r) => [r.id, r.nombre]));
@@ -798,7 +805,7 @@ async function iniciarDashboard() {
         cargarUsuariosAdmin();
         llenarSelect(document.getElementById("inputRolNuevoUsuario"), ROLES, "Selecciona rol");
         document.getElementById("inputRamaNuevoUsuario").innerHTML = `<option value="">Sin rama</option>` +
-            Object.entries(mapaRamas).map(([id, nombre]) => `<option value="${id}">${nombre}</option>`).join("");
+            Object.entries(mapaRamas).map(([id, nombre]) => `<option value="${id}">${esc(nombre)}</option>`).join("");
         cargarFiltroUsuariosAuditoria();
         cargarAuditoria();
         cargarIntentosLogin();
@@ -858,9 +865,9 @@ async function cargarSolicitudesInternas() {
             : tareas.slice(0, 20).map((t) => `
                 <div class="feed-item">
                     <span class="hora">${formatearHora(t.creado_en)}</span>
-                    ${mapaRamas[t.rama_origen_id] || "—"} → ${t.rama_id ? (mapaRamas[t.rama_id] || "—") : "todas las ramas"} · ${t.titulo}
-                    ${t.cantidad_personas ? ` (${t.checks_count || 0}/${t.cantidad_personas})` : ""}
-                    <div class="usuario"><span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span></div>
+                    ${esc(mapaRamas[t.rama_origen_id] || "—")} → ${t.rama_id ? esc(mapaRamas[t.rama_id] || "—") : "todas las ramas"} · ${esc(t.titulo)}
+                    ${t.cantidad_personas ? ` (${esc(t.checks_count || 0)}/${esc(t.cantidad_personas)})` : ""}
+                    <div class="usuario"><span class="estado-badge ${esc(t.estado)}">${humanizar(t.estado)}</span></div>
                 </div>
             `).join("");
 
@@ -881,32 +888,32 @@ async function cargarPanel() {
         const datos = await peticionApi("/api/centro-control/panel");
 
         document.getElementById("statsParticipantes").innerHTML = `
-            <div class="stat-tile"><div class="stat-numero">${datos.participantes.admitidos}</div><span class="stat-etiqueta">Admitidos</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.participantes.ingresados}</div><span class="stat-etiqueta">Ingresaron</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.participantes.pendientes}</div><span class="stat-etiqueta">Pendientes</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.participantes.retirados}</div><span class="stat-etiqueta">Retirados</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.participantes.ocupacionActual}</div><span class="stat-etiqueta">Actualmente en el camp</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.participantes.admitidos)}</div><span class="stat-etiqueta">Admitidos</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.participantes.ingresados)}</div><span class="stat-etiqueta">Ingresaron</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.participantes.pendientes)}</div><span class="stat-etiqueta">Pendientes</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.participantes.retirados)}</div><span class="stat-etiqueta">Retirados</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.participantes.ocupacionActual)}</div><span class="stat-etiqueta">Actualmente en el camp</span></div>
         `;
 
         document.getElementById("statsAlimentacion").innerHTML = `
-            <div class="stat-tile"><div class="stat-numero">${datos.alimentacion.porTipo.desayuno}</div><span class="stat-etiqueta">Desayunos</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.alimentacion.porTipo.almuerzo}</div><span class="stat-etiqueta">Almuerzos</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.alimentacion.porTipo.cena}</div><span class="stat-etiqueta">Cenas</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.alimentacion.porTipo.refrigerio}</div><span class="stat-etiqueta">Refrigerios</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.alimentacion.porTipo.desayuno)}</div><span class="stat-etiqueta">Desayunos</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.alimentacion.porTipo.almuerzo)}</div><span class="stat-etiqueta">Almuerzos</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.alimentacion.porTipo.cena)}</div><span class="stat-etiqueta">Cenas</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.alimentacion.porTipo.refrigerio)}</div><span class="stat-etiqueta">Refrigerios</span></div>
         `;
 
         document.getElementById("statsIncidentes").innerHTML = `
-            <div class="stat-tile"><div class="stat-numero">${datos.incidentes.abiertos}</div><span class="stat-etiqueta">Activos</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.incidentes.enSeguimiento}</div><span class="stat-etiqueta">En seguimiento</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.incidentes.criticos}</div><span class="stat-etiqueta">Críticos</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.incidentes.tiempoPromedioResolucionMinutos ?? "—"}</div><span class="stat-etiqueta">Min. prom. resolución</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.incidentes.abiertos)}</div><span class="stat-etiqueta">En atención</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.incidentes.enSeguimiento)}</div><span class="stat-etiqueta">En seguimiento</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.incidentes.criticos)}</div><span class="stat-etiqueta">Críticos</span></div>
+            <div class="stat-tile"><div class="stat-numero">${datos.incidentes.tiempoPromedioResolucionMinutos == null ? "—" : formatearDuracion(datos.incidentes.tiempoPromedioResolucionMinutos)}</div><span class="stat-etiqueta">Resolución promedio (7 días)</span></div>
         `;
 
         document.getElementById("statsCarpas").innerHTML = `
-            <div class="stat-tile"><div class="stat-numero">${datos.carpas.totalCarpas}</div><span class="stat-etiqueta">Total carpas</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.carpas.ocupacionTotal}</div><span class="stat-etiqueta">Ocupación</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.carpas.cuposDisponibles}</div><span class="stat-etiqueta">Cupos libres</span></div>
-            <div class="stat-tile"><div class="stat-numero">${datos.carpas.lideresAsignados}</div><span class="stat-etiqueta">Líderes</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.carpas.totalCarpas)}</div><span class="stat-etiqueta">Total carpas</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.carpas.ocupacionTotal)}</div><span class="stat-etiqueta">Ocupación</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.carpas.cuposDisponibles)}</div><span class="stat-etiqueta">Cupos libres</span></div>
+            <div class="stat-tile"><div class="stat-numero">${esc(datos.carpas.lideresAsignados)}</div><span class="stat-etiqueta">Líderes</span></div>
         `;
 
         renderizarAlertas(datos.alertas);
@@ -980,13 +987,13 @@ document.getElementById("btnVerUsosClaveExtrema").addEventListener("click", asyn
             ? `<p class="detalle">Sin usos registrados todavía.</p>`
             : usos.map((u) => `
                 <div class="fila-conteo">
-                    <span class="etiqueta">${new Date(u.creado_en).toLocaleString("es-CO")} · ${u.usuario_nombre || "—"}</span>
-                    <span class="valor">${humanizar(u.accion)} — ${u.exito ? "correcto" : "clave incorrecta"} (${u.ip || "—"})</span>
+                    <span class="etiqueta">${new Date(u.creado_en).toLocaleString("es-CO")} · ${esc(u.usuario_nombre || "—")}</span>
+                    <span class="valor">${humanizar(u.accion)} — ${u.exito ? "correcto" : "clave incorrecta"} (${esc(u.ip || "—")})</span>
                 </div>
             `).join("");
 
     } catch (error) {
-        contenedor.innerHTML = `<p class="detalle">${error.message}</p>`;
+        contenedor.innerHTML = `<p class="detalle">${esc(error.message)}</p>`;
     }
 
 });
@@ -1163,10 +1170,10 @@ async function cargarAnunciosAdmin() {
                 return `
                 <div class="feed-item">
                     <span class="hora">${new Date(a.creado_en).toLocaleString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric", hour: "numeric", minute: "2-digit" })}</span>
-                    ${a.mensaje}${a.editado ? ` <span class="detalle">(editado)</span>` : ""}
-                    ${segmentos.length > 0 ? `<div class="detalle">${segmentos.join(" · ")}</div>` : ""}
-                    <button class="boton pequeno secundario" data-editar-anuncio="${a.id}" data-mensaje-actual="${a.mensaje.replace(/"/g, "&quot;")}" style="width:auto; padding:4px 10px; font-size:11px; margin-left:8px;">Editar</button>
-                    ${puedeEliminar ? `<button class="boton pequeno secundario" data-eliminar-anuncio="${a.id}" style="width:auto; padding:4px 10px; font-size:11px;">Eliminar</button>` : ""}
+                    ${esc(a.mensaje)}${a.editado ? ` <span class="detalle">(editado)</span>` : ""}
+                    ${segmentos.length > 0 ? `<div class="detalle">${esc(segmentos.join(" · "))}</div>` : ""}
+                    <button class="boton pequeno secundario" data-editar-anuncio="${esc(a.id)}" data-mensaje-actual="${esc(a.mensaje)}" style="width:auto; padding:4px 10px; font-size:11px; margin-left:8px;">Editar</button>
+                    ${puedeEliminar ? `<button class="boton pequeno secundario" data-eliminar-anuncio="${esc(a.id)}" style="width:auto; padding:4px 10px; font-size:11px;">Eliminar</button>` : ""}
                 </div>
             `;
             }).join("");
@@ -1270,31 +1277,31 @@ function renderizarAlertas(alertas) {
     const chips = [];
 
     if (alertas.criticos.length > 0) {
-        chips.push(`<div class="alerta-chip critica" data-filtro-prioridad="critica"><span class="numero">${alertas.criticos.length}</span> incidentes críticos</div>`);
+        chips.push(`<div class="alerta-chip critica" data-filtro-prioridad="critica"><span class="numero">${esc(alertas.criticos.length)}</span> incidentes críticos</div>`);
     }
 
     if (alertas.vencidos.length > 0) {
-        chips.push(`<div class="alerta-chip critica" data-filtro-vencidos="true"><span class="numero">${alertas.vencidos.length}</span> seguimientos vencidos</div>`);
+        chips.push(`<div class="alerta-chip critica" data-filtro-vencidos="true"><span class="numero">${esc(alertas.vencidos.length)}</span> seguimientos vencidos</div>`);
     }
 
     if (alertas.emergenciasMedicas.length > 0) {
-        chips.push(`<div class="alerta-chip critica" data-filtro-categoria="emergencia_medica"><span class="numero">${alertas.emergenciasMedicas.length}</span> emergencias médicas</div>`);
+        chips.push(`<div class="alerta-chip critica" data-filtro-categoria="emergencia_medica"><span class="numero">${esc(alertas.emergenciasMedicas.length)}</span> emergencias médicas</div>`);
     }
 
     if (alertas.sinResponsable.length > 0) {
-        chips.push(`<div class="alerta-chip alta"><span class="numero">${alertas.sinResponsable.length}</span> incidentes sin responsable</div>`);
+        chips.push(`<div class="alerta-chip alta"><span class="numero">${esc(alertas.sinResponsable.length)}</span> incidentes sin responsable</div>`);
     }
 
     if (alertas.carpasSobreocupadas.length > 0) {
-        chips.push(`<div class="alerta-chip alta"><span class="numero">${alertas.carpasSobreocupadas.length}</span> carpas sobreocupadas: ${alertas.carpasSobreocupadas.map((c) => c.nombre).join(", ")}</div>`);
+        chips.push(`<div class="alerta-chip alta"><span class="numero">${esc(alertas.carpasSobreocupadas.length)}</span> carpas sobreocupadas: ${esc(alertas.carpasSobreocupadas.map((c) => c.nombre).join(", "))}</div>`);
     }
 
     if (alertas.participantesSinCarpa > 0) {
-        chips.push(`<div class="alerta-chip info"><span class="numero">${alertas.participantesSinCarpa}</span> participantes sin carpa</div>`);
+        chips.push(`<div class="alerta-chip info"><span class="numero">${esc(alertas.participantesSinCarpa)}</span> participantes sin carpa</div>`);
     }
 
     if (alertas.participantesSinIngreso > 0) {
-        chips.push(`<div class="alerta-chip info"><span class="numero">${alertas.participantesSinIngreso}</span> participantes sin ingresar</div>`);
+        chips.push(`<div class="alerta-chip info"><span class="numero">${esc(alertas.participantesSinIngreso)}</span> participantes sin ingresar</div>`);
     }
 
     const contenedor = document.getElementById("alertasBarra");
@@ -1376,14 +1383,14 @@ async function cargarIncidentes() {
             const vencido = abierto && incidente.proximo_seguimiento_en && new Date(incidente.proximo_seguimiento_en).getTime() <= ahora;
 
             return `
-                <tr class="fila-${incidente.prioridad} ${vencido ? "fila-vencido" : ""}" data-id="${incidente.id}">
-                    <td class="codigo-incidente">${incidente.codigo}</td>
+                <tr class="fila-${esc(incidente.prioridad)} ${vencido ? "fila-vencido" : ""}" data-id="${esc(incidente.id)}">
+                    <td class="codigo-incidente">${esc(incidente.codigo)}</td>
                     <td>${formatearHora(incidente.creado_en)}</td>
-                    <td>${incidente.lugar || humanizar(incidente.zona)}</td>
+                    <td>${incidente.lugar ? esc(incidente.lugar) : humanizar(incidente.zona)}</td>
                     <td>${humanizar(incidente.categoria)}</td>
-                    <td><span class="prioridad-badge ${incidente.prioridad}">${humanizar(incidente.prioridad)}</span></td>
-                    <td><span class="estado-badge ${incidente.estado}">${humanizar(incidente.estado)}</span></td>
-                    <td>${mapaOperadores[incidente.responsable_id] || "—"}</td>
+                    <td><span class="prioridad-badge ${esc(incidente.prioridad)}">${humanizar(incidente.prioridad)}</span></td>
+                    <td><span class="estado-badge ${esc(incidente.estado)}">${humanizar(incidente.estado)}</span></td>
+                    <td>${esc(mapaOperadores[incidente.responsable_id] || "—")}</td>
                     <td>${tiempoIncidente(incidente)}</td>
                     <td>${abierto && incidente.proximo_seguimiento_en ? textoProximoSeguimiento(incidente.proximo_seguimiento_en) : "—"}</td>
                 </tr>
@@ -1419,10 +1426,10 @@ async function cargarColaSeguimiento() {
             const vencido = restante !== null && restante <= 0;
 
             return `
-                <div class="fila-conteo" data-id="${incidente.id}" style="cursor:pointer;">
+                <div class="fila-conteo" data-id="${esc(incidente.id)}" style="cursor:pointer;">
                     <span class="etiqueta">
-                        <span class="prioridad-badge ${incidente.prioridad}">${humanizar(incidente.prioridad)}</span>
-                        ${incidente.codigo}
+                        <span class="prioridad-badge ${esc(incidente.prioridad)}">${humanizar(incidente.prioridad)}</span>
+                        ${esc(incidente.codigo)}
                     </span>
                     <span class="valor" style="color:${vencido ? "var(--rojo)" : "inherit"};">
                         ${restante === null ? "—" : textoProximoSeguimiento(incidente.proximo_seguimiento_en)}
@@ -1453,8 +1460,8 @@ async function cargarActividad() {
             ? `<p class="detalle">Sin actividad reciente.</p>`
             : actividad.map((item) => `
                 <div class="feed-item">
-                    <span class="hora">${formatearHora(item.creado_en)}</span>${item.descripcion}
-                    <div class="usuario">Usuario: ${item.usuario_nombre || "—"}</div>
+                    <span class="hora">${formatearHora(item.creado_en)}</span>${esc(item.descripcion)}
+                    <div class="usuario">Usuario: ${esc(item.usuario_nombre || "—")}</div>
                 </div>
             `).join("");
 
@@ -1751,15 +1758,15 @@ document.getElementById("formBusquedaGlobal").addEventListener("submit", async (
 
         contenedor.innerHTML = [
             ...participantes.map((p) => `
-                <div class="resultado-item" data-tipo="participante" data-id="${p.id}">
-                    <div><div class="nombre">${p.nombre}</div><div class="detalle">${p.documento} · Carpa: ${p.carpa_asignada || "sin asignar"}</div></div>
+                <div class="resultado-item" data-tipo="participante" data-id="${esc(p.id)}">
+                    <div><div class="nombre">${esc(p.nombre)}</div><div class="detalle">${esc(p.documento)} · Carpa: ${esc(p.carpa_asignada || "sin asignar")}</div></div>
                     <span class="badge neutro">Participante</span>
                 </div>
             `),
             ...incidentes.map((i) => `
-                <div class="resultado-item" data-tipo="incidente" data-id="${i.id}">
-                    <div><div class="nombre">${i.codigo}</div><div class="detalle">${i.descripcion}</div></div>
-                    <span class="prioridad-badge ${i.prioridad}">${humanizar(i.prioridad)}</span>
+                <div class="resultado-item" data-tipo="incidente" data-id="${esc(i.id)}">
+                    <div><div class="nombre">${esc(i.codigo)}</div><div class="detalle">${esc(i.descripcion)}</div></div>
+                    <span class="prioridad-badge ${esc(i.prioridad)}">${humanizar(i.prioridad)}</span>
                 </div>
             `)
         ].join("");
@@ -1780,7 +1787,7 @@ document.getElementById("formBusquedaGlobal").addEventListener("submit", async (
 
     } catch (error) {
         contenedor.classList.remove("oculto");
-        contenedor.innerHTML = `<p class="detalle">${error.message}</p>`;
+        contenedor.innerHTML = `<p class="detalle">${esc(error.message)}</p>`;
     }
 
 });
@@ -1824,17 +1831,17 @@ function renderizarTablaParticipantes(lista) {
     const cuerpo = document.getElementById("filasParticipantes");
 
     cuerpo.innerHTML = lista.map((p) => `
-        <tr data-id="${p.id}">
-            <td>${p.nombre}${p.retirado ? ' <span class="badge rojo">Retirado</span>' : ""}${p.salidaLibreActiva ? ` <span class="badge neutro">${icono("walk")} Salida libre (${p.salidaLibreActiva.motivo})</span>` : ""}</td>
-            <td>${p.municipio || "—"}</td>
-            <td>${p.carpa_asignada || "—"}</td>
+        <tr data-id="${esc(p.id)}">
+            <td>${esc(p.nombre)}${p.retirado ? ' <span class="badge rojo">Retirado</span>' : ""}${p.salidaLibreActiva ? ` <span class="badge neutro">${icono("walk")} Salida libre (${esc(p.salidaLibreActiva.motivo)})</span>` : ""}</td>
+            <td>${esc(p.municipio || "—")}</td>
+            <td>${esc(p.carpa_asignada || "—")}</td>
             <td>${p.es_lider_carpa ? "Sí" : "No"}</td>
             <td>${p.ingreso_registrado ? `${punto("ok")}Ingresó` : `${punto("pendiente")}Pendiente`}</td>
-            <td>${p.entregas_alimentacion} entregas</td>
-            <td>${p.incidentes_activos}</td>
+            <td>${esc(p.entregas_alimentacion)} entregas</td>
+            <td>${esc(p.incidentes_activos)}</td>
             <td>
-                ${p.retirado ? "" : `<button class="boton pequeno" data-retirar="${p.id}">Marcar retirado</button>`}
-                ${p.salidaLibreActiva ? `<button class="boton pequeno secundario" data-regreso-salida="${p.id}" style="margin-top:4px;">Registrar regreso</button>` : ""}
+                ${p.retirado ? "" : `<button class="boton pequeno" data-retirar="${esc(p.id)}">Marcar retirado</button>`}
+                ${p.salidaLibreActiva ? `<button class="boton pequeno secundario" data-regreso-salida="${esc(p.id)}" style="margin-top:4px;">Registrar regreso</button>` : ""}
             </td>
         </tr>
     `).join("");
@@ -1921,13 +1928,13 @@ async function cargarCronologiaCampistas() {
         cuerpo.innerHTML = eventos.map((e) => `
             <tr>
                 <td>${new Date(e.creadoEn).toLocaleString("es-CO")}</td>
-                <td>${e.participante ? `${e.participante.nombre} (${e.participante.codigo})` : "—"}</td>
-                <td>${ICONOS_CRONOLOGIA_CAMPISTAS[e.tipo] || "•"} ${e.descripcion}</td>
+                <td>${e.participante ? `${esc(e.participante.nombre)} (${esc(e.participante.codigo)})` : "—"}</td>
+                <td>${ICONOS_CRONOLOGIA_CAMPISTAS[e.tipo] || "•"} ${esc(e.descripcion)}</td>
             </tr>
         `).join("") || `<tr><td colspan="3">Todavía no hay actividad de campistas registrada.</td></tr>`;
 
     } catch (error) {
-        cuerpo.innerHTML = `<tr><td colspan="3">Error al cargar: ${error.message}</td></tr>`;
+        cuerpo.innerHTML = `<tr><td colspan="3">Error al cargar: ${esc(error.message)}</td></tr>`;
     }
 
 }
@@ -1966,8 +1973,8 @@ document.getElementById("formBuscarPerfil").addEventListener("submit", async (ev
         }
 
         contenedor.innerHTML = participantes.map((p) => `
-            <div class="resultado-item" data-id="${p.id}">
-                <div><div class="nombre">${p.nombre}</div><div class="detalle">${p.codigo} · ${p.documento} · ${p.municipio || ""}</div></div>
+            <div class="resultado-item" data-id="${esc(p.id)}">
+                <div><div class="nombre">${esc(p.nombre)}</div><div class="detalle">${esc(p.codigo)} · ${esc(p.documento)} · ${esc(p.municipio || "")}</div></div>
                 <span class="badge neutro">${icono("trophy")} ${(p.logros_desbloqueados || []).length}</span>
             </div>
         `).join("");
@@ -1978,7 +1985,7 @@ document.getElementById("formBuscarPerfil").addEventListener("submit", async (ev
 
     } catch (error) {
         contenedor.classList.remove("oculto");
-        contenedor.innerHTML = `<p class="detalle">${error.message}</p>`;
+        contenedor.innerHTML = `<p class="detalle">${esc(error.message)}</p>`;
     }
 
 });
@@ -2029,17 +2036,17 @@ async function abrirPerfil(id) {
         document.getElementById("perfilBadges").innerHTML = [
             `<span class="badge ${p.estado_admision === "admitido" ? "verde" : "neutro"}">${humanizar(p.estado_admision)}</span>`,
             p.ingreso_registrado ? `<span class="badge verde">${icono("check-circle")} Ingresó</span>` : `<span class="badge neutro">Sin ingreso</span>`,
-            p.carpa_asignada ? `<span class="badge neutro">${icono("tent")} ${p.carpa_asignada}</span>` : "",
+            p.carpa_asignada ? `<span class="badge neutro">${icono("tent")} ${esc(p.carpa_asignada)}</span>` : "",
             p.retirado ? `<span class="badge rojo">Retirado</span>` : ""
         ].join("");
 
         document.getElementById("perfilInfo").innerHTML = `
-            <div class="dato"><span class="etiqueta">Municipio</span><span class="valor">${p.municipio || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Teléfono</span><span class="valor">${p.telefono || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Correo</span><span class="valor">${p.correo_personal || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Contacto de emergencia</span><span class="valor">${p.contacto_emergencia_nombre || "—"} · ${p.contacto_emergencia_telefono || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Condición médica</span><span class="valor">${p.tiene_condicion_medica ? (p.condicion_medica_detalle || "Sí") : "No"}</span></div>
-            <div class="dato"><span class="etiqueta">Restricciones alimentarias</span><span class="valor">${p.tiene_restricciones_alimentarias ? (p.restricciones_alimentarias_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Municipio</span><span class="valor">${esc(p.municipio || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Teléfono</span><span class="valor">${esc(p.telefono || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Correo</span><span class="valor">${esc(p.correo_personal || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Contacto de emergencia</span><span class="valor">${esc(p.contacto_emergencia_nombre || "—")} · ${esc(p.contacto_emergencia_telefono || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Condición médica</span><span class="valor">${p.tiene_condicion_medica ? esc(p.condicion_medica_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Restricciones alimentarias</span><span class="valor">${p.tiene_restricciones_alimentarias ? esc(p.restricciones_alimentarias_detalle || "Sí") : "No"}</span></div>
         `;
 
         const logros = p.logros_desbloqueados || [];
@@ -2066,8 +2073,8 @@ async function abrirPerfil(id) {
             ? eventos.map((e) => `
                 <div class="bitacora-item">
                     <span class="hora">${new Date(e.fecha).toLocaleString("es-CO")}</span>
-                    <div>${e.icono} ${e.texto}</div>
-                    <div class="usuario">${e.autor ? "Por: " + e.autor : "Automático / el propio campista"}</div>
+                    <div>${e.icono} ${esc(e.texto)}</div>
+                    <div class="usuario">${e.autor ? "Por: " + esc(e.autor) : "Automático / el propio campista"}</div>
                 </div>
             `).join("")
             : `<p class="detalle">Sin eventos registrados todavía.</p>`;
@@ -2178,8 +2185,8 @@ async function abrirIncidente(id) {
         intervaloVistaIncidente = setInterval(() => actualizarAvisoOtrosViendo(id), 5000);
 
         document.getElementById("detalleIncidenteBadges").innerHTML = `
-            <span class="prioridad-badge ${incidente.prioridad}">${humanizar(incidente.prioridad)}</span>
-            <span class="estado-badge ${incidente.estado}">${humanizar(incidente.estado)}</span>
+            <span class="prioridad-badge ${esc(incidente.prioridad)}">${humanizar(incidente.prioridad)}</span>
+            <span class="estado-badge ${esc(incidente.estado)}">${humanizar(incidente.estado)}</span>
         `;
 
         document.getElementById("detalleIncidenteCodigo").textContent = incidente.codigo;
@@ -2188,9 +2195,9 @@ async function abrirIncidente(id) {
         document.getElementById("detalleIncidenteInfo").innerHTML = `
             <div class="dato"><span class="etiqueta">Categoría</span><span class="valor">${humanizar(incidente.categoria)}</span></div>
             <div class="dato"><span class="etiqueta">Zona</span><span class="valor">${humanizar(incidente.zona)}</span></div>
-            <div class="dato"><span class="etiqueta">Lugar</span><span class="valor">${incidente.lugar || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Reportado por</span><span class="valor">${incidente.reportado_por || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Responsable</span><span class="valor">${mapaOperadores[incidente.responsable_id] || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Lugar</span><span class="valor">${esc(incidente.lugar || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Reportado por</span><span class="valor">${esc(incidente.reportado_por || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Responsable</span><span class="valor">${esc(mapaOperadores[incidente.responsable_id] || "—")}</span></div>
             <div class="dato"><span class="etiqueta">Registrado</span><span class="valor">${formatearFechaHora(incidente.creado_en)}</span></div>
             <div class="dato"><span class="etiqueta">${incidente.cerrado_en ? "Resuelto" : "Abierto hace"}</span><span class="valor">${incidente.cerrado_en ? `${formatearFechaHora(incidente.cerrado_en)} · ${tiempoIncidente(incidente).replace("Resuelto en ", "")}` : tiempoIncidente(incidente)}</span></div>
         `;
@@ -2198,8 +2205,8 @@ async function abrirIncidente(id) {
         document.getElementById("bitacoraIncidente").innerHTML = seguimientos.map((s) => `
             <div class="bitacora-item">
                 <span class="hora">${formatearHora(s.creado_en)}</span>
-                <div>${humanizar(s.accion)}${s.observaciones ? `: ${s.observaciones}` : ""}</div>
-                <div class="usuario">Usuario: ${s.usuario_nombre || "—"}</div>
+                <div>${humanizar(s.accion)}${s.observaciones ? `: ${esc(s.observaciones)}` : ""}</div>
+                <div class="usuario">Usuario: ${esc(s.usuario_nombre || "—")}</div>
             </div>
         `).join("");
 
@@ -2226,7 +2233,7 @@ function renderizarAccionesIncidente(incidente) {
         // seguimiento, pero el panel nunca lo enviaba: escalar no reasignaba.
         const opcionesResponsable = Object.entries(mapaOperadores)
             .filter(([idOperador]) => idOperador !== incidente.responsable_id)
-            .map(([idOperador, nombre]) => `<option value="${idOperador}">${nombre}</option>`).join("");
+            .map(([idOperador, nombre]) => `<option value="${idOperador}">${esc(nombre)}</option>`).join("");
 
         contenedor.innerHTML = `
             <div class="campo" style="width:100%; margin-bottom:8px;">
@@ -2240,7 +2247,7 @@ function renderizarAccionesIncidente(incidente) {
             <div class="campo" style="width:100%; margin-bottom:8px;" id="campoNuevoResponsable">
                 <label for="selectNuevoResponsable">Responsable</label>
                 <select id="selectNuevoResponsable">
-                    <option value="">Mantener: ${mapaOperadores[incidente.responsable_id] || "sin responsable"}</option>
+                    <option value="">Mantener: ${esc(mapaOperadores[incidente.responsable_id] || "sin responsable")}</option>
                     ${opcionesResponsable}
                 </select>
             </div>
@@ -2419,10 +2426,10 @@ async function cargarCapacidadCarpas() {
             ? `<p class="detalle">Todavía no hay carpas configuradas.</p>`
             : carpas.map((c) => `
                 <div class="fila-conteo">
-                    <span class="etiqueta">${c.nombre}</span>
+                    <span class="etiqueta">${esc(c.nombre)}</span>
                     <span class="valor">
-                        Capacidad: ${c.capacidad}
-                        <button class="boton pequeno secundario" data-eliminar-carpa="${c.nombre}" style="margin-left:8px;">Eliminar</button>
+                        Capacidad: ${esc(c.capacidad)}
+                        <button class="boton pequeno secundario" data-eliminar-carpa="${esc(c.nombre)}" style="margin-left:8px;">Eliminar</button>
                     </span>
                 </div>
             `).join("");
@@ -2634,7 +2641,7 @@ async function cargarZonasAdmin() {
                 <div class="fila-conteo">
                     <span class="etiqueta">${humanizar(z.nombre)}</span>
                     <span class="valor">
-                        <button class="boton pequeno secundario" data-eliminar-zona="${z.nombre}">Eliminar</button>
+                        <button class="boton pequeno secundario" data-eliminar-zona="${esc(z.nombre)}">Eliminar</button>
                     </span>
                 </div>
             `).join("");
@@ -2746,12 +2753,12 @@ async function cargarRamasAdmin() {
         contenedor.innerHTML = ramas.length === 0
             ? `<p class="detalle">Todavía no hay ramas configuradas.</p>`
             : ramas.map((r) => `
-                <div class="tarjeta" style="margin-bottom:10px; box-shadow:none; border-width:2px;" data-rama="${r.id}">
+                <div class="tarjeta" style="margin-bottom:10px; box-shadow:none; border-width:2px;" data-rama="${esc(r.id)}">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <strong>${r.nombre}</strong>
+                        <strong>${esc(r.nombre)}</strong>
                         <div>
-                            <button class="boton pequeno" data-guardar-rama="${r.id}">Guardar</button>
-                            <button class="boton pequeno secundario" data-eliminar-rama="${r.id}">Eliminar</button>
+                            <button class="boton pequeno" data-guardar-rama="${esc(r.id)}">Guardar</button>
+                            <button class="boton pequeno secundario" data-eliminar-rama="${esc(r.id)}">Eliminar</button>
                         </div>
                     </div>
                     <div class="categorias-rama" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
@@ -2859,19 +2866,19 @@ async function cargarUsuariosAdmin() {
         const estiloCampo = "padding:6px 8px; border:2px solid #ddd; border-radius:8px; font-family:inherit; width:100%;";
 
         cuerpo.innerHTML = usuarios.map((u) => `
-            <tr data-id="${u.id}">
-                <td><input type="text" class="input-nombre-usuario" value="${u.nombre}" style="${estiloCampo}"></td>
-                <td>${u.email || "—"}</td>
+            <tr data-id="${esc(u.id)}">
+                <td><input type="text" class="input-nombre-usuario" value="${esc(u.nombre)}" style="${estiloCampo}"></td>
+                <td>${esc(u.email || "—")}</td>
                 <td>
                     <select class="select-rol-usuario" style="${estiloCampo}">
                         ${ROLES.map((r) => `<option value="${r}" ${r === u.rol ? "selected" : ""}>${humanizar(r)}</option>`).join("")}
                     </select>
                 </td>
-                <td><input type="text" class="input-telefono-usuario" value="${u.telefono || ""}" placeholder="300..." style="${estiloCampo}"></td>
+                <td><input type="text" class="input-telefono-usuario" value="${esc(u.telefono || "")}" placeholder="300..." style="${estiloCampo}"></td>
                 <td>
                     <select class="select-rama-usuario" style="${estiloCampo}">
                         <option value="">Sin rama</option>
-                        ${ramasDisponibles.map((r) => `<option value="${r.id}" ${r.id === u.rama_id ? "selected" : ""}>${r.nombre}</option>`).join("")}
+                        ${ramasDisponibles.map((r) => `<option value="${esc(r.id)}" ${r.id === u.rama_id ? "selected" : ""}>${esc(r.nombre)}</option>`).join("")}
                     </select>
                 </td>
                 <td>
@@ -2883,13 +2890,13 @@ async function cargarUsuariosAdmin() {
                 <td>
                     <select class="select-zona-usuario" style="${estiloCampo}">
                         <option value="">Sin zona</option>
-                        ${zonasDisponibles.map((z) => `<option value="${z.nombre}" ${z.nombre === u.zona ? "selected" : ""}>${humanizar(z.nombre)}</option>`).join("")}
+                        ${zonasDisponibles.map((z) => `<option value="${esc(z.nombre)}" ${z.nombre === u.zona ? "selected" : ""}>${humanizar(z.nombre)}</option>`).join("")}
                     </select>
                 </td>
                 <td><input type="date" class="input-expira-usuario" value="${u.expira_en ? u.expira_en.slice(0, 10) : ""}" style="${estiloCampo}"></td>
                 <td>
-                    <button class="boton pequeno" data-guardar-usuario="${u.id}" style="margin-bottom:6px;">Guardar</button>
-                    <button class="boton pequeno secundario" data-restablecer-clave="${u.id}">Restablecer clave</button>
+                    <button class="boton pequeno" data-guardar-usuario="${esc(u.id)}" style="margin-bottom:6px;">Guardar</button>
+                    <button class="boton pequeno secundario" data-restablecer-clave="${esc(u.id)}">Restablecer clave</button>
                 </td>
             </tr>
         `).join("");
@@ -2954,7 +2961,7 @@ async function cargarFiltroUsuariosAuditoria() {
         const select = document.getElementById("filtroAuditoriaUsuario");
 
         select.innerHTML = `<option value="">Todos</option>` +
-            usuarios.map((u) => `<option value="${u.id}">${u.nombre}</option>`).join("");
+            usuarios.map((u) => `<option value="${esc(u.id)}">${esc(u.nombre)}</option>`).join("");
 
     } catch (error) {
         console.error(error);
@@ -2985,10 +2992,10 @@ async function cargarAuditoria() {
         cuerpo.innerHTML = registros.map((r) => `
             <tr>
                 <td>${new Date(r.creado_en).toLocaleString("es-CO")}</td>
-                <td>${r.usuario_nombre || "—"}</td>
-                <td>${r.metodo}</td>
-                <td>${r.ruta}</td>
-                <td>${r.ip || "—"}</td>
+                <td>${esc(r.usuario_nombre || "—")}</td>
+                <td>${esc(r.metodo)}</td>
+                <td>${esc(r.ruta)}</td>
+                <td>${esc(r.ip || "—")}</td>
             </tr>
         `).join("") || `<tr><td colspan="5">Sin registros con estos filtros</td></tr>`;
 
@@ -3000,7 +3007,7 @@ async function cargarAuditoria() {
 
     } catch (error) {
         console.error(error);
-        cuerpo.innerHTML = `<tr><td colspan="5">Error al cargar la bitácora: ${error.message}</td></tr>`;
+        cuerpo.innerHTML = `<tr><td colspan="5">Error al cargar la bitácora: ${esc(error.message)}</td></tr>`;
     }
 
 }
@@ -3037,13 +3044,13 @@ async function cargarIntentosLogin() {
         cuerpo.innerHTML = registros.map((r) => `
             <tr>
                 <td>${new Date(r.creado_en).toLocaleString("es-CO")}</td>
-                <td>${r.email || "—"}</td>
-                <td>${r.ip || "—"}</td>
+                <td>${esc(r.email || "—")}</td>
+                <td>${esc(r.ip || "—")}</td>
             </tr>
         `).join("") || `<tr><td colspan="3">Sin intentos fallidos registrados.</td></tr>`;
 
     } catch (error) {
-        cuerpo.innerHTML = `<tr><td colspan="3">Error al cargar: ${error.message}</td></tr>`;
+        cuerpo.innerHTML = `<tr><td colspan="3">Error al cargar: ${esc(error.message)}</td></tr>`;
     }
 
 }
@@ -3099,16 +3106,16 @@ async function cargarActividades() {
         contenedor.innerHTML = actividades.length === 0
             ? `<p class="detalle">Todavía no hay actividades programadas.</p>`
             : actividades.map((a) => `
-                <div class="incidente-item ${a.cancelada ? "fila-vencido" : ""}" data-actividad="${a.id}">
+                <div class="incidente-item ${a.cancelada ? "fila-vencido" : ""}" data-actividad="${esc(a.id)}">
                     <div class="fila-superior">
-                        <span class="codigo-incidente">${a.titulo}</span>
+                        <span class="codigo-incidente">${esc(a.titulo)}</span>
                         <span>
                             ${a.cancelada ? `<span class="badge rojo">Cancelada</span>` : ""}
                             <span class="badge ${a.montaje_completado ? "verde" : "neutro"}">${a.montaje_completado ? "Montaje listo" : "Montaje pendiente"}</span>
                             <span class="badge ${a.finalizada ? "verde" : "neutro"}">${a.finalizada ? "Finalizada" : "Sin finalizar"}</span>
                         </span>
                     </div>
-                    <div class="descripcion">${formatearFechaHora(a.hora_inicio)} — ${formatearFechaHora(a.hora_fin)} ${a.espacio_usado ? `· ${a.espacio_usado}` : ""}</div>
+                    <div class="descripcion">${formatearFechaHora(a.hora_inicio)} — ${formatearFechaHora(a.hora_fin)} ${a.espacio_usado ? `· ${esc(a.espacio_usado)}` : ""}</div>
                 </div>
             `).join("");
 
@@ -3141,9 +3148,9 @@ function renderizarChecklistMaterialesNuevaActividad(materiales) {
         ? `<p class="detalle">No hay materiales en el inventario todavía (se pueden crear en la pestaña Inventario).</p>`
         : materiales.map((m) => `
             <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                <input type="checkbox" class="checkbox-material-nueva-actividad" value="${m.id}">
-                <span style="flex:1; font-size:13px;">${m.nombre} <span style="color:#888; font-size:11.5px;">(disponible: ${m.disponible})</span></span>
-                <input type="number" class="cantidad-material-nueva-actividad" min="1" max="${m.disponible}" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                <input type="checkbox" class="checkbox-material-nueva-actividad" value="${esc(m.id)}">
+                <span style="flex:1; font-size:13px;">${esc(m.nombre)} <span style="color:#888; font-size:11.5px;">(disponible: ${esc(m.disponible)})</span></span>
+                <input type="number" class="cantidad-material-nueva-actividad" min="1" max="${esc(m.disponible)}" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
             </div>
         `).join("");
 
@@ -3276,8 +3283,8 @@ async function abrirDetalleActividad(id) {
         document.getElementById("detalleHistorialActividad").innerHTML = (historial || []).map((h) => `
             <div class="bitacora-item">
                 <span class="hora">${new Date(h.creado_en).toLocaleString("es-CO")}</span>
-                <div>${h.descripcion}</div>
-                <div class="usuario">${h.usuario_nombre || "—"}</div>
+                <div>${esc(h.descripcion)}</div>
+                <div class="usuario">${esc(h.usuario_nombre || "—")}</div>
             </div>
         `).join("");
 
@@ -3288,11 +3295,11 @@ async function abrirDetalleActividad(id) {
         document.getElementById("detalleActividadTitulo").textContent = actividad.titulo;
 
         document.getElementById("detalleActividadInfo").innerHTML = `
-            <div class="dato"><span class="etiqueta">Fecha</span><span class="valor">${actividad.fecha}</span></div>
+            <div class="dato"><span class="etiqueta">Fecha</span><span class="valor">${esc(actividad.fecha)}</span></div>
             <div class="dato"><span class="etiqueta">Horario</span><span class="valor">${formatearFechaHora(actividad.hora_inicio)} — ${formatearFechaHora(actividad.hora_fin)}</span></div>
-            <div class="dato"><span class="etiqueta">Espacio</span><span class="valor">${actividad.espacio_usado || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Espacio</span><span class="valor">${esc(actividad.espacio_usado || "—")}</span></div>
             <div class="dato"><span class="etiqueta">Asistentes estimados</span><span class="valor">${actividad.cantidad_asistentes_estimada ?? "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${actividad.encargados_metodologicos || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Encargados metodológicos</span><span class="valor">${esc(actividad.encargados_metodologicos || "—")}</span></div>
         `;
 
         renderizarFasesActividad(actividad);
@@ -3318,8 +3325,8 @@ async function abrirDetalleActividad(id) {
         if (perfilActual?.rol === "admin") {
             document.getElementById("ramasTareaActividad").innerHTML = ramasDisponibles.map((r) => `
                 <label style="display:flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600;">
-                    <input type="checkbox" name="ramaNuevaTarea" value="${r.id}">
-                    ${r.nombre}
+                    <input type="checkbox" name="ramaNuevaTarea" value="${esc(r.id)}">
+                    ${esc(r.nombre)}
                 </label>
             `).join("");
         }
@@ -3342,8 +3349,8 @@ async function abrirDetalleActividad(id) {
                 ? `<p class="detalle">Sin tareas registradas todavía.</p>`
                 : resumen.map((r) => `
                     <div class="fila-conteo" style="margin-top:4px;">
-                        <span class="etiqueta">${r.rama}</span>
-                        <span class="valor">${r.aTiempo} a tiempo · ${r.tarde} tarde · ${r.pendientes} pendientes</span>
+                        <span class="etiqueta">${esc(r.rama)}</span>
+                        <span class="valor">${esc(r.aTiempo)} a tiempo · ${esc(r.tarde)} tarde · ${esc(r.pendientes)} pendientes</span>
                     </div>
                 `).join("");
         } catch (error) {
@@ -3437,16 +3444,16 @@ function renderizarTareasPorRama(tareas) {
             .map((idRama) => mapaRamas[idRama] || "Sin rama").join(", ");
 
         return `
-            <div class="fila-conteo" data-tarea-actividad="${t.id}" style="margin-top:6px; cursor:pointer; flex-direction:column; align-items:stretch; gap:4px;">
+            <div class="fila-conteo" data-tarea-actividad="${esc(t.id)}" style="margin-top:6px; cursor:pointer; flex-direction:column; align-items:stretch; gap:4px;">
                 <div style="display:flex; justify-content:space-between; width:100%; gap:8px;">
-                    <span class="etiqueta">${t.titulo}</span>
-                    <span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span>
+                    <span class="etiqueta">${esc(t.titulo)}</span>
+                    <span class="estado-badge ${esc(t.estado)}">${humanizar(t.estado)}</span>
                 </div>
                 <div class="detalle">
-                    Ramas: ${nombresRamas}${t.hora_programada ? ` · Listo a las ${formatearFechaHora(t.hora_programada)}` : ""}
+                    Ramas: ${esc(nombresRamas)}${t.hora_programada ? ` · Listo a las ${formatearFechaHora(t.hora_programada)}` : ""}
                 </div>
-                ${perfilActual?.rol === "admin" && t.estado === "pendiente" ? `<div><button type="button" class="boton pequeno secundario" data-cancelar-tarea="${t.id}">Cancelar tarea</button></div>` : ""}
-                <div class="oculto" id="detalleTareaActividad-${t.id}"></div>
+                ${perfilActual?.rol === "admin" && t.estado === "pendiente" ? `<div><button type="button" class="boton pequeno secundario" data-cancelar-tarea="${esc(t.id)}">Cancelar tarea</button></div>` : ""}
+                <div class="oculto" id="detalleTareaActividad-${esc(t.id)}"></div>
             </div>
         `;
 
@@ -3502,7 +3509,7 @@ async function abrirDetalleTareaEnActividad(tareaId) {
             ? `<p class="detalle">Sin subtareas asignadas.</p>`
             : subtareas.map((s) => `
                 <div class="fila-conteo" style="margin-top:4px;">
-                    <span class="etiqueta">${s.estado === "hecha" ? icono("check-circle") : punto("pendiente")} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}</span>
+                    <span class="etiqueta">${s.estado === "hecha" ? icono("check-circle") : punto("pendiente")} ${esc(s.titulo)}${s.asignado_a_nombre ? ` · ${esc(s.asignado_a_nombre)}` : ""}</span>
                 </div>
             `).join("");
 
@@ -3511,7 +3518,7 @@ async function abrirDetalleTareaEnActividad(tareaId) {
                 <input type="text" placeholder="Nueva subtarea" class="input-titulo-subtarea-admin" style="flex:1; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
                 <select class="select-asignado-subtarea-admin" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
                     <option value="">Sin asignar</option>
-                    ${miembros.map((m) => `<option value="${m.id}">${m.nombre}</option>`).join("")}
+                    ${miembros.map((m) => `<option value="${esc(m.id)}">${esc(m.nombre)}</option>`).join("")}
                 </select>
                 <button type="submit" class="boton pequeno" style="width:auto;">Agregar</button>
             </form>
@@ -3528,8 +3535,8 @@ async function abrirDetalleTareaEnActividad(tareaId) {
                 <div class="checkboxes-reasignar-rama" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:6px;">
                     ${ramasDisponibles.map((r) => `
                         <label style="display:flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600;">
-                            <input type="checkbox" value="${r.id}" ${ramas.some((asignada) => asignada.id === r.id) ? "checked" : ""}>
-                            ${r.nombre}
+                            <input type="checkbox" value="${esc(r.id)}" ${ramas.some((asignada) => asignada.id === r.id) ? "checked" : ""}>
+                            ${esc(r.nombre)}
                         </label>
                     `).join("")}
                 </div>
@@ -3672,11 +3679,11 @@ async function cargarAnaliticaAdmin() {
             ? `<p class="detalle">Todavía no hay tareas registradas.</p>`
             : cumplimientoRamas.map((r) => `
                 <div class="fila-conteo">
-                    <span class="etiqueta">${r.rama}</span>
+                    <span class="etiqueta">${esc(r.rama)}</span>
                     <span class="valor">
-                        ${r.completadas}/${r.total} tareas hechas
+                        ${esc(r.completadas)}/${esc(r.total)} tareas hechas
                         ${totalCompletadas > 0 ? ` · ${Math.round((r.completadas / totalCompletadas) * 100)}% del total completado` : ""}
-                        · ${r.porcentajeCumplimiento}% a tiempo
+                        · ${esc(r.porcentajeCumplimiento)}% a tiempo
                     </span>
                 </div>
             `).join("");
@@ -3697,8 +3704,8 @@ async function cargarAnaliticaAdmin() {
             ? `<p class="detalle">Todavía no hay suficientes datos.</p>`
             : destacadosPositivos.map((p) => `
                 <div class="fila-conteo" style="margin-top:4px;">
-                    <span class="etiqueta">${p.nombre}</span>
-                    <span class="valor">${p.porcentaje}% a tiempo (${p.aTiempo}/${p.total})</span>
+                    <span class="etiqueta">${esc(p.nombre)}</span>
+                    <span class="valor">${esc(p.porcentaje)}% a tiempo (${esc(p.aTiempo)}/${esc(p.total)})</span>
                 </div>
             `).join("");
 
@@ -3706,8 +3713,8 @@ async function cargarAnaliticaAdmin() {
             ? `<p class="detalle">Todavía no hay suficientes datos.</p>`
             : destacadosNegativos.map((p) => `
                 <div class="fila-conteo" style="margin-top:4px;">
-                    <span class="etiqueta">${p.nombre}</span>
-                    <span class="valor">${p.porcentaje}% a tiempo (${p.tarde} tarde de ${p.total})</span>
+                    <span class="etiqueta">${esc(p.nombre)}</span>
+                    <span class="valor">${esc(p.porcentaje)}% a tiempo (${esc(p.tarde)} tarde de ${esc(p.total)})</span>
                 </div>
             `).join("");
 
@@ -3753,7 +3760,7 @@ async function cargarResumenControl() {
 
         const filaActividad = (a) => `
             <div class="fila-conteo" style="margin-top:4px;">
-                <span class="etiqueta">${a.titulo}</span>
+                <span class="etiqueta">${esc(a.titulo)}</span>
                 <span class="valor">${formatearFechaHora(a.hora_inicio)}</span>
             </div>
         `;
@@ -3820,34 +3827,34 @@ function renderizarListaInventario(materiales) {
         : materiales.map((m) => `
             <div class="tarjeta" style="margin-bottom:10px; box-shadow:none; border-width:2px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-                    <strong>${m.nombre}</strong>
+                    <strong>${esc(m.nombre)}</strong>
                     <span style="display:flex; gap:6px; flex-wrap:wrap;">
                         ${m.stockBajo ? `<span class="badge rojo">${icono("alert")} Stock bajo</span>` : ""}
                         ${m.es_consumible ? `<span class="badge neutro">Consumible</span>` : ""}
-                        <span class="badge ${m.disponible > 0 ? "verde" : "rojo"}">${m.disponible}/${m.cantidad_total} disponibles</span>
+                        <span class="badge ${m.disponible > 0 ? "verde" : "rojo"}">${esc(m.disponible)}/${esc(m.cantidad_total)} disponibles</span>
                     </span>
                 </div>
                 <div style="font-size:12px; color:#777; margin-top:4px;">
-                    ${humanizar(m.objetivo)}${m.ubicacion ? ` · ${m.ubicacion}` : ""}${m.danadaOPerdida > 0 ? ` · ${m.danadaOPerdida} dañados/perdidos` : ""}
+                    ${humanizar(m.objetivo)}${m.ubicacion ? ` · ${esc(m.ubicacion)}` : ""}${m.danadaOPerdida > 0 ? ` · ${esc(m.danadaOPerdida)} dañados/perdidos` : ""}
                 </div>
-                ${m.tenedores.length > 0 ? `<div style="font-size:12px; color:#777; margin-top:2px;">Tienen: ${m.tenedores.map((t) => `${t.liderNombre} (${t.cantidad})`).join(", ")}</div>` : ""}
+                ${m.tenedores.length > 0 ? `<div style="font-size:12px; color:#777; margin-top:2px;">Tienen: ${m.tenedores.map((t) => `${esc(t.liderNombre)} (${esc(t.cantidad)})`).join(", ")}</div>` : ""}
                 <div style="margin-top:8px; display:flex; gap:8px;">
-                    <button class="boton pequeno secundario" data-ver-historial-material="${m.id}" style="width:auto; padding:6px 12px; font-size:11px;">Ver historial</button>
-                    ${perfilActual?.rol === "admin" ? `<button class="boton pequeno secundario" data-editar-material="${m.id}">Editar</button><button class="boton pequeno peligro" data-eliminar-material="${m.id}">Eliminar</button>` : ""}
+                    <button class="boton pequeno secundario" data-ver-historial-material="${esc(m.id)}" style="width:auto; padding:6px 12px; font-size:11px;">Ver historial</button>
+                    ${perfilActual?.rol === "admin" ? `<button class="boton pequeno secundario" data-editar-material="${esc(m.id)}">Editar</button><button class="boton pequeno peligro" data-eliminar-material="${esc(m.id)}">Eliminar</button>` : ""}
                 </div>
                 ${perfilActual?.rol === "admin" ? `
-                <form class="oculto form-editar-material" data-form-material="${m.id}" style="margin-top:12px;">
+                <form class="oculto form-editar-material" data-form-material="${esc(m.id)}" style="margin-top:12px;">
                     <div class="grid-info" style="margin-bottom:8px;">
                         <div class="campo"><label>Nombre</label><input name="nombre" required value="${escaparAtributo(m.nombre)}"></div>
                         <div class="campo"><label>Ubicación</label><input name="ubicacion" value="${escaparAtributo(m.ubicacion || "")}"></div>
-                        <div class="campo"><label>Cantidad total</label><input name="cantidadTotal" type="number" min="0" required value="${m.cantidad_total}"></div>
+                        <div class="campo"><label>Cantidad total</label><input name="cantidadTotal" type="number" min="0" required value="${esc(m.cantidad_total)}"></div>
                         <div class="campo"><label>Avisar stock bajo desde</label><input name="umbralStockBajo" type="number" min="0" value="${m.umbral_stock_bajo ?? ""}"></div>
                     </div>
                     <div class="campo"><label>Descripción</label><input name="descripcion" value="${escaparAtributo(m.descripcion || "")}"></div>
-                    <div style="display:flex; gap:8px;"><button type="submit" class="boton pequeno">Guardar cambios</button><button type="button" class="boton pequeno secundario" data-cancelar-edicion="${m.id}">Cancelar</button></div>
+                    <div style="display:flex; gap:8px;"><button type="submit" class="boton pequeno">Guardar cambios</button><button type="button" class="boton pequeno secundario" data-cancelar-edicion="${esc(m.id)}">Cancelar</button></div>
                     <div class="mensaje"></div>
                 </form>` : ""}
-                <div class="oculto" id="historialMaterial-${m.id}" style="margin-top:8px; font-size:12px; max-height:200px; overflow-y:auto;"></div>
+                <div class="oculto" id="historialMaterial-${esc(m.id)}" style="margin-top:8px; font-size:12px; max-height:200px; overflow-y:auto;"></div>
             </div>
         `).join("");
 
@@ -3904,13 +3911,13 @@ async function alternarHistorialMaterial(id) {
             ? `<p class="detalle">Sin movimientos registrados.</p>`
             : historial.map((h) => `
                 <div style="padding:4px 0; border-bottom:1px solid #eee;">
-                    <strong>${humanizar(h.tipo)}</strong>${h.cantidad != null ? ` · ${h.cantidad}` : ""} — ${h.usuario_nombre || "—"}
-                    <div class="detalle">${new Date(h.creado_en).toLocaleString("es-CO")}${h.detalle ? ` · ${h.detalle}` : ""}</div>
+                    <strong>${humanizar(h.tipo)}</strong>${h.cantidad != null ? ` · ${esc(h.cantidad)}` : ""} — ${esc(h.usuario_nombre || "—")}
+                    <div class="detalle">${new Date(h.creado_en).toLocaleString("es-CO")}${h.detalle ? ` · ${esc(h.detalle)}` : ""}</div>
                 </div>
             `).join("");
 
     } catch (error) {
-        contenedor.innerHTML = `<p class="detalle">Error al cargar: ${error.message}</p>`;
+        contenedor.innerHTML = `<p class="detalle">Error al cargar: ${esc(error.message)}</p>`;
     }
 
 }
@@ -3966,7 +3973,7 @@ async function poblarSelectLideres(select, etiquetaVacio) {
         const lideres = usuarios.filter((u) => u.rol_en_rama === "lider");
 
         select.innerHTML = `<option value="">${etiquetaVacio || "Selecciona un líder"}</option>` +
-            lideres.map((l) => `<option value="${l.id}">${l.nombre}${l.rama_id && mapaRamas[l.rama_id] ? ` (${mapaRamas[l.rama_id]})` : ""}</option>`)
+            lideres.map((l) => `<option value="${esc(l.id)}">${esc(l.nombre)}${l.rama_id && mapaRamas[l.rama_id] ? ` (${mapaRamas[l.rama_id]})` : ""}</option>`)
                 .join("");
     } catch (error) {
         console.error(error);
@@ -3984,7 +3991,7 @@ async function cargarActividadesParaLote() {
         const { actividades } = await peticionApi("/api/actividades");
 
         document.getElementById("inputActividadLote").innerHTML = `<option value="">Sin actividad</option>` +
-            actividades.filter((a) => !a.cancelada).map((a) => `<option value="${a.id}">${a.titulo}</option>`).join("");
+            actividades.filter((a) => !a.cancelada).map((a) => `<option value="${esc(a.id)}">${esc(a.titulo)}</option>`).join("");
     } catch (error) {
         console.error(error);
     }
@@ -3999,9 +4006,9 @@ function renderizarChecklistMaterialesLote(materiales) {
         ? `<p class="detalle">No hay materiales para asignar.</p>`
         : materiales.map((m) => `
             <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                <input type="checkbox" class="checkbox-material-lote" value="${m.id}">
-                <span style="flex:1; font-size:13px;">${m.nombre} <span style="color:#888; font-size:11.5px;">(disponible: ${m.disponible})</span></span>
-                <input type="number" class="cantidad-material-lote" min="1" max="${m.disponible}" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                <input type="checkbox" class="checkbox-material-lote" value="${esc(m.id)}">
+                <span style="flex:1; font-size:13px;">${esc(m.nombre)} <span style="color:#888; font-size:11.5px;">(disponible: ${esc(m.disponible)})</span></span>
+                <input type="number" class="cantidad-material-lote" min="1" max="${esc(m.disponible)}" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
             </div>
         `).join("");
 
@@ -4018,10 +4025,10 @@ async function cargarMaterialesDeActividad(actividadId) {
             ? `<p class="detalle">Todavía no se han asignado materiales a esta actividad.</p>`
             : lotes.map((l) => `
                 <div class="fila-conteo" style="margin-top:4px; flex-direction:column; align-items:stretch;">
-                    <strong style="font-size:12.5px;">${l.liderNombre}</strong>
+                    <strong style="font-size:12.5px;">${esc(l.liderNombre)}</strong>
                     ${l.lineas.map((linea) => `
                         <span style="font-size:12px; color:#666;">
-                            ${linea.materialNombre} — ${linea.pendiente > 0 ? `${linea.pendiente} pendiente de devolver` : "devuelto"}
+                            ${esc(linea.materialNombre)} — ${linea.pendiente > 0 ? `${esc(linea.pendiente)} pendiente de devolver` : "devuelto"}
                         </span>
                     `).join("")}
                 </div>
@@ -4046,9 +4053,9 @@ function renderizarChecklistMaterialesActividad(materiales) {
         ? `<p class="detalle">No hay materiales en el inventario.</p>`
         : materiales.map((m) => `
             <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                <input type="checkbox" class="checkbox-material-actividad" value="${m.id}">
-                <span style="flex:1; font-size:13px;">${m.nombre} <span style="color:#888; font-size:11.5px;">(disponible: ${m.disponible})</span></span>
-                <input type="number" class="cantidad-material-actividad" min="1" max="${m.disponible}" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                <input type="checkbox" class="checkbox-material-actividad" value="${esc(m.id)}">
+                <span style="flex:1; font-size:13px;">${esc(m.nombre)} <span style="color:#888; font-size:11.5px;">(disponible: ${esc(m.disponible)})</span></span>
+                <input type="number" class="cantidad-material-actividad" min="1" max="${esc(m.disponible)}" placeholder="Cant." style="width:70px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
             </div>
         `).join("");
 
@@ -4155,21 +4162,21 @@ async function cargarSolicitudesMaterialAdmin() {
             : solicitudes.map((s) => `
                 <div class="tarjeta" style="margin-bottom:10px; box-shadow:none; border-width:2px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                        <strong>${s.solicitante_nombre}</strong>
+                        <strong>${esc(s.solicitante_nombre)}</strong>
                         <span style="display:flex; align-items:center; gap:8px;">
                             <span class="badge ${s.estado === "aprobada" ? "verde" : "neutro"}">${humanizar(s.estado)}</span>
                             <span style="font-size:11.5px; color:#777;">${new Date(s.creado_en).toLocaleString("es-CO")}</span>
                         </span>
                     </div>
                     <div style="font-size:12.5px; margin-top:4px;">
-                        ${s.items.map((i) => `${i.materialNombre} × ${i.cantidad}`).join(", ")}
+                        ${s.items.map((i) => `${esc(i.materialNombre)} × ${esc(i.cantidad)}`).join(", ")}
                     </div>
                     ${s.necesario_para ? `<div style="font-size:12px; color:#c0392b; margin-top:4px; font-weight:700;">Necesario para: ${new Date(s.necesario_para).toLocaleString("es-CO")}</div>` : ""}
-                    ${s.notas ? `<div style="font-size:12px; color:#777; margin-top:4px;">${s.notas}</div>` : ""}
+                    ${s.notas ? `<div style="font-size:12px; color:#777; margin-top:4px;">${esc(s.notas)}</div>` : ""}
                     <div style="display:flex; gap:8px; margin-top:10px;">
-                        ${s.estado === "pendiente" ? `<button class="boton pequeno secundario" data-aprobar-solicitud="${s.id}" style="width:auto;">Solo aprobar</button>` : ""}
-                        <button class="boton pequeno" data-entregar-solicitud="${s.id}" style="width:auto;">${s.estado === "pendiente" ? "Aprobar y entregar" : "Entregar"}</button>
-                        <button class="boton pequeno secundario" data-rechazar-solicitud="${s.id}" style="width:auto;">Rechazar</button>
+                        ${s.estado === "pendiente" ? `<button class="boton pequeno secundario" data-aprobar-solicitud="${esc(s.id)}" style="width:auto;">Solo aprobar</button>` : ""}
+                        <button class="boton pequeno" data-entregar-solicitud="${esc(s.id)}" style="width:auto;">${s.estado === "pendiente" ? "Aprobar y entregar" : "Entregar"}</button>
+                        <button class="boton pequeno secundario" data-rechazar-solicitud="${esc(s.id)}" style="width:auto;">Rechazar</button>
                     </div>
                 </div>
             `).join("");
@@ -4235,7 +4242,7 @@ document.getElementById("btnCargarPendientesSalida").addEventListener("click", a
         const { participantes } = await peticionApi("/api/centro-control/participantes/pendientes-salida");
 
         contenedor.innerHTML = participantes.length === 0 ? `<p class="detalle">Todos los que ingresaron ya tienen registrada su salida.</p>` : `
-            <p class="detalle" style="margin-bottom:8px;"><strong>${participantes.length}</strong> pendiente(s):</p>
+            <p class="detalle" style="margin-bottom:8px;"><strong>${esc(participantes.length)}</strong> pendiente(s):</p>
             <div class="tabla-wrap">
                 <table class="tabla-participantes">
                     <thead>
@@ -4248,8 +4255,8 @@ document.getElementById("btnCargarPendientesSalida").addEventListener("click", a
                     <tbody>
                         ${participantes.map((p) => `
                             <tr>
-                                <td>${p.nombre} (${p.codigo})</td>
-                                <td>${p.carpa_asignada || "—"}</td>
+                                <td>${esc(p.nombre)} (${esc(p.codigo)})</td>
+                                <td>${esc(p.carpa_asignada || "—")}</td>
                                 <td>${formatearFechaHora(p.hora_ingreso)}</td>
                             </tr>
                         `).join("")}
@@ -4393,16 +4400,16 @@ function renderizarTablaInscripciones(participantes) {
     }
 
     cuerpo.innerHTML = participantes.map((p) => `
-        <tr data-fila-inscripcion="${p.id}">
+        <tr data-fila-inscripcion="${esc(p.id)}">
             <td style="white-space:nowrap;">${p.creado_en ? new Date(p.creado_en).toLocaleString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}</td>
-            <td>${p.nombre}${p.esMenorDeEdad ? ' <span class="badge neutro">Menor</span>' : ""}${edadFueraDeRango(p.edad) ? ' <span class="badge rojo">Edad fuera de rango</span>' : ""}</td>
-            <td>${p.documento}</td>
-            <td>${p.municipio}${p.municipio === "Otro" && p.municipio_otro ? ` (${p.municipio_otro})` : ""}</td>
+            <td>${esc(p.nombre)}${p.esMenorDeEdad ? ' <span class="badge neutro">Menor</span>' : ""}${edadFueraDeRango(p.edad) ? ' <span class="badge rojo">Edad fuera de rango</span>' : ""}</td>
+            <td>${esc(p.documento)}</td>
+            <td>${esc(p.municipio)}${p.municipio === "Otro" && p.municipio_otro ? ` (${esc(p.municipio_otro)})` : ""}</td>
             <td>${p.edad ?? "—"}</td>
-            <td>${p.telefono || "—"}</td>
+            <td>${esc(p.telefono || "—")}</td>
             <td>${mostrandoEliminadosInscripcion
                 ? humanizar(p.estado_admision)
-                : `<select class="select-admision-inscripcion" data-id="${p.id}" data-anterior="${p.estado_admision}" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
+                : `<select class="select-admision-inscripcion" data-id="${esc(p.id)}" data-anterior="${esc(p.estado_admision)}" style="padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
                         <option value="pendiente" ${p.estado_admision === "pendiente" ? "selected" : ""}>Pendiente</option>
                         <option value="admitido" ${p.estado_admision === "admitido" ? "selected" : ""}>Admitido</option>
                         <option value="no_admitido" ${p.estado_admision === "no_admitido" ? "selected" : ""}>No admitido</option>
@@ -4414,20 +4421,20 @@ function renderizarTablaInscripciones(participantes) {
                     ${p.correo_confirmacion_estado === "enviado" ? `${punto("ok")}Enviado` : p.correo_confirmacion_estado === "fallo" ? `${punto("error")}Falló` : "No enviado"}
                 </span>
                 ${!mostrandoEliminadosInscripcion && p.correo_confirmacion_estado !== "enviado" && esAdmin
-                    ? `<button class="boton pequeno secundario" data-enviar-correo="${p.id}" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;">Enviar prueba</button>`
+                    ? `<button class="boton pequeno secundario" data-enviar-correo="${esc(p.id)}" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;">Enviar prueba</button>`
                     : ""}
                 ${!mostrandoEliminadosInscripcion && p.correo_confirmacion_estado === "fallo" && esAdmin
-                    ? `<button class="boton pequeno secundario" data-editar-correo="${p.id}" data-correo-actual="${p.correo_personal || ""}" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;">Editar correo</button>`
+                    ? `<button class="boton pequeno secundario" data-editar-correo="${esc(p.id)}" data-correo-actual="${esc(p.correo_personal || "")}" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;">Editar correo</button>`
                     : ""}
             </td>
             <td style="white-space:nowrap;">
-                <button class="boton pequeno secundario" data-detalle-inscripcion="${p.id}" style="width:auto; padding:6px 10px; font-size:11px;">Ver</button>
+                <button class="boton pequeno secundario" data-detalle-inscripcion="${esc(p.id)}" style="width:auto; padding:6px 10px; font-size:11px;">Ver</button>
                 ${mostrandoEliminadosInscripcion
-                    ? `<button class="boton pequeno" data-restaurar="${p.id}" style="width:auto; padding:6px 10px; font-size:11px;">Restaurar</button>`
-                    : (esAdmin ? `<button class="boton pequeno secundario" data-eliminar="${p.id}" style="width:auto; padding:6px 10px; font-size:11px;">Eliminar</button>` : "")}
+                    ? `<button class="boton pequeno" data-restaurar="${esc(p.id)}" style="width:auto; padding:6px 10px; font-size:11px;">Restaurar</button>`
+                    : (esAdmin ? `<button class="boton pequeno secundario" data-eliminar="${esc(p.id)}" style="width:auto; padding:6px 10px; font-size:11px;">Eliminar</button>` : "")}
             </td>
         </tr>
-        <tr class="oculto" id="filaDetalleInscripcion-${p.id}"><td colspan="9"><div id="detalleInscripcion-${p.id}"></div></td></tr>
+        <tr class="oculto" id="filaDetalleInscripcion-${esc(p.id)}"><td colspan="9"><div id="detalleInscripcion-${esc(p.id)}"></div></td></tr>
     `).join("");
 
     cuerpo.querySelectorAll(".select-admision-inscripcion").forEach((select) => {
@@ -4495,29 +4502,29 @@ async function alternarDetalleInscripcion(id) {
 
     contenedor.innerHTML = `
         <div class="grid-info" style="margin:10px 0 0;">
-            <div class="dato"><span class="etiqueta">Correo personal</span><span class="valor">${p.correo_personal || "—"}</span></div>
-            ${p.motivo_rechazo ? `<div class="dato"><span class="etiqueta">Motivo (rechazo/deserción)</span><span class="valor">${p.motivo_rechazo}</span></div>` : ""}
-            <div class="dato"><span class="etiqueta">Zona</span><span class="valor">${p.zona_rural_urbana || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Contacto de emergencia 1</span><span class="valor">${p.contacto_emergencia_nombre || "—"} · ${p.contacto_emergencia_telefono || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Contacto de emergencia 2</span><span class="valor">${p.contacto_emergencia_2_nombre || "—"} · ${p.contacto_emergencia_2_telefono || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">RH</span><span class="valor">${p.rh || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">EPS</span><span class="valor">${p.eps || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Condición médica</span><span class="valor">${p.tiene_condicion_medica ? (p.condicion_medica_detalle || "Sí") : "No"}</span></div>
-            <div class="dato"><span class="etiqueta">Restricciones alimentarias</span><span class="valor">${p.tiene_restricciones_alimentarias ? (p.restricciones_alimentarias_detalle || "Sí") : "No"}</span></div>
-            <div class="dato"><span class="etiqueta">Alergia a medicamento</span><span class="valor">${p.alergia_medicamento ? (p.alergia_medicamento_detalle || "Sí") : "No"}</span></div>
-            <div class="dato"><span class="etiqueta">Alergia a alimento</span><span class="valor">${p.alergia_alimento ? (p.alergia_alimento_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Correo personal</span><span class="valor">${esc(p.correo_personal || "—")}</span></div>
+            ${p.motivo_rechazo ? `<div class="dato"><span class="etiqueta">Motivo (rechazo/deserción)</span><span class="valor">${esc(p.motivo_rechazo)}</span></div>` : ""}
+            <div class="dato"><span class="etiqueta">Zona</span><span class="valor">${esc(p.zona_rural_urbana || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Contacto de emergencia 1</span><span class="valor">${esc(p.contacto_emergencia_nombre || "—")} · ${esc(p.contacto_emergencia_telefono || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Contacto de emergencia 2</span><span class="valor">${esc(p.contacto_emergencia_2_nombre || "—")} · ${esc(p.contacto_emergencia_2_telefono || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">RH</span><span class="valor">${esc(p.rh || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">EPS</span><span class="valor">${esc(p.eps || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Condición médica</span><span class="valor">${p.tiene_condicion_medica ? esc(p.condicion_medica_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Restricciones alimentarias</span><span class="valor">${p.tiene_restricciones_alimentarias ? esc(p.restricciones_alimentarias_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Alergia a medicamento</span><span class="valor">${p.alergia_medicamento ? esc(p.alergia_medicamento_detalle || "Sí") : "No"}</span></div>
+            <div class="dato"><span class="etiqueta">Alergia a alimento</span><span class="valor">${p.alergia_alimento ? esc(p.alergia_alimento_detalle || "Sí") : "No"}</span></div>
             <div class="dato"><span class="etiqueta">Carpa propia</span><span class="valor">${p.carpa_propia ? "Sí" : "No"}</span></div>
-            <div class="dato"><span class="etiqueta">Subsistema — instancia</span><span class="valor">${p.subsistema_instancia || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Cómo se enteró</span><span class="valor">${(p.como_se_entero || []).join(", ") || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Invitado por</span><span class="valor">${p.invitado_por || "—"}</span></div>
+            <div class="dato"><span class="etiqueta">Subsistema — instancia</span><span class="valor">${esc(p.subsistema_instancia || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Cómo se enteró</span><span class="valor">${esc((p.como_se_entero || []).join(", ") || "—")}</span></div>
+            <div class="dato"><span class="etiqueta">Invitado por</span><span class="valor">${esc(p.invitado_por || "—")}</span></div>
         </div>
         ${p.municipio !== "Bugalagrande" ? `
         <div style="margin-top:14px; padding-top:10px; border-top:1px solid #eee;">
             <strong style="font-size:12px;">Liderazgo y motivación</strong>
-            <p class="detalle" style="margin-top:6px;"><strong>Experiencia en liderazgo:</strong> ${p.experiencia_liderazgo || "—"}</p>
-            <p class="detalle"><strong>Incidencia como líder social:</strong> ${p.incidencia_lider_social || "—"}</p>
-            <p class="detalle"><strong>Beneficio personal:</strong> ${p.beneficio_personal_liderazgo || "—"}</p>
-            <p class="detalle"><strong>Expectativa post-campamento:</strong> ${p.expectativa_post_campamento || "—"}</p>
+            <p class="detalle" style="margin-top:6px;"><strong>Experiencia en liderazgo:</strong> ${esc(p.experiencia_liderazgo || "—")}</p>
+            <p class="detalle"><strong>Incidencia como líder social:</strong> ${esc(p.incidencia_lider_social || "—")}</p>
+            <p class="detalle"><strong>Beneficio personal:</strong> ${esc(p.beneficio_personal_liderazgo || "—")}</p>
+            <p class="detalle"><strong>Expectativa post-campamento:</strong> ${esc(p.expectativa_post_campamento || "—")}</p>
         </div>
         ` : `<p class="detalle" style="margin-top:10px;">Es de Bugalagrande — no aplica el bloque de liderazgo.</p>`}
         <div id="infraccionesInscripcion-${id}" style="margin-top:14px; padding-top:10px; border-top:1px solid #eee;">
@@ -4542,7 +4549,7 @@ async function cargarInfraccionesInscripcion(id) {
 
         const listaInfracciones = infracciones.length === 0
             ? `<p class="detalle">Sin infracciones registradas.</p>`
-            : `<ul style="margin-top:6px; padding-left:18px;">${infracciones.map((i) => `<li class="detalle">${formatearFechaHora(i.creado_en)} — ${i.descripcion} (${i.registrado_por_nombre || "—"})</li>`).join("")}</ul>`;
+            : `<ul style="margin-top:6px; padding-left:18px;">${infracciones.map((i) => `<li class="detalle">${formatearFechaHora(i.creado_en)} — ${esc(i.descripcion)} (${esc(i.registrado_por_nombre || "—")})</li>`).join("")}</ul>`;
 
         const puedeConfirmar = perfilActual?.rol === "admin" || perfilActual?.rol === "control";
 
@@ -4708,13 +4715,13 @@ document.getElementById("btnVerCorreosFallidos").addEventListener("click", async
             ? `<p class="detalle">No hay correos fallidos pendientes de revisar.</p>`
             : participantes.map((p) => `
                 <div class="fila-conteo">
-                    <span class="etiqueta">${p.nombre} (${p.codigo})</span>
-                    <span class="valor">${p.correo_personal || "sin correo"} — ${p.correo_confirmacion_error || "error desconocido"}</span>
+                    <span class="etiqueta">${esc(p.nombre)} (${esc(p.codigo)})</span>
+                    <span class="valor">${esc(p.correo_personal || "sin correo")} — ${esc(p.correo_confirmacion_error || "error desconocido")}</span>
                 </div>
             `).join("");
 
     } catch (error) {
-        document.getElementById("listaCorreosFallidos").innerHTML = `<p class="detalle">${error.message}</p>`;
+        document.getElementById("listaCorreosFallidos").innerHTML = `<p class="detalle">${esc(error.message)}</p>`;
     }
 
 });
@@ -4766,11 +4773,11 @@ function renderizarTilesInscripciones(estadisticas) {
 
     contenedor.innerHTML = `
         <div class="stat-tile" data-tile-total="true" style="cursor:pointer;"><div class="stat-numero">${total}</div><span class="stat-etiqueta">Total inscritos</span></div>
-        <div class="stat-tile" data-tile-estado="pendiente" style="cursor:pointer;"><div class="stat-numero">${estado.pendiente || 0}</div><span class="stat-etiqueta">Pendientes</span></div>
-        <div class="stat-tile" data-tile-estado="admitido" style="cursor:pointer;"><div class="stat-numero">${estado.admitido || 0}</div><span class="stat-etiqueta">Admitidos</span></div>
-        <div class="stat-tile" data-tile-estado="no_admitido" style="cursor:pointer;"><div class="stat-numero">${estado.no_admitido || 0}</div><span class="stat-etiqueta">No admitidos</span></div>
+        <div class="stat-tile" data-tile-estado="pendiente" style="cursor:pointer;"><div class="stat-numero">${esc(estado.pendiente || 0)}</div><span class="stat-etiqueta">Pendientes</span></div>
+        <div class="stat-tile" data-tile-estado="admitido" style="cursor:pointer;"><div class="stat-numero">${esc(estado.admitido || 0)}</div><span class="stat-etiqueta">Admitidos</span></div>
+        <div class="stat-tile" data-tile-estado="no_admitido" style="cursor:pointer;"><div class="stat-numero">${esc(estado.no_admitido || 0)}</div><span class="stat-etiqueta">No admitidos</span></div>
         <div class="stat-tile" data-tile-menor="true" style="cursor:pointer;"><div class="stat-numero">${menor["Sí"] || 0}</div><span class="stat-etiqueta">Menores de edad</span></div>
-        <div class="stat-tile" data-tile-bugalagrande="true" style="cursor:pointer;"><div class="stat-numero">${cupo.admitidos}/${cupo.maximo}</div><span class="stat-etiqueta">Cupo Bugalagrande${cupo.enEspera > 0 ? ` (${cupo.enEspera} en espera)` : ""}</span></div>
+        <div class="stat-tile" data-tile-bugalagrande="true" style="cursor:pointer;"><div class="stat-numero">${esc(cupo.admitidos)}/${esc(cupo.maximo)}</div><span class="stat-etiqueta">Cupo Bugalagrande${cupo.enEspera > 0 ? ` (${esc(cupo.enEspera)} en espera)` : ""}</span></div>
     `;
 
     const tileTotal = contenedor.querySelector("[data-tile-total]");
@@ -4825,8 +4832,8 @@ function renderizarGraficosInscripciones(estadisticas) {
 
     contenedor.innerHTML = GRAFICOS_INSCRIPCION.map((g) => `
         <div class="grafico-tarjeta">
-            <h3>${g.titulo}</h3>
-            <canvas id="graficoInscripcion_${g.campo}"></canvas>
+            <h3>${esc(g.titulo)}</h3>
+            <canvas id="graficoInscripcion_${esc(g.campo)}"></canvas>
         </div>
     `).join("");
 
@@ -4897,13 +4904,13 @@ function renderizarListaMapasCandidatos() {
     }
 
     contenedor.innerHTML = mapasCandidatos.map((mapa) => `
-        <div class="item-zona-mapa" data-mapa-candidato="${mapa.id}" style="${mapa.id === mapaSeleccionadoId ? "border-color:var(--teal);" : ""}">
+        <div class="item-zona-mapa" data-mapa-candidato="${esc(mapa.id)}" style="${mapa.id === mapaSeleccionadoId ? "border-color:var(--teal);" : ""}">
             <div class="info-zona">
-                <strong>${mapa.nombre} <span class="badge ${mapa.publicado ? "verde" : "neutro"}" style="margin-left:6px;">${mapa.publicado ? "Publicado" : "Borrador"}</span></strong>
-                <span>${mapa.zonas.length} zona(s)</span>
+                <strong>${esc(mapa.nombre)} <span class="badge ${mapa.publicado ? "verde" : "neutro"}" style="margin-left:6px;">${mapa.publicado ? "Publicado" : "Borrador"}</span></strong>
+                <span>${esc(mapa.zonas.length)} zona(s)</span>
             </div>
-            <button type="button" class="boton pequeno secundario" data-renombrar-mapa="${mapa.id}" style="width:auto; padding:6px 10px; font-size:11px;">Renombrar</button>
-            <button type="button" class="boton pequeno peligro" data-eliminar-mapa="${mapa.id}">Eliminar</button>
+            <button type="button" class="boton pequeno secundario" data-renombrar-mapa="${esc(mapa.id)}" style="width:auto; padding:6px 10px; font-size:11px;">Renombrar</button>
+            <button type="button" class="boton pequeno peligro" data-eliminar-mapa="${esc(mapa.id)}">Eliminar</button>
         </div>
     `).join("");
 
@@ -5027,12 +5034,12 @@ function renderizarZonasEnSvgYLista(mapa) {
         const centro = centroideZonaMapa(zona.puntos);
         const pin = marcadorPin(centro, 3);
         return `
-            <g data-zona-svg="${zona.id}">
-                <polygon class="mapa-zona-poligono" points="${puntos}" style="fill:${zona.color}; stroke:${zona.color};"></polygon>
+            <g data-zona-svg="${esc(zona.id)}">
+                <polygon class="mapa-zona-poligono" points="${puntos}" style="fill:${esc(zona.color)}; stroke:${esc(zona.color)};"></polygon>
                 <g class="mapa-pin-zona">
-                    <polygon class="mapa-pin-cola" points="${pin.puntosCola}" style="fill:${zona.color};"></polygon>
-                    <circle class="mapa-pin-bulbo" cx="${pin.centroBulbo.x}" cy="${pin.centroBulbo.y}" r="${pin.radio}" style="fill:${zona.color};"></circle>
-                    <text class="mapa-zona-numero" x="${pin.centroBulbo.x}" y="${pin.centroBulbo.y}" dy="0.95">${indice + 1}</text>
+                    <polygon class="mapa-pin-cola" points="${esc(pin.puntosCola)}" style="fill:${esc(zona.color)};"></polygon>
+                    <circle class="mapa-pin-bulbo" cx="${esc(pin.centroBulbo.x)}" cy="${esc(pin.centroBulbo.y)}" r="${esc(pin.radio)}" style="fill:${esc(zona.color)};"></circle>
+                    <text class="mapa-zona-numero" x="${esc(pin.centroBulbo.x)}" y="${esc(pin.centroBulbo.y)}" dy="0.95">${indice + 1}</text>
                 </g>
             </g>
         `;
@@ -5061,11 +5068,11 @@ function renderizarZonasEnSvgYLista(mapa) {
     lista.innerHTML = mapa.zonas.length === 0
         ? `<p class="detalle">Sin zonas todavía.</p>`
         : mapa.zonas.map((zona, indice) => `
-            <div class="item-zona-mapa" data-zona-lista="${zona.id}">
-                <span class="numero-zona" style="background:${zona.color};">${indice + 1}</span>
+            <div class="item-zona-mapa" data-zona-lista="${esc(zona.id)}">
+                <span class="numero-zona" style="background:${esc(zona.color)};">${indice + 1}</span>
                 <div class="info-zona">
-                    <strong>${zona.nombre}</strong>
-                    <span>${zona.actividades.length} actividad(es) vinculada(s)</span>
+                    <strong>${esc(zona.nombre)}</strong>
+                    <span>${esc(zona.actividades.length)} actividad(es) vinculada(s)</span>
                 </div>
             </div>
         `).join("");
@@ -5101,7 +5108,7 @@ function renderizarDibujoTemporalMapa() {
     if (!grupo) return;
 
     const puntosTexto = puntosDibujoMapaActual.map((p) => `${p.x},${p.y}`).join(" ");
-    const marcadores = puntosDibujoMapaActual.map((p) => `<circle class="mapa-punto-temporal" cx="${p.x}" cy="${p.y}" r="1.2"></circle>`).join("");
+    const marcadores = puntosDibujoMapaActual.map((p) => `<circle class="mapa-punto-temporal" cx="${esc(p.x)}" cy="${esc(p.y)}" r="1.2"></circle>`).join("");
 
     grupo.innerHTML = `
         <polyline class="mapa-dibujo-temporal" points="${puntosTexto}"></polyline>
@@ -5322,13 +5329,13 @@ async function cargarDirectorioYReferencia() {
 
         const listaContactos = document.getElementById("listaContactosEmergencia");
         listaContactos.innerHTML = contactos.map((c) => `
-            <div class="item-zona-mapa" data-contacto="${c.id}">
+            <div class="item-zona-mapa" data-contacto="${esc(c.id)}">
                 <div class="info-zona">
-                    <strong>${c.entidad}</strong>
-                    <span>${c.telefono || "sin teléfono"} · ${c.funcion || ""}</span>
+                    <strong>${esc(c.entidad)}</strong>
+                    <span>${esc(c.telefono || "sin teléfono")} · ${esc(c.funcion || "")}</span>
                 </div>
-                <button type="button" class="boton pequeno secundario" data-editar-contacto="${c.id}" style="width:auto; padding:6px 10px; font-size:11px;">Editar</button>
-                <button type="button" class="boton pequeno peligro" data-eliminar-contacto="${c.id}">Eliminar</button>
+                <button type="button" class="boton pequeno secundario" data-editar-contacto="${esc(c.id)}" style="width:auto; padding:6px 10px; font-size:11px;">Editar</button>
+                <button type="button" class="boton pequeno peligro" data-eliminar-contacto="${esc(c.id)}">Eliminar</button>
             </div>
         `).join("");
 
@@ -5360,10 +5367,10 @@ async function cargarDirectorioYReferencia() {
 
         const listaRutas = document.getElementById("listaRutasEmergencia");
         listaRutas.innerHTML = rutas.map((r) => `
-            <button type="button" class="cf-ruta-toggle" data-ruta="${r.codigo}" style="display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border:2px solid #ddd; border-radius:8px; background:var(--crema); font-weight:700; font-size:13px; cursor:pointer; font-family:inherit;">${r.titulo}</button>
-            <div class="oculto" data-ruta-pasos="${r.codigo}" style="padding:6px 16px 14px;">
+            <button type="button" class="cf-ruta-toggle" data-ruta="${esc(r.codigo)}" style="display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border:2px solid #ddd; border-radius:8px; background:var(--crema); font-weight:700; font-size:13px; cursor:pointer; font-family:inherit;">${esc(r.titulo)}</button>
+            <div class="oculto" data-ruta-pasos="${esc(r.codigo)}" style="padding:6px 16px 14px;">
                 <ol style="margin:0; padding-left:18px; font-size:12.5px;">
-                    ${r.pasos.map((p) => `<li style="margin-bottom:4px;">${p}</li>`).join("")}
+                    ${r.pasos.map((p) => `<li style="margin-bottom:4px;">${esc(p)}</li>`).join("")}
                 </ol>
             </div>
         `).join("");
@@ -5381,10 +5388,10 @@ async function cargarDirectorioYReferencia() {
                     <tbody>
                         ${matrizRiesgos.map((r) => `
                             <tr>
-                                <td>${r.riesgo}</td>
+                                <td>${esc(r.riesgo)}</td>
                                 <td>${humanizar(r.probabilidad)}</td>
                                 <td>${humanizar(r.impacto)}</td>
-                                <td>${r.medida}</td>
+                                <td>${esc(r.medida)}</td>
                             </tr>
                         `).join("")}
                     </tbody>
@@ -5438,8 +5445,8 @@ async function cargarUsuariosParaTurnos() {
 
         document.getElementById("checkboxesAsignadosTurno").innerHTML = usuarios.map((u) => `
             <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600;">
-                <input type="checkbox" value="${u.id}" data-asignado-turno>
-                ${u.nombre}${u.rama_nombre ? ` (${u.rama_nombre})` : ""}
+                <input type="checkbox" value="${esc(u.id)}" data-asignado-turno>
+                ${esc(u.nombre)}${u.rama_nombre ? ` (${esc(u.rama_nombre)})` : ""}
             </label>
         `).join("");
 
@@ -5462,11 +5469,11 @@ async function cargarTurnosCentinela() {
             : turnos.map((t) => `
                 <div class="item-zona-mapa">
                     <div class="info-zona">
-                        <strong>${t.fecha} · ${formatearFechaHora(t.hora_inicio)} – ${formatearFechaHora(t.hora_fin)}</strong>
-                        <span>${t.asignadosNombres.join(", ") || "sin asignados"}</span>
+                        <strong>${esc(t.fecha)} · ${formatearFechaHora(t.hora_inicio)} – ${formatearFechaHora(t.hora_fin)}</strong>
+                        <span>${esc(t.asignadosNombres.join(", ") || "sin asignados")}</span>
                     </div>
                     <span class="badge ${t.finalizado ? "verde" : t.iniciado ? "neutro" : "rojo"}">${t.finalizado ? "Finalizado" : t.iniciado ? "En curso" : "Sin iniciar"}</span>
-                    <button type="button" class="boton pequeno peligro" data-eliminar-turno="${t.id}">Eliminar</button>
+                    <button type="button" class="boton pequeno peligro" data-eliminar-turno="${esc(t.id)}">Eliminar</button>
                 </div>
             `).join("");
 
@@ -5541,8 +5548,8 @@ async function cargarVerificacionesOperativas() {
                 <div class="historial-item">
                     <span class="hora">${formatearFechaHora(v.creado_en)}</span> —
                     <strong>${humanizar(v.tipo)}</strong>
-                    ${v.sin_novedades ? `<span class="badge verde">Sin novedades</span>` : `<span class="badge rojo">Novedad: ${v.novedades}</span>`}
-                    <div class="usuario">${v.registrado_por_nombre || "—"}</div>
+                    ${v.sin_novedades ? `<span class="badge verde">Sin novedades</span>` : `<span class="badge rojo">Novedad: ${esc(v.novedades)}</span>`}
+                    <div class="usuario">${esc(v.registrado_por_nombre || "—")}</div>
                 </div>
             `).join("");
 
@@ -5577,12 +5584,12 @@ async function cargarAliados() {
             : aliados.map((a) => `
                 <div class="item-zona-mapa">
                     <div class="info-zona">
-                        <strong>${a.entidad}</strong>
-                        <span>${a.representante || "—"} · ${a.telefono || "sin teléfono"}</span>
+                        <strong>${esc(a.entidad)}</strong>
+                        <span>${esc(a.representante || "—")} · ${esc(a.telefono || "sin teléfono")}</span>
                     </div>
                     <span class="badge ${a.salida_en ? "verde" : a.llegada_en ? "neutro" : "rojo"}">${a.salida_en ? "Salió" : a.llegada_en ? "En el sitio" : "Sin llegar"}</span>
-                    ${!a.llegada_en ? `<button type="button" class="boton pequeno terciario" data-llegada-aliado="${a.id}" style="width:auto; padding:6px 10px; font-size:11px;">Marcar llegada</button>` : ""}
-                    ${a.llegada_en && !a.salida_en ? `<button type="button" class="boton pequeno secundario" data-salida-aliado="${a.id}" style="width:auto; padding:6px 10px; font-size:11px;">Marcar salida</button>` : ""}
+                    ${!a.llegada_en ? `<button type="button" class="boton pequeno terciario" data-llegada-aliado="${esc(a.id)}" style="width:auto; padding:6px 10px; font-size:11px;">Marcar llegada</button>` : ""}
+                    ${a.llegada_en && !a.salida_en ? `<button type="button" class="boton pequeno secundario" data-salida-aliado="${esc(a.id)}" style="width:auto; padding:6px 10px; font-size:11px;">Marcar salida</button>` : ""}
                 </div>
             `).join("");
 
