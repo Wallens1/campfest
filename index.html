@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="./campfest/assets/style.css">
+<script src="./config.js"></script>
 </head>
 
 <body id="cf26">
@@ -771,7 +772,7 @@
 (function () {
   // "Modo evento": el día del evento el admin lo activa desde el Centro de
   // Control. Mientras está apagado, esta página no cambia en nada.
-  var API_BASE = "https://campfest-api-production.up.railway.app";
+  var API_BASE = window.CAMPFEST_API;
 
   async function iniciar() {
     var estado;
@@ -818,7 +819,7 @@
 <script>
 (function () {
   // El mapa vive oculto hasta que el admin lo publica desde Centro de Control.
-  var API_BASE = "https://campfest-api-production.up.railway.app";
+  var API_BASE = window.CAMPFEST_API;
   async function iniciar() {
     try {
       var respuesta = await fetch(API_BASE + "/api/mapa");

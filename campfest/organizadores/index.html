@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="../assets/style.css">
+<script src="../../config.js"></script>
 </head>
 <body>
 
@@ -361,7 +362,7 @@
 // Modo evento (activado por el admin el día del evento) elimina el acceso a
 // esta subpágina, redirige a la home, que en ese modo solo muestra el
 // portal del campista y la información útil.
-fetch("https://campfest-api-production.up.railway.app/api/estado-evento")
+fetch(window.CAMPFEST_API + "/api/estado-evento")
   .then(function (r) { return r.json(); })
   .then(function (estado) { if (estado.modoEventoActivo) window.location.href = "../../index.html"; })
   .catch(function () {});

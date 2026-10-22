@@ -1,5 +1,5 @@
 // Reemplaza esto con tus valores reales
-const API_BASE = "https://campfest-api-production.up.railway.app";
+const API_BASE = window.CAMPFEST_API; // se define en /config.js
 const SUPABASE_URL = "https://lazarmjxajhdjvuhtzcl.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhemFybWp4YWpoZGp2dWh0emNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MDY4MzQsImV4cCI6MjA5OTM4MjgzNH0.j3muJDelPhZibma-yeuIhvjrvQ01e7DN0B-4UaYyCFM";
 

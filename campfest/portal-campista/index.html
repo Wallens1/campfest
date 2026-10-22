@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="../assets/style.css">
+<script src="../../config.js"></script>
 </head>
 
 <body id="cf26">
@@ -372,7 +373,7 @@
 
 (function () {
 
-  var API_BASE = "https://campfest-api-production.up.railway.app";
+  var API_BASE = window.CAMPFEST_API;
   var TOKEN_KEY = "cf_token_campista";
 
   function mostrarEstado(el, tipo, texto) {

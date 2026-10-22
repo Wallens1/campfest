@@ -183,6 +183,7 @@ body{
 }
 
 </style>
+<script src="../config.js"></script>
 </head>
 <body>
 
@@ -217,7 +218,7 @@ body{
 <script>
 
 // Reemplaza esto con la URL real de tu backend en Railway
-const API_BASE = "https://campfest-api-production.up.railway.app";
+const API_BASE = window.CAMPFEST_API;
 
 const input = document.getElementById("inputCodigo");
 const boton = document.getElementById("botonVerificar");

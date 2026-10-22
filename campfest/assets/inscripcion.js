@@ -3,7 +3,7 @@
 // páginas; la fecha de nacimiento real decide si aplica el aviso de menor
 // de edad, no la página en la que se llenó).
 
-const API_BASE = "https://campfest-api-production.up.railway.app";
+const API_BASE = window.CAMPFEST_API; // se define en /config.js
 const ENDPOINT_INSCRIPCION = `${API_BASE}/api/inscripcion`;
 
 const MUNICIPIOS_VALLE = [
