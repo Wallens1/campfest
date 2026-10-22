@@ -4,25 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Camp Fest · Centro de Control</title>
-<link rel="stylesheet" href="assets/style.css?v=4">
+<meta name="theme-color" content="#1A1A1E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../paneles/base.css?v=1">
+<link rel="stylesheet" href="assets/style.css?v=5">
 <script src="../config.js"></script>
 </head>
 <body>
 
-<div class="banner-sin-conexion oculto" id="bannerSinConexion">⚠️ Sin conexión con el servidor — reintentando automáticamente…</div>
+<div class="banner-sin-conexion oculto" id="bannerSinConexion" role="status"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-signal"/></svg> Sin conexión con el servidor. Reintentando automáticamente…</div>
 
-<!-- ===== LOGIN ===== -->
+<!-- ===== INGRESO ===== -->
 <div id="pantallaLogin">
     <div class="tarjeta">
         <div class="encabezado-login">
-            <span class="eyebrow">Camp Fest · Centro de Control</span>
-            <h1>Centro de Operaciones</h1>
+            <span class="marca-login"><span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-tent"/></svg></span>Camp Fest · Centro de Control</span>
+            <h1>Inicia sesión para operar</h1>
+            <p>Acceso para el equipo de control y administración del evento.</p>
         </div>
 
         <form id="formLogin">
             <div class="campo">
                 <label for="inputEmail">Correo</label>
-                <input type="email" id="inputEmail" autocomplete="username" required>
+                <input type="email" id="inputEmail" autocomplete="username" spellcheck="false" required>
             </div>
             <div class="campo">
                 <label for="inputPassword">Contraseña</label>
@@ -31,34 +37,75 @@
             <button type="submit" class="boton" id="btnLogin">Iniciar sesión</button>
         </form>
 
-        <div class="mensaje" id="mensajeLogin"></div>
+        <div class="mensaje" id="mensajeLogin" role="alert"></div>
     </div>
 </div>
 
-<!-- ===== DASHBOARD ===== -->
-<div id="dashboard" class="oculto">
+<!-- ===== CENTRO DE CONTROL ===== -->
+<div id="dashboard" class="oculto app">
 
-    <div class="banner-critico oculto" id="bannerCritico">
+    <!-- Navegación: las vistas se agrupan por lo que el equipo hace -->
+    <aside class="barra-lateral">
+        <div class="marca-lateral">
+            <span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-tent"/></svg></span>
+            <span class="texto-marca"><strong>Camp Fest</strong><small>Centro de Control</small></span>
+        </div>
+
+        <nav class="tabs-modulo nav-lateral" aria-label="Secciones del Centro de Control">
+            <p class="grupo-nav">Operación</p>
+            <button type="button" class="tab-modulo activo" data-vista="panel" data-descripcion="Alertas, incidentes y participantes en tiempo real" aria-current="page"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-grid"/></svg><span>Panel</span></button>
+            <button type="button" class="tab-modulo" data-vista="cronograma" data-descripcion="Actividades, tareas por rama y cumplimiento"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-calendar"/></svg><span>Cronograma</span></button>
+            <button type="button" class="tab-modulo" data-vista="inventario" data-descripcion="Materiales, lotes y solicitudes de las ramas"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-package"/></svg><span>Inventario</span></button>
+            <p class="grupo-nav">Campistas</p>
+            <button type="button" class="tab-modulo" data-vista="inscripciones" data-descripcion="Registros, documentos y correos de confirmación"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-id"/></svg><span>Inscripciones</span></button>
+            <button type="button" class="tab-modulo" data-vista="notificaciones" data-descripcion="Anuncios que ven los campistas en su portal"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-megaphone"/></svg><span>Notificaciones</span></button>
+            <button type="button" class="tab-modulo" data-vista="perfiles" data-descripcion="Actividad, logros y cronología de cada campista"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-user"/></svg><span>Perfiles</span></button>
+            <p class="grupo-nav">Sistema</p>
+            <button type="button" class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion" data-descripcion="Configuración del evento, usuarios, emergencias y cierre"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-gear"/></svg><span>Administración</span></button>
+        </nav>
+
+        <div class="pie-lateral">
+            <span class="usuario-actual" id="usuarioActual"></span>
+            <button type="button" class="boton-plano" id="btnAyudaRoles" aria-controls="panelAyudaRoles"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-question"/></svg><span>Qué puede hacer cada rol</span></button>
+            <button type="button" class="boton-plano" id="btnCerrarSesion"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-sign-out"/></svg><span>Cerrar sesión</span></button>
+        </div>
+    </aside>
+
+    <main class="contenido">
+
+    <div class="banner-critico oculto" id="bannerCritico" role="alert">
         <span id="textoBannerCritico"></span>
-        <button class="boton pequeno" id="btnCerrarBannerCritico" style="width:auto;">Visto</button>
+        <button class="boton pequeno" id="btnCerrarBannerCritico">Visto</button>
     </div>
 
-    <div class="banner-critico oculto" id="bannerAlertaExtrema" style="background:#c0392b;">
+    <div class="banner-critico oculto" id="bannerAlertaExtrema" role="alert">
         <span id="textoBannerAlertaExtrema"></span>
     </div>
 
-    <div class="barra-superior">
-        <span class="marca">🛰️ Camp Fest · Centro de Control</span>
-        <div class="acciones-rapidas">
-            <span class="usuario-actual" id="usuarioActual"></span>
-            <button class="boton pequeno" id="btnAbrirFormIncidente">Registrar incidente</button>
-            <button class="boton pequeno secundario" id="btnEnfocarBusqueda">Buscar</button>
-            <button class="boton pequeno terciario" id="btnExportarExcel">Exportar Excel</button>
-            <button class="boton pequeno amarillo" id="btnExportarPdf">Exportar PDF</button>
-            <button class="boton pequeno secundario" id="btnAyudaRoles" style="width:auto; padding:10px 14px;">?</button>
-            <button class="boton pequeno" id="btnCerrarSesion">Cerrar sesión</button>
+    <header class="barra-superior">
+        <div class="titulo-vista">
+            <h1 id="tituloVista">Panel</h1>
+            <p id="descripcionVista">Alertas, incidentes y participantes en tiempo real</p>
         </div>
-    </div>
+        <div class="acciones-rapidas">
+            <form class="busqueda-global" id="formBusquedaGlobal" role="search">
+                <svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-search"/></svg>
+                <input type="search" id="inputBusquedaGlobal" placeholder="Buscar persona, documento, carpa o incidente" aria-label="Buscar en todo el evento" autocomplete="off">
+                <kbd aria-hidden="true">/</kbd>
+            </form>
+            <button type="button" class="oculto" id="btnEnfocarBusqueda" tabindex="-1" aria-hidden="true">Buscar</button>
+            <details class="menu-acciones" id="menuExportar">
+                <summary class="boton secundario"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-download"/></svg><span>Exportar</span><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-caret-down"/></svg></summary>
+                <div class="lista-menu">
+                    <button type="button" class="boton-plano" id="btnExportarExcel"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-file"/></svg>Incidentes en Excel</button>
+                    <button type="button" class="boton-plano" id="btnExportarPdf"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-printer"/></svg>Incidentes en PDF</button>
+                </div>
+            </details>
+            <button type="button" class="boton" id="btnAbrirFormIncidente"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-plus"/></svg><span>Registrar incidente</span></button>
+        </div>
+    </header>
+
+    <div class="resultados-globales oculto" id="resultadosGlobales" aria-live="polite"></div>
 
     <div class="oculto" id="panelAyudaRoles">
         <div class="tarjeta" style="max-width:520px; margin:0 auto 14px;">
@@ -75,60 +122,24 @@
         </div>
     </div>
 
-    <div class="tabs-modulo">
-        <button class="tab-modulo activo" data-vista="panel">Panel</button>
-        <button class="tab-modulo" data-vista="cronograma">Cronograma</button>
-        <button class="tab-modulo" data-vista="inventario">Inventario</button>
-        <button class="tab-modulo" data-vista="inscripciones">Inscripciones</button>
-        <button class="tab-modulo" data-vista="notificaciones">Notificaciones</button>
-        <button class="tab-modulo" data-vista="perfiles">Perfiles</button>
-        <button class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion">Administración</button>
-    </div>
-
     <!-- ===== VISTA: PANEL ===== -->
     <section id="vistaPanel">
 
-    <!-- Panel de alertas: siempre visible -->
+    <!-- Alertas: siempre arriba, cada una filtra la tabla de incidentes -->
     <div class="alertas-barra" id="alertasBarra"></div>
 
-    <!-- Estadísticas -->
-    <div class="stats-fila">
-        <div class="tarjeta grupo-stat">
-            <h3>Participantes</h3>
-            <div class="stats-grid" id="statsParticipantes"></div>
+    <!-- Registro de incidente: se abre desde la barra superior -->
+    <div class="tarjeta oculto" id="tarjetaFormIncidente">
+        <div class="encabezado-tarjeta">
+            <h3>Registrar incidente</h3>
+            <p class="detalle">Empieza con una plantilla o llena el formulario directamente.</p>
         </div>
-        <div class="tarjeta grupo-stat">
-            <h3>Alimentación</h3>
-            <div class="stats-grid" id="statsAlimentacion"></div>
-        </div>
-        <div class="tarjeta grupo-stat">
-            <h3>Incidentes</h3>
-            <div class="stats-grid" id="statsIncidentes"></div>
-        </div>
-        <div class="tarjeta grupo-stat">
-            <h3>Carpas</h3>
-            <div class="stats-grid" id="statsCarpas"></div>
-        </div>
-    </div>
-
-    <!-- Búsqueda global -->
-    <div class="tarjeta" style="margin-bottom:14px;">
-        <form class="busqueda-global" id="formBusquedaGlobal">
-            <input type="text" id="inputBusquedaGlobal" placeholder="Buscar por nombre, documento, código, teléfono, carpa o código de incidente...">
-            <button type="submit" class="boton pequeno">Buscar</button>
-        </form>
-        <div class="resultados-globales oculto" id="resultadosGlobales"></div>
-    </div>
-
-    <!-- Formulario de registro de incidente -->
-    <div class="tarjeta oculto" id="tarjetaFormIncidente" style="margin-bottom:14px;">
-        <h3>Registrar incidente</h3>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;" id="plantillasIncidente">
-            <button type="button" class="boton pequeno terciario" data-plantilla="medico" style="width:auto;">🏥 Malestar leve</button>
-            <button type="button" class="boton pequeno terciario" data-plantilla="objeto" style="width:auto;">🎒 Objeto perdido</button>
-            <button type="button" class="boton pequeno terciario" data-plantilla="alimentacion" style="width:auto;">🍽️ Problema de alimentación</button>
-            <button type="button" class="boton pequeno terciario" data-plantilla="convivencia" style="width:auto;">⚠️ Convivencia</button>
-            <button type="button" class="boton pequeno terciario" data-plantilla="consulta" style="width:auto;">❓ Consulta general</button>
+        <div class="plantillas" id="plantillasIncidente">
+            <button type="button" class="boton pequeno secundario" data-plantilla="medico"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-first-aid"/></svg>Malestar leve</button>
+            <button type="button" class="boton pequeno secundario" data-plantilla="objeto"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-backpack"/></svg>Objeto perdido</button>
+            <button type="button" class="boton pequeno secundario" data-plantilla="alimentacion"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-food"/></svg>Problema de alimentación</button>
+            <button type="button" class="boton pequeno secundario" data-plantilla="convivencia"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-warning-circle"/></svg>Convivencia</button>
+            <button type="button" class="boton pequeno secundario" data-plantilla="consulta"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-question"/></svg>Consulta general</button>
         </div>
         <form id="formIncidente">
             <div class="grid-info" style="margin-bottom:0;">
@@ -167,6 +178,26 @@
             <button type="submit" class="boton pequeno">Guardar incidente</button>
         </form>
         <div class="mensaje" id="mensajeIncidente"></div>
+    </div>
+
+    <!-- Resumen del evento -->
+    <div class="stats-fila">
+        <div class="tarjeta grupo-stat">
+            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-users"/></svg>Participantes</h3>
+            <div class="stats-grid" id="statsParticipantes"></div>
+        </div>
+        <div class="tarjeta grupo-stat">
+            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-food"/></svg>Alimentación</h3>
+            <div class="stats-grid" id="statsAlimentacion"></div>
+        </div>
+        <div class="tarjeta grupo-stat">
+            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-alert"/></svg>Incidentes</h3>
+            <div class="stats-grid" id="statsIncidentes"></div>
+        </div>
+        <div class="tarjeta grupo-stat">
+            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-tent"/></svg>Carpas</h3>
+            <div class="stats-grid" id="statsCarpas"></div>
+        </div>
     </div>
 
     <!-- Layout principal: tabla de incidentes + columna lateral -->
@@ -226,28 +257,8 @@
 
     </div>
 
-    <!-- Gráficos -->
-    <div class="graficos-fila">
-        <div class="tarjeta grafico-tarjeta">
-            <h3>Por categoría</h3>
-            <canvas id="graficoCategoria"></canvas>
-        </div>
-        <div class="tarjeta grafico-tarjeta">
-            <h3>Por prioridad</h3>
-            <canvas id="graficoPrioridad"></canvas>
-        </div>
-        <div class="tarjeta grafico-tarjeta">
-            <h3>Por zona</h3>
-            <canvas id="graficoZona"></canvas>
-        </div>
-        <div class="tarjeta grafico-tarjeta">
-            <h3>Por hora del día</h3>
-            <canvas id="graficoHora"></canvas>
-        </div>
-    </div>
-
     <!-- Participantes -->
-    <div class="tarjeta" style="margin-bottom:14px;">
+    <div class="tarjeta">
         <h3>Participantes</h3>
         <div class="tabla-wrap" style="max-height:420px;">
             <table class="tabla-participantes">
@@ -268,12 +279,32 @@
         </div>
     </div>
 
+    <!-- Gráficos: análisis, al final porque no exigen acción -->
+    <div class="graficos-fila">
+        <div class="tarjeta grafico-tarjeta">
+            <h3>Por categoría</h3>
+            <canvas id="graficoCategoria"></canvas>
+        </div>
+        <div class="tarjeta grafico-tarjeta">
+            <h3>Por prioridad</h3>
+            <canvas id="graficoPrioridad"></canvas>
+        </div>
+        <div class="tarjeta grafico-tarjeta">
+            <h3>Por zona</h3>
+            <canvas id="graficoZona"></canvas>
+        </div>
+        <div class="tarjeta grafico-tarjeta">
+            <h3>Por hora del día</h3>
+            <canvas id="graficoHora"></canvas>
+        </div>
+    </div>
+
     </section>
 
     <!-- ===== VISTA: CRONOGRAMA ===== -->
     <section id="vistaCronograma" class="oculto">
 
-        <div class="tarjeta oculto" id="tarjetaCronogramaAdmin" style="margin-bottom:14px;">
+        <div class="tarjeta oculto" id="tarjetaCronogramaAdmin">
             <h3>Nueva actividad</h3>
             <form id="formActividad">
                 <div class="grid-info" style="margin-bottom:0;">
@@ -326,7 +357,7 @@
         <div id="listaActividades"></div>
 
         <!-- ===== DETALLE DE ACTIVIDAD (tareas por rama) ===== -->
-        <div class="tarjeta oculto" id="tarjetaDetalleActividad" style="margin-top:14px;">
+        <div class="tarjeta oculto" id="tarjetaDetalleActividad">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                 <h2 id="detalleActividadTitulo" style="margin:0;"></h2>
                 <div style="display:flex; gap:8px;">
@@ -369,7 +400,7 @@
 
             <div class="seccion oculto" id="bloqueCrearTareaActividad">
                 <h3>Asignar tarea (una o varias ramas)</h3>
-                <p style="font-size:12px; color:#777; margin-top:-8px;">
+                <p style="font-size:12px; color:var(--tinta-3); margin-top:-8px;">
                     El líder de cada rama que marques queda automáticamente como responsable.
                 </p>
                 <form id="formTareaActividad">
@@ -424,7 +455,7 @@
         </div>
 
         <!-- ===== ANALÍTICA (admin) ===== -->
-        <div class="tarjeta oculto" id="tarjetaAnaliticaAdmin" style="margin-top:14px;">
+        <div class="tarjeta oculto" id="tarjetaAnaliticaAdmin">
             <h3>Analítica de cumplimiento</h3>
 
             <div class="graficos-fila" style="grid-template-columns:1fr 1fr 1fr;">
@@ -446,32 +477,32 @@
 
             <div class="grid-info" style="margin-top:16px;">
                 <div>
-                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">Destacados 🌟</h3>
+                    <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-star"/></svg> Destacados</h3>
                     <div id="listaDestacadosPositivos"></div>
                 </div>
                 <div>
-                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">Necesitan seguimiento ⚠️</h3>
+                    <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-alert"/></svg> Necesitan seguimiento</h3>
                     <div id="listaDestacadosNegativos"></div>
                 </div>
             </div>
         </div>
 
         <!-- ===== RESUMEN REDUCIDO (control) ===== -->
-        <div class="tarjeta oculto" id="tarjetaResumenControl" style="margin-top:14px;">
+        <div class="tarjeta oculto" id="tarjetaResumenControl">
             <h3>Resumen del cronograma</h3>
             <div class="stats-grid" id="statsResumenControl" style="grid-template-columns:1fr; margin-bottom:16px;"></div>
 
             <div class="grid-info">
                 <div>
-                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">Próximas</h3>
+                    <h3>Próximas</h3>
                     <div id="listaActividadesProximas"></div>
                 </div>
                 <div>
-                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">En curso</h3>
+                    <h3>En curso</h3>
                     <div id="listaActividadesEnCurso"></div>
                 </div>
                 <div>
-                    <h3 style="font-size:13px; color:var(--morado); text-transform:uppercase;">Terminadas</h3>
+                    <h3>Terminadas</h3>
                     <div id="listaActividadesTerminadas"></div>
                 </div>
             </div>
@@ -482,7 +513,7 @@
     <!-- ===== VISTA: INVENTARIO ===== -->
     <section id="vistaInventario" class="oculto">
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Inventario de materiales</h3>
             <div class="grid-info" style="margin-bottom:10px;">
                 <div class="campo" style="margin-bottom:0;">
@@ -497,7 +528,7 @@
             <div id="listaInventario"></div>
         </div>
 
-        <div class="tarjeta oculto" id="bloqueGestionInventarioAdmin" style="margin-bottom:14px;">
+        <div class="tarjeta oculto" id="bloqueGestionInventarioAdmin">
             <h3>Nuevo material</h3>
             <form id="formNuevoMaterial">
                 <div class="grid-info" style="margin-bottom:0;">
@@ -537,7 +568,7 @@
             <div class="mensaje" id="mensajeNuevoMaterial"></div>
         </div>
 
-        <div class="tarjeta oculto" id="bloqueCrearLoteAdmin" style="margin-bottom:14px;">
+        <div class="tarjeta oculto" id="bloqueCrearLoteAdmin">
             <h3>Asignar lote a un líder</h3>
             <form id="formCrearLote">
                 <div class="grid-info" style="margin-bottom:0;">
@@ -559,7 +590,7 @@
             <div class="mensaje" id="mensajeCrearLote"></div>
         </div>
 
-        <div class="tarjeta oculto" id="bloqueSolicitudesMaterialAdmin" style="margin-bottom:14px;">
+        <div class="tarjeta oculto" id="bloqueSolicitudesMaterialAdmin">
             <h3>Solicitudes de materiales pendientes</h3>
             <div id="listaSolicitudesMaterial"></div>
         </div>
@@ -578,7 +609,7 @@
     <!-- ===== VISTA: INSCRIPCIONES ===== -->
     <section id="vistaInscripciones" class="oculto">
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <div class="stats-grid" id="tilesInscripciones" style="margin-bottom:16px;"></div>
 
             <div class="mensaje fallo" id="avisoEdadInscripciones" style="text-align:left; margin-bottom:14px; margin-top:0;"></div>
@@ -626,7 +657,7 @@
                 <button class="boton pequeno terciario oculto" id="btnExportarListaEspera" style="width:auto;">Exportar lista de espera Bugalagrande</button>
             </div>
 
-            <div class="tarjeta oculto" id="bloqueCorreosFallidos" style="margin-top:10px;">
+            <div class="tarjeta oculto" id="bloqueCorreosFallidos">
                 <h4 style="margin:0 0 8px;">Correos fallidos</h4>
                 <div id="listaCorreosFallidos"></div>
                 <button class="boton pequeno" id="btnReenviarFallidos" style="width:auto; margin-top:10px;">Reintentar todos los fallidos</button>
@@ -684,9 +715,9 @@
     <!-- ===== VISTA: NOTIFICACIONES ===== -->
     <section class="oculto" id="vistaNotificaciones">
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Notificaciones del portal del campista</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 Los avisos publicados aquí aparecen en el perfil de cada campista (portal-campista), con fecha
                 y hora. Cualquier rol puede publicar y editar; borrar es de administrador, o del propio autor
                 durante los 2 minutos siguientes a publicarlo.
@@ -729,9 +760,9 @@
     <!-- ===== VISTA: PERFILES ===== -->
     <section class="oculto" id="vistaPerfiles">
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Actividad reciente de campistas</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 Se actualiza sola mientras esta pestaña está abierta: cada logro que alguien desbloquea
                 en su portal o cada dato de perfil que actualiza aparece aquí apenas pasa.
             </p>
@@ -739,8 +770,8 @@
                 <label for="filtroTipoCronologiaCampistas">Filtrar por tipo</label>
                 <select id="filtroTipoCronologiaCampistas">
                     <option value="">Todo (logros y cambios de perfil)</option>
-                    <option value="logro">🏆 Solo logros</option>
-                    <option value="perfil_actualizado">✏️ Solo cambios de perfil</option>
+                    <option value="logro">Solo logros</option>
+                    <option value="perfil_actualizado">Solo cambios de perfil</option>
                 </select>
             </div>
             <div class="tabla-wrap">
@@ -757,9 +788,9 @@
             </div>
         </div>
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Buscar participante</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 Busca por código (CF-XXXX), documento o nombre para ver el perfil completo: sus logros
                 desbloqueados en el portal, los cambios que ha hecho a sus datos, y la cronología de todo
                 lo que le ha pasado en el evento (ingreso, carpa, alimentación, salidas libres, incidentes).
@@ -795,9 +826,9 @@
 
         <div data-grupo-admin="evento">
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Portal del campista — Modo evento y alerta extrema</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 Ambas acciones piden la clave de administrador extremo (no es la contraseña de tu cuenta).
                 Al activar el modo evento, el sitio público (campfest.online) deja de mostrar la página normal
                 y muestra el portal de inicio de sesión del campista.
@@ -807,7 +838,7 @@
                 <button class="boton pequeno secundario" id="btnDesactivarModoEvento" style="width:auto;">Desactivar modo evento</button>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button class="boton pequeno" id="btnActivarAlertaExtrema" style="width:auto; background:#c0392b;">Activar alerta extrema</button>
+                <button class="boton pequeno peligro" id="btnActivarAlertaExtrema">Activar alerta extrema</button>
                 <button class="boton pequeno secundario" id="btnDesactivarAlertaExtrema" style="width:auto;">Desactivar alerta extrema</button>
             </div>
             <div class="mensaje" id="mensajeModoEvento"></div>
@@ -815,9 +846,9 @@
             <div id="listaUsosClaveExtrema" class="oculto" style="margin-top:10px; font-size:12px;"></div>
         </div>
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Encuesta de satisfacción — habilitar salida</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 La encuesta del campista solo se puede responder a partir de esta fecha y hora — y es
                 obligatoria para poder registrar la salida final del evento. Déjala para cerca del cierre,
                 así nadie la responde antes de vivir el evento completo.
@@ -838,9 +869,9 @@
 
         <div data-grupo-admin="importacion" class="oculto">
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Importar participantes desde Excel</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 Debe ser el .xlsx exportado del formulario de inscripción. Los documentos que ya
                 existan en el sistema se omiten (no se sobrescriben); a los nuevos se les asigna
                 su código CF automáticamente.
@@ -855,9 +886,9 @@
             <div class="mensaje" id="mensajeImportarParticipantes"></div>
         </div>
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Completar datos faltantes desde Excel</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 Esto NO inserta participantes nuevos. Para los documentos que ya existen en el sistema,
                 rellena únicamente los campos que estén vacíos (ej. correo personal) sin tocar el estado
                 de admisión ni ningún dato ya cargado.
@@ -876,7 +907,7 @@
 
         <div data-grupo-admin="carpas" class="oculto">
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Configurar capacidad de carpas</h3>
             <form id="formCapacidadCarpa" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
                 <div class="campo" style="margin-bottom:0;">
@@ -893,7 +924,7 @@
             <div class="lista-conteo" id="listaCapacidadCarpas" style="margin-top:12px;"></div>
         </div>
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Zonas de incidentes</h3>
             <form id="formZona" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
                 <div class="campo" style="margin-bottom:0; flex:1;">
@@ -910,9 +941,9 @@
 
         <div data-grupo-admin="ramas" class="oculto">
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Ramas de logística</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 Ej: Alimentación, Carpas, Emergencias. Cada rama queda asociada a las categorías
                 de incidente que atiende, para poder mostrar sus responsables cuando llegue ese
                 tipo de problema.
@@ -932,7 +963,7 @@
             <div class="lista-conteo" id="listaRamas" style="margin-top:12px;"></div>
         </div>
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Nuevo usuario</h3>
             <form id="formNuevoUsuario">
                 <div class="grid-info" style="margin-bottom:0;">
@@ -972,13 +1003,13 @@
                         <input type="date" id="inputExpiraNuevoUsuario">
                     </div>
                 </div>
-                <p style="font-size:12px; color:#777; margin:-2px 0 10px;">Déjalo vacío para una cuenta permanente. Útil para apoyo puntual (ej. voluntarios de un solo día) — pasada esa fecha, la cuenta deja de poder entrar sola.</p>
+                <p style="font-size:12px; color:var(--tinta-3); margin:-2px 0 10px;">Déjalo vacío para una cuenta permanente. Útil para apoyo puntual (ej. voluntarios de un solo día) — pasada esa fecha, la cuenta deja de poder entrar sola.</p>
                 <button type="submit" class="boton pequeno">Crear usuario</button>
             </form>
             <div class="mensaje" id="mensajeNuevoUsuario"></div>
         </div>
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Usuarios (control y logística)</h3>
             <div class="tabla-wrap">
                 <table class="tabla-participantes">
@@ -1005,9 +1036,9 @@
 
         <div data-grupo-admin="auditoria" class="oculto">
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Bitácora de auditoría</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 Cada acción que crea, actualiza o borra algo queda registrada aquí con quién la hizo,
                 desde qué IP y en qué momento — útil para investigar un cambio inesperado o un intento
                 de acceso sospechoso. Las simples consultas (GET) no se registran.
@@ -1054,15 +1085,15 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; flex-wrap:wrap; gap:10px;">
                 <span class="detalle" id="totalAuditoria"></span>
                 <div style="display:flex; gap:8px;">
-                    <button class="boton pequeno secundario" id="btnAuditoriaAnterior" style="width:auto;" disabled>← Anterior</button>
-                    <button class="boton pequeno secundario" id="btnAuditoriaSiguiente" style="width:auto;">Siguiente →</button>
+                    <button class="boton pequeno secundario" id="btnAuditoriaAnterior" style="width:auto;" disabled><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-arrow-left"/></svg>Anterior</button>
+                    <button class="boton pequeno secundario" id="btnAuditoriaSiguiente" style="width:auto;">Siguiente<svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-arrow-right"/></svg></button>
                 </div>
             </div>
         </div>
 
-        <div class="tarjeta" style="margin-bottom:14px;">
+        <div class="tarjeta">
             <h3>Intentos de login fallidos</h3>
-            <p style="font-size:12.5px; color:#777; margin-top:-4px;">
+            <p style="font-size:12.5px; color:var(--tinta-3); margin-top:-4px;">
                 El login de staff pasa directo por Supabase Auth; esto registra cada intento que falló
                 (correo escrito y desde qué IP), para detectar un intento de adivinar la contraseña de una cuenta.
             </p>
@@ -1193,7 +1224,7 @@
                     <button type="button" class="boton pequeno amarillo" id="btnNuevaZonaMapa" style="width:auto;">+ Nueva zona</button>
                     <button type="button" class="boton pequeno secundario oculto" id="btnDeshacerPuntoMapa" style="width:auto;">Deshacer último punto</button>
                     <button type="button" class="boton pequeno terciario oculto" id="btnCerrarFormaMapa" style="width:auto;" disabled>Cerrar forma</button>
-                    <button type="button" class="boton pequeno oculto" id="btnCancelarDibujoMapa" style="width:auto; background:#999;">Cancelar</button>
+                    <button type="button" class="boton pequeno secundario oculto" id="btnCancelarDibujoMapa">Cancelar</button>
                     <span class="detalle oculto" id="ayudaDibujoMapa" style="align-self:center;">Toca la imagen para ir agregando los vértices de la zona (mínimo 3).</span>
                 </div>
 
@@ -1297,12 +1328,14 @@
 
     </section>
 
+    </main>
+
 </div>
 
 <!-- ===== PANEL DE DETALLE / EDICIÓN DE UNA ZONA DEL MAPA ===== -->
 <div class="overlay-detalle oculto" id="overlayZonaMapa"></div>
 <div class="panel-detalle" id="panelZonaMapa">
-    <button class="cerrar-panel" id="btnCerrarZonaMapa">✕</button>
+    <button type="button" class="cerrar-panel" id="btnCerrarZonaMapa" aria-label="Cerrar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-x"/></svg></button>
 
     <h2 id="tituloPanelZonaMapa">Nueva zona</h2>
 
@@ -1323,7 +1356,7 @@
 
     <div class="acciones-incidente">
         <button type="button" class="boton pequeno" id="btnGuardarZonaMapa" style="width:auto;">Guardar zona</button>
-        <button type="button" class="boton pequeno secundario oculto" id="btnEliminarZonaMapa" style="width:auto; background:var(--rojo);">Eliminar zona</button>
+        <button type="button" class="boton pequeno peligro oculto" id="btnEliminarZonaMapa">Eliminar zona</button>
     </div>
 
     <div class="mensaje" id="mensajePanelZonaMapa"></div>
@@ -1332,7 +1365,7 @@
 <!-- ===== PANEL DE DETALLE DEL INCIDENTE ===== -->
 <div class="overlay-detalle oculto" id="overlayDetalle"></div>
 <div class="panel-detalle" id="panelDetalle">
-    <button class="cerrar-panel" id="btnCerrarDetalle">✕</button>
+    <button type="button" class="cerrar-panel" id="btnCerrarDetalle" aria-label="Cerrar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-x"/></svg></button>
 
     <div class="badges" id="detalleIncidenteBadges"></div>
     <h2 id="detalleIncidenteCodigo"></h2>
@@ -1377,7 +1410,7 @@
 <!-- ===== PANEL DE DETALLE DEL PERFIL DE UN PARTICIPANTE ===== -->
 <div class="overlay-detalle oculto" id="overlayPerfil"></div>
 <div class="panel-detalle" id="panelPerfil">
-    <button class="cerrar-panel" id="btnCerrarPerfil">✕</button>
+    <button type="button" class="cerrar-panel" id="btnCerrarPerfil" aria-label="Cerrar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-x"/></svg></button>
 
     <div class="badges" id="perfilBadges"></div>
     <h2 id="perfilNombre"></h2>
@@ -1400,6 +1433,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=49" defer></script>
+<script src="scripts/dashboard.js?v=50" defer></script>
 </body>
 </html>

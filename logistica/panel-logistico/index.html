@@ -4,25 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Camp Fest · Logística</title>
-<link rel="stylesheet" href="../assets/style.css?v=7">
+<meta name="theme-color" content="#1A1A1E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../../paneles/base.css?v=1">
+<link rel="stylesheet" href="../assets/style.css?v=8">
 <script src="../../config.js"></script>
 </head>
 <body>
 
-<div class="banner-sin-conexion oculto" id="bannerSinConexion">⚠️ Sin conexión con el servidor — reintentando automáticamente…</div>
+<div class="banner-sin-conexion oculto" id="bannerSinConexion" role="status"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-signal"/></svg> Sin conexión con el servidor. Reintentando automáticamente…</div>
 
 <!-- ===== LOGIN ===== -->
 <div id="pantallaLogin">
     <div class="tarjeta">
         <div class="encabezado-login">
-            <span class="eyebrow">Camp Fest · Logística</span>
-            <h1>Ingreso de participantes</h1>
+            <span class="marca-login"><span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-tent"/></svg></span>Camp Fest · Logística</span>
+            <h1>Inicia sesión para tu turno</h1>
+            <p>Registro de campistas, incidentes y tareas de tu rama.</p>
         </div>
 
         <form id="formLogin">
             <div class="campo">
                 <label for="inputEmail">Correo</label>
-                <input type="email" id="inputEmail" autocomplete="username" required>
+                <input type="email" id="inputEmail" autocomplete="username" spellcheck="false" required>
             </div>
             <div class="campo">
                 <label for="inputPassword">Contraseña</label>
@@ -38,20 +44,22 @@
 <!-- ===== PANEL ===== -->
 <div id="pantallaPanel" class="oculto">
 
-    <div class="barra-superior">
-        <span class="marca">Camp Fest · Logística</span>
-        <div class="barra-superior-acciones">
-            <span class="usuario-actual" id="usuarioActual"></span>
-            <button class="boton pequeno secundario" id="btnVerTour" style="width:auto; padding:10px 14px;" title="Tour guiado">🎓</button>
-            <button class="boton pequeno secundario" id="btnChecklistTurno" style="width:auto; padding:10px 14px;" title="Checklist de turno">📋</button>
-            <button class="boton pequeno secundario" id="btnEncuestaStaff" style="width:auto; padding:10px 14px;" title="Encuesta de satisfacción">📝</button>
-            <button class="boton pequeno secundario" id="btnVerEmergencias" style="width:auto; padding:10px 14px;" title="Plan de Emergencias">🚨</button>
-            <button class="boton pequeno secundario" id="btnAyudaRoles" style="width:auto; padding:10px 14px;">?</button>
-            <button class="boton pequeno" id="btnCerrarSesion">Cerrar sesión</button>
+    <header class="barra-superior">
+        <div class="marca-app">
+            <span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-tent"/></svg></span>
+            <span class="texto-marca"><strong>Camp Fest · Logística</strong><span class="usuario-actual" id="usuarioActual"></span></span>
         </div>
-    </div>
+        <div class="barra-superior-acciones">
+            <button type="button" class="boton pequeno peligro-suave icono" id="btnVerEmergencias" title="Plan de emergencias" aria-label="Plan de emergencias"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-siren"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnChecklistTurno" title="Checklist de turno" aria-label="Checklist de turno"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-list-checks"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnEncuestaStaff" title="Encuesta de satisfacción" aria-label="Encuesta de satisfacción"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-pencil"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnVerTour" title="Tour guiado" aria-label="Tour guiado"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-grad"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnAyudaRoles" title="Qué puede hacer cada rol" aria-label="Qué puede hacer cada rol"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-question"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnCerrarSesion" title="Cerrar sesión" aria-label="Cerrar sesión"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-sign-out"/></svg></button>
+        </div>
+    </header>
 
-    <div class="oculto" id="bannerAlertaExtrema" style="background:#c0392b; color:#fff; padding:12px 16px; text-align:center; font-weight:700;">
+    <div class="banner-critico oculto" id="bannerAlertaExtrema" role="alert">
         <span id="textoBannerAlertaExtrema"></span>
     </div>
 
@@ -135,13 +143,13 @@
     <div class="alertas-barra" id="alertasBarraLogistica"></div>
     <div class="alertas-barra" id="avisosInternosBarra"></div>
 
-    <div class="tabs-modulo">
-        <button class="tab-modulo activo" data-vista="registro">Registro</button>
-        <button class="tab-modulo" data-vista="comunicacion">Comunicación</button>
-        <button class="tab-modulo" data-vista="tareas">Tareas</button>
-        <button class="tab-modulo" data-vista="cronograma">Mi cronograma</button>
-        <button class="tab-modulo" data-vista="materiales">Materiales</button>
-    </div>
+    <nav class="tabs-modulo nav-logistica" aria-label="Secciones del panel">
+        <button type="button" class="tab-modulo activo" data-vista="registro"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-id"/></svg><span>Registro</span></button>
+        <button type="button" class="tab-modulo" data-vista="comunicacion"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-chat"/></svg><span class="largo">Comunicación</span><span class="corto">Reportar</span></button>
+        <button type="button" class="tab-modulo" data-vista="tareas"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-list-checks"/></svg><span>Tareas</span></button>
+        <button type="button" class="tab-modulo" data-vista="cronograma"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-calendar"/></svg><span class="largo">Mi cronograma</span><span class="corto">Agenda</span></button>
+        <button type="button" class="tab-modulo" data-vista="materiales"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-package"/></svg><span>Materiales</span></button>
+    </nav>
 
     <!-- ===== VISTA: REGISTRO ===== -->
     <section id="vistaRegistro">
@@ -157,8 +165,10 @@
             <button type="submit" class="boton pequeno">Buscar</button>
         </form>
 
-        <button type="button" class="boton pequeno secundario" id="btnEscanearQR" style="width:auto; margin-bottom:8px;">📷 Escanear QR de la insignia</button>
-        <button type="button" class="boton pequeno secundario" id="btnEscanearSalida" style="width:auto; margin-bottom:14px;">📤 Escanear código de salida</button>
+        <div class="acciones-escaneo">
+        <button type="button" class="boton secundario" id="btnEscanearQR" ><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-qr"/></svg>Escanear QR de la insignia</button>
+        <button type="button" class="boton secundario" id="btnEscanearSalida" ><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-export"/></svg>Escanear código de salida</button>
+        </div>
 
         <div class="mensaje" id="mensajeBusqueda"></div>
 
@@ -318,7 +328,7 @@
 
         <div class="tarjeta-incidente">
             <h3>Verificaciones operativas</h3>
-            <p style="font-size:12px; color:#777; margin-top:-6px;">Ronda de seguridad, verificación de terreno, infraestructura (extintores/luz/sonido) o manejo de residuos — un registro rápido para que el Centro de Control lo vea.</p>
+            <p style="font-size:12px; color:var(--tinta-3); margin-top:-6px;">Ronda de seguridad, verificación de terreno, infraestructura (extintores/luz/sonido) o manejo de residuos — un registro rápido para que el Centro de Control lo vea.</p>
             <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
                 <button type="button" class="boton pequeno secundario" data-registrar-verificacion="ronda_seguridad" style="width:auto;">Ronda de seguridad</button>
                 <button type="button" class="boton pequeno secundario" data-registrar-verificacion="verificacion_terreno" style="width:auto;">Verificación de terreno</button>
@@ -331,7 +341,7 @@
 
         <div class="tarjeta-incidente">
             <h3>Objetos perdidos</h3>
-            <p style="font-size:12px; color:#777; margin-top:-6px;">Para algo que encontraste suelto (no confiscado en una requisa — eso se registra desde la ficha del participante en Registro).</p>
+            <p style="font-size:12px; color:var(--tinta-3); margin-top:-6px;">Para algo que encontraste suelto (no confiscado en una requisa — eso se registra desde la ficha del participante en Registro).</p>
             <form id="formObjetoPerdido" style="display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; align-items:end;">
                 <input type="text" id="inputDescripcionObjetoPerdido" placeholder="¿Qué encontraste?" style="flex:2; min-width:140px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;" required>
                 <input type="text" id="inputLugarObjetoPerdido" placeholder="¿Dónde? (opcional)" style="flex:1; min-width:120px; padding:6px 8px; border:2px solid #ddd; border-radius:8px;">
@@ -343,7 +353,7 @@
 
         <div class="tarjeta-incidente oculto" id="tarjetaPedirAyuda">
             <h3>Pedir ayuda a otra rama</h3>
-            <p style="font-size:12px; color:#777; margin-top:-6px;">Solo los líderes de rama pueden pedir ayuda a otra rama.</p>
+            <p style="font-size:12px; color:var(--tinta-3); margin-top:-6px;">Solo los líderes de rama pueden pedir ayuda a otra rama.</p>
             <form id="formSolicitud">
                 <div class="campo">
                     <label for="inputRamaDestinoSolicitud">Rama a la que pides ayuda</label>
@@ -554,6 +564,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../scripts/jsQR.js" defer></script>
-<script src="../scripts/dashboard.js?v=33" defer></script>
+<script src="../scripts/dashboard.js?v=34" defer></script>
 </body>
 </html>

@@ -3,221 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verificación de Carta · Camp Fest 2026</title>
+<title>Verificación de carta · Camp Fest</title>
+<meta name="theme-color" content="#FFF7EA">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../paneles/base.css?v=1">
 <style>
-
-:root{
-    --amarillo:#FFC93C;
-    --coral:#FF5D5D;
-    --teal:#1FB6A6;
-    --morado:#5B4B8A;
-    --tinta:#1A1A2E;
-    --crema:#FFF8EC;
-}
-
-*{ box-sizing:border-box; }
-
-body{
-    margin:0;
-    font-family:'Poppins', 'Segoe UI', sans-serif;
-    background:var(--crema);
-    color:var(--tinta);
-    min-height:100vh;
-}
-
-.contenedor{
-    max-width:520px;
-    margin:0 auto;
-    padding:64px 24px 80px;
-}
-
-.encabezado{
-    text-align:center;
-    margin-bottom:32px;
-}
-
-.encabezado .eyebrow{
-    display:inline-block;
-    background:var(--tinta);
-    color:var(--teal);
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    padding:6px 16px;
-    border-radius:999px;
-    margin-bottom:16px;
-}
-
-.encabezado h1{
-    font-size:28px;
-    font-weight:800;
-    margin:0 0 8px;
-}
-
-.encabezado p{
-    font-size:14px;
-    color:#555;
-    margin:0;
-}
-
-.tarjeta{
-    background:white;
-    border:3px solid var(--tinta);
-    border-radius:20px;
-    padding:32px;
-    box-shadow:8px 8px 0 var(--tinta);
-}
-
-.campo-busqueda{
-    display:flex;
-    gap:10px;
-    margin-bottom:8px;
-}
-
+.contenedor{ max-width:520px; margin:0 auto; padding:56px 16px 80px; }
+.encabezado{ margin-bottom:24px; }
+.encabezado .marca-login{ margin-bottom:20px; }
+.encabezado h1{ font-size:28px; font-weight:800; margin:0 0 6px; }
+.encabezado p{ font-size:15px; color:var(--tinta-3); margin:0; }
+.tarjeta{ padding:24px; }
+.campo-busqueda{ display:flex; gap:10px; }
 .campo-busqueda input{
-    flex:1;
-    padding:12px 14px;
-    font-size:15px;
-    font-family:inherit;
-    border:2px solid #ddd;
-    border-radius:10px;
-    background:var(--crema);
-    text-transform:uppercase;
-    letter-spacing:1px;
+    flex:1; min-width:0; min-height:50px; padding:10px 14px;
+    font-size:17px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+    font-variant-numeric:tabular-nums;
+    border:2px solid var(--tinta); border-radius:10px; background:var(--blanco);
 }
-
-.campo-busqueda input:focus{
-    outline:none;
-    border-color:var(--teal);
-    background:white;
+.campo-busqueda input::placeholder{ letter-spacing:.04em; font-weight:500; }
+.campo-busqueda input:focus{ outline:none; box-shadow:0 0 0 3px rgba(255,212,0,.65); }
+.campo-busqueda .boton{ min-height:50px; }
+.ayuda{ margin:10px 0 0; font-size:13px; color:var(--tinta-3); }
+.cargando-texto{ display:none; align-items:center; gap:8px; margin-top:16px; font-size:14px; font-weight:600; color:var(--tinta-2); }
+.cargando-texto.mostrar{ display:flex; }
+.cargando-texto .cf-i{ animation:girar 1s linear infinite; }
+@keyframes girar{ to{ transform:rotate(360deg); } }
+.resultado{ display:none; margin-top:20px; }
+.resultado.mostrar{ display:block; animation:aparecer .22s var(--salida); }
+@keyframes aparecer{ from{ opacity:0; transform:translateY(4px); } }
+.caja{ border-radius:var(--radio); padding:18px; border:2px solid; }
+.resultado.valido .caja{ background:var(--ok-fondo); border-color:var(--ok-texto); }
+.resultado.invalido .caja{ background:var(--error-fondo); border-color:var(--error-texto); }
+.estado-texto{ display:flex; align-items:center; gap:8px; font-size:16px; font-weight:800; margin-bottom:12px; }
+.estado-texto .cf-i{ width:22px; height:22px; }
+.resultado.valido .estado-texto{ color:var(--ok-texto); }
+.resultado.invalido .estado-texto{ color:var(--error-texto); }
+.icono-valido, .icono-invalido{ display:none; }
+.resultado.valido .icono-valido, .resultado.invalido .icono-invalido{ display:inline; }
+.dato{ margin-bottom:10px; }
+.dato:last-child{ margin-bottom:0; }
+.dato .valor{ font-size:18px; font-weight:700; }
+.pie{ margin-top:24px; font-size:12.5px; color:var(--tinta-3); text-align:center; }
+.pie a{ font-weight:600; }
+@media (max-width:420px){
+    .contenedor{ padding-top:32px; }
+    .encabezado h1{ font-size:24px; }
+    .campo-busqueda{ flex-direction:column; }
 }
-
-.campo-busqueda button{
-    padding:12px 20px;
-    font-family:inherit;
-    font-size:14px;
-    font-weight:800;
-    color:white;
-    background:var(--morado);
-    border:2px solid var(--tinta);
-    border-radius:10px;
-    cursor:pointer;
-    white-space:nowrap;
-}
-
-.campo-busqueda button:disabled{
-    opacity:.6;
-    cursor:not-allowed;
-}
-
-.resultado{
-    margin-top:22px;
-    display:none;
-}
-
-.resultado.mostrar{
-    display:block;
-}
-
-.resultado.valido .caja{
-    border:2px solid var(--teal);
-    background:#e2f7f2;
-}
-
-.resultado.invalido .caja{
-    border:2px solid var(--coral);
-    background:#ffeaea;
-}
-
-.caja{
-    border-radius:14px;
-    padding:20px;
-}
-
-.resultado .estado-texto{
-    font-size:13px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.5px;
-    margin-bottom:10px;
-}
-
-.resultado.valido .estado-texto{
-    color:#0f7a67;
-}
-
-.resultado.invalido .estado-texto{
-    color:#c23b3b;
-}
-
-.dato{
-    margin-bottom:8px;
-}
-
-.dato .etiqueta{
-    font-size:11px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.5px;
-    color:var(--morado);
-    display:block;
-    margin-bottom:2px;
-}
-
-.dato .valor{
-    font-size:17px;
-    font-weight:700;
-}
-
-.cargando-texto{
-    text-align:center;
-    font-size:14px;
-    color:#8a6d00;
-    margin-top:16px;
-    display:none;
-}
-
-.cargando-texto.mostrar{
-    display:block;
-}
-
 </style>
 <script src="../config.js"></script>
 </head>
 <body>
 
-<div class="contenedor">
+<main class="contenedor">
 
     <div class="encabezado">
-        <span class="eyebrow">Camp Fest 2026</span>
-        <h1>Verificación de documento</h1>
-        <p>Ingresa el código de verificación que aparece en la carta.</p>
+        <a class="marca-login" href="/" style="color:inherit; text-decoration:none;"><span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-tent"/></svg></span>Camp Fest</a>
+        <h1>Verificación de carta</h1>
+        <p>Comprueba que una carta de Camp Fest es auténtica con el código impreso en ella.</p>
     </div>
 
     <div class="tarjeta">
 
+        <label class="campo" for="inputCodigo" style="display:block; margin-bottom:8px; font-size:12.5px; font-weight:600; color:var(--tinta-2);">Código de verificación</label>
         <div class="campo-busqueda">
-            <input type="text" id="inputCodigo" placeholder="Ej. ABC123XYZ" autocomplete="off">
-            <button id="botonVerificar">Verificar</button>
+            <input type="text" id="inputCodigo" placeholder="Ej. ABC123XYZ" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <button type="button" class="boton" id="botonVerificar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-check-circle"/></svg>Verificar</button>
         </div>
+        <p class="ayuda">Si escaneaste el QR de la carta, el código ya viene escrito.</p>
 
-        <div class="cargando-texto" id="cargando">Consultando...</div>
+        <div class="cargando-texto" id="cargando" role="status"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-refresh"/></svg>Consultando…</div>
 
-        <div class="resultado" id="resultado">
+        <div class="resultado" id="resultado" aria-live="polite">
             <div class="caja">
-                <div class="estado-texto" id="estadoTexto"></div>
+                <div class="estado-texto"><span class="icono-valido"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-check-circle"/></svg></span><span class="icono-invalido"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-x-circle"/></svg></span><span id="estadoTexto"></span></div>
                 <div id="datosParticipante"></div>
             </div>
         </div>
 
     </div>
 
-</div>
+    <p class="pie">¿Dudas sobre una carta? Escribe a la organización desde <a href="/">campfest.online</a>.</p>
+
+</main>
 
 <script>
 
-// Reemplaza esto con la URL real de tu backend en Railway
+// La dirección del backend se define en /config.js
 const API_BASE = window.CAMPFEST_API;
 
 const input = document.getElementById("inputCodigo");

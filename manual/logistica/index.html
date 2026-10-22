@@ -340,10 +340,10 @@ footer.manual-footer {
 
 </style>
 
-<button class="menu-toggle" id="menuToggle">☰ Índice</button>
+<button class="menu-toggle" id="menuToggle"><svg class="cf-i" aria-hidden="true" style="width:1.1em;height:1.1em;fill:currentColor;vertical-align:-.18em"><use href="../../campfest/assets/icons.svg#i-menu"/></svg> Índice</button>
 
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-brand"><span class="mark">🏕️</span><h1>Camp Fest 2026</h1></div>
+  <div class="sidebar-brand"><span class="mark"><svg class="cf-i" aria-hidden="true" style="width:1.1em;height:1.1em;fill:currentColor;vertical-align:-.18em"><use href="../../campfest/assets/icons.svg#i-tent"/></svg></span><h1>Camp Fest 2026</h1></div>
   <p class="sidebar-sub">Manual de uso del Centro de Control y el Panel Logístico — paso a paso, con capturas reales.</p>
 
   <nav>
@@ -403,11 +403,11 @@ footer.manual-footer {
     <li>Abre la dirección de la herramienta que te corresponde.</li>
     <li>Escribe tu <span class="ui">Correo</span> y tu <span class="ui">Contraseña</span> en el formulario de inicio de sesión.</li>
     <li>Pulsa <span class="ui">Iniciar sesión</span>. Si los datos son correctos entras directo al panel; si no, verás el mensaje "Correo o contraseña incorrectos" y puedes intentar de nuevo.</li>
-    <li>Arriba a la derecha siempre verás tu nombre y tu rol (por ejemplo "Mariana Rojas · Admin"). Cuando termines, usa el botón <span class="ui">Cerrar sesión</span> — sobre todo si usas un computador compartido.</li>
+    <li>Siempre verás tu nombre y tu rol (por ejemplo "Mariana Rojas · Admin"): en el Centro de Control, al pie del menú lateral; en el Panel Logístico, en la barra oscura de arriba. Cuando termines, usa <span class="ui">Cerrar sesión</span> (en el Panel Logístico es el ícono de la flecha saliendo, arriba a la derecha) — sobre todo si usas un computador compartido.</li>
   </ol>
   <div class="note">
-    <strong class="label">Botón "?"</strong>
-    En ambas herramientas hay un botón <span class="ui">?</span> junto a "Cerrar sesión" que abre un recordatorio rápido de qué puede hacer cada rol. Es un resumen — este manual es la versión completa.
+    <strong class="label">Ayuda por rol</strong>
+    En el Centro de Control está al pie del menú lateral (<span class="ui">Qué puede hacer cada rol</span>); en el Panel Logístico es el ícono del signo de interrogación de la barra superior. Abre un recordatorio rápido de qué puede hacer cada rol. Es un resumen — este manual es la versión completa.
   </div>
   <div class="note warn">
     <strong class="label">Si ves una franja roja arriba de todo</strong>
@@ -421,10 +421,10 @@ footer.manual-footer {
 
 <section class="part" id="parte-admin">
   <div class="part-header admin">
-    <span class="role-icon">🛠️</span>
+    <span class="role-icon"><svg class="cf-i" aria-hidden="true" style="width:1.1em;height:1.1em;fill:currentColor;vertical-align:-.18em"><use href="../../campfest/assets/icons.svg#i-gear"/></svg></span>
     <div><h2>Administrador — Centro de Control</h2><p>Acceso completo: incidentes, cronograma, inventario, inscripciones, notificaciones y configuración del evento.</p></div>
   </div>
-  <p class="part-intro">Si tu cuenta tiene el rol <strong>Admin</strong>, ves las siete pestañas de arriba: <span class="ui">Panel</span>, <span class="ui">Cronograma</span>, <span class="ui">Inventario</span>, <span class="ui">Inscripciones</span>, <span class="ui">Notificaciones</span>, <span class="ui">Perfiles</span> y <span class="ui">Administración</span>. Si tu cuenta tiene el rol <strong>Control</strong>, ves las mismas pestañas salvo Administración (incluyendo Perfiles, que también es suya), y algunas herramientas de gestión (crear actividades, gestionar inventario, enviar correos masivos) no te aparecen — son exclusivas de Admin y se marcan así en cada sección.</p>
+  <p class="part-intro">Si tu cuenta tiene el rol <strong>Admin</strong>, ves las siete secciones del menú lateral (en celular y tableta, la fila de pestañas de arriba), agrupadas en Operación, Campistas y Sistema: <span class="ui">Panel</span>, <span class="ui">Cronograma</span>, <span class="ui">Inventario</span>, <span class="ui">Inscripciones</span>, <span class="ui">Notificaciones</span>, <span class="ui">Perfiles</span> y <span class="ui">Administración</span>. Si tu cuenta tiene el rol <strong>Control</strong>, ves las mismas pestañas salvo Administración (incluyendo Perfiles, que también es suya), y algunas herramientas de gestión (crear actividades, gestionar inventario, enviar correos masivos) no te aparecen — son exclusivas de Admin y se marcan así en cada sección.</p>
 
   <h3 class="feature" id="admin-panel"><span class="tag admin">Pestaña</span>Panel</h3>
   <p>Es la pantalla de inicio: un resumen de todo el evento en tiempo real, más la herramienta para registrar y dar seguimiento a incidentes. Se actualiza sola cada 7 segundos.</p>
@@ -432,7 +432,7 @@ footer.manual-footer {
   <figure class="screen wide"><img src="capturas/cc_01_panel.png" alt="Vista general de la pestaña Panel"><figcaption>Vista completa de la pestaña Panel: alertas, tarjetas de estadísticas, tabla de incidentes, cola de seguimiento, gráficos y tabla de participantes.</figcaption></figure>
 
   <h4 class="sub">Chips de alerta</h4>
-  <p>Justo debajo de las pestañas aparecen chips como <span class="ui">1 incidentes críticos</span> o <span class="ui">9 participantes sin ingresar</span>. Son clicables: al tocar uno, la tabla de incidentes se filtra automáticamente para mostrarte solo esos casos. Si no hay nada urgente, verás simplemente "Sin alertas activas".</p>
+  <p>Arriba del Panel aparecen chips como <span class="ui">1 incidentes críticos</span> o <span class="ui">9 participantes sin ingresar</span>. Son clicables: al tocar uno, la tabla de incidentes se filtra automáticamente para mostrarte solo esos casos. Si no hay nada urgente, verás simplemente "Sin alertas activas".</p>
 
   <h4 class="sub">Las 4 tarjetas de estadísticas</h4>
   <table class="fields">
@@ -445,15 +445,15 @@ footer.manual-footer {
 
   <h4 class="sub">Buscar por nombre, documento, código, teléfono, carpa o incidente</h4>
   <ol class="steps">
-    <li>Escribe lo que buscas en el campo grande <span class="ui">Buscar por nombre, documento, código, teléfono, carpa o código de incidente…</span> (o pulsa el botón rojo <span class="ui">Buscar</span> de la barra superior para saltar directo ahí).</li>
-    <li>Pulsa <span class="ui">Buscar</span>.</li>
-    <li>Aparece una lista de resultados debajo. Si es un participante, al hacer clic se resalta su fila en la tabla de abajo; si es un incidente, se abre su panel de detalle.</li>
+    <li>Escribe lo que buscas en el buscador de la barra superior (<span class="ui">Buscar persona, documento, carpa o incidente</span>). Está disponible desde cualquier sección; con el teclado, la tecla <span class="ui">/</span> te lleva directo a él.</li>
+    <li>Pulsa <span class="ui">Enter</span>.</li>
+    <li>Aparece una lista de resultados debajo de la barra. Si es un participante, al hacer clic vuelves al Panel y se resalta su fila en la tabla de participantes; si es un incidente, se abre su panel de detalle. <span class="ui">Esc</span> cierra la lista.</li>
   </ol>
 
   <h4 class="sub">Registrar un incidente</h4>
   <p>Este es el formulario que usa todo el equipo (Admin, Control y Logística) para dejar constancia de cualquier situación durante el evento.</p>
   <ol class="steps">
-    <li>Pulsa el botón rojo <span class="ui">Registrar incidente</span> de la barra superior. Se despliega el formulario.</li>
+    <li>Pulsa el botón amarillo <span class="ui">Registrar incidente</span> de la barra superior. Funciona desde cualquier sección: te lleva al Panel y abre el formulario arriba, con plantillas rápidas (malestar leve, objeto perdido, alimentación, convivencia, consulta general).</li>
     <li>Elige la <span class="ui">Categoría</span> (por ejemplo "Emergencia médica" o "Alimentación"). Apenas la eliges, aparece automáticamente la lista de <strong>responsables de esa categoría</strong> — quién de logística la atiende, con teléfono y zona.</li>
     <li>Elige la <span class="ui">Prioridad</span>: baja, media, alta o crítica.</li>
     <li>Opcional: elige la <span class="ui">Zona</span> y escribe el <span class="ui">Lugar específico</span> (ej. "Carpa 4").</li>
@@ -486,7 +486,7 @@ footer.manual-footer {
     <tr><td>Solucionado</td><td><span class="ui">Cerrar caso</span></td><td>Cierra el caso definitivamente con tus observaciones finales.</td></tr>
     <tr><td>Cerrado</td><td><span class="ui">Reabrir (solo administrador)</span></td><td>Vuelve a abrir un caso ya cerrado — solo disponible para el rol Admin.</td></tr>
   </table>
-  <p>El botón <span class="ui">Imprimir</span> abre el diálogo de impresión del navegador con el detalle del incidente. Para cerrar el panel sin hacer nada, pulsa la <span class="ui">✕</span> de la esquina o haz clic fuera del panel.</p>
+  <p>El botón <span class="ui">Imprimir</span> abre el diálogo de impresión del navegador con el detalle del incidente. Para cerrar el panel sin hacer nada, pulsa la <span class="ui">X</span> de la esquina o haz clic fuera del panel.</p>
 
   <h4 class="sub">Cola de seguimiento, actividad reciente y solicitudes internas</h4>
   <p>A la derecha de la tabla, tres bloques que también se actualizan solos:</p>
@@ -500,10 +500,10 @@ footer.manual-footer {
   <p>Cuatro gráficos de barras que se recalculan solos: <strong>Por categoría</strong>, <strong>Por prioridad</strong>, <strong>Por zona</strong> y <strong>Por hora del día</strong> — útiles para ver de un vistazo dónde se están concentrando los problemas.</p>
 
   <h4 class="sub">Tabla de participantes: retirar y salidas libres</h4>
-  <p>Al final de la pestaña Panel, la tabla completa de participantes con columnas <strong>Nombre, Municipio, Carpa, Líder, Ingreso, Alimentación</strong> (cuántas entregas lleva) e <strong>Incidentes activos</strong>.</p>
+  <p>Debajo de los incidentes, en la misma pestaña Panel, está la tabla completa de participantes con columnas <strong>Nombre, Municipio, Carpa, Líder, Ingreso, Alimentación</strong> (cuántas entregas lleva) e <strong>Incidentes activos</strong>.</p>
   <ol class="steps">
     <li>Para marcar que alguien se retiró del evento, pulsa <span class="ui">Marcar retirado</span> en su fila. Aparece una confirmación: "¿Confirmas que este participante se retira del evento?". Al aceptar, queda marcado con la etiqueta roja "Retirado".</li>
-    <li>Si un participante está en salida libre (solo aplica a quienes viven en Bugalagrande, zona urbana), verás la etiqueta "🚶 Salida libre (motivo)" junto a su nombre y el botón <span class="ui">Registrar regreso</span>. Al pulsarlo y confirmar, se cierra su salida libre.</li>
+    <li>Si un participante está en salida libre (solo aplica a quienes viven en Bugalagrande, zona urbana), verás la etiqueta "Salida libre (motivo)" junto a su nombre y el botón <span class="ui">Registrar regreso</span>. Al pulsarlo y confirmar, se cierra su salida libre.</li>
   </ol>
   <div class="note warn"><strong class="label">Marcar retirado no se puede deshacer desde aquí</strong>Piénsalo dos veces antes de confirmar — es una acción pensada para cuando alguien deja el campamento definitivamente.</div>
 
@@ -549,7 +549,7 @@ footer.manual-footer {
   <p>Debajo verás, por líder, qué materiales tiene pendientes de devolver y cuáles ya devolvió.</p>
 
   <h4 class="sub">Analítica de cumplimiento</h4>
-  <p>Al final de Cronograma (solo Admin): un gráfico de <strong>% cumplimiento por rama</strong>, otro de <strong>cuánto ha hecho cada rama</strong> (proporción de tareas completadas), un histograma de <strong>tareas por hora programada</strong>, la lista detallada por rama, y dos listas de personas — <strong>Destacados 🌟</strong> (mejor desempeño a tiempo) y <strong>Necesitan seguimiento ⚠️</strong> (más atrasos).</p>
+  <p>Al final de Cronograma (solo Admin): un gráfico de <strong>% cumplimiento por rama</strong>, otro de <strong>cuánto ha hecho cada rama</strong> (proporción de tareas completadas), un histograma de <strong>tareas por hora programada</strong>, la lista detallada por rama, y dos listas de personas — <strong>Destacados</strong> (mejor desempeño a tiempo) y <strong>Necesitan seguimiento</strong> (más atrasos).</p>
 
   <h3 class="feature" id="admin-inventario"><span class="tag admin">Pestaña</span>Inventario</h3>
   <p>El catálogo completo de materiales del evento: qué hay, cuánto queda disponible, quién tiene qué, y las solicitudes que hace el equipo de logística.</p>
@@ -609,7 +609,7 @@ footer.manual-footer {
   <figure class="screen wide"><img src="capturas/cc_08_inscripcion_detalle.png" alt="Detalle expandido de una inscripción"><figcaption>Detalle expandido de una inscripción, con todos los datos del formulario original.</figcaption></figure>
 
   <h4 class="sub">Correos de confirmación</h4>
-  <p>La columna <span class="ui">Correo confirmación</span> muestra si ya se envió ("✅ Enviado"), si falló ("⚠️ Falló", con el motivo al pasar el cursor) o si no se ha enviado. Solo Admin ve los botones <span class="ui">Enviar prueba</span> (reenvía el correo real a esa persona, con confirmación previa) y <span class="ui">Editar correo</span> (para corregir una dirección mal escrita).</p>
+  <p>La columna <span class="ui">Correo confirmación</span> muestra si ya se envió ("Enviado"), si falló ("Falló", con el motivo al pasar el cursor) o si no se ha enviado. Solo Admin ve los botones <span class="ui">Enviar prueba</span> (reenvía el correo real a esa persona, con confirmación previa) y <span class="ui">Editar correo</span> (para corregir una dirección mal escrita).</p>
   <div class="note admin">
     <strong class="label">Solo administrador — envío masivo y prueba libre</strong>
     El botón <span class="ui">Enviar correo a todos los pendientes</span> manda el correo de confirmación a todos los que aún no lo han recibido — pide confirmación explícita antes de ejecutarse. Más abajo, el bloque <span class="ui">Probar contenido del correo</span> te deja enviar una versión de prueba (Pendiente / Admitido / No admitido) a cualquier dirección, sin afectar ninguna inscripción real — útil para revisar cómo se ve el correo antes de un envío masivo.
@@ -738,7 +738,7 @@ footer.manual-footer {
 
 <section class="part" id="parte-logistica">
   <div class="part-header logistica">
-    <span class="role-icon">🎪</span>
+    <span class="role-icon"><svg class="cf-i" aria-hidden="true" style="width:1.1em;height:1.1em;fill:currentColor;vertical-align:-.18em"><use href="../../campfest/assets/icons.svg#i-clipboard"/></svg></span>
     <div><h2>Logística — Panel Logístico</h2><p>Registro de participantes en el evento, comunicación con Centro de Control, tareas de tu rama y materiales.</p></div>
   </div>
   <p class="part-intro">Todo el equipo de logística — seas <strong>miembro</strong> o <strong>líder</strong> de tu rama — entra por esta misma herramienta y ve las cinco pestañas: <span class="ui">Registro</span>, <span class="ui">Comunicación</span>, <span class="ui">Tareas</span>, <span class="ui">Mi cronograma</span> y <span class="ui">Materiales</span>. Esta parte del manual describe lo que ve <strong>cualquier miembro</strong>; todo lo que además desbloquea ser líder está en la <a href="#lider-intro">sección de líder de rama</a> más abajo.</p>
@@ -756,7 +756,7 @@ footer.manual-footer {
   <h4 class="sub">Escanear el QR de la insignia (más rápido en la llegada masiva)</h4>
   <p>Cada campista tiene, en la insignia que descarga desde su portal, un código QR con su código CF. En vez de escribirlo a mano, puedes escanearlo directo:</p>
   <ol class="steps">
-    <li>Pulsa <span class="ui">📷 Escanear QR de la insignia</span>.</li>
+    <li>Pulsa <span class="ui">Escanear QR de la insignia</span>.</li>
     <li>El navegador te va a pedir permiso para usar la cámara — acéptalo la primera vez.</li>
     <li>Apunta la cámara al QR que el campista te muestra en su celular. En cuanto lo reconoce, la cámara se cierra sola y la búsqueda por código se dispara automáticamente — no hace falta tocar nada más.</li>
   </ol>
@@ -865,7 +865,7 @@ footer.manual-footer {
 
 <section class="part" id="parte-lider">
   <div class="part-header lider">
-    <span class="role-icon">⭐</span>
+    <span class="role-icon"><svg class="cf-i" aria-hidden="true" style="width:1.1em;height:1.1em;fill:currentColor;vertical-align:-.18em"><use href="../../campfest/assets/icons.svg#i-star"/></svg></span>
     <div><h2>Líder de rama</h2><p>Todo lo de Logística, más las herramientas para coordinar a tu equipo.</p></div>
   </div>
   <p class="part-intro" id="lider-intro">Si tu cuenta tiene <span class="ui">Rol en la rama = Líder</span> (lo configura un administrador en <a href="#admin-administracion">Administración → Usuarios</a>), entras al mismo Panel Logístico que el resto de tu equipo, pero con bloques adicionales que solo tú ves. Esta sección cubre <strong>únicamente esas funciones extra</strong> — todo lo demás ya está explicado en la <a href="#parte-logistica">sección de Logística</a>.</p>

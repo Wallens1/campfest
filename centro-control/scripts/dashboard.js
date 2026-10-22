@@ -9,6 +9,11 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const POLLING_MS = 7000;
 
+// Íconos del sprite compartido (Phosphor bold) — reemplazan a los emojis.
+const SPRITE_ICONOS = "../campfest/assets/icons.svg";
+const icono = (nombre) => `<svg class="cf-i" aria-hidden="true"><use href="${SPRITE_ICONOS}#i-${nombre}"/></svg>`;
+const punto = (tipo) => `<span class="punto ${tipo}" aria-hidden="true"></span>`;
+
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const CATEGORIAS = [
@@ -251,7 +256,7 @@ async function cargarResponsablesPorCategoria(categoria, contenedor) {
         contenedor.innerHTML = responsables.map((r) => `
             <div class="fila-conteo">
                 <span class="etiqueta">
-                    ${r.rol_en_rama === "lider" ? "⭐" : "•"} ${r.nombre} · ${r.rama_nombre}
+                    ${r.rol_en_rama === "lider" ? icono("star") : "•"} ${r.nombre} · ${r.rama_nombre}
                 </span>
                 <span class="valor">${r.telefono || "sin teléfono"} · ${r.zona ? humanizar(r.zona) : "sin zona"}</span>
             </div>
@@ -323,10 +328,19 @@ document.querySelectorAll(".tab-modulo:not([data-subpestana-admin])").forEach((t
 
     tab.addEventListener("click", () => {
 
-        document.querySelectorAll(".tab-modulo:not([data-subpestana-admin])").forEach((t) => t.classList.remove("activo"));
+        document.querySelectorAll(".tab-modulo:not([data-subpestana-admin])").forEach((t) => {
+            t.classList.remove("activo");
+            t.removeAttribute("aria-current");
+        });
         tab.classList.add("activo");
+        tab.setAttribute("aria-current", "page");
 
         const vista = tab.dataset.vista;
+
+        document.getElementById("tituloVista").textContent = tab.textContent.trim();
+        document.getElementById("descripcionVista").textContent = tab.dataset.descripcion || "";
+        document.getElementById("resultadosGlobales").classList.add("oculto");
+        window.scrollTo({ top: 0 });
 
         document.getElementById("vistaPanel").classList.toggle("oculto", vista !== "panel");
         document.getElementById("vistaCronograma").classList.toggle("oculto", vista !== "cronograma");
@@ -377,6 +391,39 @@ document.querySelectorAll(".tab-modulo:not([data-subpestana-admin])").forEach((t
 
     });
 
+});
+
+// Lleva a una vista si no es la activa (las acciones de la barra superior
+// funcionan desde cualquier vista, pero sus tarjetas viven en el Panel).
+function irAVista(vista) {
+    const tab = document.querySelector(`.tab-modulo[data-vista="${vista}"]`);
+    if (tab && !tab.classList.contains("activo")) tab.click();
+}
+
+// "/" enfoca la búsqueda global; Esc cierra resultados y el menú de exportar.
+document.addEventListener("keydown", (evento) => {
+    const enCampo = evento.target instanceof Element && evento.target.closest("input, textarea, select, [contenteditable]");
+    if (evento.key === "/" && !enCampo && !document.getElementById("dashboard").classList.contains("oculto")) {
+        evento.preventDefault();
+        document.getElementById("inputBusquedaGlobal").focus();
+    }
+    if (evento.key === "Escape") {
+        document.getElementById("resultadosGlobales").classList.add("oculto");
+        document.getElementById("menuExportar").removeAttribute("open");
+    }
+});
+
+document.getElementById("inputBusquedaGlobal").addEventListener("input", (evento) => {
+    if (!evento.target.value.trim()) document.getElementById("resultadosGlobales").classList.add("oculto");
+});
+
+document.querySelectorAll("#menuExportar .boton-plano").forEach((boton) => {
+    boton.addEventListener("click", () => document.getElementById("menuExportar").removeAttribute("open"));
+});
+
+document.addEventListener("click", (evento) => {
+    const menu = document.getElementById("menuExportar");
+    if (menu.open && !menu.contains(evento.target)) menu.removeAttribute("open");
 });
 
 // ==========================
@@ -758,7 +805,7 @@ async function cargarEstadoEvento() {
         const banner = document.getElementById("bannerAlertaExtrema");
 
         if (estado.alertaActiva) {
-            document.getElementById("textoBannerAlertaExtrema").textContent = `🚨 ALERTA EXTREMA: ${estado.alertaMensaje}`;
+            document.getElementById("textoBannerAlertaExtrema").textContent = `ALERTA EXTREMA: ${estado.alertaMensaje}`;
             banner.classList.remove("oculto");
         } else {
             banner.classList.add("oculto");
@@ -782,7 +829,7 @@ async function cargarSolicitudesInternas() {
             : tareas.slice(0, 20).map((t) => `
                 <div class="feed-item">
                     <span class="hora">${formatearHora(t.creado_en)}</span>
-                    ${mapaRamas[t.rama_origen_id] || "—"} → ${t.rama_id ? (mapaRamas[t.rama_id] || "—") : "🆘 todas las ramas"} · ${t.titulo}
+                    ${mapaRamas[t.rama_origen_id] || "—"} → ${t.rama_id ? (mapaRamas[t.rama_id] || "—") : "todas las ramas"} · ${t.titulo}
                     ${t.cantidad_personas ? ` (${t.checks_count || 0}/${t.cantidad_personas})` : ""}
                     <div class="usuario"><span class="estado-badge ${t.estado}">${humanizar(t.estado)}</span></div>
                 </div>
@@ -879,7 +926,7 @@ function revisarIncidentesCriticosNuevos(alertasCriticasYAltas) {
 
     const banner = document.getElementById("bannerCritico");
     document.getElementById("textoBannerCritico").textContent =
-        `🚨 ${nuevos.length} incidente${nuevos.length > 1 ? "s" : ""} crítico${nuevos.length > 1 ? "s" : ""} nuevo${nuevos.length > 1 ? "s" : ""}: ${nuevos.map((i) => i.codigo).join(", ")}`;
+        `${nuevos.length} incidente${nuevos.length > 1 ? "s" : ""} crítico${nuevos.length > 1 ? "s" : ""} nuevo${nuevos.length > 1 ? "s" : ""}: ${nuevos.map((i) => i.codigo).join(", ")}`;
     banner.classList.remove("oculto");
 
 }
@@ -905,7 +952,7 @@ document.getElementById("btnVerUsosClaveExtrema").addEventListener("click", asyn
             : usos.map((u) => `
                 <div class="fila-conteo">
                     <span class="etiqueta">${new Date(u.creado_en).toLocaleString("es-CO")} · ${u.usuario_nombre || "—"}</span>
-                    <span class="valor">${humanizar(u.accion)} — ${u.exito ? "✅ correcto" : "❌ clave incorrecta"} (${u.ip || "—"})</span>
+                    <span class="valor">${humanizar(u.accion)} — ${u.exito ? "correcto" : "clave incorrecta"} (${u.ip || "—"})</span>
                 </div>
             `).join("");
 
@@ -1496,8 +1543,11 @@ const mensajeIncidente = document.getElementById("mensajeIncidente");
 let participanteVinculadoId = null;
 
 btnAbrirFormIncidente.addEventListener("click", () => {
-    tarjetaFormIncidente.classList.toggle("oculto");
-    tarjetaFormIncidente.scrollIntoView({ behavior: "smooth" });
+    const enOtraVista = !document.querySelector('.tab-modulo[data-vista="panel"]').classList.contains("activo");
+    irAVista("panel");
+    tarjetaFormIncidente.classList.toggle("oculto", enOtraVista ? false : !tarjetaFormIncidente.classList.contains("oculto"));
+    tarjetaFormIncidente.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!tarjetaFormIncidente.classList.contains("oculto")) document.getElementById("inputCategoria").focus({ preventScroll: true });
     // Antes quedaba vacío y dependía de que el operador lo llenara a mano;
     // si lo olvidaba, el incidente quedaba con reportado_por = null, sin
     // ninguna pista de quién lo registró. Se precarga con el nombre de quien
@@ -1515,11 +1565,11 @@ btnAbrirFormIncidente.addEventListener("click", () => {
 // clasificado no deberían tratarse igual solo porque alguien marcó la misma
 // etiqueta de prioridad.
 const PROTOCOLOS_POR_CATEGORIA = {
-    emergencia_medica: "🏥 Protocolo médico: notifica de inmediato al responsable de Emergencias. No muevas a la persona si hay sospecha de lesión grave — quédate con ella hasta que llegue el apoyo.",
-    accidente: "⚠️ Protocolo de accidente: verifica el estado de la persona antes que nada. No la muevas si hay dolor intenso o sospecha de fractura — notifica a Emergencias.",
-    seguridad: "🚨 Protocolo de seguridad: separa a las personas involucradas sin confrontarlas directamente. Avisa al responsable de Seguridad de inmediato, no intentes resolverlo solo.",
-    convivencia: "🗣️ Escucha a ambas partes por separado antes de escalar. No tomes partido frente al grupo en el momento.",
-    disciplina: "🗣️ Escucha a ambas partes por separado antes de escalar. No tomes partido frente al grupo en el momento."
+    emergencia_medica: "Protocolo médico: notifica de inmediato al responsable de Emergencias. No muevas a la persona si hay sospecha de lesión grave — quédate con ella hasta que llegue el apoyo.",
+    accidente: "Protocolo de accidente: verifica el estado de la persona antes que nada. No la muevas si hay dolor intenso o sospecha de fractura — notifica a Emergencias.",
+    seguridad: "Protocolo de seguridad: separa a las personas involucradas sin confrontarlas directamente. Avisa al responsable de Seguridad de inmediato, no intentes resolverlo solo.",
+    convivencia: "Escucha a ambas partes por separado antes de escalar. No tomes partido frente al grupo en el momento.",
+    disciplina: "Escucha a ambas partes por separado antes de escalar. No tomes partido frente al grupo en el momento."
 };
 
 function actualizarNotaProtocolo(categoria) {
@@ -1746,11 +1796,11 @@ function renderizarTablaParticipantes(lista) {
 
     cuerpo.innerHTML = lista.map((p) => `
         <tr data-id="${p.id}">
-            <td>${p.nombre}${p.retirado ? ' <span class="badge rojo">Retirado</span>' : ""}${p.salidaLibreActiva ? ` <span class="badge neutro">🚶 Salida libre (${p.salidaLibreActiva.motivo})</span>` : ""}</td>
+            <td>${p.nombre}${p.retirado ? ' <span class="badge rojo">Retirado</span>' : ""}${p.salidaLibreActiva ? ` <span class="badge neutro">${icono("walk")} Salida libre (${p.salidaLibreActiva.motivo})</span>` : ""}</td>
             <td>${p.municipio || "—"}</td>
             <td>${p.carpa_asignada || "—"}</td>
             <td>${p.es_lider_carpa ? "Sí" : "No"}</td>
-            <td>${p.ingreso_registrado ? "🟢 Ingresó" : "🔴 Pendiente"}</td>
+            <td>${p.ingreso_registrado ? `${punto("ok")}Ingresó` : `${punto("pendiente")}Pendiente`}</td>
             <td>${p.entregas_alimentacion} entregas</td>
             <td>${p.incidentes_activos}</td>
             <td>
@@ -1804,6 +1854,7 @@ async function marcarRetirado(id) {
 
 function resaltarParticipante(id) {
 
+    irAVista("panel");
     document.getElementById("resultadosGlobales").classList.add("oculto");
 
     const fila = document.querySelector(`#filasParticipantes tr[data-id="${id}"]`);
@@ -1811,7 +1862,7 @@ function resaltarParticipante(id) {
     document.querySelector('.tarjeta:has(#filasParticipantes)')?.scrollIntoView({ behavior: "smooth" });
 
     if (fila) {
-        fila.style.outline = "3px solid var(--teal)";
+        fila.style.outline = "3px solid var(--morado-vivo)";
         setTimeout(() => { fila.style.outline = "none"; }, 2500);
     }
 
@@ -1823,7 +1874,7 @@ function resaltarParticipante(id) {
 // dashboard (cada POLLING_MS) mientras la pestaña Perfiles esté abierta.
 // ==========================
 
-const ICONOS_CRONOLOGIA_CAMPISTAS = { logro: "🏆", perfil_actualizado: "✏️" };
+const ICONOS_CRONOLOGIA_CAMPISTAS = { logro: icono("trophy"), perfil_actualizado: icono("pencil") };
 
 async function cargarCronologiaCampistas() {
 
@@ -1888,7 +1939,7 @@ document.getElementById("formBuscarPerfil").addEventListener("submit", async (ev
         contenedor.innerHTML = participantes.map((p) => `
             <div class="resultado-item" data-id="${p.id}">
                 <div><div class="nombre">${p.nombre}</div><div class="detalle">${p.codigo} · ${p.documento} · ${p.municipio || ""}</div></div>
-                <span class="badge neutro">🏆 ${(p.logros_desbloqueados || []).length}</span>
+                <span class="badge neutro">${icono("trophy")} ${(p.logros_desbloqueados || []).length}</span>
             </div>
         `).join("");
 
@@ -1918,14 +1969,14 @@ function cerrarPanelPerfil() {
 // tipo real de historial_eventos, se usa solo para los eventos armados a
 // partir de la lista de incidentes del participante (ver abrirPerfil).
 const ICONOS_CRONOLOGIA = {
-    ingreso: "🟢",
-    asignacion_carpa: "⛺",
-    alimentacion: "🍽️",
-    salida_libre: "🚶",
-    retiro: "🔴",
-    logro: "🏆",
-    perfil_actualizado: "✏️",
-    incidente: "🚨"
+    ingreso: icono("check-circle"),
+    asignacion_carpa: icono("tent"),
+    alimentacion: icono("food"),
+    salida_libre: icono("walk"),
+    retiro: icono("x-circle"),
+    logro: icono("trophy"),
+    perfil_actualizado: icono("pencil"),
+    incidente: icono("siren")
 };
 
 async function abrirPerfil(id) {
@@ -1942,8 +1993,8 @@ async function abrirPerfil(id) {
 
         document.getElementById("perfilBadges").innerHTML = [
             `<span class="badge ${p.estado_admision === "admitido" ? "verde" : "neutro"}">${humanizar(p.estado_admision)}</span>`,
-            p.ingreso_registrado ? `<span class="badge verde">🟢 Ingresó</span>` : `<span class="badge neutro">Sin ingreso</span>`,
-            p.carpa_asignada ? `<span class="badge neutro">⛺ ${p.carpa_asignada}</span>` : "",
+            p.ingreso_registrado ? `<span class="badge verde">${icono("check-circle")} Ingresó</span>` : `<span class="badge neutro">Sin ingreso</span>`,
+            p.carpa_asignada ? `<span class="badge neutro">${icono("tent")} ${p.carpa_asignada}</span>` : "",
             p.retirado ? `<span class="badge rojo">Retirado</span>` : ""
         ].join("");
 
@@ -1958,7 +2009,7 @@ async function abrirPerfil(id) {
 
         const logros = p.logros_desbloqueados || [];
         document.getElementById("perfilLogros").innerHTML = logros.length > 0
-            ? logros.map((idLogro) => `<span class="badge neutro">🏆 ${humanizar(idLogro)}</span>`).join("")
+            ? logros.map((idLogro) => `<span class="badge neutro">${icono("trophy")} ${humanizar(idLogro)}</span>`).join("")
             : `<p class="detalle">Todavía no ha desbloqueado ningún logro.</p>`;
 
         const eventos = [
@@ -2033,7 +2084,7 @@ async function actualizarAvisoOtrosViendo(id) {
         const aviso = document.getElementById("avisoOtrosViendoIncidente");
 
         if (otrosViendo.length > 0) {
-            aviso.textContent = `👀 ${otrosViendo.join(", ")} también ${otrosViendo.length > 1 ? "están viendo" : "está viendo"} este caso ahora.`;
+            aviso.textContent = `${otrosViendo.join(", ")} también ${otrosViendo.length > 1 ? "están viendo" : "está viendo"} este caso ahora.`;
             aviso.classList.remove("oculto");
         } else {
             aviso.classList.add("oculto");
@@ -2404,7 +2455,7 @@ document.getElementById("formImportarParticipantes").addEventListener("submit", 
         // que sea la misma persona con el documento mal digitado en algún
         // lado (no lo detectaría el chequeo por documento exacto).
         const duplicadosPrevia = (previa.posiblesDuplicados || []).length > 0
-            ? `\n\n⚠️ ${previa.posiblesDuplicados.length} posible(s) duplicado(s) por nombre + fecha de nacimiento/teléfono:\n`
+            ? `\n\nAtención: ${previa.posiblesDuplicados.length} posible(s) duplicado(s) por nombre + fecha de nacimiento/teléfono:\n`
                 + previa.posiblesDuplicados.slice(0, 5).map((d) => `· ${d.nombre} (fila ${d.fila}) — parecido a "${d.posibleDuplicadoDe}" ya registrado`).join("\n")
             : "";
 
@@ -3230,7 +3281,7 @@ async function abrirDetalleActividad(id) {
                 : resumen.map((r) => `
                     <div class="fila-conteo" style="margin-top:4px;">
                         <span class="etiqueta">${r.rama}</span>
-                        <span class="valor">✅ ${r.aTiempo} a tiempo · ⏰ ${r.tarde} tarde · ⬜ ${r.pendientes} pendientes</span>
+                        <span class="valor">${r.aTiempo} a tiempo · ${r.tarde} tarde · ${r.pendientes} pendientes</span>
                     </div>
                 `).join("");
         } catch (error) {
@@ -3375,7 +3426,7 @@ async function abrirDetalleTareaEnActividad(tareaId) {
             ? `<p class="detalle">Sin subtareas asignadas.</p>`
             : subtareas.map((s) => `
                 <div class="fila-conteo" style="margin-top:4px;">
-                    <span class="etiqueta">${s.estado === "hecha" ? "✅" : "⬜"} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}</span>
+                    <span class="etiqueta">${s.estado === "hecha" ? icono("check-circle") : punto("pendiente")} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}</span>
                 </div>
             `).join("");
 
@@ -3695,7 +3746,7 @@ function renderizarListaInventario(materiales) {
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
                     <strong>${m.nombre}</strong>
                     <span style="display:flex; gap:6px; flex-wrap:wrap;">
-                        ${m.stockBajo ? `<span class="badge rojo">⚠️ Stock bajo</span>` : ""}
+                        ${m.stockBajo ? `<span class="badge rojo">${icono("alert")} Stock bajo</span>` : ""}
                         ${m.es_consumible ? `<span class="badge neutro">Consumible</span>` : ""}
                         <span class="badge ${m.disponible > 0 ? "verde" : "rojo"}">${m.disponible}/${m.cantidad_total} disponibles</span>
                     </span>
@@ -4215,7 +4266,7 @@ function actualizarAvisoEdadInscripciones(participantes) {
     const nombres = fueraDeRango.slice(0, 5).map((p) => `${p.nombre} (${p.edad} años)`).join(", ");
     const extra = fueraDeRango.length > 5 ? ` y ${fueraDeRango.length - 5} más` : "";
 
-    aviso.innerHTML = `⚠️ ${fueraDeRango.length} inscripción${fueraDeRango.length === 1 ? "" : "es"} fuera del rango de edad permitido (${EDAD_MINIMA_PERMITIDA}–${EDAD_MAXIMA_PERMITIDA} años): ${nombres}${extra}.`;
+    aviso.innerHTML = `${icono("alert")} ${fueraDeRango.length} inscripción${fueraDeRango.length === 1 ? "" : "es"} fuera del rango de edad permitido (${EDAD_MINIMA_PERMITIDA}–${EDAD_MAXIMA_PERMITIDA} años): ${nombres}${extra}.`;
     aviso.classList.add("mostrar");
 
 }
@@ -4235,7 +4286,7 @@ function renderizarTablaInscripciones(participantes) {
     cuerpo.innerHTML = participantes.map((p) => `
         <tr data-fila-inscripcion="${p.id}">
             <td style="white-space:nowrap;">${p.creado_en ? new Date(p.creado_en).toLocaleString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}</td>
-            <td>${p.nombre}${p.esMenorDeEdad ? ' <span class="badge neutro">Menor</span>' : ""}${edadFueraDeRango(p.edad) ? ' <span class="badge rojo">⚠ Edad fuera de rango</span>' : ""}</td>
+            <td>${p.nombre}${p.esMenorDeEdad ? ' <span class="badge neutro">Menor</span>' : ""}${edadFueraDeRango(p.edad) ? ' <span class="badge rojo">Edad fuera de rango</span>' : ""}</td>
             <td>${p.documento}</td>
             <td>${p.municipio}${p.municipio === "Otro" && p.municipio_otro ? ` (${p.municipio_otro})` : ""}</td>
             <td>${p.edad ?? "—"}</td>
@@ -4251,7 +4302,7 @@ function renderizarTablaInscripciones(participantes) {
             </td>
             <td>
                 <span class="badge ${p.correo_confirmacion_estado === "enviado" ? "verde" : p.correo_confirmacion_estado === "fallo" ? "rojo" : "neutro"}" ${p.correo_confirmacion_estado === "fallo" && p.correo_confirmacion_error ? `title="${p.correo_confirmacion_error.replace(/"/g, "&quot;")}"` : ""}>
-                    ${p.correo_confirmacion_estado === "enviado" ? "✅ Enviado" : p.correo_confirmacion_estado === "fallo" ? "⚠️ Falló" : "No enviado"}
+                    ${p.correo_confirmacion_estado === "enviado" ? `${punto("ok")}Enviado` : p.correo_confirmacion_estado === "fallo" ? `${punto("error")}Falló` : "No enviado"}
                 </span>
                 ${!mostrandoEliminadosInscripcion && p.correo_confirmacion_estado !== "enviado" && esAdmin
                     ? `<button class="boton pequeno secundario" data-enviar-correo="${p.id}" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;">Enviar prueba</button>`
@@ -4388,7 +4439,7 @@ async function cargarInfraccionesInscripcion(id) {
 
         const banner = totalInfracciones >= 3 && !participante.retirado ? `
             <div class="alerta-chip critica" style="display:flex; flex-direction:column; gap:8px; align-items:flex-start; cursor:default; margin-top:8px;">
-                <span>⚠️ Este participante llegó a ${totalInfracciones} infracciones — se debe firmar el acta de expulsión mutua.</span>
+                <span>${icono("alert")} Este participante llegó a ${totalInfracciones} infracciones — se debe firmar el acta de expulsión mutua.</span>
                 <div style="display:flex; gap:8px;">
                     <button class="boton pequeno secundario" id="btnDescargarActaInscripcion-${id}" style="width:auto;">Descargar acta (PDF)</button>
                     ${puedeConfirmar ? `<button class="boton pequeno" id="btnConfirmarExpulsionInscripcion-${id}" style="width:auto;">Confirmar expulsión firmada</button>` : ""}
@@ -4743,7 +4794,7 @@ function renderizarListaMapasCandidatos() {
                 <span>${mapa.zonas.length} zona(s)</span>
             </div>
             <button type="button" class="boton pequeno secundario" data-renombrar-mapa="${mapa.id}" style="width:auto; padding:6px 10px; font-size:11px;">Renombrar</button>
-            <button type="button" class="boton pequeno" data-eliminar-mapa="${mapa.id}" style="width:auto; padding:6px 10px; font-size:11px; background:var(--rojo);">Eliminar</button>
+            <button type="button" class="boton pequeno peligro" data-eliminar-mapa="${mapa.id}">Eliminar</button>
         </div>
     `).join("");
 
@@ -5168,7 +5219,7 @@ async function cargarDirectorioYReferencia() {
                     <span>${c.telefono || "sin teléfono"} · ${c.funcion || ""}</span>
                 </div>
                 <button type="button" class="boton pequeno secundario" data-editar-contacto="${c.id}" style="width:auto; padding:6px 10px; font-size:11px;">Editar</button>
-                <button type="button" class="boton pequeno" data-eliminar-contacto="${c.id}" style="width:auto; padding:6px 10px; font-size:11px; background:var(--rojo);">Eliminar</button>
+                <button type="button" class="boton pequeno peligro" data-eliminar-contacto="${c.id}">Eliminar</button>
             </div>
         `).join("");
 
@@ -5306,7 +5357,7 @@ async function cargarTurnosCentinela() {
                         <span>${t.asignadosNombres.join(", ") || "sin asignados"}</span>
                     </div>
                     <span class="badge ${t.finalizado ? "verde" : t.iniciado ? "neutro" : "rojo"}">${t.finalizado ? "Finalizado" : t.iniciado ? "En curso" : "Sin iniciar"}</span>
-                    <button type="button" class="boton pequeno" data-eliminar-turno="${t.id}" style="width:auto; padding:6px 10px; font-size:11px; background:var(--rojo);">Eliminar</button>
+                    <button type="button" class="boton pequeno peligro" data-eliminar-turno="${t.id}">Eliminar</button>
                 </div>
             `).join("");
 

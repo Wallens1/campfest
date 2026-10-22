@@ -39,6 +39,11 @@ const formLogin = document.getElementById("formLogin");
 const btnLogin = document.getElementById("btnLogin");
 const mensajeLogin = document.getElementById("mensajeLogin");
 
+// Íconos del sprite compartido (Phosphor bold) — reemplazan a los emojis.
+const SPRITE_ICONOS = "../../campfest/assets/icons.svg";
+const icono = (nombre) => `<svg class="cf-i" aria-hidden="true"><use href="${SPRITE_ICONOS}#i-${nombre}"/></svg>`;
+const punto = (tipo) => `<span class="punto ${tipo}" aria-hidden="true"></span>`;
+
 const usuarioActual = document.getElementById("usuarioActual");
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 
@@ -306,7 +311,7 @@ async function cargarAvisosInternos() {
 
         contenedor.innerHTML = avisos.map((a) => `
             <div class="alerta-chip" data-aviso-interno="${a.id}">
-                <span>🔔 ${a.mensaje}</span>
+                <span>${icono("bell")} ${a.mensaje}</span>
             </div>
         `).join("");
 
@@ -333,7 +338,7 @@ async function cargarEstadoEvento() {
         const banner = document.getElementById("bannerAlertaExtrema");
 
         if (estado.alertaActiva) {
-            document.getElementById("textoBannerAlertaExtrema").textContent = `🚨 ALERTA EXTREMA: ${estado.alertaMensaje}`;
+            document.getElementById("textoBannerAlertaExtrema").textContent = `ALERTA EXTREMA: ${estado.alertaMensaje}`;
             banner.classList.remove("oculto");
         } else {
             banner.classList.add("oculto");
@@ -416,7 +421,7 @@ document.getElementById("btnCerrarAyudaRoles").addEventListener("click", () => {
 // explicando (con un resplandor + el resto de la pantalla oscurecido) y un
 // cuadro de texto que flota al lado suyo, en vez de un modal genérico
 // centrado. Se muestra solo una vez por dispositivo/navegador (no hay nada
-// que sincronizar con el servidor), y se puede volver a abrir con 🎓. Al
+// que sincronizar con el servidor), y se puede volver a abrir con el botón del birrete. Al
 // terminar (o saltar), todo vuelve exactamente a como estaba: se quita el
 // resaltado, se borra cualquier texto de ejemplo que se haya puesto, y se
 // vuelve a la pestaña donde estaba el usuario antes de empezar.
@@ -427,7 +432,7 @@ const PASOS_TOUR = [
     // ===== Bienvenida =====
     {
         titulo: "Bienvenido al Panel Logístico",
-        texto: "Este tour recorre TODO el panel, sección por sección — resaltando cada botón real de la pantalla cuando está visible. Si algo depende de tener un participante seleccionado o de que seas líder de tu rama, te lo explica igual aunque no lo veas resaltado en este momento. Puedes saltarlo cuando quieras y volver a verlo con el botón 🎓.",
+        texto: "Este tour recorre TODO el panel, sección por sección — resaltando cada botón real de la pantalla cuando está visible. Si algo depende de tener un participante seleccionado o de que seas líder de tu rama, te lo explica igual aunque no lo veas resaltado en este momento. Puedes saltarlo cuando quieras y volver a verlo con el botón del birrete.",
         selector: null
     },
 
@@ -440,25 +445,25 @@ const PASOS_TOUR = [
     },
     {
         titulo: "Este mismo botón: el tour",
-        texto: "El 🎓 abre este tour guiado cuando quieras repasarlo — la primera vez se abre solo, después de eso solo aparece si lo pulsas.",
+        texto: "El botón del birrete abre este tour guiado cuando quieras repasarlo — la primera vez se abre solo, después de eso solo aparece si lo pulsas.",
         selector: "#btnVerTour",
         vista: null
     },
     {
         titulo: "Checklist de turno",
-        texto: "El 📋 abre un checklist con dos listas de chequeo — \"Al empezar el turno\" y \"Antes de irte\" — para no olvidar nada. Se guarda solo en tu celular y se reinicia cada día; no es un registro del sistema.",
+        texto: "El botón de la lista abre un checklist con dos listas de chequeo — \"Al empezar el turno\" y \"Antes de irte\" — para no olvidar nada. Se guarda solo en tu celular y se reinicia cada día; no es un registro del sistema.",
         selector: "#btnChecklistTurno",
         vista: null
     },
     {
         titulo: "Encuesta de satisfacción (staff)",
-        texto: "El 📝 abre tu propia encuesta de satisfacción como parte del equipo — organización, herramientas, comunicación, carga de trabajo. Puedes reenviarla si quieres actualizar tus respuestas.",
+        texto: "El botón del lápiz abre tu propia encuesta de satisfacción como parte del equipo — organización, herramientas, comunicación, carga de trabajo. Puedes reenviarla si quieres actualizar tus respuestas.",
         selector: "#btnEncuestaStaff",
         vista: null
     },
     {
         titulo: "Plan de Emergencias",
-        texto: "El 🚨 abre el directorio institucional (Policía, Bomberos, Cruz Roja, Hospital...) y las rutas de actuación paso a paso — ábrelo rápido si pasa algo real.",
+        texto: "El botón rojo de la sirena abre el directorio institucional (Policía, Bomberos, Cruz Roja, Hospital...) y las rutas de actuación paso a paso — ábrelo rápido si pasa algo real.",
         selector: "#btnVerEmergencias",
         vista: null
     },
@@ -568,7 +573,7 @@ const PASOS_TOUR = [
     },
     {
         titulo: "Salida final del evento",
-        texto: "Es la contraparte del ingreso, al terminar el camp. Ahora exige que el participante ya haya completado su encuesta de satisfacción — si no la completó, este botón se bloquea y te lo avisa. Lo más rápido para registrar la salida es escanear su código (📤, ya lo vimos) en vez de usar este botón manual, que es más bien un respaldo por si el escaneo falla.",
+        texto: "Es la contraparte del ingreso, al terminar el camp. Ahora exige que el participante ya haya completado su encuesta de satisfacción — si no la completó, este botón se bloquea y te lo avisa. Lo más rápido para registrar la salida es escanear su código («Escanear código de salida», ya lo vimos) en vez de usar este botón manual, que es más bien un respaldo por si el escaneo falla.",
         selector: "#bloqueSalidaEvento",
         vista: "registro"
     },
@@ -698,7 +703,7 @@ const PASOS_TOUR = [
     // ===== Cierre =====
     {
         titulo: "¡Listo, ya viste todo el panel!",
-        texto: "Repasaste las 5 pestañas completas, la ficha del participante entera, y todos los botones de la barra superior. Puedes volver a ver este tour cuando quieras con el botón 🎓 de arriba.",
+        texto: "Repasaste las 5 pestañas completas, la ficha del participante entera, y todos los botones de la barra superior. Puedes volver a ver este tour cuando quieras con el botón del birrete de arriba.",
         selector: null
     }
 
@@ -1532,7 +1537,7 @@ async function confirmarSalidaEscaneada(codigo) {
             body: JSON.stringify({ codigo })
         });
 
-        mostrarMensaje(mensajeEscanerSalida, `✅ Salida registrada: ${resultado.nombre}`, "ok");
+        mostrarMensaje(mensajeEscanerSalida, `Salida registrada: ${resultado.nombre}`, "ok");
 
     } catch (error) {
         mostrarMensaje(mensajeEscanerSalida, error.message, "fallo");
@@ -1602,7 +1607,7 @@ function renderizarFicha(datos) {
     actualizarMensajeParticipanteVinculado();
 
     tituloAlimentacion.textContent = `Alimentación (${entregasRealizadas}/${totalServicios})`
-        + (participante.tiene_restricciones_alimentarias ? ` — ⚠️ ${participante.restricciones_alimentarias_detalle || "restricción alimentaria"}` : "");
+        + (participante.tiene_restricciones_alimentarias ? ` — ${participante.restricciones_alimentarias_detalle || "restricción alimentaria"}` : "");
     renderizarAlimentacion(servicios, entregas);
 
     renderizarSalidaEvento(participante, encuestaCompletada);
@@ -1614,8 +1619,8 @@ function renderizarFicha(datos) {
 function renderizarBadges(participante, entregasRealizadas, totalServicios) {
 
     const ingresoBadge = participante.ingreso_registrado
-        ? `<span class="badge verde">🟢 Ingresó</span>`
-        : `<span class="badge rojo">🔴 Pendiente de ingreso</span>`;
+        ? `<span class="badge verde">${icono("check-circle")} Ingresó</span>`
+        : `<span class="badge rojo">Pendiente de ingreso</span>`;
 
     const alimentacionBadge = `<span class="badge neutro">${entregasRealizadas}/${totalServicios} entregas</span>`;
 
@@ -1623,8 +1628,8 @@ function renderizarBadges(participante, entregasRealizadas, totalServicios) {
 
     const liderBadge = `<span class="badge neutro">Líder de carpa: ${participante.es_lider_carpa ? "Sí" : "No"}</span>`;
 
-    const retiradoBadge = participante.retirado ? `<span class="badge rojo">⚠️ Retirado</span>` : "";
-    const alimentacionEspecialBadge = participante.tiene_restricciones_alimentarias ? `<span class="badge rojo">🍽️ Alimentación especial</span>` : "";
+    const retiradoBadge = participante.retirado ? `<span class="badge rojo">${icono("alert")} Retirado</span>` : "";
+    const alimentacionEspecialBadge = participante.tiene_restricciones_alimentarias ? `<span class="badge rojo">${icono("food")} Alimentación especial</span>` : "";
 
     badges.innerHTML = retiradoBadge + ingresoBadge + alimentacionBadge + carpaBadge + liderBadge + alimentacionEspecialBadge;
 
@@ -1810,7 +1815,7 @@ function renderizarInfracciones(infracciones, totalInfracciones, participante) {
         alerta.classList.remove("oculto");
         alerta.innerHTML = `
             <div class="alerta-chip" style="display:flex; flex-direction:column; gap:8px; align-items:flex-start; cursor:default;">
-                <span>⚠️ Este participante llegó a ${totalInfracciones} infracciones — se debe firmar el acta de expulsión mutua.</span>
+                <span>${icono("alert")} Este participante llegó a ${totalInfracciones} infracciones — se debe firmar el acta de expulsión mutua.</span>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button class="boton pequeno secundario" id="btnDescargarActaExpulsion" style="width:auto;">Descargar acta (PDF)</button>
                     ${puedeConfirmar ? `<button class="boton pequeno" id="btnConfirmarExpulsion" style="width:auto;">Confirmar expulsión firmada</button>` : ""}
@@ -1949,7 +1954,7 @@ function renderizarSalidaEvento(participante, encuestaCompletada) {
     }
 
     if (!participante.salida_evento_registrada && !encuestaCompletada) {
-        bloque.innerHTML = `<p class="detalle" style="color:var(--coral); font-weight:600;">⚠️ Todavía no completó la encuesta de satisfacción — es obligatoria antes de poder registrar su salida. Lo más rápido es escanear su código de salida cuando la termine (📤 arriba).</p>`;
+        bloque.innerHTML = `<p class="detalle" style="color:var(--coral); font-weight:600;">${icono("alert")} Todavía no completó la encuesta de satisfacción — es obligatoria antes de poder registrar su salida. Lo más rápido es escanear su código de salida cuando la termine (botón «Escanear código de salida»).</p>`;
         return;
     }
 
@@ -2242,7 +2247,7 @@ document.getElementById("inputCategoria").addEventListener("change", async (even
             : responsables.map((r) => `
                 <div class="incidente-mini">
                     <div>
-                        <span class="codigo">${r.rol_en_rama === "lider" ? "⭐" : "•"} ${r.nombre}</span>
+                        <span class="codigo">${r.rol_en_rama === "lider" ? icono("star") : "•"} ${r.nombre}</span>
                         <div class="descripcion">${r.rama_nombre}</div>
                     </div>
                     <div class="descripcion">${r.telefono || "sin teléfono"} · ${r.zona ? humanizar(r.zona) : "sin zona"}</div>
@@ -2594,7 +2599,7 @@ async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
                 : subtareas.map((s) => `
                     <div class="fila-conteo">
                         <span class="nombre-fila-conteo">
-                            ${s.estado === "hecha" ? "✅" : "⬜"} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}
+                            ${s.estado === "hecha" ? icono("check-circle") : punto("pendiente")} ${s.titulo}${s.asignado_a_nombre ? ` · ${s.asignado_a_nombre}` : ""}
                         </span>
                         ${s.estado === "pendiente" && puedeMarcarSubtarea(s) ? `<button class="boton pequeno" data-hecha-subtarea="${s.id}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar hecha</button>` : ""}
                     </div>
