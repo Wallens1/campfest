@@ -123,3 +123,26 @@
     el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reclamar(); } });
   });
 })();
+
+/* Aviso de cookies: el sitio solo guarda lo necesario (sesión del portal,
+   logros, preferencias), así que no hay nada opcional que aceptar; se
+   informa una vez y se recuerda durante 12 meses. */
+(function () {
+  var CLAVE = 'cf_aviso_cookies';
+  try {
+    var visto = Number(localStorage.getItem(CLAVE) || 0);
+    if (visto && Date.now() - visto < 365 * 24 * 60 * 60 * 1000) return;
+  } catch (e) { return; }
+  var enlace = document.querySelector('a[href$="campfest/politica-de-cookies/"]');
+  if (!enlace) return;
+  var aviso = document.createElement('div');
+  aviso.className = 'cf-aviso-cookies';
+  aviso.setAttribute('role', 'region');
+  aviso.setAttribute('aria-label', 'Aviso de cookies');
+  aviso.innerHTML = '<p>Este sitio no usa cookies de publicidad ni de seguimiento. Solo guarda en tu navegador lo necesario para tu sesión y tus logros. <a href="' + enlace.getAttribute('href') + '">Más información</a></p><button type="button">Entendido</button>';
+  aviso.querySelector('button').addEventListener('click', function () {
+    try { localStorage.setItem(CLAVE, String(Date.now())); } catch (e) {}
+    aviso.remove();
+  });
+  document.body.appendChild(aviso);
+})();

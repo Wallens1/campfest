@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://campfest-api-production.up.railway.app https://*.up.railway.app https://api.campfest.online https://lazarmjxajhdjvuhtzcl.supabase.co wss://lazarmjxajhdjvuhtzcl.supabase.co; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mi portal · Camp Fest Bugalagrande 2027</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='14' cy='14' r='11' fill='%23FF2E8B' stroke='%231A1A1E' stroke-width='3'/%3E%3Cpath d='M22 18l7 12H15z' fill='%23FFD400' stroke='%231A1A1E' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E">
@@ -301,6 +303,7 @@
     </div>
   </div>
   <div class="cf-footer-legal">
+    <nav class="cf-footer-links-legales" aria-label="Documentos legales"><a href="../../campfest/politica-de-datos/">Tratamiento de datos</a><a href="../../campfest/aviso-de-privacidad/">Aviso de privacidad</a><a href="../../campfest/politica-de-cookies/">Cookies</a><a href="../../campfest/terminos-y-condiciones/">Términos</a></nav>
     <span>© 2026 Camp Fest Bugalagrande. Organizado en Bugalagrande, Valle del Cauca.</span>
     <span>Iniciativa juvenil amparada en la Ley 1622 de 2013 y la Ley 1885 de 2018.</span>
   </div>
@@ -365,6 +368,11 @@
 <script src="qrcode.min.js"></script>
 <script src="../assets/mapa-evento.js"></script>
 <script>
+// Escapa texto que viene del servidor antes de meterlo en HTML.
+function esc(valor) {
+  return String(valor).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+}
+
   // Iconos del set propio (../assets/icons.svg) para el HTML que arma el JS.
   function ic(nombre, tamano) {
     var estilo = tamano ? ' style="width:' + tamano + '; height:' + tamano + '"' : "";
@@ -539,7 +547,7 @@
       } else {
         contenedor.innerHTML = resultado.actividades.map(function (a) {
           var hora = new Date(a.hora_inicio).toLocaleString("es-CO", { day: "2-digit", month: "short", hour: "numeric", minute: "2-digit" });
-          return '<div class="cf-item-itinerario"><strong>' + hora + "</strong>, " + a.titulo + (a.espacio_usado ? " (" + a.espacio_usado + ")" : "") + "</div>";
+          return '<div class="cf-item-itinerario"><strong>' + hora + "</strong>, " + esc(a.titulo) + (a.espacio_usado ? " (" + esc(a.espacio_usado) + ")" : "") + "</div>";
         }).join("");
       }
       desbloquearLogro("vio_itinerario_real");
@@ -743,7 +751,7 @@
       } else {
         contenedor.innerHTML = resultado.anuncios.map(function (a) {
           var fechaHora = new Date(a.creado_en).toLocaleString("es-CO", { day: "2-digit", month: "short", hour: "numeric", minute: "2-digit" });
-          return '<div class="cf-item-aviso"><strong>' + fechaHora + ":</strong> " + a.mensaje + "</div>";
+          return '<div class="cf-item-aviso"><strong>' + fechaHora + ":</strong> " + esc(a.mensaje) + "</div>";
         }).join("");
       }
       desbloquearLogro("vio_avisos");

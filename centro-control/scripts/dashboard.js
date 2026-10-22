@@ -5652,3 +5652,29 @@ document.getElementById("formNuevoAliado").addEventListener("submit", async (eve
 // ==========================
 
 verificarSesion();
+
+// ==========================
+// Cierre de sesión por inactividad: los paneles muestran datos de salud y
+// contacto de menores, y a veces se usan en equipos compartidos. Tras 30
+// minutos sin actividad la sesión se cierra sola.
+// ==========================
+
+const INACTIVIDAD_MAX_MS = 30 * 60 * 1000;
+let ultimaActividad = Date.now();
+
+["pointerdown", "keydown", "scroll", "touchstart"].forEach((tipo) => {
+    document.addEventListener(tipo, () => { ultimaActividad = Date.now(); }, { passive: true });
+});
+
+setInterval(async () => {
+    const enSesion = document.getElementById("pantallaLogin").classList.contains("oculto");
+    if (!enSesion || Date.now() - ultimaActividad < INACTIVIDAD_MAX_MS) return;
+    ultimaActividad = Date.now();
+    await supabaseClient.auth.signOut();
+    location.replace(`${location.pathname}?sesion=inactiva`);
+}, 60 * 1000);
+
+if (new URLSearchParams(location.search).get("sesion") === "inactiva") {
+    mostrarMensaje(document.getElementById("mensajeLogin"), "Tu sesión se cerró por inactividad. Vuelve a iniciar sesión.", "fallo");
+    history.replaceState(null, "", location.pathname);
+}
