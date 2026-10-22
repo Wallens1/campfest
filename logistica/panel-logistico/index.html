@@ -8,19 +8,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="../../paneles/base.css?v=1">
-<link rel="stylesheet" href="../assets/style.css?v=8">
+<link rel="stylesheet" href="../../paneles/base.css?v=2">
+<link rel="stylesheet" href="../assets/style.css?v=9">
 <script src="../../config.js"></script>
 </head>
 <body>
 
-<div class="banner-sin-conexion oculto" id="bannerSinConexion" role="status"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-signal"/></svg> Sin conexión con el servidor. Reintentando automáticamente…</div>
+<div class="banner-sin-conexion oculto" id="bannerSinConexion" role="status"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-signal"/></svg> Sin conexión con el servidor. Reintentando automáticamente…</div>
 
 <!-- ===== LOGIN ===== -->
 <div id="pantallaLogin">
     <div class="tarjeta">
         <div class="encabezado-login">
-            <span class="marca-login"><span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-tent"/></svg></span>Camp Fest · Logística</span>
+            <span class="marca-login"><span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-tent"/></svg></span>Camp Fest · Logística</span>
             <h1>Inicia sesión para tu turno</h1>
             <p>Registro de campistas, incidentes y tareas de tu rama.</p>
         </div>
@@ -46,16 +46,16 @@
 
     <header class="barra-superior">
         <div class="marca-app">
-            <span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-tent"/></svg></span>
+            <span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-tent"/></svg></span>
             <span class="texto-marca"><strong>Camp Fest · Logística</strong><span class="usuario-actual" id="usuarioActual"></span></span>
         </div>
         <div class="barra-superior-acciones">
-            <button type="button" class="boton pequeno peligro-suave icono" id="btnVerEmergencias" title="Plan de emergencias" aria-label="Plan de emergencias"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-siren"/></svg></button>
-            <button type="button" class="boton pequeno secundario icono" id="btnChecklistTurno" title="Checklist de turno" aria-label="Checklist de turno"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-list-checks"/></svg></button>
-            <button type="button" class="boton pequeno secundario icono" id="btnEncuestaStaff" title="Encuesta de satisfacción" aria-label="Encuesta de satisfacción"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-pencil"/></svg></button>
-            <button type="button" class="boton pequeno secundario icono" id="btnVerTour" title="Tour guiado" aria-label="Tour guiado"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-grad"/></svg></button>
-            <button type="button" class="boton pequeno secundario icono" id="btnAyudaRoles" title="Qué puede hacer cada rol" aria-label="Qué puede hacer cada rol"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-question"/></svg></button>
-            <button type="button" class="boton pequeno secundario icono" id="btnCerrarSesion" title="Cerrar sesión" aria-label="Cerrar sesión"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-sign-out"/></svg></button>
+            <button type="button" class="boton pequeno peligro-suave icono" id="btnVerEmergencias" title="Plan de emergencias" aria-label="Plan de emergencias"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-siren"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnChecklistTurno" title="Checklist de turno" aria-label="Checklist de turno"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-list-checks"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnEncuestaStaff" title="Encuesta de satisfacción" aria-label="Encuesta de satisfacción"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-pencil"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnVerTour" title="Tour guiado" aria-label="Tour guiado"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-grad"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnAyudaRoles" title="Qué puede hacer cada rol" aria-label="Qué puede hacer cada rol"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-question"/></svg></button>
+            <button type="button" class="boton pequeno secundario icono" id="btnCerrarSesion" title="Cerrar sesión" aria-label="Cerrar sesión"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-sign-out"/></svg></button>
         </div>
     </header>
 
@@ -144,11 +144,11 @@
     <div class="alertas-barra" id="avisosInternosBarra"></div>
 
     <nav class="tabs-modulo nav-logistica" aria-label="Secciones del panel">
-        <button type="button" class="tab-modulo activo" data-vista="registro"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-id"/></svg><span>Registro</span></button>
-        <button type="button" class="tab-modulo" data-vista="comunicacion"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-chat"/></svg><span class="largo">Comunicación</span><span class="corto">Reportar</span></button>
-        <button type="button" class="tab-modulo" data-vista="tareas"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-list-checks"/></svg><span>Tareas</span></button>
-        <button type="button" class="tab-modulo" data-vista="cronograma"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-calendar"/></svg><span class="largo">Mi cronograma</span><span class="corto">Agenda</span></button>
-        <button type="button" class="tab-modulo" data-vista="materiales"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-package"/></svg><span>Materiales</span></button>
+        <button type="button" class="tab-modulo activo" data-vista="registro"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-id"/></svg><span>Registro</span></button>
+        <button type="button" class="tab-modulo" data-vista="comunicacion"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-chat"/></svg><span class="largo">Comunicación</span><span class="corto">Reportar</span></button>
+        <button type="button" class="tab-modulo" data-vista="tareas"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-list-checks"/></svg><span>Tareas</span></button>
+        <button type="button" class="tab-modulo" data-vista="cronograma"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-calendar"/></svg><span class="largo">Mi cronograma</span><span class="corto">Agenda</span></button>
+        <button type="button" class="tab-modulo" data-vista="materiales"><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-package"/></svg><span>Materiales</span></button>
     </nav>
 
     <!-- ===== VISTA: REGISTRO ===== -->
@@ -166,8 +166,8 @@
         </form>
 
         <div class="acciones-escaneo">
-        <button type="button" class="boton secundario" id="btnEscanearQR" ><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-qr"/></svg>Escanear QR de la insignia</button>
-        <button type="button" class="boton secundario" id="btnEscanearSalida" ><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg#i-export"/></svg>Escanear código de salida</button>
+        <button type="button" class="boton secundario" id="btnEscanearQR" ><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-qr"/></svg>Escanear QR de la insignia</button>
+        <button type="button" class="boton secundario" id="btnEscanearSalida" ><svg class="cf-i" aria-hidden="true"><use href="../../campfest/assets/icons.svg?v=2#i-export"/></svg>Escanear código de salida</button>
         </div>
 
         <div class="mensaje" id="mensajeBusqueda"></div>
@@ -422,6 +422,8 @@
                 <div class="campo">
                     <label for="inputMiembroObservacion">Integrante</label>
                     <select id="inputMiembroObservacion" required></select>
+                    <button type="button" class="boton pequeno secundario" id="btnFichaMiembro" style="margin-top:8px;">Ver ficha de desempeño</button>
+                    <div class="oculto" id="fichaDesempenoMiembro" style="margin-top:10px;"></div>
                 </div>
                 <div class="campo">
                     <label for="inputTipoObservacion">Tipo</label>
@@ -442,6 +444,8 @@
 
         <div class="tarjeta-incidente">
             <h3>Mis observaciones</h3>
+            <button type="button" class="boton pequeno secundario" id="btnMiFichaDesempeno" style="margin-bottom:10px;">Ver mi desempeño</button>
+            <div class="oculto" id="miFichaDesempeno" style="margin-bottom:12px;"></div>
             <div id="listaObservaciones"></div>
         </div>
 
@@ -564,6 +568,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../scripts/jsQR.js" defer></script>
-<script src="../scripts/dashboard.js?v=34" defer></script>
+<script src="../scripts/dashboard.js?v=35" defer></script>
 </body>
 </html>

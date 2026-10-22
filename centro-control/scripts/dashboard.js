@@ -10,7 +10,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const POLLING_MS = 7000;
 
 // Íconos del sprite compartido (Phosphor bold) — reemplazan a los emojis.
-const SPRITE_ICONOS = "../campfest/assets/icons.svg";
+const SPRITE_ICONOS = "../campfest/assets/icons.svg?v=2";
 const icono = (nombre) => `<svg class="cf-i" aria-hidden="true"><use href="${SPRITE_ICONOS}#i-${nombre}"/></svg>`;
 const punto = (tipo) => `<span class="punto ${tipo}" aria-hidden="true"></span>`;
 
@@ -85,6 +85,34 @@ function minutosDesde(fechaIso) {
 
 function minutosHasta(fechaIso) {
     return Math.round((new Date(fechaIso).getTime() - Date.now()) / 60000);
+}
+
+// 45 min · 3 h 12 min · 2 d 4 h — antes todo salía en minutos (miles, en
+// casos de días anteriores).
+function escaparAtributo(texto) {
+    return String(texto).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+function formatearDuracion(minutos) {
+    const m = Math.max(0, Math.round(minutos));
+    if (m < 60) return `${m} min`;
+    const horas = Math.floor(m / 60);
+    if (horas < 24) return `${horas} h${m % 60 ? ` ${m % 60} min` : ""}`;
+    const dias = Math.floor(horas / 24);
+    return `${dias} d${horas % 24 ? ` ${horas % 24} h` : ""}`;
+}
+
+// Un incidente resuelto deja de contar: su tiempo es el que tardó en cerrarse.
+function tiempoIncidente(incidente) {
+    if (incidente.cerrado_en) {
+        return `Resuelto en ${formatearDuracion((new Date(incidente.cerrado_en) - new Date(incidente.creado_en)) / 60000)}`;
+    }
+    return formatearDuracion(minutosDesde(incidente.creado_en));
+}
+
+function textoProximoSeguimiento(fechaIso) {
+    const restante = minutosHasta(fechaIso);
+    return restante <= 0 ? `Vencido hace ${formatearDuracion(-restante)}` : `En ${formatearDuracion(restante)}`;
 }
 
 function llenarSelect(select, valores, etiquetaTodos) {
@@ -196,7 +224,8 @@ async function descargarArchivo(ruta, nombreArchivo) {
     const respuesta = await peticionApi(ruta, { binario: true });
 
     if (!respuesta.ok) {
-        alert("No se pudo generar el archivo");
+        const cuerpo = await respuesta.json().catch(() => null);
+        alert(cuerpo?.mensaje || "No se pudo generar el archivo");
         return;
     }
 
@@ -1355,8 +1384,8 @@ async function cargarIncidentes() {
                     <td><span class="prioridad-badge ${incidente.prioridad}">${humanizar(incidente.prioridad)}</span></td>
                     <td><span class="estado-badge ${incidente.estado}">${humanizar(incidente.estado)}</span></td>
                     <td>${mapaOperadores[incidente.responsable_id] || "—"}</td>
-                    <td>${minutosDesde(incidente.creado_en)} min</td>
-                    <td>${abierto && incidente.proximo_seguimiento_en ? `${minutosHasta(incidente.proximo_seguimiento_en)} min` : "—"}</td>
+                    <td>${tiempoIncidente(incidente)}</td>
+                    <td>${abierto && incidente.proximo_seguimiento_en ? textoProximoSeguimiento(incidente.proximo_seguimiento_en) : "—"}</td>
                 </tr>
             `;
 
@@ -1396,7 +1425,7 @@ async function cargarColaSeguimiento() {
                         ${incidente.codigo}
                     </span>
                     <span class="valor" style="color:${vencido ? "var(--rojo)" : "inherit"};">
-                        ${restante === null ? "—" : vencido ? `Vencido hace ${Math.abs(restante)} min` : `${restante} min`}
+                        ${restante === null ? "—" : textoProximoSeguimiento(incidente.proximo_seguimiento_en)}
                     </span>
                 </div>
             `;
@@ -1989,6 +2018,12 @@ async function abrirPerfil(id) {
         const { participante: p, historial, incidentes } = await peticionApi(`/api/centro-control/participantes/${id}`);
 
         document.getElementById("perfilNombre").textContent = p.nombre;
+
+        const botonCertificado = document.getElementById("btnCertificadoPerfil");
+        const puedeCertificar = p.ingreso_registrado && !p.retirado;
+        botonCertificado.disabled = !puedeCertificar;
+        botonCertificado.title = puedeCertificar ? "" : "Disponible cuando el participante haya ingresado al evento y no esté retirado";
+        botonCertificado.onclick = () => descargarArchivo(`/api/centro-control/participantes/${id}/certificado`, `Certificado-Participacion-${p.codigo}.pdf`);
         document.getElementById("perfilDocumento").textContent = `${p.codigo} · Documento: ${p.documento}`;
 
         document.getElementById("perfilBadges").innerHTML = [
@@ -2156,8 +2191,8 @@ async function abrirIncidente(id) {
             <div class="dato"><span class="etiqueta">Lugar</span><span class="valor">${incidente.lugar || "—"}</span></div>
             <div class="dato"><span class="etiqueta">Reportado por</span><span class="valor">${incidente.reportado_por || "—"}</span></div>
             <div class="dato"><span class="etiqueta">Responsable</span><span class="valor">${mapaOperadores[incidente.responsable_id] || "—"}</span></div>
-            <div class="dato"><span class="etiqueta">Registrado</span><span class="valor">${formatearHora(incidente.creado_en)}</span></div>
-            <div class="dato"><span class="etiqueta">Cerrado</span><span class="valor">${formatearHora(incidente.cerrado_en)}</span></div>
+            <div class="dato"><span class="etiqueta">Registrado</span><span class="valor">${formatearFechaHora(incidente.creado_en)}</span></div>
+            <div class="dato"><span class="etiqueta">${incidente.cerrado_en ? "Resuelto" : "Abierto hace"}</span><span class="valor">${incidente.cerrado_en ? `${formatearFechaHora(incidente.cerrado_en)} · ${tiempoIncidente(incidente).replace("Resuelto en ", "")}` : tiempoIncidente(incidente)}</span></div>
         `;
 
         document.getElementById("bitacoraIncidente").innerHTML = seguimientos.map((s) => `
@@ -2187,30 +2222,57 @@ function renderizarAccionesIncidente(incidente) {
         // Antes eran 3 botones separados que llamaban al mismo endpoint con
         // distinto "resultado" — un solo selector + un botón hace lo mismo
         // con menos ruido visual.
+        // El backend ya aceptaba un nuevo responsable al escalar o dar
+        // seguimiento, pero el panel nunca lo enviaba: escalar no reasignaba.
+        const opcionesResponsable = Object.entries(mapaOperadores)
+            .filter(([idOperador]) => idOperador !== incidente.responsable_id)
+            .map(([idOperador, nombre]) => `<option value="${idOperador}">${nombre}</option>`).join("");
+
         contenedor.innerHTML = `
-            <select id="selectResultadoSeguimiento" style="margin-bottom:8px; width:100%;">
-                <option value="pendiente">Registrar seguimiento (sigue igual)</option>
-                <option value="escalado">Escalar caso</option>
-                <option value="solucionado">Marcar solucionado</option>
-            </select>
+            <div class="campo" style="width:100%; margin-bottom:8px;">
+                <label for="selectResultadoSeguimiento">Qué pasó</label>
+                <select id="selectResultadoSeguimiento">
+                    <option value="pendiente">Registrar seguimiento (sigue abierto)</option>
+                    <option value="escalado">Escalar caso</option>
+                    <option value="solucionado">Marcar solucionado</option>
+                </select>
+            </div>
+            <div class="campo" style="width:100%; margin-bottom:8px;" id="campoNuevoResponsable">
+                <label for="selectNuevoResponsable">Responsable</label>
+                <select id="selectNuevoResponsable">
+                    <option value="">Mantener: ${mapaOperadores[incidente.responsable_id] || "sin responsable"}</option>
+                    ${opcionesResponsable}
+                </select>
+            </div>
             <button class="boton pequeno" id="btnGuardarSeguimiento">Guardar</button>
         `;
 
+        const selectResultado = document.getElementById("selectResultadoSeguimiento");
+        selectResultado.addEventListener("change", () => {
+            document.getElementById("campoNuevoResponsable").classList.toggle("oculto", selectResultado.value === "solucionado");
+        });
+
         document.getElementById("btnGuardarSeguimiento").addEventListener("click", () => {
-            registrarSeguimientoIncidente(incidente.id, document.getElementById("selectResultadoSeguimiento").value);
+            const nuevoResponsableId = selectResultado.value === "solucionado" ? null : document.getElementById("selectNuevoResponsable").value || null;
+            registrarSeguimientoIncidente(incidente.id, selectResultado.value, nuevoResponsableId);
         });
 
         return;
     }
 
+    const esAdmin = perfilActual?.rol === "admin";
+    const botonReabrir = esAdmin ? `<button class="boton pequeno secundario" id="btnReabrirIncidente">Reabrir caso</button>` : "";
+
     if (incidente.estado === "solucionado") {
-        contenedor.innerHTML = `<button class="boton pequeno" id="btnCerrarIncidente">Cerrar caso</button>`;
+        // Antes un caso "solucionado" por error no se podía reabrir: solo
+        // se podía cerrar. Ahora el admin puede devolverlo a atención.
+        contenedor.innerHTML = `<button class="boton pequeno" id="btnCerrarIncidente">Cerrar caso</button>${botonReabrir}`;
         document.getElementById("btnCerrarIncidente").addEventListener("click", () => cerrarIncidente(incidente.id));
-        return;
+    } else {
+        contenedor.innerHTML = botonReabrir || `<p class="detalle" style="margin:0;">Caso cerrado. Solo un administrador puede reabrirlo.</p>`;
     }
 
-    contenedor.innerHTML = `<button class="boton pequeno secundario" id="btnReabrirIncidente">Reabrir (solo administrador)</button>`;
-    document.getElementById("btnReabrirIncidente").addEventListener("click", () => reabrirIncidente(incidente.id));
+    document.getElementById("btnReabrirIncidente")?.addEventListener("click", () => reabrirIncidente(incidente.id));
 
 }
 
@@ -2249,7 +2311,7 @@ function mostrarMensajeConDeshacer(mensajeEl, texto, id, deshacer, alTerminar) {
 
 }
 
-async function registrarSeguimientoIncidente(id, resultado) {
+async function registrarSeguimientoIncidente(id, resultado, nuevoResponsableId = null) {
 
     const observaciones = document.getElementById("inputObservacionesSeguimiento").value.trim();
     const mensaje = document.getElementById("mensajeDetalleIncidente");
@@ -2258,7 +2320,7 @@ async function registrarSeguimientoIncidente(id, resultado) {
 
         const respuesta = await peticionApi(`/api/incidentes/${id}/seguimiento`, {
             method: "POST",
-            body: JSON.stringify({ resultado, observaciones })
+            body: JSON.stringify({ resultado, observaciones, nuevoResponsableId })
         });
 
         document.getElementById("inputObservacionesSeguimiento").value = "";
@@ -3383,11 +3445,25 @@ function renderizarTareasPorRama(tareas) {
                 <div class="detalle">
                     Ramas: ${nombresRamas}${t.hora_programada ? ` · Listo a las ${formatearFechaHora(t.hora_programada)}` : ""}
                 </div>
+                ${perfilActual?.rol === "admin" && t.estado === "pendiente" ? `<div><button type="button" class="boton pequeno secundario" data-cancelar-tarea="${t.id}">Cancelar tarea</button></div>` : ""}
                 <div class="oculto" id="detalleTareaActividad-${t.id}"></div>
             </div>
         `;
 
     }).join("");
+
+    contenedor.querySelectorAll("[data-cancelar-tarea]").forEach((boton) => {
+        boton.addEventListener("click", async (evento) => {
+            evento.stopPropagation();
+            if (!confirm("¿Cancelar esta tarea? Las ramas ya no la verán como pendiente.")) return;
+            try {
+                await peticionApi(`/api/tareas/${boton.dataset.cancelarTarea}/cancelar`, { method: "POST" });
+                await abrirDetalleActividad(actividadAbiertaId);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    });
 
     contenedor.querySelectorAll("[data-tarea-actividad]").forEach((fila) => {
         fila.addEventListener("click", (evento) => {
@@ -3757,8 +3833,20 @@ function renderizarListaInventario(materiales) {
                 ${m.tenedores.length > 0 ? `<div style="font-size:12px; color:#777; margin-top:2px;">Tienen: ${m.tenedores.map((t) => `${t.liderNombre} (${t.cantidad})`).join(", ")}</div>` : ""}
                 <div style="margin-top:8px; display:flex; gap:8px;">
                     <button class="boton pequeno secundario" data-ver-historial-material="${m.id}" style="width:auto; padding:6px 12px; font-size:11px;">Ver historial</button>
-                    ${perfilActual?.rol === "admin" ? `<button class="boton pequeno secundario" data-eliminar-material="${m.id}" style="width:auto; padding:6px 12px; font-size:11px;">Eliminar</button>` : ""}
+                    ${perfilActual?.rol === "admin" ? `<button class="boton pequeno secundario" data-editar-material="${m.id}">Editar</button><button class="boton pequeno peligro" data-eliminar-material="${m.id}">Eliminar</button>` : ""}
                 </div>
+                ${perfilActual?.rol === "admin" ? `
+                <form class="oculto form-editar-material" data-form-material="${m.id}" style="margin-top:12px;">
+                    <div class="grid-info" style="margin-bottom:8px;">
+                        <div class="campo"><label>Nombre</label><input name="nombre" required value="${escaparAtributo(m.nombre)}"></div>
+                        <div class="campo"><label>Ubicación</label><input name="ubicacion" value="${escaparAtributo(m.ubicacion || "")}"></div>
+                        <div class="campo"><label>Cantidad total</label><input name="cantidadTotal" type="number" min="0" required value="${m.cantidad_total}"></div>
+                        <div class="campo"><label>Avisar stock bajo desde</label><input name="umbralStockBajo" type="number" min="0" value="${m.umbral_stock_bajo ?? ""}"></div>
+                    </div>
+                    <div class="campo"><label>Descripción</label><input name="descripcion" value="${escaparAtributo(m.descripcion || "")}"></div>
+                    <div style="display:flex; gap:8px;"><button type="submit" class="boton pequeno">Guardar cambios</button><button type="button" class="boton pequeno secundario" data-cancelar-edicion="${m.id}">Cancelar</button></div>
+                    <div class="mensaje"></div>
+                </form>` : ""}
                 <div class="oculto" id="historialMaterial-${m.id}" style="margin-top:8px; font-size:12px; max-height:200px; overflow-y:auto;"></div>
             </div>
         `).join("");
@@ -3766,6 +3854,27 @@ function renderizarListaInventario(materiales) {
     if (perfilActual?.rol === "admin") {
         contenedor.querySelectorAll("[data-eliminar-material]").forEach((boton) => {
             boton.addEventListener("click", () => eliminarMaterial(boton.dataset.eliminarMaterial));
+        });
+
+        const alternarFormulario = (id) => contenedor.querySelector(`[data-form-material="${id}"]`).classList.toggle("oculto");
+        contenedor.querySelectorAll("[data-editar-material]").forEach((boton) => {
+            boton.addEventListener("click", () => alternarFormulario(boton.dataset.editarMaterial));
+        });
+        contenedor.querySelectorAll("[data-cancelar-edicion]").forEach((boton) => {
+            boton.addEventListener("click", () => alternarFormulario(boton.dataset.cancelarEdicion));
+        });
+
+        contenedor.querySelectorAll("[data-form-material]").forEach((form) => {
+            form.addEventListener("submit", async (evento) => {
+                evento.preventDefault();
+                const datos = Object.fromEntries(new FormData(form));
+                try {
+                    await peticionApi(`/api/materiales/${form.dataset.formMaterial}`, { method: "PATCH", body: JSON.stringify(datos) });
+                    await cargarInventario();
+                } catch (error) {
+                    mostrarMensaje(form.querySelector(".mensaje"), error.message, "fallo");
+                }
+            });
         });
     }
 

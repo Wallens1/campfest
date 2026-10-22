@@ -680,3 +680,7 @@ table.tabla-participantes thead th{
 .punto.error{ background:var(--rojo); }
 
 .badge.verde, .badge.rojo{ border-color:currentColor; }
+
+/* avisos dentro de paneles (p. ej. "otra persona está viendo este caso") */
+.note{ padding:10px 12px; border-radius:var(--radio-s); font-size:13px; font-weight:600; background:var(--info-fondo); color:var(--info-texto); border:1.5px solid #CDB5F2; margin:0 0 14px; }
+.note.warn{ background:var(--aviso-fondo); color:var(--aviso-texto); border-color:#E8CF6A; }

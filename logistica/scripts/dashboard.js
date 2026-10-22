@@ -40,7 +40,7 @@ const btnLogin = document.getElementById("btnLogin");
 const mensajeLogin = document.getElementById("mensajeLogin");
 
 // Íconos del sprite compartido (Phosphor bold) — reemplazan a los emojis.
-const SPRITE_ICONOS = "../../campfest/assets/icons.svg";
+const SPRITE_ICONOS = "../../campfest/assets/icons.svg?v=2";
 const icono = (nombre) => `<svg class="cf-i" aria-hidden="true"><use href="${SPRITE_ICONOS}#i-${nombre}"/></svg>`;
 const punto = (tipo) => `<span class="punto ${tipo}" aria-hidden="true"></span>`;
 
@@ -359,7 +359,7 @@ async function cargarRamas() {
 
         document.getElementById("inputRamaDestinoSolicitud").innerHTML =
             ramas.map((r) => `<option value="${r.id}">${r.nombre}</option>`).join("") +
-            `<option value="todas">🆘 Todas las ramas (urgente)</option>`;
+            `<option value="todas">Todas las ramas (urgente)</option>`;
 
     } catch (error) {
         console.error(error);
@@ -2475,7 +2475,7 @@ function renderizarListaTareas(contenedor, tareas, contenedorKey) {
             </div>
             ${t.descripcion ? `<div class="descripcion">${t.descripcion}</div>` : ""}
             <div class="descripcion">
-                ${t.tipo === "solicitud" ? `De ${mapaRamas[t.rama_origen_id] || "—"} para ${t.rama_id ? (mapaRamas[t.rama_id] || "—") : "🆘 todas las ramas"}` : `Rama: ${mapaRamas[t.rama_id] || "—"}`}
+                ${t.tipo === "solicitud" ? `De ${mapaRamas[t.rama_origen_id] || "—"} para ${t.rama_id ? (mapaRamas[t.rama_id] || "—") : "todas las ramas"}` : `Rama: ${mapaRamas[t.rama_id] || "—"}`}
                 ${t.hora_programada ? ` · Listo antes de: ${formatearHora(t.hora_programada)}` : ""}
                 ${t.cantidad_personas ? ` · ${t.checks_count || 0}/${t.cantidad_personas} aceptaron` : ""}
             </div>
@@ -2577,13 +2577,16 @@ async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
                 ? `<span class="badge rojo">Cupo cubierto, ya no se necesita más gente</span>`
                 : `<button class="boton pequeno" data-marcar="1">Marqué que ayudé</button>`;
 
+        const puedeCancelar = !!perfilActual && (perfilActual.rol === "admin" || perfilActual.id === tarea.creado_por);
+
         const acciones = tarea.estado !== "pendiente"
-            ? `<p class="detalle" style="margin-top:8px;">Cerrado ${formatearHora(tarea.completada_en)}</p>`
+            ? `<p class="detalle" style="margin-top:8px;">${tarea.estado === "cancelada" ? "Cancelada" : `Cerrado ${formatearHora(tarea.completada_en)}`}</p>`
             : `
                 ${cupoTexto}
                 <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
                     ${botonMarcarHtml}
                     ${puedeCompletar ? `<button class="boton pequeno secundario" data-completar="1">Dar check final</button>` : ""}
+                    ${puedeCancelar ? `<button class="boton pequeno secundario" data-cancelar="1">Cancelar</button>` : ""}
                 </div>
             `;
 
@@ -2672,6 +2675,18 @@ async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
                 marcarParticipacionTarea(id, contenedorKey);
             });
         }
+
+        contenedor.querySelector("[data-cancelar]")?.addEventListener("click", async (evento) => {
+            evento.stopPropagation();
+            if (!confirm("¿Cancelar este caso? Ya nadie lo verá como pendiente.")) return;
+            try {
+                await peticionApi(`/api/tareas/${id}/cancelar`, { method: "POST" });
+                await Promise.all([cargarSolicitudes(), cargarTareas()]);
+                await abrirDetalleTarea(id, true, contenedorKey);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
 
         const botonCompletar = contenedor.querySelector("[data-completar]");
         if (botonCompletar) {
@@ -2829,7 +2844,7 @@ function renderizarAlertasSolicitudes(recibidas) {
 
     contenedor.innerHTML = pendientes.map((t) => `
         <div class="alerta-chip" data-tarea-alerta="${t.id}">
-            <span>🆘 ${mapaRamas[t.rama_origen_id] || "Una rama"} necesita ayuda: ${t.titulo}</span>
+            <span>${icono("siren")} ${mapaRamas[t.rama_origen_id] || "Una rama"} necesita ayuda: ${t.titulo}</span>
             <span class="numero">${t.cantidad_personas ? `${t.checks_count || 0}/${t.cantidad_personas}` : ""}</span>
         </div>
     `).join("");
@@ -3473,3 +3488,32 @@ document.getElementById("checkboxSoloMisSolicitudes").addEventListener("change",
 // ==========================
 
 verificarSesion();
+
+// ==========================
+// Ficha de desempeño: la propia persona o su líder ven cuántas
+// observaciones tiene y qué tan a tiempo cumple sus subtareas.
+// ==========================
+
+async function mostrarFichaDesempeno(usuarioId, contenedor) {
+    contenedor.classList.remove("oculto");
+    contenedor.innerHTML = `<p class="detalle">Cargando…</p>`;
+    try {
+        const { usuario, observaciones, cumplimiento } = await peticionApi(`/api/observaciones/ficha-desempeno/${usuarioId}`);
+        contenedor.innerHTML = `
+            <div class="fila-conteo"><span class="nombre-fila-conteo">${usuario.nombre}</span><span class="badge neutro">${cumplimiento.porcentajeATiempo === null ? "Sin subtareas cerradas" : `${cumplimiento.porcentajeATiempo}% a tiempo`}</span></div>
+            <p class="detalle" style="margin:6px 0 0;">Subtareas: ${cumplimiento.aTiempo} a tiempo · ${cumplimiento.tarde} tarde · ${cumplimiento.pendientes} pendientes</p>
+            <p class="detalle" style="margin:2px 0 0;">Observaciones: ${observaciones.positiva} positivas · ${observaciones.neutral} neutrales · ${observaciones.negativa} negativas</p>
+        `;
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">${error.message}</p>`;
+    }
+}
+
+document.getElementById("btnFichaMiembro").addEventListener("click", () => {
+    const usuarioId = document.getElementById("inputMiembroObservacion").value;
+    if (usuarioId) mostrarFichaDesempeno(usuarioId, document.getElementById("fichaDesempenoMiembro"));
+});
+
+document.getElementById("btnMiFichaDesempeno").addEventListener("click", () => {
+    if (perfilActual) mostrarFichaDesempeno(perfilActual.id, document.getElementById("miFichaDesempeno"));
+});

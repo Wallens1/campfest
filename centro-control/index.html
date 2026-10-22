@@ -8,19 +8,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="../paneles/base.css?v=1">
-<link rel="stylesheet" href="assets/style.css?v=5">
+<link rel="stylesheet" href="../paneles/base.css?v=2">
+<link rel="stylesheet" href="assets/style.css?v=6">
 <script src="../config.js"></script>
 </head>
 <body>
 
-<div class="banner-sin-conexion oculto" id="bannerSinConexion" role="status"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-signal"/></svg> Sin conexión con el servidor. Reintentando automáticamente…</div>
+<div class="banner-sin-conexion oculto" id="bannerSinConexion" role="status"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-signal"/></svg> Sin conexión con el servidor. Reintentando automáticamente…</div>
 
 <!-- ===== INGRESO ===== -->
 <div id="pantallaLogin">
     <div class="tarjeta">
         <div class="encabezado-login">
-            <span class="marca-login"><span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-tent"/></svg></span>Camp Fest · Centro de Control</span>
+            <span class="marca-login"><span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-tent"/></svg></span>Camp Fest · Centro de Control</span>
             <h1>Inicia sesión para operar</h1>
             <p>Acceso para el equipo de control y administración del evento.</p>
         </div>
@@ -47,27 +47,27 @@
     <!-- Navegación: las vistas se agrupan por lo que el equipo hace -->
     <aside class="barra-lateral">
         <div class="marca-lateral">
-            <span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-tent"/></svg></span>
+            <span class="sello"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-tent"/></svg></span>
             <span class="texto-marca"><strong>Camp Fest</strong><small>Centro de Control</small></span>
         </div>
 
         <nav class="tabs-modulo nav-lateral" aria-label="Secciones del Centro de Control">
             <p class="grupo-nav">Operación</p>
-            <button type="button" class="tab-modulo activo" data-vista="panel" data-descripcion="Alertas, incidentes y participantes en tiempo real" aria-current="page"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-grid"/></svg><span>Panel</span></button>
-            <button type="button" class="tab-modulo" data-vista="cronograma" data-descripcion="Actividades, tareas por rama y cumplimiento"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-calendar"/></svg><span>Cronograma</span></button>
-            <button type="button" class="tab-modulo" data-vista="inventario" data-descripcion="Materiales, lotes y solicitudes de las ramas"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-package"/></svg><span>Inventario</span></button>
+            <button type="button" class="tab-modulo activo" data-vista="panel" data-descripcion="Alertas, incidentes y participantes en tiempo real" aria-current="page"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-grid"/></svg><span>Panel</span></button>
+            <button type="button" class="tab-modulo" data-vista="cronograma" data-descripcion="Actividades, tareas por rama y cumplimiento"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-calendar"/></svg><span>Cronograma</span></button>
+            <button type="button" class="tab-modulo" data-vista="inventario" data-descripcion="Materiales, lotes y solicitudes de las ramas"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-package"/></svg><span>Inventario</span></button>
             <p class="grupo-nav">Campistas</p>
-            <button type="button" class="tab-modulo" data-vista="inscripciones" data-descripcion="Registros, documentos y correos de confirmación"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-id"/></svg><span>Inscripciones</span></button>
-            <button type="button" class="tab-modulo" data-vista="notificaciones" data-descripcion="Anuncios que ven los campistas en su portal"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-megaphone"/></svg><span>Notificaciones</span></button>
-            <button type="button" class="tab-modulo" data-vista="perfiles" data-descripcion="Actividad, logros y cronología de cada campista"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-user"/></svg><span>Perfiles</span></button>
+            <button type="button" class="tab-modulo" data-vista="inscripciones" data-descripcion="Registros, documentos y correos de confirmación"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-id"/></svg><span>Inscripciones</span></button>
+            <button type="button" class="tab-modulo" data-vista="notificaciones" data-descripcion="Anuncios que ven los campistas en su portal"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-megaphone"/></svg><span>Notificaciones</span></button>
+            <button type="button" class="tab-modulo" data-vista="perfiles" data-descripcion="Actividad, logros y cronología de cada campista"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-user"/></svg><span>Perfiles</span></button>
             <p class="grupo-nav">Sistema</p>
-            <button type="button" class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion" data-descripcion="Configuración del evento, usuarios, emergencias y cierre"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-gear"/></svg><span>Administración</span></button>
+            <button type="button" class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion" data-descripcion="Configuración del evento, usuarios, emergencias y cierre"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-gear"/></svg><span>Administración</span></button>
         </nav>
 
         <div class="pie-lateral">
             <span class="usuario-actual" id="usuarioActual"></span>
-            <button type="button" class="boton-plano" id="btnAyudaRoles" aria-controls="panelAyudaRoles"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-question"/></svg><span>Qué puede hacer cada rol</span></button>
-            <button type="button" class="boton-plano" id="btnCerrarSesion"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-sign-out"/></svg><span>Cerrar sesión</span></button>
+            <button type="button" class="boton-plano" id="btnAyudaRoles" aria-controls="panelAyudaRoles"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-question"/></svg><span>Qué puede hacer cada rol</span></button>
+            <button type="button" class="boton-plano" id="btnCerrarSesion"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-sign-out"/></svg><span>Cerrar sesión</span></button>
         </div>
     </aside>
 
@@ -89,19 +89,19 @@
         </div>
         <div class="acciones-rapidas">
             <form class="busqueda-global" id="formBusquedaGlobal" role="search">
-                <svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-search"/></svg>
+                <svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-search"/></svg>
                 <input type="search" id="inputBusquedaGlobal" placeholder="Buscar persona, documento, carpa o incidente" aria-label="Buscar en todo el evento" autocomplete="off">
                 <kbd aria-hidden="true">/</kbd>
             </form>
             <button type="button" class="oculto" id="btnEnfocarBusqueda" tabindex="-1" aria-hidden="true">Buscar</button>
             <details class="menu-acciones" id="menuExportar">
-                <summary class="boton secundario"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-download"/></svg><span>Exportar</span><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-caret-down"/></svg></summary>
+                <summary class="boton secundario"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-download"/></svg><span>Exportar</span><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-caret-down"/></svg></summary>
                 <div class="lista-menu">
-                    <button type="button" class="boton-plano" id="btnExportarExcel"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-file"/></svg>Incidentes en Excel</button>
-                    <button type="button" class="boton-plano" id="btnExportarPdf"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-printer"/></svg>Incidentes en PDF</button>
+                    <button type="button" class="boton-plano" id="btnExportarExcel"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-file"/></svg>Incidentes en Excel</button>
+                    <button type="button" class="boton-plano" id="btnExportarPdf"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-printer"/></svg>Incidentes en PDF</button>
                 </div>
             </details>
-            <button type="button" class="boton" id="btnAbrirFormIncidente"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-plus"/></svg><span>Registrar incidente</span></button>
+            <button type="button" class="boton" id="btnAbrirFormIncidente"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-plus"/></svg><span>Registrar incidente</span></button>
         </div>
     </header>
 
@@ -135,11 +135,11 @@
             <p class="detalle">Empieza con una plantilla o llena el formulario directamente.</p>
         </div>
         <div class="plantillas" id="plantillasIncidente">
-            <button type="button" class="boton pequeno secundario" data-plantilla="medico"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-first-aid"/></svg>Malestar leve</button>
-            <button type="button" class="boton pequeno secundario" data-plantilla="objeto"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-backpack"/></svg>Objeto perdido</button>
-            <button type="button" class="boton pequeno secundario" data-plantilla="alimentacion"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-food"/></svg>Problema de alimentación</button>
-            <button type="button" class="boton pequeno secundario" data-plantilla="convivencia"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-warning-circle"/></svg>Convivencia</button>
-            <button type="button" class="boton pequeno secundario" data-plantilla="consulta"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-question"/></svg>Consulta general</button>
+            <button type="button" class="boton pequeno secundario" data-plantilla="medico"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-first-aid"/></svg>Malestar leve</button>
+            <button type="button" class="boton pequeno secundario" data-plantilla="objeto"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-backpack"/></svg>Objeto perdido</button>
+            <button type="button" class="boton pequeno secundario" data-plantilla="alimentacion"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-food"/></svg>Problema de alimentación</button>
+            <button type="button" class="boton pequeno secundario" data-plantilla="convivencia"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-warning-circle"/></svg>Convivencia</button>
+            <button type="button" class="boton pequeno secundario" data-plantilla="consulta"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-question"/></svg>Consulta general</button>
         </div>
         <form id="formIncidente">
             <div class="grid-info" style="margin-bottom:0;">
@@ -183,19 +183,19 @@
     <!-- Resumen del evento -->
     <div class="stats-fila">
         <div class="tarjeta grupo-stat">
-            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-users"/></svg>Participantes</h3>
+            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-users"/></svg>Participantes</h3>
             <div class="stats-grid" id="statsParticipantes"></div>
         </div>
         <div class="tarjeta grupo-stat">
-            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-food"/></svg>Alimentación</h3>
+            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-food"/></svg>Alimentación</h3>
             <div class="stats-grid" id="statsAlimentacion"></div>
         </div>
         <div class="tarjeta grupo-stat">
-            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-alert"/></svg>Incidentes</h3>
+            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-alert"/></svg>Incidentes</h3>
             <div class="stats-grid" id="statsIncidentes"></div>
         </div>
         <div class="tarjeta grupo-stat">
-            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-tent"/></svg>Carpas</h3>
+            <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-tent"/></svg>Carpas</h3>
             <div class="stats-grid" id="statsCarpas"></div>
         </div>
     </div>
@@ -477,11 +477,11 @@
 
             <div class="grid-info" style="margin-top:16px;">
                 <div>
-                    <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-star"/></svg> Destacados</h3>
+                    <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-star"/></svg> Destacados</h3>
                     <div id="listaDestacadosPositivos"></div>
                 </div>
                 <div>
-                    <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-alert"/></svg> Necesitan seguimiento</h3>
+                    <h3><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-alert"/></svg> Necesitan seguimiento</h3>
                     <div id="listaDestacadosNegativos"></div>
                 </div>
             </div>
@@ -1085,8 +1085,8 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; flex-wrap:wrap; gap:10px;">
                 <span class="detalle" id="totalAuditoria"></span>
                 <div style="display:flex; gap:8px;">
-                    <button class="boton pequeno secundario" id="btnAuditoriaAnterior" style="width:auto;" disabled><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-arrow-left"/></svg>Anterior</button>
-                    <button class="boton pequeno secundario" id="btnAuditoriaSiguiente" style="width:auto;">Siguiente<svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-arrow-right"/></svg></button>
+                    <button class="boton pequeno secundario" id="btnAuditoriaAnterior" style="width:auto;" disabled><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-arrow-left"/></svg>Anterior</button>
+                    <button class="boton pequeno secundario" id="btnAuditoriaSiguiente" style="width:auto;">Siguiente<svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-arrow-right"/></svg></button>
                 </div>
             </div>
         </div>
@@ -1335,7 +1335,7 @@
 <!-- ===== PANEL DE DETALLE / EDICIÓN DE UNA ZONA DEL MAPA ===== -->
 <div class="overlay-detalle oculto" id="overlayZonaMapa"></div>
 <div class="panel-detalle" id="panelZonaMapa">
-    <button type="button" class="cerrar-panel" id="btnCerrarZonaMapa" aria-label="Cerrar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-x"/></svg></button>
+    <button type="button" class="cerrar-panel" id="btnCerrarZonaMapa" aria-label="Cerrar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-x"/></svg></button>
 
     <h2 id="tituloPanelZonaMapa">Nueva zona</h2>
 
@@ -1365,7 +1365,7 @@
 <!-- ===== PANEL DE DETALLE DEL INCIDENTE ===== -->
 <div class="overlay-detalle oculto" id="overlayDetalle"></div>
 <div class="panel-detalle" id="panelDetalle">
-    <button type="button" class="cerrar-panel" id="btnCerrarDetalle" aria-label="Cerrar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-x"/></svg></button>
+    <button type="button" class="cerrar-panel" id="btnCerrarDetalle" aria-label="Cerrar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-x"/></svg></button>
 
     <div class="badges" id="detalleIncidenteBadges"></div>
     <h2 id="detalleIncidenteCodigo"></h2>
@@ -1410,13 +1410,17 @@
 <!-- ===== PANEL DE DETALLE DEL PERFIL DE UN PARTICIPANTE ===== -->
 <div class="overlay-detalle oculto" id="overlayPerfil"></div>
 <div class="panel-detalle" id="panelPerfil">
-    <button type="button" class="cerrar-panel" id="btnCerrarPerfil" aria-label="Cerrar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg#i-x"/></svg></button>
+    <button type="button" class="cerrar-panel" id="btnCerrarPerfil" aria-label="Cerrar"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-x"/></svg></button>
 
     <div class="badges" id="perfilBadges"></div>
     <h2 id="perfilNombre"></h2>
     <p id="perfilDocumento" class="detalle"></p>
 
     <div class="grid-info" id="perfilInfo"></div>
+
+    <div class="acciones-incidente">
+        <button type="button" class="boton pequeno secundario" id="btnCertificadoPerfil"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-download"/></svg>Certificado de participación</button>
+    </div>
 
     <div class="seccion">
         <h3>Logros desbloqueados</h3>
@@ -1433,6 +1437,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="scripts/dashboard.js?v=50" defer></script>
+<script src="scripts/dashboard.js?v=51" defer></script>
 </body>
 </html>
