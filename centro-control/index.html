@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="../paneles/base.css?v=2">
-<link rel="stylesheet" href="assets/style.css?v=6">
+<link rel="stylesheet" href="assets/style.css?v=7">
 <script src="../config.js"></script>
 </head>
 <body>
@@ -824,6 +824,7 @@
             <button type="button" class="tab-modulo" data-subpestana-admin="mapa">Mapa del evento</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="emergencias">Emergencias</button>
             <button type="button" class="tab-modulo" data-subpestana-admin="aliados">Aliados</button>
+            <button type="button" class="tab-modulo" data-subpestana-admin="privacidad">Datos personales</button>
         </div>
 
         <div data-grupo-admin="evento">
@@ -1328,6 +1329,67 @@
 
         </div>
 
+
+        <div data-grupo-admin="privacidad" class="oculto">
+
+        <div class="tarjeta">
+            <div class="encabezado-tarjeta">
+                <h3>Solicitudes de titulares</h3>
+                <p class="detalle">Consultas (10 días hábiles) y reclamos (15 días hábiles) sobre datos personales, según la Ley 1581 de 2012. Registra cada correo que llegue a la dirección de la política.</p>
+            </div>
+            <form id="formSolicitudTitular">
+                <div class="grid-info" style="margin-bottom:0;">
+                    <div class="campo"><label for="inputTipoSolicitud">Tipo</label>
+                        <select id="inputTipoSolicitud" required><option value="consulta">Consulta: conocer sus datos</option><option value="reclamo">Reclamo: corregir, suprimir, revocar</option></select></div>
+                    <div class="campo"><label for="inputRecibidaSolicitud">Recibida el</label><input type="datetime-local" id="inputRecibidaSolicitud"></div>
+                    <div class="campo"><label for="inputTitularSolicitud">Titular</label><input type="text" id="inputTitularSolicitud" required></div>
+                    <div class="campo"><label for="inputDocumentoSolicitud">Documento (opcional)</label><input type="text" id="inputDocumentoSolicitud"></div>
+                    <div class="campo"><label for="inputContactoSolicitud">Correo o teléfono para responder</label><input type="text" id="inputContactoSolicitud"></div>
+                    <div class="campo"><label for="inputCodigoSolicitud">Código del participante (opcional)</label><input type="text" id="inputCodigoSolicitud" placeholder="CF-012"></div>
+                </div>
+                <div class="campo"><label for="inputDescripcionSolicitud">Qué pide</label><textarea id="inputDescripcionSolicitud" required></textarea></div>
+                <button type="submit" class="boton pequeno">Registrar solicitud</button>
+            </form>
+            <div class="mensaje" id="mensajeSolicitudTitular"></div>
+            <div id="listaSolicitudesTitulares" style="margin-top:16px;"><p class="detalle">Cargando…</p></div>
+        </div>
+
+        <div class="tarjeta">
+            <div class="encabezado-tarjeta">
+                <h3>Conservación y cierre de edición</h3>
+                <p class="detalle">Con estas fechas, el servidor aplica solo los plazos de la política: borra los datos de salud 30 días después del cierre del evento, anonimiza las inscripciones no admitidas 6 meses después del cierre de inscripciones y el resto 12 meses después del evento. Mientras estén vacías, no se borra nada.</p>
+            </div>
+            <div class="grid-info" style="margin-bottom:0;">
+                <div class="campo"><label for="inputCierreEvento">Cierre del evento</label><input type="date" id="inputCierreEvento"></div>
+                <div class="campo"><label for="inputCierreInscripciones">Cierre de inscripciones</label><input type="date" id="inputCierreInscripciones"></div>
+            </div>
+            <p class="detalle" id="estadoConservacion"></p>
+            <div class="acciones-incidente" style="margin-top:0;">
+                <button type="button" class="boton pequeno" id="btnGuardarConservacion">Guardar fechas</button>
+                <button type="button" class="boton pequeno peligro" id="btnSuprimirSaludAhora">Borrar ya los datos de salud</button>
+            </div>
+            <div class="seccion">
+                <h3>Borrar registros de pruebas o ediciones anteriores</h3>
+                <p class="detalle">Borra incidentes, entregas de alimentación, historial de participantes y auditoría anteriores a la fecha. No toca las inscripciones. No se puede deshacer: descarga antes un respaldo desde «Respaldo».</p>
+                <div class="grid-info" style="margin-bottom:8px;">
+                    <div class="campo"><label for="inputPurgaAntesDe">Borrar lo anterior a</label><input type="date" id="inputPurgaAntesDe"></div>
+                    <div class="campo"><label for="inputPurgaConfirmacion">Escribe BORRAR para confirmar</label><input type="text" id="inputPurgaConfirmacion" autocomplete="off"></div>
+                </div>
+                <button type="button" class="boton pequeno peligro" id="btnPurgarOperativos">Borrar registros anteriores</button>
+            </div>
+            <div class="mensaje" id="mensajeConservacion"></div>
+        </div>
+
+        <div class="tarjeta">
+            <div class="encabezado-tarjeta">
+                <h3>Sin autorización de uso de imagen</h3>
+                <p class="detalle">No publiques fotos ni videos en los que aparezcan estas personas.</p>
+            </div>
+            <div id="listaSinImagen"><p class="detalle">Cargando…</p></div>
+        </div>
+
+        </div>
+
     </section>
 
     </main>
@@ -1377,6 +1439,8 @@
 
     <div class="grid-info" id="detalleIncidenteInfo"></div>
 
+    <div class="seccion oculto" id="seccionParticipanteIncidente"></div>
+
     <div class="seccion">
         <h3>Responsables de esta categoría</h3>
         <div class="lista-conteo" id="detalleResponsablesCategoria"></div>
@@ -1396,7 +1460,9 @@
     <div class="acciones-incidente">
         <button class="boton pequeno secundario" id="btnImprimirIncidente">Imprimir</button>
         <button class="boton pequeno secundario" id="btnExportarPdfIndividual">Exportar PDF</button>
+        <button type="button" class="boton pequeno secundario" id="btnEditarIncidente"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-pencil"/></svg>Editar datos del caso</button>
     </div>
+    <div class="oculto" id="formEditarIncidente"></div>
 
     <div class="campo" style="margin-top:14px;">
         <label for="inputCodigoDuplicado">Marcar como duplicado de (código del incidente original)</label>
@@ -1422,6 +1488,20 @@
 
     <div class="acciones-incidente">
         <button type="button" class="boton pequeno secundario" id="btnCertificadoPerfil"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-download"/></svg>Certificado de participación</button>
+        <button type="button" class="boton pequeno secundario oculto" id="btnEditarPerfil"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-pencil"/></svg>Corregir datos</button>
+        <button type="button" class="boton pequeno secundario oculto" id="btnAnularIngresoPerfil">Anular ingreso</button>
+        <button type="button" class="boton pequeno secundario oculto" id="btnRevertirRetiroPerfil">Revertir retiro</button>
+        <button type="button" class="boton pequeno secundario oculto" id="btnRevertirSalidaPerfil">Revertir salida</button>
+    </div>
+    <div class="oculto" id="perfilFormulario"></div>
+
+    <div class="seccion oculto" id="perfilPrivacidad">
+        <h3>Datos personales</h3>
+        <div class="badges" id="perfilPrivacidadBadges"></div>
+        <div class="acciones-incidente">
+            <button type="button" class="boton pequeno secundario" id="btnExportarDatosPerfil"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-download"/></svg>Exportar sus datos</button>
+            <button type="button" class="boton pequeno peligro" id="btnSuprimirDatosPerfil">Suprimir sus datos</button>
+        </div>
     </div>
 
     <div class="seccion">
@@ -1439,6 +1519,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js" integrity="sha384-Emf5ZVIUiarAdhkgtqK+5/Z5qIvM6QoVrS+qAVtfyZVuD5lIHrac0me485+Antp0" crossorigin="anonymous"></script>
-<script src="scripts/dashboard.js?v=53" defer></script>
+<script src="scripts/dashboard.js?v=54" defer></script>
 </body>
 </html>

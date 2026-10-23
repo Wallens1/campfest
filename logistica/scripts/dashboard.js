@@ -1661,9 +1661,13 @@ function siONoConDetalle(participante, campoBooleano, campoDetalle) {
 
 function renderizarInfo(participante) {
 
-    const condicionMedica = siONoConDetalle(participante, "tiene_condicion_medica", "condicion_medica_detalle");
+    // Si el servidor ocultó la salud (tu rama no la necesita), se dice así
+    // en vez de mostrar un "No" que podría confundirse con un dato real.
+    const RESTRINGIDO = { valor: "Solo lo ve salud y coordinación" };
+    const restringida = !!participante.salud_restringida;
+    const condicionMedica = restringida ? RESTRINGIDO : siONoConDetalle(participante, "tiene_condicion_medica", "condicion_medica_detalle");
     const restriccionAlimentaria = siONoConDetalle(participante, "tiene_restricciones_alimentarias", "restricciones_alimentarias_detalle");
-    const alergiaMedicamento = siONoConDetalle(participante, "alergia_medicamento", "alergia_medicamento_detalle");
+    const alergiaMedicamento = restringida ? RESTRINGIDO : siONoConDetalle(participante, "alergia_medicamento", "alergia_medicamento_detalle");
     const alergiaAlimento = siONoConDetalle(participante, "alergia_alimento", "alergia_alimento_detalle");
 
     const campos = [
@@ -1676,12 +1680,12 @@ function renderizarInfo(participante) {
         { etiqueta: "Correo personal", valor: participante.correo_personal },
         { etiqueta: "Contacto de emergencia 1", valor: contactoCompleto(participante.contacto_emergencia_nombre, participante.contacto_emergencia_telefono) },
         { etiqueta: "Contacto de emergencia 2", valor: contactoCompleto(participante.contacto_emergencia_2_nombre, participante.contacto_emergencia_2_telefono) },
-        { etiqueta: "RH", valor: participante.rh },
+        { etiqueta: "RH", valor: restringida ? RESTRINGIDO.valor : participante.rh },
         { etiqueta: "Condición médica/discapacidad", valor: condicionMedica.valor, alerta: condicionMedica.alerta },
         { etiqueta: "Restricción alimentaria", valor: restriccionAlimentaria.valor, alerta: restriccionAlimentaria.alerta },
         { etiqueta: "Alergia a medicamento", valor: alergiaMedicamento.valor, alerta: alergiaMedicamento.alerta },
         { etiqueta: "Alergia a alimento", valor: alergiaAlimento.valor, alerta: alergiaAlimento.alerta },
-        { etiqueta: "EPS", valor: participante.eps },
+        { etiqueta: "EPS", valor: restringida ? RESTRINGIDO.valor : participante.eps },
         {
             etiqueta: "Certificado EPS",
             valor: participante.certificado_eps_url
@@ -2406,6 +2410,12 @@ function renderizarAlimentacion(servicios, entregas) {
                 <span>${esc(servicio.label)}</span>
                 <span class="marcado">Entregado · ${formatearHora(entrega.hora)}</span>
             `;
+            const anular = document.createElement("button");
+            anular.type = "button";
+            anular.className = "boton-anular";
+            anular.textContent = "Anular";
+            anular.addEventListener("click", () => anularAlimentacion(servicio));
+            item.appendChild(anular);
         } else {
             item.innerHTML = `<span>${esc(servicio.label)}</span>`;
 
@@ -2419,6 +2429,23 @@ function renderizarAlimentacion(servicios, entregas) {
 
     });
 
+}
+
+// Para corregir una entrega marcada por error; pide motivo y queda en el
+// historial del participante.
+async function anularAlimentacion(servicio) {
+    const motivo = prompt(`¿Por qué anulas «${servicio.label}»? (queda en el historial)`);
+    if (motivo === null) return;
+    try {
+        await peticionApi(`/api/logistica/participante/${participanteActualId}/alimentacion/deshacer`, {
+            method: "POST",
+            body: JSON.stringify({ servicio: servicio.id, motivo: motivo.trim() })
+        });
+        mostrarMensaje(mensajeFicha, `${servicio.label} anulado`, "ok");
+        await seleccionarParticipante(participanteActualId);
+    } catch (error) {
+        mostrarMensaje(mensajeFicha, error.message, "fallo");
+    }
 }
 
 async function marcarAlimentacion(servicioId) {
@@ -2594,6 +2621,7 @@ async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
                 <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
                     ${botonMarcarHtml}
                     ${puedeCompletar ? `<button class="boton pequeno secundario" data-completar="1">Dar check final</button>` : ""}
+                    ${puedeCancelar ? `<button class="boton pequeno secundario" data-editar-caso="1">Editar</button>` : ""}
                     ${puedeCancelar ? `<button class="boton pequeno secundario" data-cancelar="1">Cancelar</button>` : ""}
                 </div>
             `;
@@ -2683,6 +2711,21 @@ async function abrirDetalleTarea(id, forzar, contenedorKey, silencioso) {
                 marcarParticipacionTarea(id, contenedorKey);
             });
         }
+
+        contenedor.querySelector("[data-editar-caso]")?.addEventListener("click", async (evento) => {
+            evento.stopPropagation();
+            const titulo = prompt("Título:", tarea.titulo);
+            if (titulo === null || !titulo.trim()) return;
+            const descripcion = prompt("Descripción (puedes dejarla vacía):", tarea.descripcion || "");
+            if (descripcion === null) return;
+            try {
+                await peticionApi(`/api/tareas/${id}`, { method: "PATCH", body: JSON.stringify({ titulo: titulo.trim(), descripcion: descripcion.trim() }) });
+                await Promise.all([cargarSolicitudes(), cargarTareas()]);
+                await abrirDetalleTarea(id, true, contenedorKey);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
 
         contenedor.querySelector("[data-cancelar]")?.addEventListener("click", async (evento) => {
             evento.stopPropagation();
@@ -2974,6 +3017,7 @@ async function cargarObservaciones() {
                     <div style="display:flex; gap:8px; margin-top:6px;">
                         ${!o.leido && o.usuario_id === perfilActual?.id ? `<button class="boton pequeno secundario" data-marcar-leida="${esc(o.id)}" style="width:auto; padding:4px 10px; font-size:11px;">Marcar como leída</button>` : ""}
                         <button class="boton pequeno secundario" data-responder-observacion="${esc(o.id)}" style="width:auto; padding:4px 10px; font-size:11px;">Responder</button>
+                        ${o.autor_id === perfilActual?.id || perfilActual?.rol === "admin" ? `<button class="boton pequeno secundario" data-editar-observacion="${esc(o.id)}" data-texto="${esc(o.texto)}" style="width:auto; padding:4px 10px; font-size:11px;">Editar</button>` : ""}
                     </div>
                 </div>
             `).join("");
@@ -2982,6 +3026,19 @@ async function cargarObservaciones() {
             boton.addEventListener("click", async () => {
                 await peticionApi(`/api/observaciones/${boton.dataset.marcarLeida}/leido`, { method: "POST" }).catch(() => {});
                 await cargarObservaciones();
+            });
+        });
+
+        contenedor.querySelectorAll("[data-editar-observacion]").forEach((boton) => {
+            boton.addEventListener("click", async () => {
+                const texto = prompt("Corrige la observación (la persona la verá de nuevo como no leída):", boton.dataset.texto);
+                if (texto === null || !texto.trim()) return;
+                try {
+                    await peticionApi(`/api/observaciones/${boton.dataset.editarObservacion}`, { method: "PATCH", body: JSON.stringify({ texto: texto.trim() }) });
+                    await cargarObservaciones();
+                } catch (error) {
+                    alert(error.message);
+                }
             });
         });
 

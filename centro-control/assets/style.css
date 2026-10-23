@@ -563,3 +563,10 @@ table.tabla-participantes td{ padding:8px 12px; border-bottom:1px solid var(--li
     .stat-tile{ display:flex; align-items:baseline; gap:8px; padding:8px 10px; }
     .stat-tile .stat-etiqueta{ margin-top:0; overflow-wrap:normal; }
 }
+
+/* formularios en línea para corregir datos sin abrir ventanas */
+.form-en-linea{ margin:12px 0; padding:16px; background:var(--crema); border:1.5px solid var(--linea-fuerte); border-radius:var(--radio); }
+.form-en-linea h3{ margin:0 0 4px; font-size:15px; }
+.form-en-linea > .detalle{ margin:0 0 12px; }
+.form-en-linea .grid-info{ margin-bottom:12px; }
+.campo-check{ display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; min-height:32px; }

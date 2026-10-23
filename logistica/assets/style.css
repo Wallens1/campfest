@@ -411,3 +411,7 @@
     .nav-logistica .largo{ display:none; }
     .nav-logistica .corto{ display:inline; }
 }
+
+/* anular una entrega marcada por error: secundario, no compite con "Marcar" */
+.item-servicio .boton-anular{ min-height:32px; padding:4px 10px; font-size:12px; font-weight:600; border:1.5px solid var(--linea-fuerte); border-radius:8px; background:var(--blanco); color:var(--tinta-2); cursor:pointer; }
+.item-servicio .boton-anular:hover{ border-color:var(--tinta); color:var(--tinta); }

@@ -53,6 +53,11 @@ function esc(valor) {
     return String(valor).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+function humanizarTexto(texto) {
+    const limpio = String(texto || "").replace(/_/g, " ");
+    return limpio.charAt(0).toUpperCase() + limpio.slice(1);
+}
+
 function humanizar(texto) {
     if (!texto) return "—";
     const limpio = String(texto).replace(/_/g, " ");
@@ -98,6 +103,64 @@ function minutosHasta(fechaIso) {
 // casos de días anteriores).
 function escaparAtributo(texto) {
     return String(texto).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+// ==========================
+// Formulario en línea reutilizable: editar sin abrir ventanas. Cada campo:
+// { nombre, etiqueta, tipo, valor, opciones, requerido, ancho }.
+// ==========================
+
+function campoEnLineaHtml(c) {
+    const id = `campo-${c.nombre}-${Math.random().toString(36).slice(2, 7)}`;
+    if (c.tipo === "checkbox") {
+        return `<label class="campo-check" style="grid-column:1 / -1;"><input type="checkbox" name="${c.nombre}" ${c.valor ? "checked" : ""}> ${esc(c.etiqueta)}</label>`;
+    }
+    const ancho = c.ancho === "completo" || c.tipo === "textarea" ? ' style="grid-column:1 / -1;"' : "";
+    let control;
+    if (c.tipo === "select") {
+        control = `<select id="${id}" name="${c.nombre}" ${c.requerido ? "required" : ""}>${c.opciones.map(([valor, texto]) => `<option value="${esc(valor)}" ${String(valor) === String(c.valor ?? "") ? "selected" : ""}>${esc(texto)}</option>`).join("")}</select>`;
+    } else if (c.tipo === "textarea") {
+        control = `<textarea id="${id}" name="${c.nombre}" ${c.requerido ? "required" : ""}>${esc(c.valor ?? "")}</textarea>`;
+    } else {
+        control = `<input id="${id}" name="${c.nombre}" type="${c.tipo || "text"}" value="${esc(c.valor ?? "")}" ${c.requerido ? "required" : ""} autocomplete="off">`;
+    }
+    return `<div class="campo"${ancho}><label for="${id}">${esc(c.etiqueta)}</label>${control}</div>`;
+}
+
+function abrirFormularioEnLinea(contenedor, { titulo, descripcion, campos, textoBoton = "Guardar", peligro = false, onGuardar }) {
+    contenedor.classList.remove("oculto");
+    contenedor.innerHTML = `
+        <form class="form-en-linea">
+            ${titulo ? `<h3>${esc(titulo)}</h3>` : ""}
+            ${descripcion ? `<p class="detalle">${esc(descripcion)}</p>` : ""}
+            <div class="grid-info">${campos.map(campoEnLineaHtml).join("")}</div>
+            <div class="acciones-incidente" style="margin-top:0;">
+                <button type="submit" class="boton pequeno ${peligro ? "peligro" : ""}">${esc(textoBoton)}</button>
+                <button type="button" class="boton pequeno secundario" data-cancelar-en-linea>Cancelar</button>
+            </div>
+            <div class="mensaje"></div>
+        </form>`;
+    const form = contenedor.querySelector("form");
+    const cerrar = () => { contenedor.classList.add("oculto"); contenedor.innerHTML = ""; };
+    form.querySelector("[data-cancelar-en-linea]").addEventListener("click", cerrar);
+    form.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        const datos = {};
+        campos.forEach((c) => {
+            const control = form.elements[c.nombre];
+            datos[c.nombre] = c.tipo === "checkbox" ? control.checked : control.value;
+        });
+        const boton = form.querySelector('[type="submit"]');
+        boton.disabled = true;
+        try {
+            await onGuardar(datos);
+            cerrar();
+        } catch (error) {
+            mostrarMensaje(form.querySelector(".mensaje"), error.message, "fallo");
+            boton.disabled = false;
+        }
+    });
+    form.querySelector("input, select, textarea")?.focus();
 }
 
 function formatearDuracion(minutos) {
@@ -484,6 +547,7 @@ function mostrarSubpestanaAdmin(grupo) {
     if (grupo === "mapa") cargarMapasCandidatos();
     if (grupo === "emergencias") cargarEmergencias();
     if (grupo === "aliados") cargarAliados();
+    if (grupo === "privacidad") { cargarSolicitudesTitulares(); cargarConservacion(); cargarSinImagen(); }
 
 }
 
@@ -2032,6 +2096,7 @@ async function abrirPerfil(id) {
         botonCertificado.title = puedeCertificar ? "" : "Disponible cuando el participante haya ingresado al evento y no esté retirado";
         botonCertificado.onclick = () => descargarArchivo(`/api/centro-control/participantes/${id}/certificado`, `Certificado-Participacion-${p.codigo}.pdf`);
         document.getElementById("perfilDocumento").textContent = `${p.codigo} · Documento: ${p.documento}`;
+        prepararAccionesPerfil(p);
 
         document.getElementById("perfilBadges").innerHTML = [
             `<span class="badge ${p.estado_admision === "admitido" ? "verde" : "neutro"}">${humanizar(p.estado_admision)}</span>`,
@@ -2088,6 +2153,128 @@ async function abrirPerfil(id) {
     }
 
 }
+
+// ==========================
+// Perfil: correcciones y datos personales
+// ==========================
+
+let participanteEnPerfil = null;
+
+function pedirMotivo(titulo, descripcion, textoBoton, accion, { confirmacion, peligro } = {}) {
+    const campos = [{ nombre: "motivo", etiqueta: "Motivo (queda en el historial)", tipo: "textarea", requerido: true }];
+    if (confirmacion) campos.push({ nombre: "confirmacion", etiqueta: `Escribe ${confirmacion} para confirmar`, requerido: true, ancho: "completo" });
+    abrirFormularioEnLinea(document.getElementById("perfilFormulario"), {
+        titulo, descripcion, campos, textoBoton, peligro,
+        onGuardar: async (datos) => {
+            if (confirmacion && datos.confirmacion.trim() !== confirmacion) throw new Error(`Escribe exactamente ${confirmacion}`);
+            await accion(datos);
+        }
+    });
+}
+
+function prepararAccionesPerfil(p) {
+    participanteEnPerfil = p;
+    const esAdmin = perfilActual?.rol === "admin";
+    document.getElementById("perfilFormulario").classList.add("oculto");
+    document.getElementById("btnEditarPerfil").classList.toggle("oculto", !esAdmin);
+    document.getElementById("btnAnularIngresoPerfil").classList.toggle("oculto", !p.ingreso_registrado);
+    document.getElementById("btnRevertirRetiroPerfil").classList.toggle("oculto", !(esAdmin && p.retirado));
+    document.getElementById("btnRevertirSalidaPerfil").classList.toggle("oculto", !(esAdmin && p.salida_evento_registrada));
+    const seccionPrivacidad = document.getElementById("perfilPrivacidad");
+    seccionPrivacidad.classList.toggle("oculto", !esAdmin);
+    if (esAdmin) cargarPrivacidadPerfil(p.id);
+}
+
+async function cargarPrivacidadPerfil(id) {
+    const badges = document.getElementById("perfilPrivacidadBadges");
+    try {
+        const estado = await peticionApi(`/api/privacidad/participantes/${id}/estado`);
+        badges.innerHTML = [
+            estado.reclamoEnTramite ? `<span class="badge rojo">${icono("alert")} Reclamo en trámite</span>` : "",
+            estado.aceptaUsoImagen ? `<span class="badge verde">Autorizó uso de imagen</span>` : `<span class="badge rojo">Sin autorización de imagen</span>`,
+            `<span class="badge neutro">Autorización de datos: ${estado.autorizacionFecha ? new Date(estado.autorizacionFecha).toLocaleDateString("es-CO") : "sin fecha"}${estado.autorizacionVersion ? ` · política ${esc(estado.autorizacionVersion)}` : ""}</span>`
+        ].join("");
+    } catch (error) {
+        badges.innerHTML = `<span class="badge neutro">${esc(error.message)}</span>`;
+    }
+}
+
+async function recargarPerfilTrasCambio(mensajeTexto) {
+    await abrirPerfil(participanteEnPerfil.id);
+    cargarParticipantes();
+    mostrarMensaje(document.getElementById("mensajePerfil"), mensajeTexto, "ok");
+}
+
+document.getElementById("btnEditarPerfil").addEventListener("click", () => {
+    const p = participanteEnPerfil;
+    const fecha = p.fecha_nacimiento ? String(p.fecha_nacimiento).slice(0, 10) : "";
+    abrirFormularioEnLinea(document.getElementById("perfilFormulario"), {
+        titulo: "Corregir datos de inscripción",
+        descripcion: "El historial registra qué campos cambiaron, no sus valores.",
+        campos: [
+            { nombre: "nombre", etiqueta: "Nombre completo", valor: p.nombre, requerido: true, ancho: "completo" },
+            { nombre: "tipo_documento", etiqueta: "Tipo de documento", valor: p.tipo_documento, requerido: true },
+            { nombre: "documento", etiqueta: "Documento", valor: p.documento, requerido: true },
+            { nombre: "fecha_nacimiento", etiqueta: "Fecha de nacimiento", tipo: "date", valor: fecha, requerido: true },
+            { nombre: "municipio", etiqueta: "Municipio", valor: p.municipio, requerido: true },
+            { nombre: "telefono", etiqueta: "Teléfono", tipo: "tel", valor: p.telefono, requerido: true },
+            { nombre: "correo_personal", etiqueta: "Correo", tipo: "email", valor: p.correo_personal },
+            { nombre: "contacto_emergencia_nombre", etiqueta: "Contacto de emergencia 1", valor: p.contacto_emergencia_nombre },
+            { nombre: "contacto_emergencia_telefono", etiqueta: "Teléfono contacto 1", tipo: "tel", valor: p.contacto_emergencia_telefono },
+            { nombre: "contacto_emergencia_2_nombre", etiqueta: "Contacto de emergencia 2", valor: p.contacto_emergencia_2_nombre },
+            { nombre: "contacto_emergencia_2_telefono", etiqueta: "Teléfono contacto 2", tipo: "tel", valor: p.contacto_emergencia_2_telefono },
+            { nombre: "rh", etiqueta: "RH", valor: p.rh },
+            { nombre: "eps", etiqueta: "EPS", valor: p.eps },
+            { nombre: "tiene_condicion_medica", etiqueta: "Tiene condición médica o discapacidad", tipo: "checkbox", valor: p.tiene_condicion_medica },
+            { nombre: "condicion_medica_detalle", etiqueta: "Detalle de la condición médica", valor: p.condicion_medica_detalle, ancho: "completo" },
+            { nombre: "tiene_restricciones_alimentarias", etiqueta: "Tiene restricciones alimentarias", tipo: "checkbox", valor: p.tiene_restricciones_alimentarias },
+            { nombre: "restricciones_alimentarias_detalle", etiqueta: "Detalle de restricciones", valor: p.restricciones_alimentarias_detalle, ancho: "completo" },
+            { nombre: "alergia_medicamento", etiqueta: "Alergia a medicamentos", tipo: "checkbox", valor: p.alergia_medicamento },
+            { nombre: "alergia_medicamento_detalle", etiqueta: "¿A cuáles medicamentos?", valor: p.alergia_medicamento_detalle, ancho: "completo" },
+            { nombre: "alergia_alimento", etiqueta: "Alergia a alimentos", tipo: "checkbox", valor: p.alergia_alimento },
+            { nombre: "alergia_alimento_detalle", etiqueta: "¿A cuáles alimentos?", valor: p.alergia_alimento_detalle, ancho: "completo" },
+            { nombre: "acepta_uso_imagen", etiqueta: "Autoriza el uso de su imagen (desmárcalo si retira la autorización)", tipo: "checkbox", valor: p.acepta_uso_imagen }
+        ],
+        onGuardar: async (datos) => {
+            await peticionApi(`/api/centro-control/participantes/${p.id}`, { method: "PATCH", body: JSON.stringify(datos) });
+            await recargarPerfilTrasCambio("Datos corregidos");
+        }
+    });
+});
+
+document.getElementById("btnAnularIngresoPerfil").addEventListener("click", () => {
+    pedirMotivo("Anular ingreso", "Úsalo solo si el ingreso se registró por error. La persona vuelve a quedar como pendiente de ingreso.", "Anular ingreso", async ({ motivo }) => {
+        await peticionApi(`/api/logistica/participante/${participanteEnPerfil.id}/ingreso/deshacer`, { method: "POST", body: JSON.stringify({ motivo }) });
+        await recargarPerfilTrasCambio("Ingreso anulado");
+    });
+});
+
+document.getElementById("btnRevertirRetiroPerfil").addEventListener("click", () => {
+    pedirMotivo("Revertir retiro", "La persona vuelve a quedar activa. Su carpa se liberó al retirarla: asígnale una desde logística.", "Revertir retiro", async ({ motivo }) => {
+        await peticionApi(`/api/centro-control/participantes/${participanteEnPerfil.id}/retirado/revertir`, { method: "POST", body: JSON.stringify({ motivo }) });
+        await recargarPerfilTrasCambio("Retiro revertido");
+    });
+});
+
+document.getElementById("btnRevertirSalidaPerfil").addEventListener("click", () => {
+    pedirMotivo("Revertir salida del evento", "La salida queda sin registrar y su código de salida vuelve a servir.", "Revertir salida", async ({ motivo }) => {
+        await peticionApi(`/api/centro-control/participantes/${participanteEnPerfil.id}/salida-evento/revertir`, { method: "POST", body: JSON.stringify({ motivo }) });
+        await recargarPerfilTrasCambio("Salida revertida");
+    });
+});
+
+document.getElementById("btnExportarDatosPerfil").addEventListener("click", () => {
+    descargarArchivo(`/api/privacidad/participantes/${participanteEnPerfil.id}/exportar`, `datos-${participanteEnPerfil.codigo}.json`);
+});
+
+document.getElementById("btnSuprimirDatosPerfil").addEventListener("click", () => {
+    pedirMotivo("Suprimir datos personales", "Borra de forma definitiva nombre, documento, contactos, salud y respuestas abiertas. El registro queda anónimo para las estadísticas. No se puede deshacer: exporta antes sus datos si el titular los pidió.", "Suprimir definitivamente", async ({ motivo, confirmacion }) => {
+        await peticionApi(`/api/privacidad/participantes/${participanteEnPerfil.id}/suprimir`, { method: "POST", body: JSON.stringify({ motivo, confirmacion }) });
+        cerrarPanelPerfil();
+        cargarParticipantes();
+        alert("Datos suprimidos. El registro quedó anonimizado.");
+    }, { confirmacion: "SUPRIMIR", peligro: true });
+});
 
 // ==========================
 // Panel de detalle del incidente
@@ -2211,6 +2398,9 @@ async function abrirIncidente(id) {
         `).join("");
 
         renderizarAccionesIncidente(incidente);
+        renderizarParticipanteIncidente(incidente);
+        incidenteEnDetalle = incidente;
+        document.getElementById("formEditarIncidente").classList.add("oculto");
         cargarResponsablesPorCategoria(incidente.categoria, document.getElementById("detalleResponsablesCategoria"));
         ocultarMensaje(document.getElementById("mensajeDetalleIncidente"));
 
@@ -2219,6 +2409,63 @@ async function abrirIncidente(id) {
     }
 
 }
+
+let incidenteEnDetalle = null;
+
+// Si el incidente está vinculado a un campista, se muestra lo que hace falta
+// para atenderlo (salud, alergias, contactos) sin tener que buscarlo aparte.
+async function renderizarParticipanteIncidente(incidente) {
+    const seccion = document.getElementById("seccionParticipanteIncidente");
+    if (!incidente.participante_id) {
+        seccion.classList.add("oculto");
+        return;
+    }
+    seccion.classList.remove("oculto");
+    seccion.innerHTML = `<h3>Campista afectado</h3><p class="detalle">Cargando…</p>`;
+    try {
+        const { participante: p } = await peticionApi(`/api/centro-control/participantes/${incidente.participante_id}`);
+        const siNo = (tiene, detalle) => tiene ? esc(detalle || "Sí") : "No";
+        seccion.innerHTML = `
+            <h3>Campista afectado</h3>
+            <div class="grid-info">
+                <div class="dato"><span class="etiqueta">Nombre</span><span class="valor">${esc(p.nombre)} · ${esc(p.codigo)}</span></div>
+                <div class="dato"><span class="etiqueta">Edad · carpa</span><span class="valor">${esc(p.edad ?? "—")} años · ${esc(p.carpa_asignada || "sin carpa")}</span></div>
+                <div class="dato ${p.tiene_condicion_medica ? "alerta" : ""}"><span class="etiqueta">Condición médica</span><span class="valor">${siNo(p.tiene_condicion_medica, p.condicion_medica_detalle)}</span></div>
+                <div class="dato ${p.alergia_medicamento ? "alerta" : ""}"><span class="etiqueta">Alergia a medicamentos</span><span class="valor">${siNo(p.alergia_medicamento, p.alergia_medicamento_detalle)}</span></div>
+                <div class="dato"><span class="etiqueta">RH · EPS</span><span class="valor">${esc(p.rh || "—")} · ${esc(p.eps || "—")}</span></div>
+                <div class="dato"><span class="etiqueta">Contacto de emergencia</span><span class="valor">${esc(p.contacto_emergencia_nombre || "—")} · ${esc(p.contacto_emergencia_telefono || "—")}</span></div>
+            </div>
+            <button type="button" class="boton pequeno secundario" data-abrir-perfil-incidente>Abrir perfil completo</button>`;
+        seccion.querySelector("[data-abrir-perfil-incidente]").addEventListener("click", () => {
+            cerrarPanelDetalle();
+            abrirPerfil(incidente.participante_id);
+        });
+    } catch (error) {
+        seccion.innerHTML = `<h3>Campista afectado</h3><p class="detalle">${esc(error.message)}</p>`;
+    }
+}
+
+document.getElementById("btnEditarIncidente").addEventListener("click", () => {
+    const incidente = incidenteEnDetalle;
+    if (!incidente) return;
+    abrirFormularioEnLinea(document.getElementById("formEditarIncidente"), {
+        titulo: "Editar datos del caso",
+        descripcion: "El cambio queda en la bitácora con el valor anterior. Si cambias la prioridad de un caso abierto, se recalcula su próximo seguimiento.",
+        campos: [
+            { nombre: "categoria", etiqueta: "Categoría", tipo: "select", valor: incidente.categoria, opciones: CATEGORIAS.map((c) => [c, humanizarTexto(c)]) },
+            { nombre: "prioridad", etiqueta: "Prioridad", tipo: "select", valor: incidente.prioridad, opciones: PRIORIDADES.map((c) => [c, humanizarTexto(c)]) },
+            { nombre: "zona", etiqueta: "Zona", tipo: "select", valor: incidente.zona || "", opciones: [["", "Sin zona"], ...zonasDisponibles.map((z) => [z.nombre, humanizarTexto(z.nombre)])] },
+            { nombre: "lugar", etiqueta: "Lugar específico", valor: incidente.lugar || "" },
+            { nombre: "descripcion", etiqueta: "Descripción", tipo: "textarea", valor: incidente.descripcion, requerido: true }
+        ],
+        onGuardar: async (datos) => {
+            await peticionApi(`/api/incidentes/${incidente.id}`, { method: "PATCH", body: JSON.stringify(datos) });
+            await abrirIncidente(incidente.id);
+            await Promise.all([cargarIncidentes(), cargarColaSeguimiento(), cargarPanel(), cargarGraficos()]);
+            mostrarMensaje(document.getElementById("mensajeDetalleIncidente"), "Datos del caso actualizados", "ok");
+        }
+    });
+});
 
 function renderizarAccionesIncidente(incidente) {
 
@@ -3452,12 +3699,33 @@ function renderizarTareasPorRama(tareas) {
                 <div class="detalle">
                     Ramas: ${esc(nombresRamas)}${t.hora_programada ? ` · Listo a las ${formatearFechaHora(t.hora_programada)}` : ""}
                 </div>
-                ${perfilActual?.rol === "admin" && t.estado === "pendiente" ? `<div><button type="button" class="boton pequeno secundario" data-cancelar-tarea="${esc(t.id)}">Cancelar tarea</button></div>` : ""}
+                ${perfilActual?.rol === "admin" && t.estado === "pendiente" ? `<div class="acciones-incidente" style="margin-top:4px;"><button type="button" class="boton pequeno secundario" data-editar-tarea="${esc(JSON.stringify({ id: t.id, titulo: t.titulo, descripcion: t.descripcion, hora_programada: t.hora_programada }))}">Editar</button><button type="button" class="boton pequeno secundario" data-cancelar-tarea="${esc(t.id)}">Cancelar tarea</button></div><div class="oculto" data-form-tarea="${esc(t.id)}"></div>` : ""}
                 <div class="oculto" id="detalleTareaActividad-${esc(t.id)}"></div>
             </div>
         `;
 
     }).join("");
+
+    contenedor.querySelectorAll("[data-editar-tarea]").forEach((boton) => {
+        boton.addEventListener("click", (evento) => {
+            evento.stopPropagation();
+            const tarea = JSON.parse(boton.dataset.editarTarea);
+            const local = tarea.hora_programada ? new Date(new Date(tarea.hora_programada).getTime() - 5 * 3600000).toISOString().slice(0, 16) : "";
+            abrirFormularioEnLinea(contenedor.querySelector(`[data-form-tarea="${tarea.id}"]`), {
+                campos: [
+                    { nombre: "titulo", etiqueta: "Título", valor: tarea.titulo, requerido: true, ancho: "completo" },
+                    { nombre: "descripcion", etiqueta: "Descripción", tipo: "textarea", valor: tarea.descripcion },
+                    { nombre: "horaProgramada", etiqueta: "Lista a las", tipo: "datetime-local", valor: local }
+                ],
+                onGuardar: async (datos) => {
+                    await peticionApi(`/api/tareas/${tarea.id}`, { method: "PATCH", body: JSON.stringify({ ...datos, horaProgramada: datos.horaProgramada ? `${datos.horaProgramada}:00-05:00` : null }) });
+                    await abrirDetalleActividad(actividadAbiertaId);
+                }
+            });
+        });
+    });
+
+    contenedor.querySelectorAll("[data-form-tarea]").forEach((f) => f.addEventListener("click", (e) => e.stopPropagation()));
 
     contenedor.querySelectorAll("[data-cancelar-tarea]").forEach((boton) => {
         boton.addEventListener("click", async (evento) => {
@@ -5473,8 +5741,10 @@ async function cargarTurnosCentinela() {
                         <span>${esc(t.asignadosNombres.join(", ") || "sin asignados")}</span>
                     </div>
                     <span class="badge ${t.finalizado ? "verde" : t.iniciado ? "neutro" : "rojo"}">${t.finalizado ? "Finalizado" : t.iniciado ? "En curso" : "Sin iniciar"}</span>
+                    <button type="button" class="boton pequeno secundario" data-editar-turno="${esc(JSON.stringify({ id: t.id, fecha: t.fecha, hora_inicio: t.hora_inicio, hora_fin: t.hora_fin }))}">Editar</button>
                     <button type="button" class="boton pequeno peligro" data-eliminar-turno="${esc(t.id)}">Eliminar</button>
                 </div>
+                <div class="oculto" data-form-turno="${esc(t.id)}"></div>
             `).join("");
 
         contenedor.querySelectorAll("[data-eliminar-turno]").forEach((boton) => {
@@ -5590,7 +5860,9 @@ async function cargarAliados() {
                     <span class="badge ${a.salida_en ? "verde" : a.llegada_en ? "neutro" : "rojo"}">${a.salida_en ? "Salió" : a.llegada_en ? "En el sitio" : "Sin llegar"}</span>
                     ${!a.llegada_en ? `<button type="button" class="boton pequeno terciario" data-llegada-aliado="${esc(a.id)}" style="width:auto; padding:6px 10px; font-size:11px;">Marcar llegada</button>` : ""}
                     ${a.llegada_en && !a.salida_en ? `<button type="button" class="boton pequeno secundario" data-salida-aliado="${esc(a.id)}" style="width:auto; padding:6px 10px; font-size:11px;">Marcar salida</button>` : ""}
+                    <button type="button" class="boton pequeno secundario" data-editar-aliado="${esc(JSON.stringify({ id: a.id, entidad: a.entidad, representante: a.representante, telefono: a.telefono }))}">Editar</button>
                 </div>
+                <div class="oculto" data-form-aliado="${esc(a.id)}"></div>
             `).join("");
 
         contenedor.querySelectorAll("[data-llegada-aliado]").forEach((boton) => {
@@ -5678,3 +5950,213 @@ if (new URLSearchParams(location.search).get("sesion") === "inactiva") {
     mostrarMensaje(document.getElementById("mensajeLogin"), "Tu sesión se cerró por inactividad. Vuelve a iniciar sesión.", "fallo");
     history.replaceState(null, "", location.pathname);
 }
+
+// ==========================
+// Administración → Datos personales
+// ==========================
+
+async function cargarSolicitudesTitulares() {
+    const contenedor = document.getElementById("listaSolicitudesTitulares");
+    try {
+        const { solicitudes } = await peticionApi("/api/privacidad/solicitudes");
+        contenedor.innerHTML = solicitudes.length === 0
+            ? `<p class="detalle">No hay solicitudes registradas.</p>`
+            : solicitudes.map((s) => {
+                const plazo = s.estado !== "abierta"
+                    ? `<span class="badge verde">Respondida ${new Date(s.respondida_en).toLocaleDateString("es-CO")}</span>`
+                    : s.vencida
+                        ? `<span class="badge rojo">${icono("alert")} Vencida</span>`
+                        : `<span class="badge ${s.diasRestantes <= 2 ? "rojo" : "neutro"}">Vence ${new Date(s.vence_en).toLocaleDateString("es-CO")}</span>`;
+                return `
+                <div class="item-zona-mapa" style="flex-wrap:wrap; cursor:default;">
+                    <div class="info-zona">
+                        <strong>${humanizar(s.tipo)} · ${esc(s.titular_nombre)}${s.titular_documento ? ` · ${esc(s.titular_documento)}` : ""}</strong>
+                        <span>Recibida ${new Date(s.recibida_en).toLocaleDateString("es-CO")}${s.prorrogada ? " · prorrogada" : ""} · ${esc(s.titular_contacto || "sin contacto")}</span>
+                        <span>${esc(s.descripcion)}</span>
+                        ${s.respuesta ? `<span><strong>Respuesta:</strong> ${esc(s.respuesta)}</span>` : ""}
+                    </div>
+                    ${plazo}
+                    ${s.estado === "abierta" ? `
+                        <div class="acciones-incidente" style="margin-top:6px; flex-basis:100%;">
+                            <button type="button" class="boton pequeno" data-responder-solicitud="${esc(s.id)}">Registrar respuesta</button>
+                            ${s.prorrogada ? "" : `<button type="button" class="boton pequeno secundario" data-prorrogar-solicitud="${esc(s.id)}">Prorrogar plazo</button>`}
+                        </div>
+                        <div class="oculto" data-form-solicitud="${esc(s.id)}" style="flex-basis:100%;"></div>` : ""}
+                </div>`;
+            }).join("");
+
+        contenedor.querySelectorAll("[data-responder-solicitud]").forEach((boton) => {
+            boton.addEventListener("click", () => {
+                const id = boton.dataset.responderSolicitud;
+                abrirFormularioEnLinea(contenedor.querySelector(`[data-form-solicitud="${id}"]`), {
+                    campos: [{ nombre: "respuesta", etiqueta: "Qué se le respondió al titular", tipo: "textarea", requerido: true }],
+                    textoBoton: "Marcar como respondida",
+                    onGuardar: async ({ respuesta }) => {
+                        await peticionApi(`/api/privacidad/solicitudes/${id}/responder`, { method: "POST", body: JSON.stringify({ respuesta }) });
+                        await cargarSolicitudesTitulares();
+                    }
+                });
+            });
+        });
+
+        contenedor.querySelectorAll("[data-prorrogar-solicitud]").forEach((boton) => {
+            boton.addEventListener("click", async () => {
+                if (!confirm("¿Prorrogar el plazo? Debes avisar al titular el motivo y la nueva fecha antes de que venza.")) return;
+                try {
+                    const { mensaje } = await peticionApi(`/api/privacidad/solicitudes/${boton.dataset.prorrogarSolicitud}/prorrogar`, { method: "POST" });
+                    mostrarMensaje(document.getElementById("mensajeSolicitudTitular"), mensaje, "ok");
+                    await cargarSolicitudesTitulares();
+                } catch (error) {
+                    mostrarMensaje(document.getElementById("mensajeSolicitudTitular"), error.message, "fallo");
+                }
+            });
+        });
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">${esc(error.message)}</p>`;
+    }
+}
+
+document.getElementById("formSolicitudTitular").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeSolicitudTitular");
+    const valor = (id) => document.getElementById(id).value.trim();
+    try {
+        let participanteId = null;
+        const codigo = valor("inputCodigoSolicitud");
+        if (codigo) {
+            const { resultados } = await peticionApi(`/api/centro-control/participantes/buscar?codigo=${encodeURIComponent(codigo.toUpperCase())}`);
+            if (!resultados.length) throw new Error("No hay ningún participante con ese código");
+            participanteId = resultados[0].id;
+        }
+        const recibida = valor("inputRecibidaSolicitud");
+        await peticionApi("/api/privacidad/solicitudes", {
+            method: "POST",
+            body: JSON.stringify({
+                tipo: valor("inputTipoSolicitud"),
+                titularNombre: valor("inputTitularSolicitud"),
+                titularDocumento: valor("inputDocumentoSolicitud"),
+                titularContacto: valor("inputContactoSolicitud"),
+                participanteId,
+                descripcion: valor("inputDescripcionSolicitud"),
+                recibidaEn: recibida ? new Date(recibida).toISOString() : undefined
+            })
+        });
+        evento.target.reset();
+        mostrarMensaje(mensaje, "Solicitud registrada con su plazo de respuesta", "ok");
+        await cargarSolicitudesTitulares();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+});
+
+async function cargarConservacion() {
+    const estado = document.getElementById("estadoConservacion");
+    try {
+        const config = await peticionApi("/api/privacidad/conservacion");
+        if (config.migracionPendiente) {
+            estado.textContent = "Falta correr la migración de privacidad en Supabase: mientras tanto no se aplican los borrados programados.";
+            return;
+        }
+        document.getElementById("inputCierreEvento").value = config.fecha_cierre_evento ? config.fecha_cierre_evento.slice(0, 10) : "";
+        document.getElementById("inputCierreInscripciones").value = config.fecha_cierre_inscripciones ? config.fecha_cierre_inscripciones.slice(0, 10) : "";
+        estado.textContent = config.salud_suprimida_en
+            ? `Los datos de salud se borraron el ${new Date(config.salud_suprimida_en).toLocaleDateString("es-CO")}.`
+            : "Los datos de salud todavía no se han borrado.";
+    } catch (error) {
+        estado.textContent = error.message;
+    }
+}
+
+document.getElementById("btnGuardarConservacion").addEventListener("click", async () => {
+    const mensaje = document.getElementById("mensajeConservacion");
+    const fecha = (id) => document.getElementById(id).value ? `${document.getElementById(id).value}T23:59:00-05:00` : null;
+    try {
+        const { mensaje: texto } = await peticionApi("/api/privacidad/conservacion", {
+            method: "PUT",
+            body: JSON.stringify({ fechaCierreEvento: fecha("inputCierreEvento"), fechaCierreInscripciones: fecha("inputCierreInscripciones") })
+        });
+        mostrarMensaje(mensaje, texto, "ok");
+        await cargarConservacion();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+});
+
+document.getElementById("btnSuprimirSaludAhora").addEventListener("click", async () => {
+    const mensaje = document.getElementById("mensajeConservacion");
+    const confirmacion = prompt("Esto borra los datos de salud de TODOS los participantes y no se puede deshacer. Escribe BORRAR SALUD para confirmar.");
+    if (confirmacion === null) return;
+    try {
+        const { mensaje: texto } = await peticionApi("/api/privacidad/conservacion/suprimir-salud", { method: "POST", body: JSON.stringify({ confirmacion: confirmacion.trim() }) });
+        mostrarMensaje(mensaje, texto, "ok");
+        await cargarConservacion();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+});
+
+document.getElementById("btnPurgarOperativos").addEventListener("click", async () => {
+    const mensaje = document.getElementById("mensajeConservacion");
+    const antesDe = document.getElementById("inputPurgaAntesDe").value;
+    try {
+        const { mensaje: texto, resumen } = await peticionApi("/api/privacidad/conservacion/purgar-operativos", {
+            method: "POST",
+            body: JSON.stringify({ antesDe: antesDe ? `${antesDe}T00:00:00-05:00` : "", confirmacion: document.getElementById("inputPurgaConfirmacion").value.trim() })
+        });
+        mostrarMensaje(mensaje, `${texto}: ${Object.entries(resumen).map(([tabla, n]) => `${tabla.replace(/_/g, " ")} ${n}`).join(" · ")}`, "ok");
+        document.getElementById("inputPurgaConfirmacion").value = "";
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+});
+
+async function cargarSinImagen() {
+    const contenedor = document.getElementById("listaSinImagen");
+    try {
+        const { participantes } = await peticionApi("/api/privacidad/sin-imagen");
+        contenedor.innerHTML = participantes.length === 0
+            ? `<p class="detalle">Todas las personas inscritas autorizaron el uso de su imagen.</p>`
+            : `<div class="tabla-wrap" style="max-height:320px;"><table><thead><tr><th>Código</th><th>Nombre</th><th>Municipio</th><th>Carpa</th></tr></thead><tbody>${participantes.map((p) => `<tr><td>${esc(p.codigo)}</td><td>${esc(p.nombre)}</td><td>${esc(p.municipio || "—")}</td><td>${esc(p.carpa_asignada || "—")}</td></tr>`).join("")}</tbody></table></div>`;
+    } catch (error) {
+        contenedor.innerHTML = `<p class="detalle">${esc(error.message)}</p>`;
+    }
+}
+
+// ==========================
+// Editar aliados y turnos de centinela
+// ==========================
+
+document.getElementById("listaAliados").addEventListener("click", (evento) => {
+    const boton = evento.target.closest("[data-editar-aliado]");
+    if (!boton) return;
+    const a = JSON.parse(boton.dataset.editarAliado);
+    abrirFormularioEnLinea(document.querySelector(`[data-form-aliado="${a.id}"]`), {
+        campos: [
+            { nombre: "entidad", etiqueta: "Entidad", valor: a.entidad, requerido: true },
+            { nombre: "representante", etiqueta: "Representante", valor: a.representante },
+            { nombre: "telefono", etiqueta: "Teléfono", tipo: "tel", valor: a.telefono }
+        ],
+        onGuardar: async (datos) => {
+            await peticionApi(`/api/aliados/${a.id}`, { method: "PATCH", body: JSON.stringify(datos) });
+            await cargarAliados();
+        }
+    });
+});
+
+document.getElementById("listaTurnosCentinela").addEventListener("click", (evento) => {
+    const boton = evento.target.closest("[data-editar-turno]");
+    if (!boton) return;
+    const t = JSON.parse(boton.dataset.editarTurno);
+    const hora = (iso) => new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "America/Bogota" });
+    abrirFormularioEnLinea(document.querySelector(`[data-form-turno="${t.id}"]`), {
+        campos: [
+            { nombre: "fecha", etiqueta: "Fecha", tipo: "date", valor: t.fecha, requerido: true },
+            { nombre: "inicio", etiqueta: "Inicio", tipo: "time", valor: hora(t.hora_inicio), requerido: true },
+            { nombre: "fin", etiqueta: "Fin", tipo: "time", valor: hora(t.hora_fin), requerido: true }
+        ],
+        onGuardar: async ({ fecha, inicio, fin }) => {
+            await peticionApi(`/api/turnos-centinela/${t.id}`, { method: "PATCH", body: JSON.stringify({ fecha, horaInicio: `${fecha}T${inicio}:00`, horaFin: `${fecha}T${fin}:00` }) });
+            await cargarTurnosCentinela();
+        }
+    });
+});
