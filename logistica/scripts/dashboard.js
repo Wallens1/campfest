@@ -3608,3 +3608,23 @@ if (new URLSearchParams(location.search).get("sesion") === "inactiva") {
     mostrarMensaje(document.getElementById("mensajeLogin"), "Tu sesión se cerró por inactividad. Vuelve a iniciar sesión.", "fallo");
     history.replaceState(null, "", location.pathname);
 }
+
+// ==========================
+// Correo de prueba (al correo de la propia cuenta)
+// ==========================
+
+document.getElementById("btnCorreoPrueba").addEventListener("click", async () => {
+    const boton = document.getElementById("btnCorreoPrueba");
+    const mensaje = document.getElementById("mensajeCorreoPrueba");
+    boton.disabled = true;
+    boton.textContent = "Enviando…";
+    try {
+        const respuesta = await peticionApi("/api/logistica/correo-prueba", { method: "POST" });
+        mostrarMensaje(mensaje, respuesta.mensaje, "ok");
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    } finally {
+        boton.disabled = false;
+        boton.textContent = "Enviarme un correo de prueba";
+    }
+});
