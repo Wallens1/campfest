@@ -136,6 +136,12 @@ document.addEventListener("DOMContentLoaded", () => {
             ocultarEstado();
             form.classList.add("cf-oculto");
             codigoGenerado.textContent = cuerpo.codigo;
+            // Si hoy ya se alcanzó el límite diario de correos, la confirmación
+            // sale mañana: se avisa para que nadie piense que algo falló.
+            if (cuerpo.correoProgramado) {
+                document.getElementById("textoCorreoInscripcion").textContent =
+                    "Tu inscripción quedó registrada. Hoy alcanzamos el límite diario de correos, así que tu correo de confirmación te llegará mañana. Mientras tanto, guarda este código.";
+            }
             exitoInscripcion.classList.remove("cf-oculto");
             exitoInscripcion.scrollIntoView({ behavior: "smooth" });
 

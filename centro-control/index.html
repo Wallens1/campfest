@@ -60,7 +60,7 @@
             <button type="button" class="tab-modulo" data-vista="inventario" data-descripcion="Materiales, lotes y solicitudes de las ramas"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-package"/></svg><span>Inventario</span></button>
             <p class="grupo-nav">Campistas</p>
             <button type="button" class="tab-modulo" data-vista="inscripciones" data-descripcion="Registros, documentos y correos de confirmación"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-id"/></svg><span>Inscripciones</span></button>
-            <button type="button" class="tab-modulo" data-vista="notificaciones" data-descripcion="Anuncios que ven los campistas en su portal"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-megaphone"/></svg><span>Notificaciones</span></button>
+            <button type="button" class="tab-modulo" data-vista="notificaciones" data-descripcion="Correo masivo a inscritos y anuncios del portal del campista"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-megaphone"/></svg><span>Notificaciones</span></button>
             <button type="button" class="tab-modulo" data-vista="perfiles" data-descripcion="Actividad, logros y cronología de cada campista"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-user"/></svg><span>Perfiles</span></button>
             <p class="grupo-nav">Sistema</p>
             <button type="button" class="tab-modulo oculto" id="tabAdministracion" data-vista="administracion" data-descripcion="Configuración del evento, usuarios, emergencias y cierre"><svg class="cf-i" aria-hidden="true"><use href="../campfest/assets/icons.svg?v=2#i-gear"/></svg><span>Administración</span></button>
@@ -716,6 +716,47 @@
 
     <!-- ===== VISTA: NOTIFICACIONES ===== -->
     <section class="oculto" id="vistaNotificaciones">
+
+        <div class="tarjeta oculto" id="tarjetaCampanas">
+            <div class="encabezado-tarjeta">
+                <h3>Correo masivo a inscritos</h3>
+                <p class="detalle">El plan de correo permite 100 envíos al día. La campaña sale sola en tandas y deja libres 10 diarios para confirmaciones de inscripción y emergencias.</p>
+            </div>
+            <p class="detalle" id="estadoCupoCorreos" style="margin:0 0 14px;"></p>
+            <form id="formCampana">
+                <div class="grid-info" style="margin-bottom:0;">
+                    <div class="campo"><label for="inputAsuntoCampana">Asunto</label><input type="text" id="inputAsuntoCampana" required value="Camp Fest vuelve: jóvenes que reconstruyen"></div>
+                    <div class="campo"><label for="inputFiltroCampana">Para</label>
+                        <select id="inputFiltroCampana"><option value="todos">Todas las personas inscritas</option><option value="admitidos">Solo admitidas</option><option value="pendientes">Solo en revisión</option></select></div>
+                </div>
+                <div class="campo">
+                    <label for="inputMensajeCampana">Mensaje <span class="detalle">· una línea en blanco separa párrafos · {nombre} pone el primer nombre de cada persona</span></label>
+                    <textarea id="inputMensajeCampana" rows="14" required>Hola {nombre},
+
+Camp Fest Bugalagrande sigue en pie. Después del terremoto aplazamos el campamento para el primer semestre de 2027 y lo reenfocamos en lo que hoy más necesitan nuestras comunidades: la reconstrucción social. Tejido comunitario, bienestar emocional y preparación ante el riesgo, con jóvenes al frente.
+
+Tu inscripción sigue vigente y no tienes que hacer nada más. Tu código de participante es el mismo: con él puedes entrar a tu portal para ver los avisos, tus logros y, cuando se publique, el itinerario.
+
+Los aliados aplazaron sus aportes sin retirarlos, y las inscripciones siguen abiertas. Si conoces jóvenes que quieran sumarse, compárteles campfest.online.
+
+Apenas tengamos la fecha exacta te avisaremos por este correo, en tu portal y en Instagram (@campfest_2026).
+
+Lo importante siempre es la sociedad, nunca el recurso. Gracias por seguir aquí.
+
+Equipo Camp Fest Bugalagrande</textarea>
+                </div>
+                <p class="detalle" id="previsualizacionCampana"></p>
+                <div class="grid-info" style="margin-bottom:8px;">
+                    <div class="campo"><label for="inputCorreoPruebaCampana">Enviarme una prueba a</label><input type="email" id="inputCorreoPruebaCampana" placeholder="tu@correo.com"></div>
+                </div>
+                <div class="acciones-incidente" style="margin-top:0;">
+                    <button type="button" class="boton pequeno secundario" id="btnPruebaCampana">Enviar prueba</button>
+                    <button type="submit" class="boton pequeno">Programar envío</button>
+                </div>
+            </form>
+            <div class="mensaje" id="mensajeCampana"></div>
+            <div id="listaCampanas" style="margin-top:16px;"></div>
+        </div>
 
         <div class="tarjeta">
             <h3>Notificaciones del portal del campista</h3>
@@ -1519,6 +1560,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js" integrity="sha384-Emf5ZVIUiarAdhkgtqK+5/Z5qIvM6QoVrS+qAVtfyZVuD5lIHrac0me485+Antp0" crossorigin="anonymous"></script>
-<script src="scripts/dashboard.js?v=54" defer></script>
+<script src="scripts/dashboard.js?v=55" defer></script>
 </body>
 </html>

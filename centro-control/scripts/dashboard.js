@@ -476,6 +476,9 @@ document.querySelectorAll(".tab-modulo:not([data-subpestana-admin])").forEach((t
 
         if (vista === "notificaciones") {
             cargarAnunciosAdmin();
+            const esAdmin = perfilActual?.rol === "admin";
+            document.getElementById("tarjetaCampanas").classList.toggle("oculto", !esAdmin);
+            if (esAdmin) { cargarCampanas(); previsualizarCampana(); }
         }
 
         if (vista === "inscripciones") {
@@ -4686,7 +4689,7 @@ function renderizarTablaInscripciones(participantes) {
             </td>
             <td>
                 <span class="badge ${p.correo_confirmacion_estado === "enviado" ? "verde" : p.correo_confirmacion_estado === "fallo" ? "rojo" : "neutro"}" ${p.correo_confirmacion_estado === "fallo" && p.correo_confirmacion_error ? `title="${p.correo_confirmacion_error.replace(/"/g, "&quot;")}"` : ""}>
-                    ${p.correo_confirmacion_estado === "enviado" ? `${punto("ok")}Enviado` : p.correo_confirmacion_estado === "fallo" ? `${punto("error")}Falló` : "No enviado"}
+                    ${p.correo_confirmacion_estado === "enviado" ? `${punto("ok")}Enviado` : p.correo_confirmacion_estado === "fallo" ? `${punto("error")}Falló` : p.correo_confirmacion_estado === "programado" ? `${punto("pendiente")}Programado` : "No enviado"}
                 </span>
                 ${!mostrandoEliminadosInscripcion && p.correo_confirmacion_estado !== "enviado" && esAdmin
                     ? `<button class="boton pequeno secundario" data-enviar-correo="${esc(p.id)}" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;">Enviar prueba</button>`
@@ -4959,7 +4962,7 @@ document.getElementById("btnEnviarCorreoMasivo").addEventListener("click", async
 
     try {
         const resultado = await peticionApi("/api/centro-control/inscripciones/enviar-correo-masivo", { method: "POST" });
-        mostrarMensaje(mensaje, `Envío masivo terminado: ${resultado.enviados} enviados, ${resultado.fallidos} fallidos.`, resultado.fallidos > 0 ? "fallo" : "ok");
+        mostrarMensaje(mensaje, `${resultado.programados ?? resultado.enviados} correos programados: salen en tandas según el cupo diario${resultado.fallidos ? ` · ${resultado.fallidos} con correo inválido` : ""}.`, resultado.fallidos > 0 ? "fallo" : "ok");
         await cargarInscripciones();
     } catch (error) {
         mostrarMensaje(mensaje, error.message, "fallo");
@@ -5002,7 +5005,7 @@ document.getElementById("btnReenviarFallidos").addEventListener("click", async (
 
     try {
         const resultado = await peticionApi("/api/centro-control/inscripciones/enviar-correo-masivo?soloFallidos=true", { method: "POST" });
-        mostrarMensaje(mensaje, `Reintento terminado: ${resultado.enviados} enviados, ${resultado.fallidos} siguen fallando.`, resultado.fallidos > 0 ? "fallo" : "ok");
+        mostrarMensaje(mensaje, `${resultado.programados ?? resultado.enviados} reintentos programados según el cupo diario${resultado.fallidos ? ` · ${resultado.fallidos} con correo inválido` : ""}.`, resultado.fallidos > 0 ? "fallo" : "ok");
         document.getElementById("btnVerCorreosFallidos").click();
         document.getElementById("btnVerCorreosFallidos").click();
         await cargarInscripciones();
@@ -6159,4 +6162,99 @@ document.getElementById("listaTurnosCentinela").addEventListener("click", (event
             await cargarTurnosCentinela();
         }
     });
+});
+
+// ==========================
+// Correo masivo por campañas (en tandas, según el cupo diario)
+// ==========================
+
+async function cargarCampanas() {
+    const estado = document.getElementById("estadoCupoCorreos");
+    const lista = document.getElementById("listaCampanas");
+    try {
+        const datos = await peticionApi("/api/centro-control/correos/estado");
+        if (datos.migracionPendiente) {
+            estado.textContent = "Falta correr la migración de correos en Supabase: mientras tanto los correos salen sin control de cupo.";
+        } else {
+            estado.innerHTML = `Últimas 24 horas: <strong>${esc(datos.enviadosUltimas24h)} de ${esc(datos.limite)}</strong> correos enviados · ${esc(datos.pendientes)} en cola.`;
+        }
+        lista.innerHTML = datos.campanas.length === 0 ? "" : `<h3 style="font-size:14px; margin:0 0 8px;">Campañas</h3>` + datos.campanas.map((c) => {
+            const restantes = c.pendientes;
+            const dias = Math.ceil(restantes / Math.max(1, datos.capacidadCampanaDiaria));
+            return `
+                <div class="item-zona-mapa" style="cursor:default; flex-wrap:wrap;">
+                    <div class="info-zona">
+                        <strong>${esc(c.asunto)}</strong>
+                        <span>${new Date(c.creado_en).toLocaleDateString("es-CO")} · ${esc(c.enviados)} de ${esc(c.total)} enviados${c.fallidos ? ` · ${esc(c.fallidos)} fallidos` : ""}${restantes ? ` · faltan ${esc(restantes)} (unos ${dias} día${dias === 1 ? "" : "s"})` : ""}</span>
+                    </div>
+                    <span class="badge ${restantes ? "neutro" : "verde"}">${restantes ? "En curso" : "Terminada"}</span>
+                    ${restantes ? `<button type="button" class="boton pequeno secundario" data-cancelar-campana="${esc(c.id)}">Detener</button>` : ""}
+                </div>`;
+        }).join("");
+        lista.querySelectorAll("[data-cancelar-campana]").forEach((boton) => {
+            boton.addEventListener("click", async () => {
+                if (!confirm("¿Detener la campaña? Los correos que aún no salieron se cancelan.")) return;
+                try {
+                    const { mensaje } = await peticionApi(`/api/centro-control/correos/campanas/${boton.dataset.cancelarCampana}/cancelar`, { method: "POST" });
+                    mostrarMensaje(document.getElementById("mensajeCampana"), mensaje, "ok");
+                    await cargarCampanas();
+                } catch (error) {
+                    mostrarMensaje(document.getElementById("mensajeCampana"), error.message, "fallo");
+                }
+            });
+        });
+    } catch (error) {
+        estado.textContent = error.message;
+    }
+}
+
+async function previsualizarCampana() {
+    const salida = document.getElementById("previsualizacionCampana");
+    try {
+        const { total, diasEstimados } = await peticionApi(`/api/centro-control/correos/campanas/previsualizar?filtro=${encodeURIComponent(document.getElementById("inputFiltroCampana").value)}`);
+        salida.textContent = `Llegará a ${total} personas (un correo por dirección). Tardará unos ${diasEstimados} día${diasEstimados === 1 ? "" : "s"} en salir completa.`;
+    } catch (error) {
+        salida.textContent = error.message;
+    }
+}
+
+document.getElementById("inputFiltroCampana").addEventListener("change", previsualizarCampana);
+
+document.getElementById("btnPruebaCampana").addEventListener("click", async () => {
+    const mensaje = document.getElementById("mensajeCampana");
+    try {
+        const respuesta = await peticionApi("/api/centro-control/correos/campanas/prueba", {
+            method: "POST",
+            body: JSON.stringify({
+                asunto: document.getElementById("inputAsuntoCampana").value.trim(),
+                mensaje: document.getElementById("inputMensajeCampana").value,
+                correo: document.getElementById("inputCorreoPruebaCampana").value.trim()
+            })
+        });
+        mostrarMensaje(mensaje, respuesta.mensaje, "ok");
+        cargarCampanas();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
+});
+
+document.getElementById("formCampana").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const mensaje = document.getElementById("mensajeCampana");
+    const filtro = document.getElementById("inputFiltroCampana");
+    if (!confirm(`¿Programar el envío a: ${filtro.options[filtro.selectedIndex].text.toLowerCase()}? ${document.getElementById("previsualizacionCampana").textContent}`)) return;
+    try {
+        const respuesta = await peticionApi("/api/centro-control/correos/campanas", {
+            method: "POST",
+            body: JSON.stringify({
+                asunto: document.getElementById("inputAsuntoCampana").value.trim(),
+                mensaje: document.getElementById("inputMensajeCampana").value,
+                filtro: filtro.value
+            })
+        });
+        mostrarMensaje(mensaje, respuesta.mensaje, "ok");
+        await cargarCampanas();
+    } catch (error) {
+        mostrarMensaje(mensaje, error.message, "fallo");
+    }
 });
